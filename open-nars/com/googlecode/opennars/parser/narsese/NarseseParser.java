@@ -382,4 +382,23 @@ public class NarseseParser extends Parser {
         Task task = new Task(sentence, budget, memory);
         return task;
 	}
+
+	@Override
+	public List<Task> parseTasks(String input, Memory memory)
+			throws InvalidInputException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String serialiseSentence(Sentence task, Memory memory) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String serialiseSentences(List<Sentence> tasks, Memory memory) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

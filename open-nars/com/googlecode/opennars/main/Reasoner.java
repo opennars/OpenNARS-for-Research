@@ -43,7 +43,7 @@ public class Reasoner extends Observable implements Observer, Runnable {
 	 * @param parser
 	 */
 	public Reasoner(Parser parser) {
-		super();
+		this();
 		this.parser = parser;
 	}
 	
@@ -107,6 +107,14 @@ public class Reasoner extends Observable implements Observer, Runnable {
 			this.setChanged();
 			this.notifyObservers(e);
 		}
+	}
+	
+	/**
+	 * Tell the reasoner a task
+	 * @param task the task
+	 */
+	public synchronized void tellTask(Task task) {
+		inputQueue.add(task);
 	}
 	
 	/**

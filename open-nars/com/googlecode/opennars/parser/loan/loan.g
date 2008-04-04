@@ -4,6 +4,17 @@ options {
 	output = AST;
 }
 
+tokens {
+	NUM_LIT = 'numeric';
+	BOOL_LIT = 'boolean';
+	STRING_LIT = 'string';
+	URI = 'uri';
+	CURIE = 'curie';
+	PRODUCT = 'product';
+	JUDGEMENT = 'judgement';
+	GOAL = 'goal';
+}
+
 // $<Parser
 
 document 
@@ -19,7 +30,10 @@ at_rule :	AT_IMPORT^ IRI_REF DOT!
 	;
 
 sentence 
-	:	statement (judgement^|question^|goal^)
+	:	statement ( judgement
+	                  | question
+	                  | goal
+	                  )
 	;
 	
 judgement 
@@ -34,7 +48,7 @@ question
 	;
 	
 truthvalue 
-	:	PERCENT! (DECIMAL | INTEGER) (SEMICOLON DECIMAL)? PERCENT!;
+	:	PERCENT^ (DECIMAL | INTEGER) (SEMICOLON! DECIMAL)? PERCENT!;
 
 statement 
 	:	unary_statement ((CONJ^ | SEMICOLON^ | COMMA^ | DISJ^) unary_statement)*
@@ -62,16 +76,31 @@ ext_set :	OPEN_BRACE^ (term (COMMA! term)*)? CLOSE_BRACE!
 int_set :	LBRACKET^ (term (COMMA! term)*)? RBRACKET!
 	;
 	
+ext_image 
+	:	EXT_IMG^ LPAREN! term COMMA! term_or_wild (COMMA! term_or_wild)* RPAREN!
+	;
+	
+int_image 
+	:	INT_IMG^ LPAREN! term COMMA! term_or_wild (COMMA! term_or_wild)* RPAREN!
+	;
+	
+term_or_wild 
+	:	WILDCARD
+	|	term
+	;
+	
 difference 
 	:	product ((MINUS^ | TILDE^) product)*
 	;
 	
-product :	atomic_term (STAR^ atomic_term)*
+product :	atomic_term (STAR atomic_term)* -> ^(PRODUCT atomic_term*)
 	;
 
 atomic_term 
 	:	ext_set
 	|	int_set
+	|	ext_image
+	|	int_image
 	|	LPAREN! statement RPAREN!
 	|	variable
 	|	iriRef
@@ -94,9 +123,9 @@ statement_variable
 	
 	
 literal
-	:	numericLiteral
-	|	booleanLiteral
-	|	string
+	:	numericLiteral -> ^(NUM_LIT numericLiteral)
+	|	booleanLiteral -> ^(BOOL_LIT booleanLiteral)
+	|	string -> ^(STRING_LIT string)
 	;
 	
 numericLiteral
@@ -134,8 +163,8 @@ string
     ;
 
 iriRef
-    : IRI_REF
-    | prefixedName
+    : IRI_REF -> ^(URI IRI_REF)
+    | prefixedName -> ^(CURIE prefixedName)
     ;
 
 prefixedName
@@ -224,6 +253,17 @@ protected
 EQUIVALENCE_CONC 
 	:	'<|>'
 	;
+	
+EXT_IMG	:	'ext'
+	;
+	
+INT_IMG :	'int'
+	;
+	
+WILDCARD 
+	:	'_'
+	;
+
 	
 NOT	:	'!!'
 	;

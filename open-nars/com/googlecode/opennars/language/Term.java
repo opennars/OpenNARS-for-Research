@@ -26,6 +26,7 @@ import java.util.*;
 import com.googlecode.opennars.inference.SyllogisticRules;
 import com.googlecode.opennars.main.Memory;
 import com.googlecode.opennars.parser.Symbols;
+import com.googlecode.opennars.parser.TermVisitor;
 
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
@@ -125,5 +126,17 @@ public class Term implements Cloneable, Comparable<Term> {
     
     public final boolean containQueryVariable() {                           // to be revised
         return (name.indexOf(Symbols.QUERY_VARIABLE_TAG) >= 0);
+    }
+    
+    /**
+     * Accept a visitor
+     * @param <R> Return type
+     * @param <A> Argument type
+     * @param v Visitor
+     * @param arg Argument
+     * @return an instance of the return type
+     */
+    public <R,A> R accept(TermVisitor<R,A> v, A arg) {
+    	return v.visit(this, arg);
     }
 }
