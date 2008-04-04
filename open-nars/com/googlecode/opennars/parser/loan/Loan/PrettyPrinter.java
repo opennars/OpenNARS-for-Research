@@ -594,10 +594,9 @@ public class PrettyPrinter
        com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExImg _trmeximg = (com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExImg) foo;
        if (_i_ > 2) render(_L_PAREN);
        pp(_trmeximg.term_, 0);
-       render("extension");
        render("(");
        pp(_trmeximg.listterm_1, 0);
-       render("_|_");
+       render("/");
        pp(_trmeximg.listterm_2, 0);
        render(")");
        if (_i_ > 2) render(_R_PAREN);
@@ -607,10 +606,9 @@ public class PrettyPrinter
        com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInImg _trminimg = (com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInImg) foo;
        if (_i_ > 2) render(_L_PAREN);
        pp(_trminimg.term_, 0);
-       render("intension");
        render("(");
        pp(_trminimg.listterm_1, 0);
-       render("_|_");
+       render("\\");
        pp(_trminimg.listterm_2, 0);
        render(")");
        if (_i_ > 2) render(_R_PAREN);

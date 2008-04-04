@@ -54,22 +54,21 @@ IDENT = ({LETTER}|{DIGIT}|['_])
 <YYINITIAL>\| { return new Symbol(sym._SYMB_27); }
 <YYINITIAL>- { return new Symbol(sym._SYMB_28); }
 <YYINITIAL>~ { return new Symbol(sym._SYMB_29); }
-<YYINITIAL>_\|_ { return new Symbol(sym._SYMB_30); }
-<YYINITIAL>\{ { return new Symbol(sym._SYMB_31); }
-<YYINITIAL>\} { return new Symbol(sym._SYMB_32); }
-<YYINITIAL>\[ { return new Symbol(sym._SYMB_33); }
-<YYINITIAL>\] { return new Symbol(sym._SYMB_34); }
-<YYINITIAL># { return new Symbol(sym._SYMB_35); }
-<YYINITIAL>: { return new Symbol(sym._SYMB_36); }
-<YYINITIAL>% { return new Symbol(sym._SYMB_37); }
-<YYINITIAL>extension { return new Symbol(sym._SYMB_38); }
+<YYINITIAL>/ { return new Symbol(sym._SYMB_30); }
+<YYINITIAL>\\ { return new Symbol(sym._SYMB_31); }
+<YYINITIAL>\{ { return new Symbol(sym._SYMB_32); }
+<YYINITIAL>\} { return new Symbol(sym._SYMB_33); }
+<YYINITIAL>\[ { return new Symbol(sym._SYMB_34); }
+<YYINITIAL>\] { return new Symbol(sym._SYMB_35); }
+<YYINITIAL># { return new Symbol(sym._SYMB_36); }
+<YYINITIAL>: { return new Symbol(sym._SYMB_37); }
+<YYINITIAL>% { return new Symbol(sym._SYMB_38); }
 <YYINITIAL>false { return new Symbol(sym._SYMB_39); }
 <YYINITIAL>future { return new Symbol(sym._SYMB_40); }
-<YYINITIAL>intension { return new Symbol(sym._SYMB_41); }
-<YYINITIAL>not { return new Symbol(sym._SYMB_42); }
-<YYINITIAL>past { return new Symbol(sym._SYMB_43); }
-<YYINITIAL>present { return new Symbol(sym._SYMB_44); }
-<YYINITIAL>true { return new Symbol(sym._SYMB_45); }
+<YYINITIAL>not { return new Symbol(sym._SYMB_41); }
+<YYINITIAL>past { return new Symbol(sym._SYMB_42); }
+<YYINITIAL>present { return new Symbol(sym._SYMB_43); }
+<YYINITIAL>true { return new Symbol(sym._SYMB_44); }
 <YYINITIAL>"//"[^\n]*\n { /* BNFC single-line comment */ }
 <YYINITIAL>"/*" { yybegin(COMMENT); }
 <COMMENT>"*/" { yybegin(YYINITIAL); }

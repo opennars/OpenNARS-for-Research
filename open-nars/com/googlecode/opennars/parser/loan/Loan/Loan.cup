@@ -71,22 +71,21 @@ terminal _SYMB_26;    //   &
 terminal _SYMB_27;    //   |
 terminal _SYMB_28;    //   -
 terminal _SYMB_29;    //   ~
-terminal _SYMB_30;    //   _|_
-terminal _SYMB_31;    //   {
-terminal _SYMB_32;    //   }
-terminal _SYMB_33;    //   [
-terminal _SYMB_34;    //   ]
-terminal _SYMB_35;    //   #
-terminal _SYMB_36;    //   :
-terminal _SYMB_37;    //   %
-terminal _SYMB_38;    //   extension
+terminal _SYMB_30;    //   /
+terminal _SYMB_31;    //   \
+terminal _SYMB_32;    //   {
+terminal _SYMB_33;    //   }
+terminal _SYMB_34;    //   [
+terminal _SYMB_35;    //   ]
+terminal _SYMB_36;    //   #
+terminal _SYMB_37;    //   :
+terminal _SYMB_38;    //   %
 terminal _SYMB_39;    //   false
 terminal _SYMB_40;    //   future
-terminal _SYMB_41;    //   intension
-terminal _SYMB_42;    //   not
-terminal _SYMB_43;    //   past
-terminal _SYMB_44;    //   present
-terminal _SYMB_45;    //   true
+terminal _SYMB_41;    //   not
+terminal _SYMB_42;    //   past
+terminal _SYMB_43;    //   present
+terminal _SYMB_44;    //   true
 
 terminal String _STRING_;
 
@@ -131,9 +130,9 @@ Stm1 ::= Stm1:p_1 _SYMB_15 Stm2:p_3  {: RESULT = new com.googlecode.opennars.par
   | Stm1:p_1 _SYMB_18 Stm2:p_3  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmSeq(p_1,p_3); :}
   | Stm2:p_1  {: RESULT = p_1; :}
 ;
-Stm2 ::= _SYMB_42 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmNot(p_2); :} 
-  | _SYMB_43 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmPst(p_2); :}
-  | _SYMB_44 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmPres(p_2); :}
+Stm2 ::= _SYMB_41 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmNot(p_2); :} 
+  | _SYMB_42 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmPst(p_2); :}
+  | _SYMB_43 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmPres(p_2); :}
   | _SYMB_40 Stm3:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.StmFut(p_2); :}
   | Stm3:p_1  {: RESULT = p_1; :}
 ;
@@ -154,12 +153,12 @@ Term1 ::= Term1:p_1 _SYMB_28 Term2:p_3  {: RESULT = new com.googlecode.opennars.
   | Term1:p_1 _SYMB_29 Term2:p_3  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInDif(p_1,p_3); :}
   | Term2:p_1  {: RESULT = p_1; :}
 ;
-Term2 ::= Term:p_1 _SYMB_38 _SYMB_24 ListTerm:p_4 _SYMB_30 ListTerm:p_6 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExImg(p_1,p_4,p_6); :} 
-  | Term:p_1 _SYMB_41 _SYMB_24 ListTerm:p_4 _SYMB_30 ListTerm:p_6 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInImg(p_1,p_4,p_6); :}
+Term2 ::= Term:p_1 _SYMB_24 ListTerm:p_3 _SYMB_30 ListTerm:p_5 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExImg(p_1,p_3,p_5); :} 
+  | Term:p_1 _SYMB_24 ListTerm:p_3 _SYMB_31 ListTerm:p_5 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInImg(p_1,p_3,p_5); :}
   | Term3:p_1  {: RESULT = p_1; :}
 ;
-Term3 ::= _SYMB_31 ListTerm:p_2 _SYMB_32  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExSet(p_2); :} 
-  | _SYMB_33 ListTerm:p_2 _SYMB_34  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInSet(p_2); :}
+Term3 ::= _SYMB_32 ListTerm:p_2 _SYMB_33  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmExSet(p_2); :} 
+  | _SYMB_34 ListTerm:p_2 _SYMB_35  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmInSet(p_2); :}
   | _SYMB_24 ListTerm:p_2 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmProd(p_2); :}
   | Literal:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmLit(p_1); :}
   | _SYMB_24 Stm:p_2 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TrmStm(p_2); :}
@@ -178,20 +177,20 @@ URIRef ::= URILit:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.
 ;
 Literal ::= _SYMB_6 _IDENT_:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitQVar(p_2); :} 
   | _SYMB_6  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitQVarAn(); :}
-  | _SYMB_35 _IDENT_:p_2 _SYMB_24 ListIdent:p_4 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitSVarD(p_2,p_4); :}
-  | _SYMB_35 _IDENT_:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitSVarI(p_2); :}
+  | _SYMB_36 _IDENT_:p_2 _SYMB_24 ListIdent:p_4 _SYMB_25  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitSVarD(p_2,p_4); :}
+  | _SYMB_36 _IDENT_:p_2  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitSVarI(p_2); :}
   | URIRef:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitURI(p_1); :}
   | _INTEGER_:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitInt(p_1); :}
   | _DOUBLE_:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitDbl(p_1); :}
   | _STRING_:p_1  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitString(p_1); :}
-  | _SYMB_45  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitTrue(); :}
+  | _SYMB_44  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitTrue(); :}
   | _SYMB_39  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.LitFalse(); :}
 ;
-NSPrefix ::= _IDENT_:p_1 _SYMB_36  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.NSPrefix1(p_1); :} 
-  | _SYMB_36  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.NSPrefix2(); :}
+NSPrefix ::= _IDENT_:p_1 _SYMB_37  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.NSPrefix1(p_1); :} 
+  | _SYMB_37  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.NSPrefix2(); :}
 ;
 TruthValue ::=  /* empty */  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthE(); :} 
-  | _SYMB_37 _DOUBLE_:p_2 _SYMB_37  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthF(p_2); :}
-  | _SYMB_37 _DOUBLE_:p_2 _SYMB_17 _DOUBLE_:p_4 _SYMB_37  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthFC(p_2,p_4); :}
+  | _SYMB_38 _DOUBLE_:p_2 _SYMB_38  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthF(p_2); :}
+  | _SYMB_38 _DOUBLE_:p_2 _SYMB_17 _DOUBLE_:p_4 _SYMB_38  {: RESULT = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthFC(p_2,p_4); :}
 ;
 
