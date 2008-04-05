@@ -46,7 +46,7 @@ public class ShortFloat implements Cloneable {
     // set new value, rounded, with validity checking
     public void setValue(float v) {
         if ((v < 0) || (v > 1))
-            System.out.println("!!! Wrong value: " + v);
+            System.err.println("!!! Wrong value: " + v);
         else
             value = (short) (v * 10000.0 + 0.5);
     }

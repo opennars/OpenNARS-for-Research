@@ -133,7 +133,7 @@ public class BudgetFunctions extends UtilityFunctions {
     /* ----------------------- Links ----------------------- */
     
     public  BudgetValue distributeAmongLinks(BudgetValue b, int n) {
-        float priority = (float) (b.getPriority() / Math.sqrt(n));
+        float priority = (float) (b.getPriority() / (n==0 ? 1 : Math.sqrt(n)));
         return new BudgetValue(priority, b.getDurability(), b.getQuality(), memory);
     }
 
