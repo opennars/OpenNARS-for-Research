@@ -16,9 +16,13 @@ SentImport. Sentence ::= "@import" URILit "." ;							-- Imports a given URL
 SentDelay.	Sentence ::= "@delay" Integer "." ;							-- Waits for a given number of cycles before continuing
 SentOp.		Sentence ::= "@operator" URIRef "." ;						-- Declares URI to be an operator (currently unused)
 
-SentJudge.	Sentence ::= Stm TruthValue "." ;							-- A judgement with a given truth-value
-SentQuest.	Sentence ::= Stm "?" ;										-- A question
-SentGoal.	Sentence ::= Stm  TruthValue "!" ;							-- A goal with a given utility
+SentJudge.	Sentence ::= Stm TruthValue Budget "." ;					-- A judgement with a given truth-value
+SentQuest.	Sentence ::= Stm "?" Budget;								-- A question
+SentGoal.	Sentence ::= Stm  TruthValue Budget"!" ;					-- A goal with a given utility
+
+BudgetE.    Budget ::= ;
+BudgetP.    Budget ::= "@budget" "(" Double ")" ;
+BudgetPD.   Budget ::= "@budget" "(" Double ";" Double ")" ;
 
 StmImpl.	Stm  ::= Stm "==>" Stm1 ;									-- Implication
 StmEquiv.	Stm  ::= Stm "<=>" Stm1 ;									-- Equivalence
@@ -90,5 +94,5 @@ TruthE.		TruthValue ::= ;											-- The default truth value
 TruthF.		TruthValue ::= "%" Double "%" ;								-- Frequency only
 TruthFC.	TruthValue ::= "%" Double ";" Double "%" ;					-- A full truth value
 
-comment "/*" "*/" ;														-- Comments as in C++ or C#
-comment "//" ;
+comment "{---" "---}" ;														-- Comments similar to Haskell
+comment "---" ;

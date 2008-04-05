@@ -68,6 +68,9 @@ import com.googlecode.opennars.parser.loan.Loan.PrettyPrinter;
 import com.googlecode.opennars.parser.loan.Loan.Yylex;
 import com.googlecode.opennars.parser.loan.Loan.parser;
 import com.googlecode.opennars.parser.loan.Loan.Absyn.BaseR;
+import com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE;
+import com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP;
+import com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD;
 import com.googlecode.opennars.parser.loan.Loan.Absyn.Doc;
 import com.googlecode.opennars.parser.loan.Loan.Absyn.DocBR;
 import com.googlecode.opennars.parser.loan.Loan.Absyn.Document;
@@ -542,6 +545,32 @@ public class LoanParser extends Parser {
 	}
 
 	public class ParserVisitor extends AbstractVisitor<Object, LoanParser> {
+
+		/* (non-Javadoc)
+		 * @see com.googlecode.opennars.parser.loan.Loan.AbstractVisitor#visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE, java.lang.Object)
+		 */
+		@Override
+		public Object visit(BudgetE p, LoanParser arg) {
+			return super.visit(p, arg);
+		}
+
+		/* (non-Javadoc)
+		 * @see com.googlecode.opennars.parser.loan.Loan.AbstractVisitor#visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP, java.lang.Object)
+		 */
+		@Override
+		public Object visit(BudgetP p, LoanParser arg) {
+			// TODO Auto-generated method stub
+			return super.visit(p, arg);
+		}
+
+		/* (non-Javadoc)
+		 * @see com.googlecode.opennars.parser.loan.Loan.AbstractVisitor#visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD, java.lang.Object)
+		 */
+		@Override
+		public Object visit(BudgetPD p, LoanParser arg) {
+			// TODO Auto-generated method stub
+			return super.visit(p, arg);
+		}
 
 		/* (non-Javadoc)
 		 * @see com.googlecode.opennars.parser.loan.Loan.AbstractVisitor#visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BaseR, java.lang.Object)
@@ -1380,16 +1409,16 @@ public class LoanParser extends Parser {
 		com.googlecode.opennars.parser.loan.Loan.Absyn.Stm stm = (Stm) ((CompoundTerm) task.getContent()).accept(new SerialiseVisitor(), this);
 		if(task.isJudgment()) {
 			com.googlecode.opennars.parser.loan.Loan.Absyn.TruthValue tv = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthFC(Double.valueOf(task.getTruth().getFrequency()), Double.valueOf(task.getTruth().getConfidence()));
-			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentJudge(stm, tv);
+			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentJudge(stm, tv, new BudgetE());
 			ss.add(s);
 		}
 		else if(task.isQuestion()) {
-			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest(stm);
+			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest(stm, new BudgetE());
 			ss.add(s);
 		}
 		else if(task.isGoal()) {
 			com.googlecode.opennars.parser.loan.Loan.Absyn.TruthValue tv = new com.googlecode.opennars.parser.loan.Loan.Absyn.TruthFC(Double.valueOf(task.getTruth().getFrequency()), Double.valueOf(task.getTruth().getConfidence()));
-			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal(stm, tv);
+			s = new com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal(stm, tv, new BudgetE());
 			ss.add(s);
 		}
 		

@@ -24,6 +24,13 @@ public class AbstractVisitor<R,A> implements AllVisitor<R,A> {
     public R visitDefault(com.googlecode.opennars.parser.loan.Loan.Absyn.Sentence p, A arg) {
       throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
     }
+/* Budget */
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE p, A arg) { return visitDefault(p, arg); }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP p, A arg) { return visitDefault(p, arg); }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD p, A arg) { return visitDefault(p, arg); }
+    public R visitDefault(com.googlecode.opennars.parser.loan.Loan.Absyn.Budget p, A arg) {
+      throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
+    }
 /* Stm */
     public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.StmImpl p, A arg) { return visitDefault(p, arg); }
     public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.StmEquiv p, A arg) { return visitDefault(p, arg); }

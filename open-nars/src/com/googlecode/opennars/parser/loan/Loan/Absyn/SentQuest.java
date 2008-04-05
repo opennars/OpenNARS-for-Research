@@ -2,8 +2,9 @@ package com.googlecode.opennars.parser.loan.Loan.Absyn; // Java Package generate
 
 public class SentQuest extends Sentence {
   public final Stm stm_;
+  public final Budget budget_;
 
-  public SentQuest(Stm p1) { stm_ = p1; }
+  public SentQuest(Stm p1, Budget p2) { stm_ = p1; budget_ = p2; }
 
   public <R,A> R accept(com.googlecode.opennars.parser.loan.Loan.Absyn.Sentence.Visitor<R,A> v, A arg) { return v.visit(this, arg); }
 
@@ -11,13 +12,13 @@ public class SentQuest extends Sentence {
     if (this == o) return true;
     if (o instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest) {
       com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest x = (com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest)o;
-      return this.stm_.equals(x.stm_);
+      return this.stm_.equals(x.stm_) && this.budget_.equals(x.budget_);
     }
     return false;
   }
 
   public int hashCode() {
-    return this.stm_.hashCode();
+    return 37*(this.stm_.hashCode())+this.budget_.hashCode();
   }
 
 

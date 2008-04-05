@@ -85,6 +85,7 @@ public class VisitSkel
 
       p.stm_.accept(new StmVisitor<R,A>(), arg);
       p.truthvalue_.accept(new TruthValueVisitor<R,A>(), arg);
+      p.budget_.accept(new BudgetVisitor<R,A>(), arg);
 
       return null;
     }
@@ -93,6 +94,7 @@ public class VisitSkel
       /* Code For SentQuest Goes Here */
 
       p.stm_.accept(new StmVisitor<R,A>(), arg);
+      p.budget_.accept(new BudgetVisitor<R,A>(), arg);
 
       return null;
     }
@@ -102,6 +104,35 @@ public class VisitSkel
 
       p.stm_.accept(new StmVisitor<R,A>(), arg);
       p.truthvalue_.accept(new TruthValueVisitor<R,A>(), arg);
+      p.budget_.accept(new BudgetVisitor<R,A>(), arg);
+
+      return null;
+    }
+
+  }
+  public class BudgetVisitor<R,A> implements Budget.Visitor<R,A>
+  {
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE p, A arg)
+    {
+      /* Code For BudgetE Goes Here */
+
+
+      return null;
+    }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP p, A arg)
+    {
+      /* Code For BudgetP Goes Here */
+
+      //p.double_;
+
+      return null;
+    }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD p, A arg)
+    {
+      /* Code For BudgetPD Goes Here */
+
+      //p.double_1;
+      //p.double_2;
 
       return null;
     }

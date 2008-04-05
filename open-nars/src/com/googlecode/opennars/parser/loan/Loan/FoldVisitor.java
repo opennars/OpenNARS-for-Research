@@ -56,17 +56,34 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
       R r = leaf(arg);
       r = combine(p.stm_.accept(this, arg), r, arg);
       r = combine(p.truthvalue_.accept(this, arg), r, arg);
+      r = combine(p.budget_.accept(this, arg), r, arg);
       return r;
     }
     public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest p, A arg) {
       R r = leaf(arg);
       r = combine(p.stm_.accept(this, arg), r, arg);
+      r = combine(p.budget_.accept(this, arg), r, arg);
       return r;
     }
     public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal p, A arg) {
       R r = leaf(arg);
       r = combine(p.stm_.accept(this, arg), r, arg);
       r = combine(p.truthvalue_.accept(this, arg), r, arg);
+      r = combine(p.budget_.accept(this, arg), r, arg);
+      return r;
+    }
+
+/* Budget */
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE p, A arg) {
+      R r = leaf(arg);
+      return r;
+    }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP p, A arg) {
+      R r = leaf(arg);
+      return r;
+    }
+    public R visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD p, A arg) {
+      R r = leaf(arg);
       return r;
     }
 

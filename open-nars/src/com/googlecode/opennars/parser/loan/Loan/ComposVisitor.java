@@ -7,6 +7,7 @@ public class ComposVisitor<A> implements
   com.googlecode.opennars.parser.loan.Loan.Absyn.Document.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.Document,A>,
   com.googlecode.opennars.parser.loan.Loan.Absyn.BaseRule.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.BaseRule,A>,
   com.googlecode.opennars.parser.loan.Loan.Absyn.Sentence.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.Sentence,A>,
+  com.googlecode.opennars.parser.loan.Loan.Absyn.Budget.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.Budget,A>,
   com.googlecode.opennars.parser.loan.Loan.Absyn.Stm.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.Stm,A>,
   com.googlecode.opennars.parser.loan.Loan.Absyn.Term.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.Term,A>,
   com.googlecode.opennars.parser.loan.Loan.Absyn.URIRef.Visitor<com.googlecode.opennars.parser.loan.Loan.Absyn.URIRef,A>,
@@ -73,21 +74,44 @@ public class ComposVisitor<A> implements
     {
       Stm stm_ = p.stm_.accept(this, arg);
       TruthValue truthvalue_ = p.truthvalue_.accept(this, arg);
+      Budget budget_ = p.budget_.accept(this, arg);
 
-      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentJudge(stm_, truthvalue_);
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentJudge(stm_, truthvalue_, budget_);
     }
     public Sentence visit(com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest p, A arg)
     {
       Stm stm_ = p.stm_.accept(this, arg);
+      Budget budget_ = p.budget_.accept(this, arg);
 
-      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest(stm_);
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest(stm_, budget_);
     }
     public Sentence visit(com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal p, A arg)
     {
       Stm stm_ = p.stm_.accept(this, arg);
       TruthValue truthvalue_ = p.truthvalue_.accept(this, arg);
+      Budget budget_ = p.budget_.accept(this, arg);
 
-      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal(stm_, truthvalue_);
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal(stm_, truthvalue_, budget_);
+    }
+
+/* Budget */
+    public Budget visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE p, A arg)
+    {
+
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE();
+    }
+    public Budget visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP p, A arg)
+    {
+      Double double_ = p.double_;
+
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP(double_);
+    }
+    public Budget visit(com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD p, A arg)
+    {
+      Double double_1 = p.double_1;
+      Double double_2 = p.double_2;
+
+      return new com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD(double_1, double_2);
     }
 
 /* Stm */

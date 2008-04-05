@@ -8,53 +8,89 @@ public class PrettyPrinter
   //You may wish to change the parentheses used in precedence.
   private static final String _L_PAREN = new String("(");
   private static final String _R_PAREN = new String(")");
+  
+  private static boolean inAtRule = false;
   //You may wish to change render
   private static void render(String s)
   {
     if (s.equals("{"))
     {
-       buf_.append("\n");
-       indent();
+       //buf_.append("\n");
+       //indent();
        buf_.append(s);
-       _n_ = _n_ + 2;
-       buf_.append("\n");
-       indent();
+       //_n_ = _n_ + 2;
+       //buf_.append("\n");
+       //indent();
     }
     else if (s.equals("(") || s.equals("["))
        buf_.append(s);
     else if (s.equals(")") || s.equals("]"))
     {
-       backup();
+       //backup();
+       trim();
        buf_.append(s);
-       buf_.append(" ");
+       //buf_.append(" ");
     }
     else if (s.equals("}"))
     {
-       _n_ = _n_ - 2;
-       backup();
-       backup();
+       //_n_ = _n_ - 2;
+       //backup();
+       //backup();
        buf_.append(s);
-       buf_.append("\n");
-       indent();
+       //buf_.append("\n");
+       //indent();
     }
     else if (s.equals(","))
     {
-       backup();
+       //backup();
        buf_.append(s);
        buf_.append(" ");
     }
     else if (s.equals(";"))
     {
-       backup();
+       //backup();
        buf_.append(s);
-       buf_.append("\n");
-       indent();
+       buf_.append(" ");
+       //buf_.append("\n");
+       //indent();
+    }
+    else if (s.equals(":")) {
+    	if(!inAtRule) trim();
+    	buf_.append(s);
+    	if(inAtRule) buf_.append(" ");
+    }
+    else if (s.equals(".") && inAtRule) {
+    	trim();
+    	inAtRule = false;
+    	buf_.append(s);
     }
     else if (s.equals("")) return;
+    else if (s.equals("&") || s.equals("&&") || s.equals("%") 
+    		|| s.equals("|") || s.equals("||") || s.equals("-") || s.equals("~") || s.equals("/") 
+    		|| s.equals("\\") || s.equals("-->") || s.equals("<->") || s.equals("}->")
+    		|| s.equals("--[") || s.equals("}-[") || s.equals("==>") || s.equals("<=>")
+    		|| s.equals("=/>") || s.equals("=\\>") || s.equals("=|>") || s.equals("<|>")
+    		|| s.equals("</>")) {
+    	trim();
+    	buf_.append(" ");
+    	buf_.append(s);
+    	buf_.append(" ");
+    }
+    else if (s.equals("not") || s.equals("future") || s.equals("present") || s.equals("past")
+    		 || s.equals("@budget")) {
+    	buf_.append(s);
+    	buf_.append(" ");
+    }
+    else if (s.equals("@base") || s.equals("@import") || s.equals("@prefix") || s.equals("@operator")
+    		|| s.equals("@delay")) {
+    	buf_.append(s);
+    	buf_.append(" ");
+    	inAtRule = true;
+    }
     else
     {
        buf_.append(s);
-       buf_.append(" ");
+       // buf_.append(" ");
     }
   }
 
@@ -114,6 +150,21 @@ public class PrettyPrinter
     return temp;
   }
   public static String show(com.googlecode.opennars.parser.loan.Loan.Absyn.Sentence foo)
+  {
+    sh(foo);
+    String temp = buf_.toString();
+    buf_.delete(0,buf_.length());
+    return temp;
+  }
+  public static String print(com.googlecode.opennars.parser.loan.Loan.Absyn.Budget foo)
+  {
+    pp(foo, 0);
+    trim();
+    String temp = buf_.toString();
+    buf_.delete(0,buf_.length());
+    return temp;
+  }
+  public static String show(com.googlecode.opennars.parser.loan.Loan.Absyn.Budget foo)
   {
     sh(foo);
     String temp = buf_.toString();
@@ -332,6 +383,7 @@ public class PrettyPrinter
        if (_i_ > 0) render(_L_PAREN);
        pp(_sentjudge.stm_, 0);
        pp(_sentjudge.truthvalue_, 0);
+       pp(_sentjudge.budget_, 0);
        render(".");
        if (_i_ > 0) render(_R_PAREN);
     }
@@ -341,6 +393,7 @@ public class PrettyPrinter
        if (_i_ > 0) render(_L_PAREN);
        pp(_sentquest.stm_, 0);
        render("?");
+       pp(_sentquest.budget_, 0);
        if (_i_ > 0) render(_R_PAREN);
     }
     else     if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal)
@@ -349,7 +402,40 @@ public class PrettyPrinter
        if (_i_ > 0) render(_L_PAREN);
        pp(_sentgoal.stm_, 0);
        pp(_sentgoal.truthvalue_, 0);
+       pp(_sentgoal.budget_, 0);
        render("!");
+       if (_i_ > 0) render(_R_PAREN);
+    }
+  }
+
+  private static void pp(com.googlecode.opennars.parser.loan.Loan.Absyn.Budget foo, int _i_)
+  {
+    if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE _budgete = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE) foo;
+       if (_i_ > 0) render(_L_PAREN);
+       if (_i_ > 0) render(_R_PAREN);
+    }
+    else     if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP _budgetp = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP) foo;
+       if (_i_ > 0) render(_L_PAREN);
+       render("@budget");
+       render("(");
+       pp(_budgetp.double_, 0);
+       render(")");
+       if (_i_ > 0) render(_R_PAREN);
+    }
+    else     if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD _budgetpd = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD) foo;
+       if (_i_ > 0) render(_L_PAREN);
+       render("@budget");
+       render("(");
+       pp(_budgetpd.double_1, 0);
+       render(";");
+       pp(_budgetpd.double_2, 0);
+       render(")");
        if (_i_ > 0) render(_R_PAREN);
     }
   }
@@ -922,6 +1008,7 @@ public class PrettyPrinter
        render("SentJudge");
        sh(_sentjudge.stm_);
        sh(_sentjudge.truthvalue_);
+       sh(_sentjudge.budget_);
        render(")");
     }
     if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.SentQuest)
@@ -930,6 +1017,7 @@ public class PrettyPrinter
        render("(");
        render("SentQuest");
        sh(_sentquest.stm_);
+       sh(_sentquest.budget_);
        render(")");
     }
     if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.SentGoal)
@@ -939,6 +1027,33 @@ public class PrettyPrinter
        render("SentGoal");
        sh(_sentgoal.stm_);
        sh(_sentgoal.truthvalue_);
+       sh(_sentgoal.budget_);
+       render(")");
+    }
+  }
+
+  private static void sh(com.googlecode.opennars.parser.loan.Loan.Absyn.Budget foo)
+  {
+    if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE _budgete = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetE) foo;
+       render("BudgetE");
+    }
+    if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP _budgetp = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetP) foo;
+       render("(");
+       render("BudgetP");
+       sh(_budgetp.double_);
+       render(")");
+    }
+    if (foo instanceof com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD)
+    {
+       com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD _budgetpd = (com.googlecode.opennars.parser.loan.Loan.Absyn.BudgetPD) foo;
+       render("(");
+       render("BudgetPD");
+       sh(_budgetpd.double_1);
+       sh(_budgetpd.double_2);
        render(")");
     }
   }
