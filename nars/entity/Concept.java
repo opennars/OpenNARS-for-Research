@@ -33,9 +33,11 @@ import nars.operation.*;
 import nars.storage.*;
 
 /**
- * A concept contains information directly related to a term, including directly and indirectly related tasks and beliefs.
+ * A concept contains information directly related to a term, including directly 
+ * and indirectly related tasks and beliefs.
  * <p>
- * To make sure the space will be released, no other will refer to a concept, except in a concept bag.
+ * To make sure the space will be released, the only allowed reference to a concept
+ * are those in a ConceptBag. All other access go through the Term that names it.
  */
 public final class Concept extends Item {
     /* Constant term as the unique ID of the concept */
@@ -86,6 +88,7 @@ public final class Concept extends Item {
     
     /**
      * New task to be directly processed in a constant time, called from Memory only
+     * Only use local information, and provide feedback in the priority value
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
@@ -137,30 +140,51 @@ public final class Concept extends Item {
     }
     
     /**
-     * New goal
+     * Pre-processing a new goal
      * @param task The task to be processed
      */
     private void processGoal(Task task) {
         Goal goal = (Goal) task.getSentence();
+        // (1) check whether the goal is really desired
         if (revisible)
-            reviseTable(task, directGoals);
+            reviseTable(task, directGoals);               
         else
             updateTable(task);
+    // think more if not sure
+        // (2) check whether the goal is already relaized
         for (int i = 0; i < directBeliefs.size(); i++) {
             Judgment judg = directBeliefs.get(i);
-            MatchingRules.trySolution(goal, judg, task);
+            MatchingRules.trySolution(goal, judg, task);  
         }
+        // (3) decide whether to actually pursue the goal
+        decisionMaking(task);
         if (task.getPriority() > 0) {              // if still valuable
             addToTable(goal, directGoals, Parameters.MAXMUM_GOALS_LENGTH);         // with the feedbacks
         }
-        decisionMaking(task);
     }
     
-    private void decisionMaking(Task task) {    // add plausibility
+    /**
+     * Decide whether the goal will be actually pursued by setting is quality value
+     * @param task The task to be processed
+     */
+    private void decisionMaking(Task task) {
         Goal goal = (Goal) task.getSentence();
+        // for executable operations
+        if (task.aboveThreshold()) {
+            Term content = goal.getContent();
+            if (content instanceof Inheritance) {
+                Term pred = (((Inheritance) content).getPredicate()); 
+                if (pred instanceof Operator) {
+                    ((Operator) pred).call(task);
+                    return;
+                }
+            }
+        }
+        // for non-executable goals
+    // to be replaced by plausibility
         float desire = 2 * goal.getTruth().getExpectation() - 1;
-        float quality = (desire < 0) ? 0 : desire;
-        task.setQuality(quality);
+        float qua = (desire < 0) ? 0 : desire;
+        task.setQuality(qua);
     }
     
     // revise previous beliefs or goals
@@ -271,22 +295,22 @@ public final class Concept extends Item {
             return;
         Memory.currentTaskLink = tLink;
         Memory.currentBeliefLink = null;
-        if (NARS.isStandAlone())
-            Record.append(" * Selected TaskLink: " + tLink + "\n");
+//        if (NARS.isStandAlone())
+        Record.append(" * Selected TaskLink: " + tLink + "\n");
         Task task = tLink.getTargetTask();
-        Record.append(" * Selected Task: " + task + "\n");
+//        Record.append(" * Selected Task: " + task + "\n");
         Memory.currentTask = task;
         if ((tLink.getType() == TermLink.TRANSFORM) && !task.isStructual()) {
             RuleTables.transformTask(task, tLink);      // inference from a TaskLink and the Task --- for Product and Image
             return; // cannot be used otherwise
         }
-        TermLink bLink = (TermLink) termLinks.takeOut(tLink);  // to avoid repeated syllogism
-        if (bLink != null) {
+        TermLink mLink = (TermLink) termLinks.takeOut(tLink);  // to avoid repeated syllogism
+        if (mLink != null) {
             if (NARS.isStandAlone())
-                Record.append(" * Selected BeliefLink: " + bLink + "\n");
-            Memory.currentBeliefLink = bLink;
-            RuleTables.reason(tLink, bLink);
-            termLinks.putBack(bLink);
+                Record.append(" * Selected TermLink: " + mLink + "\n");
+            Memory.currentBeliefLink = mLink;
+            RuleTables.reason(tLink, mLink);
+            termLinks.putBack(mLink);
         }
         taskLinks.putBack(tLink);
     }
@@ -297,6 +321,8 @@ public final class Concept extends Item {
         return term;
     }
     
+    
+    @Override
     public String toString() {  // called from concept bag
         if (NARS.isStandAlone())
             return (super.toString2() + " " + key);
@@ -304,6 +330,7 @@ public final class Concept extends Item {
             return key;
     }
     
+    @Override
     public float getQuality() {         // re-calculate-and-set? consider syntactic complexity?
         return UtilityFunctions.and(taskLinks.averagePriority(), termLinks.averagePriority());
     }

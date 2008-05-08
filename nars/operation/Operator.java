@@ -25,6 +25,7 @@ import java.util.*;
 import java.io.*;
 import nars.language.Term;
 import nars.entity.Task;
+import nars.main.Memory;
 
 /**
  * An individual operator that can be execute by the system.
@@ -37,6 +38,13 @@ public abstract class Operator extends Term {
     
     // required method for every operation
     public abstract Object execute(Task task);
+
+    public void call(Task task) {
+        Object feedback = execute(task);
+        System.out.println("EXECUTE in " + name + " " + task.getSentence());
+        Memory.executedTask(task);
+        // the feedback will be added as input tasks
+    }
 
     // register the operators in the memory
     // the only method to modify when adding a new operator into NARS

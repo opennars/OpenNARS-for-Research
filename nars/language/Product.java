@@ -23,7 +23,6 @@ package nars.language;
 
 import java.util.*;
 import nars.io.Symbols;
-import nars.entity.TermLink;
 import nars.main.Memory;
 
 /**
@@ -67,8 +66,8 @@ public class Product extends CompoundTerm {
      * @param argument The list of components
      */
     public static Term make(ArrayList<Term> argument) {
-        if (argument.size() < 2)
-            return null;
+//        if (argument.size() < 2)
+//            return null;
         String name = makeCompoundName(Symbols.PRODUCT_OPERATOR, argument);
         Term t = Memory.nameToListedTerm(name);
         return (t != null) ? t : new Product(name, argument);

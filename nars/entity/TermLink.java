@@ -21,10 +21,8 @@
 
 package nars.entity;
 
-import nars.language.CompoundTerm;
 import nars.language.Term;
 import nars.io.Symbols;
-import nars.main.Memory;
 
 /**
  * A link between a compound term and a component term
@@ -37,7 +35,7 @@ import nars.main.Memory;
  * The index value(s) indicates the location of the component in the compound.
  */
 public class TermLink extends Item {
-
+    // mainly used in inference.RuleTable
     public static final short SELF = 0;                 // TaskLink only
     public static final short COMPONENT = 1;
     public static final short COMPOUND = 2;
@@ -57,16 +55,24 @@ public class TermLink extends Item {
      * Simplest constructor, called in CompoundTerm and Implication
      * @param t target Term
      * @param p link type
-     * @param i component index in compound
+     * @param indices component indices in compound
      */
-    public TermLink(Term t, short p, int i) {
+    public TermLink(Term t, short p, int... indices) {
         target = t;
         type = p;
-        index = new short[1];
-        index[0] = (short) i;
+        if (type == TermLink.COMPOUND_CONDITION) {
+            index = new short[indices.length + 1];
+            index[0] = 0;
+            for (int i = 0; i < indices.length; i++)
+                index[i+1] = (short) indices[i];
+        } else {
+            index = new short[indices.length];
+            for (int i = 0; i < index.length; i++)
+                index[i] = (short) indices[i];
+        }
         setKey();
     }
-
+/*
     public TermLink(Term t, short p, int i, int j) {
         target = t;
         type = p;
@@ -85,6 +91,7 @@ public class TermLink extends Item {
         index[2] = (short) k;
         setKey();
     }
+*/
 
     protected TermLink(BudgetValue v) {
         super(v);
@@ -154,10 +161,12 @@ public class TermLink extends Item {
             return (short) (i + 1);
     }
     
+    @Override
     public String toString() {
         return (super.toString() + " " + key);
     }
 
+    @Override
     public String toString2() {
         return (super.toString2() + " " + key);
     }

@@ -214,15 +214,21 @@ public class Memory {
     }
     
     /**
-     * Reporting executed task, called from Concept.directOperation.
+     * Reporting executed task, called from operation.Operator.
      * @param task the executed task
      */
     public static void executedTask(Task task) {   // called by the inference rules
-        Record.append("!!! Executed: " + task.toString() + "\n");
-        float budget = task.getBudget().singleValue();
-        float minSilent = Center.mainWindow.silentW.value() / 100.0f;
-        if (budget > minSilent)
-            report(task.getSentence(), false);
+        Record.append("!!! Executed: " + task.getSentence() + "\n");
+//        float budget = task.getBudget().singleValue();
+//        float minSilent = Center.mainWindow.silentW.value() / 100.0f;
+//        if (budget > minSilent)
+//            report(task.getSentence(), false);
+        Goal g = (Goal) task.getSentence();
+        Judgment j = new Judgment(g);
+        Task newTask = new Task(j, task.getBudget());
+        report(newTask.getSentence(), true);             // report input
+        newTasks.add(newTask);
+        taskBuffer.refresh();        
     }
     
     /**
@@ -328,6 +334,7 @@ public class Memory {
     
     /**
      * Imediate processing of a new task
+     * Local processing, in one concept only
      * @param task the task to be accepted
      */
     private static void immediateProcess(Task task) {
@@ -344,35 +351,37 @@ public class Memory {
 
     /**
      * Link to a new task from all relevant concepts for distributed processing.
+     * The only method that calls the TaskLink constructor.
      * @param task The task to be linked
      * @param content The content of the task
      */
     private static void continuedProcess(Task task, Term content) {
         TaskLink tLink;
-        Concept c1 = null;                      // local Concept
+        Concept localConcept = null;                      // local Concept
         BudgetValue budget = task.getBudget();
         if (content.isConstant()) {
-            c1 = getConcept(content);
+            localConcept = getConcept(content);
             tLink = new TaskLink(task, null, budget);   // link type SELF
-            c1.insertTaskLink(tLink);
+            localConcept.insertTaskLink(tLink);
         }
         if (content instanceof CompoundTerm) {
-            Term component;                     // component term
-            Concept c2;                         // component concept
-            TermLink cLink1, cLink2;     // a pair of compound/component links
-            ArrayList<TermLink> cLinks;  // link list
-            cLinks = (c1 != null) ? c1.getTermLinks() : ((CompoundTerm) content).prepareComponentLinks();  // use saved
-            short[] indices;
-            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, cLinks.size());
+            Term componentTerm;                     // componentTerm term
+            Concept componentConcept;               // componentTerm concept
+            ArrayList<TermLink> termLinks = (localConcept != null) ? localConcept.getTermLinks() 
+                                         : ((CompoundTerm) content).prepareComponentLinks();  // use saved
+            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
             if (!subBudget.aboveThreshold())
                 return;
-            for (TermLink cLink0 : cLinks) {
-                component = cLink0.getTarget();
-                c2 = getConcept(component);
-                if (!(task.isStructual() && (cLink0.getType() == TermLink.TRANSFORM))) {
-                    tLink = new TaskLink(task, cLink0, subBudget);
-                    c2.insertTaskLink(tLink);               // component link to task
-                }
+            for (int i = 0; i < termLinks.size(); i++) {
+                TermLink mLink = termLinks.get(i);
+                componentTerm = mLink.getTarget();
+                componentConcept = getConcept(componentTerm);
+                if (task.isStructual() && (mLink.getType() == TermLink.TRANSFORM)) // avoid circular transform
+                    return;
+                if ((content instanceof ConjunctionSequence) && (i > 0))    // only link to the first component
+                    return;
+                tLink = new TaskLink(task, mLink, subBudget);
+                componentConcept.insertTaskLink(tLink);               // componentTerm link to task                }
             }
         }
     }

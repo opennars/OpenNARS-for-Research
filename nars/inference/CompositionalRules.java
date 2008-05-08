@@ -218,8 +218,6 @@ public final class CompositionalRules {
     static void decomposeStatement(CompoundTerm compound, Term component, boolean compoundTask) {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
-        if (!sentence.isJudgment())
-            return;
         Judgment belief = Memory.currentBelief;
         Term content = CompoundTerm.reduceComponents(compound, component);
         if (content == null)
@@ -236,7 +234,7 @@ public final class CompositionalRules {
         if (compound instanceof Conjunction) {
             if (sentence instanceof Goal) {
                 if (compoundTask)
-                    truth = TruthFunctions.reduceDisjunction(v1, v2);
+                    truth = TruthFunctions.intersection(v1, v2);
                 else
                     return;
             } else if (sentence instanceof Judgment)
@@ -244,7 +242,7 @@ public final class CompositionalRules {
         } else if (compound instanceof Disjunction) {
             if (sentence instanceof Goal) {
                 if (compoundTask)
-                    truth = TruthFunctions.reduceConjunction(v1, v2);
+                    truth = TruthFunctions.reduceConjunction(v2, v1);
                 else
                     return;
             } else if (sentence instanceof Judgment)

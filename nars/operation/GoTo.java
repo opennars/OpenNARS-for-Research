@@ -33,7 +33,7 @@ public class GoTo extends Operator {
     }
     
     public Object execute(Task task) {
-        System.out.println("EXECUTE in " + name + " " + task);
+//        System.out.println("EXECUTE in " + name + " " + task.getSentence());
         return null;
     }
 }

@@ -320,18 +320,21 @@ public final class StructuralRules {
         Term content = null;
         if (indices.length == 2)
             content = newInh;
-        else {
+        else if ((oldContent instanceof Statement) && (indices[0] == 1)) {
+            content = Statement.make((Statement) oldContent, oldContent.componentAt(0), newInh);
+        } else {
             ArrayList<Term> componentList;
-            if ((oldContent instanceof Implication) && (oldContent.componentAt(0) instanceof Conjunction)) {
-                componentList = ((CompoundTerm) oldContent.componentAt(0)).cloneComponents();
+            Term condition = oldContent.componentAt(0);
+            if ((oldContent instanceof Implication) && (condition instanceof Conjunction)) {
+                componentList = ((CompoundTerm) condition).cloneComponents();
                 componentList.set(indices[0], newInh);
-                Term newCond = Conjunction.make(componentList);
+                Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
                 content = Implication.make(newCond, ((Statement) oldContent).getPredicate());
             } else
                 componentList = oldContent.cloneComponents();
             componentList.set(indices[0], newInh);
             if (oldContent instanceof Conjunction)
-                content = Conjunction.make(componentList);
+                content = CompoundTerm.make(oldContent, componentList);
             else if ((oldContent instanceof Implication) || (oldContent instanceof Equivalence))
                 content = Statement.make((Statement) oldContent, componentList.get(0), componentList.get(1));
         }

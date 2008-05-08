@@ -36,7 +36,7 @@ public class Parameters {
     public static final int BELIEF_DEFAULT_FORGETTING_CYCLE = 50;
        
     /** Silent threshold for task reporting, in [0, 100]. */
-    public static final int SILENT_LEVEL = 100;
+    public static final int SILENT_LEVEL = 10;
 
     /* ---------- parameters fixed after compiling --- logical ---------- */
 

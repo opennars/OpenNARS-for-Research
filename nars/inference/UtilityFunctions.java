@@ -31,22 +31,28 @@ public class UtilityFunctions {
     // arithmetic average
     public static float aveAri(float... arr) {
         float sum = 0;
-        for(int i=0; i<arr.length; i++)
-            sum += arr[i];
+//        for(int i=0; i<arr.length; i++)
+//            sum += arr[i];
+        for(float f : arr)
+            sum += f;
         return sum / arr.length;
     }
 
     public static float or(float... arr) {
         float product = 1;
-        for(int i=0; i<arr.length; i++)
-            product *= (1 - arr[i]);
+//        for(int i=0; i<arr.length; i++)
+//            product *= (1 - arr[i]);
+        for(float f : arr)
+            product *= (1 - f);
         return 1 - product;
     }
     
     public static float and(float... arr) {
         float product = 1;
-        for(int i=0; i<arr.length; i++)
-            product *= arr[i];
+//        for(int i=0; i<arr.length; i++)
+//            product *= arr[i];
+        for(float f : arr)
+            product *= f;
         return product;
     }
     

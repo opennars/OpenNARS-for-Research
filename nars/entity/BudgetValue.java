@@ -54,6 +54,7 @@ public class BudgetValue implements Cloneable {
         quality = new ShortFloat(v.getQuality());
     }
 
+    @Override
     public Object clone() {
         return new BudgetValue(this.getPriority(), this.getDurability(), this.getQuality());
     }
@@ -129,6 +130,7 @@ public class BudgetValue implements Cloneable {
     }
     
     // full output
+    @Override
     public String toString() {
         return mark + priority.toString() + separator + durability.toString() + separator + quality.toString() + mark;
     }

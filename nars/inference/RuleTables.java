@@ -50,6 +50,8 @@ public final class RuleTables {
             case TermLink.SELF:
                 switch(bLink.getType()) {
                     case TermLink.COMPONENT:
+                        if ((task.getSentence() instanceof Goal) && (taskTerm instanceof ConjunctionSequence) && (bIndex > 0))  // more general solution?
+                            return;
                         compoundAndSelf((CompoundTerm) taskTerm, beliefTerm, true);
                         break;
                     case TermLink.COMPOUND:
@@ -409,7 +411,7 @@ public final class RuleTables {
         if (indices.length == 2) {
             inh = content;
         } else if (indices.length == 3) {
-            if ((content instanceof Implication) && (content.componentAt(0) instanceof Conjunction))
+            if ((indices[0] == 0) && (content instanceof Implication) && (content.componentAt(0) instanceof Conjunction))
                 inh = ((CompoundTerm) content.componentAt(0)).componentAt(indices[0]);
             else
                 inh = content.componentAt(indices[0]);

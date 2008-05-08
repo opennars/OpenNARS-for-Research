@@ -21,8 +21,10 @@
 
 package nars.entity;
 
-import nars.language.Term;
+import nars.language.*;
 import nars.main.*;
+import nars.io.Symbols;
+import nars.entity.TruthValue;
 
 /**
  * A Judgment is an piece of new knowledge to be absorbed.
@@ -35,7 +37,14 @@ public class Judgment extends Sentence {
         truth = t;
         base = b;
     }
-  
+    // operation executed
+    public Judgment(Goal g) {
+        content = g.cloneContent();
+        punctuation = Symbols.JUDGMENT_MARK;
+        truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
+        base = new Base();
+    }
+    
     public TruthValue getTruth() {
         return truth;
     }

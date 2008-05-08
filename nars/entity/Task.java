@@ -22,7 +22,6 @@
 package nars.entity;
 
 import nars.main.NARS;
-import nars.operation.Operator;
 import nars.language.*;
 
 /**
@@ -62,7 +61,7 @@ public class Task extends Item {
     public String toString() {
         StringBuffer s = new StringBuffer();
         if (NARS.isStandAlone())
-            s.append(super.toString());
+            s.append(super.toString() + " ");
         s.append(sentence);
         return s.toString();
     }
@@ -70,7 +69,7 @@ public class Task extends Item {
     public String toString2() {
         StringBuffer s = new StringBuffer();
         if (NARS.isStandAlone())
-            s.append(super.toString2());
+            s.append(super.toString2() + " ");
         if (sentence instanceof Question)
             s.append(sentence);
         else

@@ -74,11 +74,11 @@ public class TaskLink extends TermLink {
         Term bTerm = bLink.getTarget();
         if (bTerm.equals(targetTask.getSentence().getContent()))
             return false;
-        String key = bLink.getKey();
+        String linkKey = bLink.getKey();
         for (int i = 0; i < record.size(); i++)
-            if (key.equals((String) record.get(i)))
+            if (linkKey.equals((String) record.get(i)))
                 return false;
-        record.add(key);       // add knowledge reference to record
+        record.add(linkKey);       // add knowledge reference to record
 //        if (record.size() > RECORD_LENGTH)         // keep a constant length --- allow repeatation
 //            record.remove(0);
         return true;

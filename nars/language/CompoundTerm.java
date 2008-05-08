@@ -562,8 +562,15 @@ public abstract class CompoundTerm extends Term {
         return componentLinks;
     }
     
-    protected void prepareComponentLinks(ArrayList<TermLink> componentLinks, short type, CompoundTerm term) {
-        Term t1, t2, t3;
+    /**
+     * add CompositionalLinks into list
+     * <p>
+     * @param componentLinks the list of TermLinks
+     * @param type the type of TermLink to be built
+     * @param term the CompoundTerm for which the links are built
+     */
+    private void prepareComponentLinks(ArrayList<TermLink> componentLinks, short type, CompoundTerm term) {
+        Term t1, t2, t3;                // components at different levels
         for (int i = 0; i < term.size(); i++) {     // first level components
             t1 = term.componentAt(i);
             if (t1.isConstant())                                            // first level
@@ -575,7 +582,10 @@ public abstract class CompoundTerm extends Term {
                     t2 = ((CompoundTerm) t1).componentAt(j);
                     if (t2.isConstant()) {                                  // second level
                         if ((t1 instanceof Product) || (t1 instanceof ImageExt) || (t1 instanceof ImageInt))
-                            componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, i, j));
+                            if (type == TermLink.COMPOUND_CONDITION)
+                                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, 0, i, j));
+                            else
+                                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, i, j));
                         else
                             componentLinks.add(new TermLink(t2, type, i, j));
                     }
@@ -583,7 +593,10 @@ public abstract class CompoundTerm extends Term {
                         for (int k = 0; k < ((CompoundTerm) t2).size(); k++) {
                             t3 = ((CompoundTerm) t2).componentAt(k);
                             if (t3.isConstant()) {                           // third level
-                                componentLinks.add(new TermLink(t3, TermLink.TRANSFORM, i, j, k));
+                                if (type == TermLink.COMPOUND_CONDITION)
+                                    componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, 0, i, j, k));
+                                else
+                                    componentLinks.add(new TermLink(t3, TermLink.TRANSFORM, i, j, k));
                             }
                         }
                     }
