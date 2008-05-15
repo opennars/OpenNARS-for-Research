@@ -37,13 +37,15 @@ public abstract class Operator extends Term {
     }
     
     // required method for every operation
-    public abstract Object execute(Task task);
+    public abstract ArrayList<Task> execute(Task task);
 
     public void call(Task task) {
-        Object feedback = execute(task);
+        ArrayList<Task> feedback = execute(task);
         System.out.println("EXECUTE in " + name + " " + task.getSentence());
         Memory.executedTask(task);
-        // the feedback will be added as input tasks
+        if (feedback != null)
+            for (Task t : feedback)
+                Memory.inputTask(t);
     }
 
     // register the operators in the memory

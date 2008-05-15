@@ -22,6 +22,7 @@
 package nars.operation;
 
 import java.io.*;
+import java.util.ArrayList;
 import nars.entity.Task;
 
 /**
@@ -32,7 +33,7 @@ public class Open extends Operator {
         super(name);
     }
 
-    public Object execute(Task task) {
+    public ArrayList<Task> execute(Task task) {
 //        System.out.println("EXECUTE in " + name + " " + task);
         return null;
     }
