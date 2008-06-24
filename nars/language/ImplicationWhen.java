@@ -24,12 +24,13 @@ package nars.language;
 import java.util.*;
 import nars.io.Symbols;
 import nars.main.Memory;
+import nars.inference.*;
 
 /**
  * Temporal Implication relation, concurrent.
  */
 
-public class ImplicationWhen extends Implication {
+public class ImplicationWhen extends Implication implements Temporal {
     
     /**
      * constructor with partial values, called by make
@@ -92,7 +93,7 @@ public class ImplicationWhen extends Implication {
         return Symbols.IMPLICATION_WHEN_RELATION;
     }
 
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.WHEN;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.WHEN;
     }
 }

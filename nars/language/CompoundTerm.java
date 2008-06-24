@@ -121,9 +121,9 @@ public abstract class CompoundTerm extends Term {
                     s.equals(Symbols.CONJUNCTION_OPERATOR) ||
                     s.equals(Symbols.SEQUENCE_OPERATOR) ||
                     s.equals(Symbols.PARALLEL_OPERATOR) ||
-                    s.equals(Symbols.PAST_OPERATOR) ||
-                    s.equals(Symbols.PRESENT_OPERATOR) ||
-                    s.equals(Symbols.FUTURE_OPERATOR));
+                    s.equals(Symbols.TENSE_PAST) ||
+                    s.equals(Symbols.TENSE_PRESENT) ||
+                    s.equals(Symbols.TENSE_FUTURE));
         return isBuiltInOperator(s); // s.length() > 2
     }
         
@@ -154,13 +154,13 @@ public abstract class CompoundTerm extends Term {
             if (op.equals(Symbols.SEQUENCE_OPERATOR))
                 return ConjunctionSequence.make(arg);
             if (op.equals(Symbols.PARALLEL_OPERATOR))
-                return ConjunctionSequence.make(arg);
-            if (op.equals(Symbols.FUTURE_OPERATOR))
-                return TenseFuture.make(arg);
-            if (op.equals(Symbols.PRESENT_OPERATOR))
-                return TensePresent.make(arg);
-            if (op.equals(Symbols.PAST_OPERATOR))
-                return TensePast.make(arg);
+                return ConjunctionParallel.make(arg);
+//            if (op.equals(Symbols.TENSE_FUTURE))
+//                return TenseFuture.make(arg);
+//            if (op.equals(Symbols.TENSE_PRESENT))
+//                return TensePresent.make(arg);
+//            if (op.equals(Symbols.TENSE_PAST))
+//                return TensePast.make(arg);
         }
         if (isBuiltInOperator(op)) {
             // t = Operator.make(op, arg);
@@ -603,49 +603,6 @@ public abstract class CompoundTerm extends Term {
                 }
             }
         }
-    }
-    
-    
-    /* ---------- temporal order among components ---------- */
-    
-    public enum TemporalOrder { BEFORE, WHEN, AFTER, NONE, UNSURE }
-    
-    public static TemporalOrder temporalInference(TemporalOrder t1, TemporalOrder t2) {
-        if ((t1 == TemporalOrder.UNSURE) || (t2 == TemporalOrder.UNSURE))
-            return TemporalOrder.UNSURE;
-        if (t1 == TemporalOrder.NONE)
-            return t2;
-        if (t2 == TemporalOrder.NONE)
-            return t1;
-        if (t1 == TemporalOrder.WHEN)
-            return t2;
-        if (t2 == TemporalOrder.WHEN)
-            return t1;
-        if (t1 == t2)
-            return t1;
-        return TemporalOrder.UNSURE;
-    }
-
-    public static TemporalOrder temporalReverse(TemporalOrder t1) {
-        if (t1 == TemporalOrder.BEFORE)
-            return TemporalOrder.AFTER;
-        if (t1 == TemporalOrder.AFTER)
-            return TemporalOrder.BEFORE;
-        return t1;
-    } 
-    
-    public static TemporalOrder temporalInferenceWithFigure(TemporalOrder order1, TemporalOrder order2, int figure) {
-        switch (figure) {
-        case 11:
-            return temporalInference(temporalReverse(order1), order2);
-        case 12:
-            return temporalInference(temporalReverse(order1), temporalReverse(order2));
-        case 21:
-            return temporalInference(order1, order2);
-        case 22:
-            return temporalInference(order1, temporalReverse(order2));
-        default:
-            return TemporalOrder.UNSURE;
-        }
-    }
+    }   
 }
+

@@ -24,15 +24,17 @@ package nars.entity;
 import nars.io.Symbols;
 import nars.language.*;
 import nars.main.*;
+import nars.inference.*;
 
 /**
  * A Sentence contains a Statement, a TruthValue, and a Base list.
  *<p>
  * It is used as the premises and conclusions of all inference rules.
  */
-public abstract class Sentence {    
+public abstract class Sentence implements Cloneable {    
     protected Term content;
     protected char punctuation;
+    protected TemporalRules.Relation tense = TemporalRules.Relation.NONE;
     protected TruthValue truth = null;
     protected Base base = null;
     protected boolean input = false;            // whether it is an input sentence
@@ -46,16 +48,16 @@ public abstract class Sentence {
      * @param base The base of the truth value (for Judgment or Goal)
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Term term, char punc, TruthValue truth, Base base) {
+    public static Sentence make(Term term, char punc, TemporalRules.Relation tense, TruthValue truth, Base base) {
         if (term instanceof CompoundTerm)
             ((CompoundTerm) term).renameVariables();
         switch (punc) {
             case Symbols.JUDGMENT_MARK:
-                return new Judgment(term, punc, truth, base);
+                return new Judgment(term, punc, tense, truth, base);
             case Symbols.GOAL_MARK:
                 return new Goal(term, punc, truth, base);
             case Symbols.QUESTION_MARK:
-                return new Question(term, punc);
+                return new Question(term, punc, tense);
             default:
                 return null;
         }
@@ -69,22 +71,39 @@ public abstract class Sentence {
      * @param base The base of the truth value (for Judgment or Goal)
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Base base) {
+    public static Sentence make(Sentence oldS, Term term, TemporalRules.Relation tense, TruthValue truth, Base base) {
         if (term instanceof CompoundTerm)
             ((CompoundTerm) term).renameVariables();
         if (oldS instanceof Question)
-            return new Question(term, Symbols.QUESTION_MARK);
+            return new Question(term, Symbols.QUESTION_MARK, tense);
         if (oldS instanceof Goal)
             return new Goal(term, Symbols.GOAL_MARK, truth, base);
-        return new Judgment(term, Symbols.JUDGMENT_MARK, truth, base);
+        return new Judgment(term, Symbols.JUDGMENT_MARK, tense, truth, base);
     }
     
+    @Override
+    public Object clone() {
+        return make(content, punctuation, tense, truth, base);
+    }
+
     public Term getContent() {
         return content;
     }
 
     public Term cloneContent() {
         return (Term) content.clone();
+    }
+    
+    public void setContent(Term t) {
+        content = t;
+    }
+    
+    public TemporalRules.Relation getTense() {
+        return tense;
+    }
+
+    public void setTense(TemporalRules.Relation t) {
+        tense = t;
     }
 
     public TruthValue getTruth() {
@@ -93,6 +112,10 @@ public abstract class Sentence {
 
     public Base getBase() {
         return null;
+    }
+    
+    public void setBase(Base b) {
+        base = b;
     }
     
     // distinguish Judgment from Goal
@@ -119,10 +142,12 @@ public abstract class Sentence {
     }
     
     // display a sentence
+    @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append(content.getName());
         s.append(punctuation + " ");
+        s.append(printTense());
         if (truth != null) {
             s.append(truth.toString()); 
             if (NARS.isStandAlone())
@@ -140,6 +165,7 @@ public abstract class Sentence {
         StringBuffer s = new StringBuffer();
         s.append(content.getName());
         s.append(punctuation + " ");
+        s.append(printTense());
         if (truth != null) {
             s.append(truth.toString2()); 
             if (NARS.isStandAlone())
@@ -150,5 +176,15 @@ public abstract class Sentence {
                 s.append("BestSolution: " + bestSolution);
         }
         return s.toString();
+    }
+    
+    private String printTense() {
+        if (tense == TemporalRules.Relation.BEFORE)
+            return Symbols.TENSE_PAST + " ";
+        if (tense == TemporalRules.Relation.WHEN)
+            return Symbols.TENSE_PRESENT + " ";
+        if (tense == TemporalRules.Relation.AFTER)
+            return Symbols.TENSE_FUTURE + " ";
+        return "";
     }
 }

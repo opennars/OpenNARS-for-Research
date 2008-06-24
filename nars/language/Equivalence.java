@@ -25,6 +25,7 @@ import java.util.*;
 import nars.io.Symbols;
 import nars.entity.TermLink;
 import nars.main.Memory;
+import nars.inference.*;
 
 /**
  * A Statement about an Equivalence relation.
@@ -78,6 +79,19 @@ public class Equivalence extends Statement {
             return (Equivalence) t;
         ArrayList<Term> argument = argumentsToList(subject, predicate);
         return new Equivalence(name, argument);
+    }
+
+    public static Equivalence make(Term subject, Term predicate, TemporalRules.Relation temporalOrder) {  // to be extended to check if subject is Conjunction
+        switch (temporalOrder) {
+            case BEFORE:
+                return EquivalenceAfter.make(predicate, subject);
+            case WHEN:
+                return EquivalenceWhen.make(subject, predicate);
+            case AFTER:
+                return EquivalenceAfter.make(subject, predicate);
+            default:
+                return Equivalence.make(subject, predicate);
+        }
     }
     
     /**

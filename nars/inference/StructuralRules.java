@@ -365,13 +365,13 @@ public final class StructuralRules {
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence instanceof Question) {
-            budget = BudgetFunctions.compoundBackward(content);
+            budget = BudgetFunctions.backward(truth);
         } else {
             if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction)))
                 truth = TruthFunctions.implying(truth);
             else
                 truth = TruthFunctions.implied(truth);
-            budget = BudgetFunctions.compoundForward(sentence.getTruth(), content);
+            budget = BudgetFunctions.forward(truth);
         }
         Memory.singlePremiseTask(budget, content, truth);
     }
@@ -403,7 +403,7 @@ public final class StructuralRules {
     static void contraposition(Statement statement) {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
-        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), CompoundTerm.temporalReverse(statement.getTemporalOrder()));
+        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), TemporalRules.reverse(statement.getTemporalOrder()));
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();

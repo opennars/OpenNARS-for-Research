@@ -124,6 +124,14 @@ public final class BudgetFunctions extends UtilityFunctions {
         return new BudgetValue(priority, durability, quality);
     }
     
+    static BudgetValue update(Task task, TruthValue bTruth) {
+        TruthValue tTruth = task.getSentence().getTruth();
+        float dif = tTruth.getExpDifAbs(bTruth);
+        float priority = or(dif, task.getPriority());
+        float durability = or(dif, task.getDurability());
+        float quality = truthToQuality(bTruth);
+        return new BudgetValue(priority, durability, quality);        
+    }
     /* ----------------------- Links ----------------------- */
     
     public static BudgetValue distributeAmongLinks(BudgetValue b, int n) {
@@ -191,7 +199,7 @@ public final class BudgetFunctions extends UtilityFunctions {
         return budgetInference(truthToQuality(truth), 1);
     }
     
-    // backward inference result and adjustment
+    // different from forward?
     public static BudgetValue backward(TruthValue truth) {
         return budgetInference(truthToQuality(truth), 1);
     }

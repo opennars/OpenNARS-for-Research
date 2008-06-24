@@ -29,7 +29,7 @@ import nars.main.Memory;
 /**
  * A parallel conjunction of Statements.
  */
-public class ConjunctionParallel extends Conjunction {
+public class ConjunctionParallel extends Conjunction implements Temporal {
     
     /**
      * constructor with partial values, called by make
@@ -120,7 +120,7 @@ public class ConjunctionParallel extends Conjunction {
         return Symbols.PARALLEL_OPERATOR;
     }
 
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.WHEN;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.WHEN;
     }
 }

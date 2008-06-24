@@ -25,7 +25,7 @@ package nars.entity;
  * An item is an object that can be put into a Bag,
  * and it participates in the resource competation of the system.
  */
-public abstract class Item extends BudgetValue implements Cloneable {
+public abstract class Item extends BudgetValue {
     /**
      * The key of the Item, unique in a Bag
      */

@@ -24,11 +24,12 @@ package nars.language;
 import java.util.*;
 import nars.io.Symbols;
 import nars.main.Memory;
+import nars.inference.*;
 
 /**
  * Temporal Implication relation, predicate after subject.
  */
-public class EquivalenceAfter extends Equivalence {
+public class EquivalenceAfter extends Equivalence implements Temporal {
     
     /**
      * constructor with partial values, called by make
@@ -93,7 +94,7 @@ public class EquivalenceAfter extends Equivalence {
         return false;
     }
 
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.AFTER;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.AFTER;
     }
 }

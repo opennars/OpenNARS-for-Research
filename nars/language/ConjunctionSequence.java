@@ -29,7 +29,7 @@ import nars.main.Memory;
 /**
  * A sequential conjunction of Statements.
  */
-public class ConjunctionSequence extends Conjunction {
+public class ConjunctionSequence extends Conjunction implements Temporal {
     
     /**
      * constructor with partial values, called by make
@@ -90,7 +90,7 @@ public class ConjunctionSequence extends Conjunction {
         return false;
     }
 
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.AFTER;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.AFTER;
     }
 }

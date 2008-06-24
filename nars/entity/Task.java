@@ -23,6 +23,7 @@ package nars.entity;
 
 import nars.main.NARS;
 import nars.language.*;
+import nars.inference.TemporalRules;
 
 /**
  * A task to be processed.
@@ -43,6 +44,10 @@ public class Task extends Item {
 
     public Term getContent() {
         return sentence.getContent();
+    }
+    
+    public TemporalRules.Relation getTense() {
+        return sentence.getTense();
     }
 
     public boolean isStructual() {

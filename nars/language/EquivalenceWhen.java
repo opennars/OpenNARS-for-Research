@@ -24,12 +24,13 @@ package nars.language;
 import java.util.*;
 import nars.io.Symbols;
 import nars.main.Memory;
+import nars.inference.*;
 
 /**
  * Temporal Equivalence relation, concurrent.
  *
  */
-public class EquivalenceWhen extends Equivalence {
+public class EquivalenceWhen extends Equivalence implements Temporal {
     
     /**
      * constructor with partial values, called by make
@@ -88,7 +89,7 @@ public class EquivalenceWhen extends Equivalence {
         return Symbols.EQUIVALENCE_WHEN_RELATION;
     }
 
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.WHEN;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.WHEN;
     }
 }

@@ -75,9 +75,12 @@ public class Symbols {
     public static final String CONJUNCTION_OPERATOR = "&&";
     public static final String SEQUENCE_OPERATOR = "&/";
     public static final String PARALLEL_OPERATOR = "&|";
-    public static final String FUTURE_OPERATOR = "/>";
-    public static final String PRESENT_OPERATOR = "|>";
-    public static final String PAST_OPERATOR = "\\>";
+
+    // Tense markers
+    public static final String TENSE_MARK = ":";
+    public static final String TENSE_PAST = ":\\:";
+    public static final String TENSE_PRESENT = ":|:";
+    public static final String TENSE_FUTURE = ":/:";
 
     // built-in relations
     // length = 3

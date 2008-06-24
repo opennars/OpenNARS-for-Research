@@ -24,7 +24,7 @@ package nars.language;
 import java.util.*;
 import nars.io.Symbols;
 import nars.main.Memory;
-import nars.inference.SyllogisticRules;
+import nars.inference.*;
 
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
@@ -118,8 +118,8 @@ public class Term implements Cloneable, Comparable<Term> {
         return true;
     }
     
-    public CompoundTerm.TemporalOrder getTemporalOrder() {
-        return CompoundTerm.TemporalOrder.NONE;
+    public TemporalRules.Relation getTemporalOrder() {
+        return TemporalRules.Relation.NONE;
     }
     
     public final boolean containQueryVariable() {                           // to be revised

@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.entity;
 
 import java.util.*;
@@ -33,32 +32,33 @@ import nars.operation.*;
 import nars.storage.*;
 
 /**
- * A concept contains information directly related to a term, including directly 
+ * A concept contains information associated with a term, including directly 
  * and indirectly related tasks and beliefs.
  * <p>
- * To make sure the space will be released, the only allowed reference to a concept
- * are those in a ConceptBag. All other access go through the Term that names it.
+ * To make sure the space will be released, the only allowed reference to a concept are
+ * those in a ConceptBag. All other access go through the Term that names the concept.
  */
 public final class Concept extends Item {
     /* Constant term as the unique ID of the concept */
     private Term term;
     /* Direct Task lists (they may never be used for a Term that is not used as a Statement) */
-    private ArrayList<Judgment> directBeliefs;      // Judgments with the same content
-    private ArrayList<Goal> directGoals;            // Goals that can be directly achieved
     private Question directQuestion;                // Question that can be directly answered
+    private ArrayList<Goal> directGoals;            // Goals that can be directly achieved
+    private ArrayList<Judgment> directBeliefs;      // Judgments with the same content
     private boolean revisible = true;               // truth value of judgments can be revised
-    /* Link bags for indirect processing (always used) */
-    private ArrayList<TermLink> linkTemplates;  // templates of TermLink, only in Concepts for CompoundTerms
+    /* Link bags for indirect processing (for all concepts) */
     private TaskLinkBag taskLinks;
     private TermLinkBag termLinks;
+    /* Link templates of TermLink, only in concepts with CompoundTerm */
+    private ArrayList<TermLink> termLinkTemplates;
+    private boolean event = false;      // default
     /* Display related fields */
     private boolean showing;            // whether this concept has an active window
     private ConceptWindow window;       // (direct) content display window
-    
+
     /* ---------- constructor ---------- */
-    
     /**
-     * Constructor
+     * Constructor, called in Memory.getConcept only
      * @param tm A constant term corresponding to the concept
      */
     public Concept(Term tm) {
@@ -71,147 +71,166 @@ public final class Concept extends Item {
         taskLinks = new TaskLinkBag();
         termLinks = new TermLinkBag();
         if (tm instanceof CompoundTerm) {
-            linkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
+            termLinkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
             checkRevisibility();
+            if (tm instanceof Temporal) {
+                markEvent();
+            }
         }
         showing = false;
         window = null;
     }
-    
-    private void checkRevisibility() {
-        revisible = !(term instanceof Tense);                                   // no tense
-        if (revisible)
-            revisible = ((key.indexOf("()") < 0) && (key.indexOf("(#")) < 0);   // no dependent variable
-    }
-    
-    /* ---------- add direct information as Tasks ---------- */
-    
+
     /**
-     * New task to be directly processed in a constant time, called from Memory only
-     * Only use local information, and provide feedback in the priority value
+     * Judgments with dependent variable cannot be revised
+     */
+    private void checkRevisibility() {
+        revisible = ((key.indexOf("()") < 0) && (key.indexOf("(#")) < 0);
+    }
+
+    /**
+     * Terms in temporal compounds is event
+     */
+    private void markEvent() {
+        for (TermLink tLink : termLinkTemplates) {
+            Term target = tLink.getTarget();
+            Concept concept = Memory.termToConcept(target);
+            if (concept != null) {
+                concept.setEvent();
+            }
+        }
+    }
+
+    /* ---------- direct processing of tasks ---------- */
+    /**
+     * Directly process a new task, called in Memory.immediateProcess only
+     * Called exactly once on each task, using local information and finishing in a constant time
+     * Provide feedback in the priority value of the task
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
-        Memory.currentTask = task;
+//        Memory.currentTask = task;
         Sentence sentence = task.getSentence();
-        if (sentence instanceof Question)
-            processQuestion(task);
-        else if (sentence instanceof Goal)
-            processGoal(task);
-        else
-            processJudgment(task);
+        if (sentence instanceof Question) {
+            processQuestion((Question) sentence, task);
+        } else if (sentence instanceof Goal) {
+            processGoal((Goal) sentence, task);
+        } else {
+            processJudgment((Judgment) sentence, task);
+        }
         Memory.activateConcept(this, task.getBudget());
-        if (showing)
+        if (showing) {
             window.post(displayContent());
+        }
     }
-    
+
     /**
-     * New question to be directly answered by existing beliefs
+     * To answer a question by existing beliefs
+     * @param ques The question to be answered
      * @param task The task to be processed
      */
-    private void processQuestion(Task task) {
-        if (directQuestion == null)
-            directQuestion = (Question) task.getSentence();         // remember it
-        for (int i = 0; i < directBeliefs.size(); i++) {
-            Judgment judg = directBeliefs.get(i);
+    private void processQuestion(Question ques, Task task) {
+        if (directQuestion == null) { // keep the existing one for answer information
+            directQuestion = ques;
+        }
+        for (Judgment judg : directBeliefs) {
             MatchingRules.trySolution(directQuestion, judg, task);    // look for better answer
         }
     }
-    
+
     /**
-     * New judgment
+     * Direct processing a new goal
+     * @param goal The goal to be processed
      * @param task The task to be processed
      */
-    private void processJudgment(Task task) {
-        Judgment judg = (Judgment) task.getSentence();
-        if (revisible)
-            reviseTable(task, directBeliefs);
-        else
-            updateTable(task);
+    private void processGoal(Goal goal, Task task) {
+        if (revisible) {
+            reviseTable(goal, task, directGoals);       // revise desire
+        }
+        for (Judgment judg : directBeliefs) {
+            MatchingRules.trySolution(goal, judg, task);    // reality check
+        }
+        float desire = 2 * goal.getTruth().getExpectation() - 1;
+        float qua = (desire < 0) ? 0 : desire;  // decision making
+        task.setQuality(qua);
+        if (task.aboveThreshold()) {
+            Term content = goal.getContent();
+            if (content instanceof Inheritance) {
+                Term pred = (((Inheritance) content).getPredicate());
+                if (pred instanceof Operator) {
+                    ((Operator) pred).call(task);   // directly archiving
+                    return;
+                }
+            }
+        }
+        if (task.getPriority() > 0) {
+            addToTable(goal, directGoals, Parameters.MAXMUM_GOALS_LENGTH);   // indirectly archiving
+        }
+    }
+
+    /**
+     * To accept a new judgment as belief
+     * This method must be put as the last of the three orverloading methods
+     * @param s The judgment to be accepted
+     * @param task The task to be processed
+     */
+    private void processJudgment(Judgment judg, Task task) {
+        if (revisible) {
+            reviseTable(judg, task, directBeliefs);
+        }
         if (task.getPriority() > 0) {               // if still valuable --- necessary???
-            if (directQuestion != null)
+            if (directQuestion != null) {
                 MatchingRules.trySolution(directQuestion, judg, task);
-            for (int i = 0; i < directGoals.size(); i++) {
-                Goal goal = directGoals.get(i);
+            }
+            for (Goal goal : directGoals) {
                 MatchingRules.trySolution(goal, judg, task);
             }
             addToTable(judg, directBeliefs, Parameters.MAXMUM_BELIEF_LENGTH);
         }
     }
-    
+
     /**
-     * Pre-processing a new goal
+     * Revise existing beliefs or goals
      * @param task The task to be processed
+     * @param table The table to be revised
      */
-    private void processGoal(Task task) {
-        Goal goal = (Goal) task.getSentence();
-        // (1) check whether the goal is really desired
-        if (revisible)
-            reviseTable(task, directGoals);               
-        else
-            updateTable(task);
-    // think more if not sure
-        // (2) check whether the goal is already relaized
-        for (int i = 0; i < directBeliefs.size(); i++) {
-            Judgment judg = directBeliefs.get(i);
-            MatchingRules.trySolution(goal, judg, task);  
-        }
-        // (3) decide whether to actually pursue the goal
-        decisionMaking(task);
-        if (task.getPriority() > 0) {              // if still valuable
-            addToTable(goal, directGoals, Parameters.MAXMUM_GOALS_LENGTH);         // with the feedbacks
-        }
-    }
-    
-    /**
-     * Decide whether the goal will be actually pursued by setting is quality value
-     * @param task The task to be processed
-     */
-    private void decisionMaking(Task task) {
-        Goal goal = (Goal) task.getSentence();
-        // for executable operations
-        if (task.aboveThreshold()) {
-            Term content = goal.getContent();
-            if (content instanceof Inheritance) {
-                Term pred = (((Inheritance) content).getPredicate()); 
-                if (pred instanceof Operator) {
-                    ((Operator) pred).call(task);
-                    return;
+    private void reviseTable(Judgment newSentence, Task task, ArrayList table) {
+        Judgment belief;
+        for (int i = table.size() - 1; i >= 0; i--) {
+            belief = (Judgment) table.get(i);
+            if ((newSentence.getTense() == belief.getTense()) && belief.noOverlapping(newSentence)) {
+                if (isUpdate(newSentence, belief)) {
+                    MatchingRules.update(task, belief);
+                    table.remove(i);
+                } else {
+                    MatchingRules.revision(task, belief, false);
                 }
             }
         }
-        // for non-executable goals
-    // to be replaced by plausibility
-        float desire = 2 * goal.getTruth().getExpectation() - 1;
-        float qua = (desire < 0) ? 0 : desire;
-        task.setQuality(qua);
     }
-    
-    // revise previous beliefs or goals
-    private void reviseTable(Task task, ArrayList table) {
-        Judgment belief;
-        for (int i = 0; i < table.size(); i++) {    // call select()
-            belief = (Judgment) table.get(i);
-            if (belief.noOverlapping((Judgment) task.getSentence()))
-                MatchingRules.revision(task, belief, false);
+
+    private boolean isUpdate(Judgment newBelief, Judgment oldBelief) {
+        if (oldBelief.getTense() != TemporalRules.Relation.WHEN) {
+            return false;
         }
+        if (newBelief.getTruth().getExpDifAbs(oldBelief.getTruth()) < 0.5) {
+            return false;
+        }
+        if ((newBelief.getBase().latest() <= oldBelief.getBase().latest())) {
+            return false;
+        }
+        return true;
     }
-    
-    // to be rewritten
-    private void updateTable(Task task) {
-//        Judgment belief;
-//        for (int i = 0; i < directBeliefs.size(); i++) {    // call select()
-//            belief = directBeliefs.get(i);
-//            if (((Judgment) task.getSentence()).getBase().latest() > belief.getBase().latest())
-//                MatchingRules.update(task, belief);
-//        }
-    }
-    
-    // add the Task as a new direct Belief or Goal, remove redundant ones
-    // table sorted by rank
+
+    /**
+     * Add a new belief or goal into the table
+     * Sort the beliefs/goals by rank, and remove redundant or low rank one
+     * @param newJudgment The judgment to be processed
+     * @param table The table to be revised
+     * @param capacity The capacity of the table
+     */
     private void addToTable(Judgment newJudgment, ArrayList table, int capacity) {
         float rank1 = BudgetFunctions.rankBelief(newJudgment);    // for the new belief
-        Base base1 = newJudgment.getBase();
         Judgment judgment2;
         float rank2;
         int i;
@@ -219,20 +238,130 @@ public final class Concept extends Item {
             judgment2 = (Judgment) table.get(i);
             rank2 = BudgetFunctions.rankBelief(judgment2); // previous belief
             if (rank1 >= rank2) {
-                if (newJudgment.equivalentTo(judgment2))
+                if (newJudgment.equivalentTo(judgment2)) {
                     return;
+                }
                 table.add(i, newJudgment);
                 break;
             }
         }
-        if (table.size() == capacity)
+        if (table.size() == capacity) {
             table.remove(capacity - 1);
-        else if (i == table.size())
+        } else if (i == table.size()) {
             table.add(newJudgment);
+        }
     }
 
-    // return a piece of Belief to be used with the task
-    // get the first qualified one
+    /* ---------- insert Links for indirect processing ---------- */
+    /**
+     * Insert a TaskLink into the TaskLink bag, and build/activate the TermLinks
+     * called only from Memory.continuedProcess
+     * @param taskLink The termLink to be inserted
+     */
+    public void insertTaskLink(TaskLink taskLink) {
+        BudgetValue budget = taskLink.getBudget();
+        taskLinks.putIn(taskLink);
+        Memory.activateConcept(this, budget);       // activate the concept
+        if (term instanceof CompoundTerm) {
+            buildTermLinks(budget);             // always recognize structure
+        }
+    }
+
+    /**
+     * Recursively build TermLinks between a compound and its components
+     * @param budget The budget of the task
+     */
+    private void buildTermLinks(BudgetValue budget) {
+        Term t;
+        Concept c;
+        TermLink cLink1, cLink2;
+        BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
+        if (subBudget.aboveThreshold()) {
+            for (TermLink link : termLinkTemplates) {
+                t = link.getTarget();
+                c = Memory.getConcept(t);
+                cLink1 = new TermLink(t, link, subBudget);
+                insertTermLink(cLink1);   // this termLink to that
+                cLink2 = new TermLink(term, link, subBudget);
+                c.insertTermLink(cLink2);   // that termLink to this
+                if (t instanceof CompoundTerm) {
+                    c.buildTermLinks(subBudget);
+                }
+            }
+        }
+    }
+
+    /**
+     * Insert a TermLink into the TermLink bag, called from buildTermLinks only
+     * @param termLink The termLink to be inserted
+     */
+    public void insertTermLink(TermLink termLink) {
+        termLinks.putIn(termLink);
+        Memory.activateConcept(this, termLink.getBudget());
+    }
+
+    /* ---------- access local information ---------- */
+    /**
+     * Return the assocated term, called from Memory only
+     * @return The assocated term
+     */
+    public Term getTerm() {
+        return term;
+    }
+
+    /**
+     * Distinguish events from non-events
+     * @return Whether the concept is an event
+     */
+    public boolean isEvent() {
+        return event;
+    }
+
+    /**
+     * Mark the concept as an event
+     */
+    public void setEvent() {
+        event = true;
+    }
+
+    /**
+     * Return a string representation of the concept, called in ConceptBag only
+     * @return The concept name, with budget in the full version
+     */
+    @Override
+    public String toString() {  // called from concept bag
+        if (NARS.isStandAlone()) {
+            return (super.toString2() + " " + key);
+        } else {
+            return key;
+        }
+    }
+
+    /**
+     * Return the quality of the concept
+     * @return The quality value
+     */
+    @Override
+    public float getQuality() {
+        // re-calculate-and-set? consider syntactic complexity?
+        return UtilityFunctions.and(taskLinks.averagePriority(), termLinks.averagePriority());
+    }
+
+    /**
+     * Return the templates for TermLinks, only called in Memory.continuedProcess
+     * @return The template list
+     */
+    public ArrayList<TermLink> getTermLinkTemplates() {
+        return termLinkTemplates;
+    }
+
+    /**
+     * Select a belief to interact with the given task in inference
+     * only called in RuleTables.reason
+     * get the first qualified one
+     * @param task The selected task
+     * @return The selected belief
+     */
     public Judgment getBelief(Task task) {
         Sentence sentence = task.getSentence();
         Judgment belief;
@@ -245,54 +374,16 @@ public final class Concept extends Item {
         }
         return null;
     }
-    
-    /* ---------- insert relational information as Links ---------- */
-    
-    public ArrayList<TermLink> getTermLinks() {
-        return linkTemplates;
-    }
-    
-    // insert TaskLink into the task base, called from Memory only
-    public void insertTaskLink(TaskLink taskLink) {
-        BudgetValue budget = taskLink.getBudget();
-        taskLinks.putIn(taskLink);
-        Memory.activateConcept(this, budget);       // activate the concept
-        if (term instanceof CompoundTerm)
-            buildTermLinks(budget);
-    }
-    
-    private void buildTermLinks(BudgetValue budget) {
-        Term t;
-        Concept c;
-        TermLink cLink1, cLink2;
-        BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, linkTemplates.size());
-        if (!subBudget.aboveThreshold())
-            return;
-        for(TermLink link : linkTemplates) {
-            t = link.getTarget();
-            c = Memory.getConcept(t);
-            cLink1 = new TermLink(t, link, subBudget);
-            insertTermLink(cLink1);   // this link to that
-            cLink2 = new TermLink(term, link, subBudget);
-            c.insertTermLink(cLink2);   // that link to this
-            if (t instanceof CompoundTerm)
-                c.buildTermLinks(subBudget);
-        }
-    }
-    
-    // insert TermLink into the Belief base, called from Memory only
-    public void insertTermLink(TermLink cLink) {
-        termLinks.putIn(cLink);
-        Memory.activateConcept(this, cLink.getBudget());
-    }
-    
+
     /* ---------- main loop ---------- */
-    
-    // a single step of syllogism within a concept
+    /**
+     * An atomic step in a concept, only called in Memory.processConcept
+     */
     public void fire() {
         TaskLink tLink = (TaskLink) taskLinks.takeOut();
-        if (tLink == null)
+        if (tLink == null) {
             return;
+        }
         Memory.currentTaskLink = tLink;
         Memory.currentBeliefLink = null;
 //        if (NARS.isStandAlone())
@@ -306,38 +397,20 @@ public final class Concept extends Item {
         }
         TermLink mLink = (TermLink) termLinks.takeOut(tLink);  // to avoid repeated syllogism
         if (mLink != null) {
-            if (NARS.isStandAlone())
+            if (NARS.isStandAlone()) {
                 Record.append(" * Selected TermLink: " + mLink + "\n");
+            }
             Memory.currentBeliefLink = mLink;
             RuleTables.reason(tLink, mLink);
             termLinks.putBack(mLink);
         }
         taskLinks.putBack(tLink);
     }
-    
-    /* ---------- utility ---------- */
-    
-    public Term getTerm() {     // called from Memory only
-        return term;
-    }
-    
-    
-    @Override
-    public String toString() {  // called from concept bag
-        if (NARS.isStandAlone())
-            return (super.toString2() + " " + key);
-        else
-            return key;
-    }
-    
-    @Override
-    public float getQuality() {         // re-calculate-and-set? consider syntactic complexity?
-        return UtilityFunctions.and(taskLinks.averagePriority(), termLinks.averagePriority());
-    }
-    
+
     /* ---------- display ---------- */
-    
-    // to display contents and links, called from ConceptWindow only
+    /**
+     * Start displaying contents and links, called from ConceptWindow only
+     */
     public void startPlay() {
         window = new ConceptWindow(this);
         showing = true;
@@ -345,33 +418,44 @@ public final class Concept extends Item {
         taskLinks.startPlay("Task Links in " + term);
         termLinks.startPlay("Term Links in " + term);
     }
-    
-    // called from ConceptWindow only
+
+    /**
+     * Resume display, called from ConceptWindow only
+     */
     public void play() {
         showing = true;
         window.post(displayContent());
     }
-    
-    // called from ConceptWindow only
+
+    // 
+    /**
+     * Stop display, called from ConceptWindow only
+     */
     public void stop() {
         showing = false;
     }
-    
-    // display direct belief, questions, and goals
+
+    /**
+     * Collect direct belief, questions, and goals for display
+     * @return String representation of direct content
+     */
     private String displayContent() {
         StringBuffer buffer = new StringBuffer();
         if (directBeliefs.size() > 0) {
             buffer.append("  Beliefs:\n");
-            for (int i = 0; i < directBeliefs.size(); i++)
+            for (int i = 0; i < directBeliefs.size(); i++) {
                 buffer.append(directBeliefs.get(i) + "\n");
+            }
         }
         if (directGoals.size() > 0) {
             buffer.append("\n  Goals:\n");
-            for (int i = 0; i < directGoals.size(); i++)
+            for (int i = 0; i < directGoals.size(); i++) {
                 buffer.append(directGoals.get(i) + "\n");
+            }
         }
-        if (directQuestion != null)
+        if (directQuestion != null) {
             buffer.append("\n  Question:\n" + directQuestion + "\n");
+        }
         return buffer.toString();
     }
 }

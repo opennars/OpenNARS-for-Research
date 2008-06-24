@@ -23,6 +23,7 @@ package nars.language;
 
 import java.util.*;
 import nars.io.*;
+import nars.inference.*;
 
 /**
  * A statement is a compound term, consisting of a subject, a predicate,
@@ -130,26 +131,26 @@ public abstract class Statement extends CompoundTerm {
      * @param order The temporal order of the statement
      * @return The Statement built
      */
-    public static Statement make(Statement statement, Term sub, Term pred, CompoundTerm.TemporalOrder order) {
-        if (order == CompoundTerm.TemporalOrder.UNSURE)
+    public static Statement make(Statement statement, Term sub, Term pred, TemporalRules.Relation order) {
+        if (order == TemporalRules.Relation.UNSURE)
             return null;
-        if (order == CompoundTerm.TemporalOrder.NONE)
+        if (order == TemporalRules.Relation.NONE)
             return make(statement, sub, pred);
-        if (order == CompoundTerm.TemporalOrder.AFTER) {
+        if (order == TemporalRules.Relation.AFTER) {
             if (statement instanceof Implication)
                 return ImplicationAfter.make(sub, pred);
             if (statement instanceof Equivalence)
                 return EquivalenceAfter.make(sub, pred);
             return null;
         }
-        if (order == CompoundTerm.TemporalOrder.WHEN) {
+        if (order == TemporalRules.Relation.WHEN) {
             if (statement instanceof Implication)
                 return ImplicationWhen.make(sub, pred);
             if (statement instanceof Equivalence)
                 return EquivalenceWhen.make(sub, pred);
             return null;
         }
-        if (order == CompoundTerm.TemporalOrder.BEFORE) {
+        if (order == TemporalRules.Relation.BEFORE) {
             if (statement instanceof Implication)
                 return ImplicationBefore.make(sub, pred);
             if (statement instanceof Equivalence)
@@ -167,27 +168,27 @@ public abstract class Statement extends CompoundTerm {
      * @param order The temporal order of the statement
      * @return The Statement built
      */
-    public static Statement makeSym(Statement statement, Term sub, Term pred, CompoundTerm.TemporalOrder order) {
-        if (order == CompoundTerm.TemporalOrder.UNSURE)
+    public static Statement makeSym(Statement statement, Term sub, Term pred, TemporalRules.Relation order) {
+        if (order == TemporalRules.Relation.UNSURE)
             return null;
-        if (order == CompoundTerm.TemporalOrder.NONE) {
+        if (order == TemporalRules.Relation.NONE) {
             if (statement instanceof Inheritance)
                 return Similarity.make(sub, pred);
             if (statement instanceof Implication)
                 return Equivalence.make(sub, pred);
             return null;
         }
-        if (order == CompoundTerm.TemporalOrder.AFTER) {
+        if (order == TemporalRules.Relation.AFTER) {
             if (statement instanceof Implication)
                 return EquivalenceAfter.make(sub, pred);
             return null;
         }
-        if (order == CompoundTerm.TemporalOrder.WHEN) {
+        if (order == TemporalRules.Relation.WHEN) {
             if (statement instanceof Implication)
                 return EquivalenceWhen.make(sub, pred);
             return null;
         }
-        if (order == CompoundTerm.TemporalOrder.BEFORE) {
+        if (order == TemporalRules.Relation.BEFORE) {
             if (statement instanceof Implication)
                 return EquivalenceAfter.make(pred, sub);
             return null;

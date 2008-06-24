@@ -25,22 +25,26 @@ import nars.language.*;
 import nars.main.*;
 import nars.io.Symbols;
 import nars.entity.TruthValue;
+import nars.inference.*;
 
 /**
  * A Judgment is an piece of new knowledge to be absorbed.
  */
 public class Judgment extends Sentence {
     
-    public Judgment(Term term, char punc, TruthValue t, Base b) {
+    public Judgment(Term term, char punc, TemporalRules.Relation s, TruthValue t, Base b) {
         content = term;
         punctuation = punc;
+        tense = s;
         truth = t;
         base = b;
     }
+    
     // operation executed
     public Judgment(Goal g) {
         content = g.cloneContent();
         punctuation = Symbols.JUDGMENT_MARK;
+        tense = TemporalRules.Relation.BEFORE;
         truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
         base = new Base();
     }

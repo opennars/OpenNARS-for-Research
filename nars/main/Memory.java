@@ -26,7 +26,7 @@ import nars.language.*;
 import nars.operation.Operator;
 import nars.storage.*;
 import nars.io.*;
-import nars.inference.BudgetFunctions;
+import nars.inference.*;
 
 /**
  * The memory of the system.
@@ -48,7 +48,7 @@ public class Memory {
      */
     private static ArrayList<Task> newTasks;
     /**
-     * New tasks to be processed in the near future.
+     * New tasks with novel composed concepts, to be processed in the near future.
      */
     private static TaskBag taskBuffer;
     /* ---------- global variables used to reduce method arguments ---------- */
@@ -73,6 +73,7 @@ public class Memory {
      */
     public static Judgment currentBelief;
     public static Base currentBase;
+    public static TemporalRules.Relation currentTemporalRelation;
 
     /* ---------- initialization ---------- */
     /**
@@ -89,7 +90,8 @@ public class Memory {
 
     /* ---------- access utilities ---------- */
     /**
-     * Get a Term for a given name of a Concept or Operator, called in StringParser and the make methods of compound terms.
+     * Get a Term for a given name of a Concept or Operator, 
+     * called in StringParser and the make methods of compound terms.
      * @param name the name of a concept or operator
      * @return a Term or null (if no Concept/Operator has this name)
      */
@@ -169,8 +171,9 @@ public class Memory {
      */
     public static void inputTask(String str) {
         Task task = StringParser.parseTask(new StringBuffer(str));       // the only place to call StringParser
-        if (task != null)
+        if (task != null) {
             inputTask(task);
+        }
     }
 
     /**
@@ -215,10 +218,6 @@ public class Memory {
      */
     public static void executedTask(Task task) {   // called by the inference rules
         Record.append("!!! Executed: " + task.getSentence() + "\n");
-//        float budget = task.getBudget().singleValue();
-//        float minSilent = Center.mainWindow.silentW.value() / 100.0f;
-//        if (budget > minSilent)
-//            report(task.getSentence(), false);
         Goal g = (Goal) task.getSentence();
         Judgment j = new Judgment(g);
         Task newTask = new Task(j, task.getBudget());
@@ -250,7 +249,7 @@ public class Memory {
      * @param truth The truth value of the new task
      */
     public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
-        Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, Memory.currentBase);
+        Sentence newSentence = Sentence.make(currentTask.getSentence(), content, currentTemporalRelation, truth, currentBase);
         Task newTask = new Task(newSentence, budget);
         derivedTask(newTask);
     }
@@ -263,21 +262,22 @@ public class Memory {
      */
     public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, truth, sentence.getBase());
+        Sentence newSentence = Sentence.make(sentence, content, sentence.getTense(), truth, sentence.getBase());
         Task newTask = new Task(newSentence, budget);
         newTask.setStructual();
         derivedTask(newTask);
     }
 
     /**
-     * Shared final operations by all single-premise rules, called in MatchingRules
+     * Convert jusgment into different relation, called in MatchingRules
      * @param budget The budget value of the new task
      * @param truth The truth value of the new task
      */
-    public static void singlePremiseTask(TruthValue truth, BudgetValue budget) {
+    public static void convertedJudgment(TruthValue truth, BudgetValue budget) {
         Term content = Memory.currentTask.getContent();
+        TemporalRules.Relation tense = Memory.currentBelief.getTense();
         Base base = Memory.currentBelief.getBase();
-        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, base);
+        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, tense, truth, base);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructual();
         derivedTask(newTask);
@@ -303,6 +303,7 @@ public class Memory {
             task = (Task) newTasks.remove(0);
             if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) // new input or existing concept
             {
+                currentTask = task;
                 immediateProcess(task);
             } // immediate process
             else {
@@ -359,34 +360,29 @@ public class Memory {
         TaskLink tLink;
         Concept localConcept = null;                      // local Concept
         BudgetValue budget = task.getBudget();
-        if (content.isConstant()) {
-            localConcept = getConcept(content);
-            tLink = new TaskLink(task, null, budget);   // link type SELF
-            localConcept.insertTaskLink(tLink);
-        }
+        localConcept = getConcept(content);
+        tLink = new TaskLink(task, null, budget);   // link type SELF
+        localConcept.insertTaskLink(tLink);
         if (content instanceof CompoundTerm) {
             Term componentTerm;                     // componentTerm term
             Concept componentConcept;               // componentTerm concept
-            ArrayList<TermLink> termLinks = (localConcept != null) ? localConcept.getTermLinks()
+            ArrayList<TermLink> termLinks = (localConcept != null) ? localConcept.getTermLinkTemplates()
                     : ((CompoundTerm) content).prepareComponentLinks();  // use saved
             BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
-            if (!subBudget.aboveThreshold()) {
-                return;
-            }
-            for (int i = 0; i < termLinks.size(); i++) {
-                TermLink mLink = termLinks.get(i);
-                componentTerm = mLink.getTarget();
-                componentConcept = getConcept(componentTerm);
-                if (task.isStructual() && (mLink.getType() == TermLink.TRANSFORM)) // avoid circular transform
-                {
-                    return;
+            if (subBudget.aboveThreshold()) {
+                for (int i = 0; i < termLinks.size(); i++) {
+                    TermLink mLink = termLinks.get(i);
+                    componentTerm = mLink.getTarget();
+                    componentConcept = getConcept(componentTerm);
+                    if (task.isStructual() && (mLink.getType() == TermLink.TRANSFORM)) { // avoid circular transform
+                        return;
+                    }
+                    if ((content instanceof ConjunctionSequence) && (i > 0)) { // only link to the first component
+                        return;
+                    }
+                    tLink = new TaskLink(task, mLink, subBudget);
+                    componentConcept.insertTaskLink(tLink);               // componentTerm link to task                }
                 }
-                if ((content instanceof ConjunctionSequence) && (i > 0)) // only link to the first component
-                {
-                    return;
-                }
-                tLink = new TaskLink(task, mLink, subBudget);
-                componentConcept.insertTaskLink(tLink);               // componentTerm link to task                }
             }
         }
     }

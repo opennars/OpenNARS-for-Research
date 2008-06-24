@@ -123,6 +123,7 @@ public class BudgetValue implements Cloneable {
     public float singleValue() {
 //        return (priority.getValue() + quality.getValue()) * durability.getValue() / 2.0f;
         return UtilityFunctions.aveAri(priority.getValue(), durability.getValue(), quality.getValue());
+//        return UtilityFunctions.and(priority.getValue(), durability.getValue(), quality.getValue());
     }
     
     public boolean aboveThreshold() {
