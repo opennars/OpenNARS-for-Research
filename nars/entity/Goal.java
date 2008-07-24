@@ -16,20 +16,29 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.entity;
 
-import nars.language.Term;
 import nars.inference.TemporalRules;
+import nars.language.Term;
 
 /**
  * A Goal is an event to be realized, and may conain query variables
  */
 public class Goal extends Judgment {
-    public Goal(Term term, char punc, TruthValue t, Base b) {
-        super(term, punc, TemporalRules.Relation.NONE, t, b);
+    /**
+     * Constructor
+     * <p>
+     * A goal has no tense
+     * @param term The content
+     * @param punc The punctuation
+     * @param t The desire (truth) value
+     * @param s The stamp
+     */
+    public Goal(Term term, char punc, TruthValue t, Stamp s) {
+        super(term, punc, TemporalRules.Relation.NONE, t, s);
     }
 }
 

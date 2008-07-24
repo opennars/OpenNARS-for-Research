@@ -16,9 +16,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.storage;
 
 import nars.entity.*;
@@ -26,30 +25,40 @@ import nars.gui.MainWindow;
 import nars.main.Parameters;
 
 /**
- * Contains CompositionLinks to relevant Terms.
+ * Contains TermLinks to relevant (compound or component) Terms.
  */
 public class TermLinkBag extends Bag<TermLink> {
-
-    private static final int maxTakeOut = Parameters.MAX_TAKE_OUT_K_LINK;
-    
+    /**
+     * Get the (constant) capacity of TermLinkBag
+     * @return The capacity of TermLinkBag
+     */
     protected int capacity() {
-        return Parameters.BELIEF_BAG_SIZE;
+        return Parameters.TERM_LINK_BAG_SIZE;
     }
-    
+
+    /**
+     * Get the (adjustable) forget rate of TermLinkBag
+     * @return The forget rate of TermLinkBag
+     */
     protected int forgetRate() {
         return MainWindow.forgetBW.value();
     }
-    
-    // replace defualt to prevent repeated inference
-    public TermLink takeOut(TaskLink tLink) {
-        for (int i = 0; i < maxTakeOut; i++) {
-            TermLink bLink = takeOut();
-            if (bLink == null)
+
+    /**
+     * Replace defualt to prevent repeated inference, by checking TaskLink
+     * @param taskLink The selected TaskLink
+     * @return The selected TermLink
+     */
+    public TermLink takeOut(TaskLink taskLink) {
+        for (int i = 0; i < Parameters.MAX_MATCHED_TERM_LINK; i++) {
+            TermLink termLink = takeOut();
+            if (termLink == null) {
                 return null;
-            if (tLink.novel(bLink)) {
-                return bLink;
             }
-            putBack(bLink);
+            if (taskLink.novel(termLink)) {
+                return termLink;
+            }
+            putBack(termLink);
         }
         return null;
     }

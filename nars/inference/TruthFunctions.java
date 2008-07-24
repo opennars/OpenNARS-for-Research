@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.inference;
@@ -24,23 +24,12 @@ package nars.inference;
 import nars.entity.TruthValue;
 
 /**
- * All truth value functions used in inference rules 
+ * All truth-value (and desire-value) functions used in inference rules 
  */
 public final class TruthFunctions extends UtilityFunctions {
     
-    /* ----- Single Argument Functions, called in MatchingRules and StructuralRules ----- */
+    /* ----- Single argument functions, called in MatchingRules ----- */
 
-    /**
-     * {A} |- (--A)
-     * @param v1 Truth value of the premise
-     * @return Truth value of the conclusion
-     */
-    static TruthValue negation(TruthValue v1) {
-        float f = 1 - v1.getFrequency();
-        float c = v1.getConfidence();
-        return new TruthValue(f, c);
-    }
-    
     /**
      * {<A ==> B>} |- <B ==> A>
      * @param v1 Truth value of the premise
@@ -52,6 +41,19 @@ public final class TruthFunctions extends UtilityFunctions {
         float w = and(f1, c1);
         float c = w2c(w);
         return new TruthValue(1, c);
+    }
+    
+    /* ----- Single argument functions, called in StructuralRules ----- */
+
+    /**
+     * {A} |- (--A)
+     * @param v1 Truth value of the premise
+     * @return Truth value of the conclusion
+     */
+    static TruthValue negation(TruthValue v1) {
+        float f = 1 - v1.getFrequency();
+        float c = v1.getConfidence();
+        return new TruthValue(f, c);
     }
     
     /**
@@ -99,8 +101,17 @@ public final class TruthFunctions extends UtilityFunctions {
     static TruthValue negImply(TruthValue v1) {
         return negation(implying(v1));
     }
-    
-    /* -------------------- called in MatchingRules -------------------- */
+        
+    /**
+     * Make temporal hypothesis
+     * @param v1 Truth value of the premise
+     * @return Truth value of the conclusion
+     */
+    static TruthValue temporalInduction(TruthValue v1) {
+        return implied(v1);
+    }
+
+    /* ----- double argument functions, called in MatchingRules ----- */
     
     /**
      * {<S ==> P>, <S ==> P>} |- <S ==> P>
@@ -120,7 +131,7 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
     
-    /* -------------------- called in SyllogisticRules -------------------- */
+    /* ----- double argument functions, called in SyllogisticRules ----- */
     
     /**
      * {<S ==> M>, <M ==> P>} |- <S ==> P>
@@ -231,10 +242,14 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
     
-    // -------------------- desire rules -------------------- //
+    /* ----- desire-value functions, called in SyllogisticRules ----- */
     
-    // strong backword inference on goals
-    // called in SyllogisticRules and HighOrderRules
+    /**
+     * A function specially designed for desire value [To be refined]
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
     static TruthValue desireStrong(TruthValue v1, TruthValue v2) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
@@ -245,8 +260,12 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
     
-    // weak backword inference on goals
-    // called in SyllogisticRules and HighOrderRules
+    /**
+     * A function specially designed for desire value [To be refined]
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
     static TruthValue desireWeak(TruthValue v1, TruthValue v2) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
@@ -257,19 +276,28 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
     
-    // strong backword inference on goals
-    // called in HighOrderRules only
+    /**
+     * A function specially designed for desire value [To be refined]
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
     static TruthValue desireDed(TruthValue v1, TruthValue v2) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = and(f1, f2);
-        float c = and(f, c1, c2);
+        float c = and(c1, c2);
         return new TruthValue(f, c);
     }
     
-    // called in HighOrderRules only
+    /**
+     * A function specially designed for desire value [To be refined]
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
     static TruthValue desireInd(TruthValue v1, TruthValue v2) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
@@ -280,7 +308,7 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f1, c);
     }
     
-    /* -------------------- called in CompositionalRules -------------------- */
+    /* ----- double argument functions, called in CompositionalRules ----- */
     
     /**
      * {<M --> S>, <M <-> P>} |- <M --> (S|P)>

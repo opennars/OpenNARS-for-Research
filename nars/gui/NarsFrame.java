@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.gui;
@@ -35,6 +35,8 @@ public abstract class NarsFrame extends Frame {
     static final Color MULTIPLE_WINDOW_COLOR = new Color(100, 220, 100);
     /** Color for the background of the text components that are read-only */
     static final Color DISPLAY_BACKGROUND_COLOR = new Color(200, 230, 220);
+    /** Color for the background of the text components that are being saved into a file */
+    static final Color SAVING_BACKGROUND_COLOR = new Color(216, 216, 128);
     /** Font for NARS GUI */
     static final Font NarsFont = new Font("Helvetica", Font.PLAIN, 11);
     /** Message for unimplemented functions */
@@ -44,6 +46,7 @@ public abstract class NarsFrame extends Frame {
     NarsFrame() {
         super();
     }
+    
     /**
      * Constructor with title and font setting
      * @param title The title displayed by the window

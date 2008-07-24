@@ -16,27 +16,27 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.main;
 
 import java.applet.*;
 
 /**
- * The main class of the poject.
+ * The main class of the project.
  * <p>
- * Define an application with full funcationality and a demonstration applet with limited functionality.
+ * Define an application with full funcationality and an applet with partial functionality.
  * <p>
  * Manage the internal working thread. Communicate with Center only.
  */
 public class NARS extends Applet implements Runnable {
     /**
-     * The information about the author, version, and copyright of the project.
+     * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.0.0     January 2008  \n";
+            "     Open-NARS     Version 1.1.0     July 2008  \n";
     /**
-     * The project website.
+     * The project websites.
      */
     public static final String WEBSITE =
       " Open-NARS website:  http://code.google.com/p/open-nars/ \n" +
@@ -53,8 +53,7 @@ public class NARS extends Applet implements Runnable {
     /**
      * The entry point of the standalone application.
      * <p>
-     * Create an instance of the class, then run the init and start methods,
-     * shared by the application and the applet.
+     * Create an instance of the class, then run the init and start methods.
      * @param args no arguments are used
      */
     public static void main(String args[]) {
@@ -67,13 +66,15 @@ public class NARS extends Applet implements Runnable {
     /**
      * Initialize the system at the control center.
      */
+    @Override
     public void init() {
         Center.start();
     }
        
     /**
-     * start the thread if necessary, called when the page containing the applet first appears on the screen.
+     * Start the thread if necessary, called when the page containing the applet first appears on the screen.
      */
+    @Override
     public void start() {
         if (narsThread == null) {
             narsThread = new Thread(this);
@@ -82,8 +83,9 @@ public class NARS extends Applet implements Runnable {
     }
     
     /**
-     * The stop() method is called when the page containing the applet is no longer on the screen.
+     * Called when the page containing the applet is no longer on the screen.
      */
+    @Override
     public void stop() {
         narsThread = null;
     }
@@ -95,11 +97,10 @@ public class NARS extends Applet implements Runnable {
         Thread thisThread = Thread.currentThread();
         while (narsThread == thisThread) {
             try {
-                thisThread.sleep(10);
+                Thread.sleep(10);
             } catch (InterruptedException e){
             }
             Center.tick();
-//            repaint();      // necessary for the applet?
         }
     }
     
@@ -115,6 +116,7 @@ public class NARS extends Applet implements Runnable {
      * Provide system information for the applet.
      * @return The string containing the information about the applet.
      */
+    @Override
     public String getAppletInfo() {
         return INFO;
     }

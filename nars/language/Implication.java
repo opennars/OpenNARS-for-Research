@@ -16,14 +16,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.language;
 
 import java.util.*;
+
+import nars.inference.TemporalRules;
 import nars.io.Symbols;
 import nars.main.Memory;
-import nars.inference.*;
 
 /**
  * A Statement about an Inheritance relation.
@@ -31,7 +32,7 @@ import nars.inference.*;
 public class Implication extends Statement {
 
     /**
-     * constructor with partial values, called by make
+     * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
      */
@@ -40,24 +41,23 @@ public class Implication extends Statement {
     }
 
     /**
-     * constructor with full values, called by clone
-     * @param cs component list
-     * @param open open variable list
-     * @param closed closed variable list
-     * @param i syntactic complexity of the compound
+     * Constructor with full values, called by clone
      * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
      */
-    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, ArrayList<Variable> closed, short i) {
-        super(n, cs, open, closed, i);
+    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
 
     /**
-     * override the cloning methed in Object
-     * @return A new object, to be casted into a SetExt
+     * Clone an object
+     * @return A new object
      */
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Implication(name, (ArrayList<Term>) cloneList(components),
-                (ArrayList<Variable>) cloneList(openVariables), (ArrayList<Variable>) cloneList(closedVariables), complexity);
+        return new Implication(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
     }
 
     /**
@@ -86,6 +86,9 @@ public class Implication extends Statement {
     }
 
     public static Implication make(Term subject, Term predicate, TemporalRules.Relation temporalOrder) {
+        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence)) {
+            return null;
+        }
         switch (temporalOrder) {
             case BEFORE:
                 return ImplicationBefore.make(subject, predicate);
@@ -99,7 +102,7 @@ public class Implication extends Statement {
     }
 
     /**
-     * get the operator of the term.
+     * Get the operator of the term.
      * @return the operator of the term
      */
     public String operator() {

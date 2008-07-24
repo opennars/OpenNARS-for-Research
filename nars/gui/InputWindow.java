@@ -16,26 +16,27 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
 
-import nars.main.Memory;
+import nars.io.StringParser;
 
 /**
  * Input window, accepting user tasks
  */
 public class InputWindow extends NarsFrame implements ActionListener {
-    /* GUI components */
-    Button      okButton, holdButton, clearButton, closeButton;
-    TextArea    inputText;
+
+    /** Control buttons */
+    private Button okButton,  holdButton,  clearButton,  closeButton;
+    /** Input area */
+    private TextArea inputText;
     /** Whether the window is ready to accept new input */
-    boolean     ready;
-    
+    private boolean ready;
+
     /**
      * Constructor
      */
@@ -47,7 +48,7 @@ public class InputWindow extends NarsFrame implements ActionListener {
         setLayout(gridbag);
         c.ipadx = 3;
         c.ipady = 3;
-        c.insets = new Insets(5,5,5,5);
+        c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
@@ -76,7 +77,7 @@ public class InputWindow extends NarsFrame implements ActionListener {
         setBounds(0, 40, 400, 210);
         setVisible(true);
     }
-    
+
     /**
      * Initialize the window
      */
@@ -84,23 +85,50 @@ public class InputWindow extends NarsFrame implements ActionListener {
         ready = false;
         inputText.setText("");
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
         Button b = (Button) e.getSource();
-        if (b == okButton)
+        if (b == okButton) {
             ready = true;
-        else if (b == holdButton)
+        } else if (b == holdButton) {
             ready = false;
-        else if (b == clearButton)
+        } else if (b == clearButton) {
             inputText.setText("");
-        else if (b == closeButton)
+        } else if (b == closeButton) {
             setVisible(false);
+        }
     }
-    
+
+    /**
+     * Get one input lines
+     * @return The top line in the input window
+     */
+    public String getLine() {
+        if (ready) {
+            String input = inputText.getText().trim();
+            int cutPoint;
+            while (input.length() > 0) {
+                cutPoint = input.indexOf('\n');
+                if (cutPoint < 0) {
+                    inputText.setText("");
+                    return input;
+                } else if (cutPoint > 0) {
+                    inputText.setText(input.substring(cutPoint + 1));
+                    return input.substring(0, cutPoint).trim();
+                } else { // (cutPoint == 0)
+                    input = input.substring(1, cutPoint).trim();
+                }
+            }
+            ready = false;
+            inputText.setText("");
+        }
+        return null;
+    }
+
     /**
      * Get input lines, and send them to Memory
      * @return Nember of running steps, if any
@@ -109,21 +137,23 @@ public class InputWindow extends NarsFrame implements ActionListener {
         while (ready) {
             String input = inputText.getText();
             int EOL = input.indexOf('\n');
-            if (EOL < 0)
+            if (EOL < 0) {
                 EOL = input.length();
+            }
             String line = input.substring(0, EOL).trim();
-            if (input.length() > EOL)
-                inputText.setText(input.substring(EOL+1));
-            else
+            if (input.length() > EOL) {
+                inputText.setText(input.substring(EOL + 1));
+            } else {
                 inputText.setText("");
-            if (line.length() == 0) // pause
+            }
+            if (line.length() == 0) {
                 ready = false;
-            else {
+            } else {
                 try {
                     Long i = new Long(line);
                     return i.longValue();
                 } catch (NumberFormatException e) {
-                    Memory.inputTask(line);
+                    StringParser.parseTask(line);
                 }
             }
         }

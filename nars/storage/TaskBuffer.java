@@ -1,5 +1,5 @@
 /*
- * ConceptBag.java
+ * TaskBuffer.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -21,28 +21,37 @@
 
 package nars.storage;
 
-import nars.entity.Concept;
-import nars.main.Parameters;
-import nars.gui.MainWindow;
+import nars.entity.Task;
+import nars.main.*;
 
 /**
- * Contains Concepts.
+ * New tasks that contain new Term.
  */
-public class ConceptBag extends Bag<Concept> {
+public class TaskBuffer extends Bag<Task> {
     
     /**
-     * Get the (constant) capacity of ConceptBag
-     * @return The capacity of ConceptBag
+     * Get the (constant) capacity of TaskBuffer
+     * @return The capacity of TaskBuffer
      */
     protected int capacity() {
-        return Parameters.CONCEPT_BAG_SIZE;
+        return Parameters.TASK_BUFFER_SIZE;
     }
     
     /**
-     * Get the (adjustable) forget rate of ConceptBag
-     * @return The forget rate of ConceptBag
+     * Get the (constant) forget rate in TaskBuffer
+     * @return The forget rate in TaskBuffer
      */
     protected int forgetRate() {
-        return MainWindow.forgetCW.value();
+        return Parameters.NEW_TASK_FORGETTING_CYCLE;
+    }
+    
+    /**
+     * Sepecial treatment: the display also include Tasks in the NewTask list
+     * @return New Tasks in the buffer and list for display
+     */
+    @Override
+    public String toString() {
+        return Memory.newTasksToString() + super.toString();
     }
 }
+

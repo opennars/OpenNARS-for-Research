@@ -16,47 +16,75 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.operation;
 
 import java.util.*;
-import java.io.*;
-import nars.language.Term;
+
+import nars.language.*;
 import nars.entity.Task;
 import nars.main.Memory;
 
 /**
- * An individual operator that can be execute by the system.
- * The only file to modify when adding a new operator into NARS
+ * An individual operator that can be execute by the system, though implemented
+ * outside NARS.
+ * <p>
+ * This is the only file to modify when adding a new operator into NARS.
  */
 public abstract class Operator extends Term {
     public Operator(String name) {
         super(name);
     }
     
-    // required method for every operation
+    /**
+     * Required method for every operation, specifying the operation
+     * @param task The task with the arguments to be passed to the operator
+     * @return The direct collectable results and feedback of the execution
+     */
     public abstract ArrayList<Task> execute(Task task);
 
+    /**
+     * Execute an operation, then handle feedback
+     * @param task The task to be executed
+     */
     public void call(Task task) {
         ArrayList<Task> feedback = execute(task);
-        System.out.println("EXECUTE in " + name + " " + task.getSentence());
+        showExecution((Statement) task.getContent());
         Memory.executedTask(task);
-        if (feedback != null)
-            for (Task t : feedback)
+        if (feedback != null) {
+            for (Task t : feedback) {
                 Memory.inputTask(t);
+            }
+        }
     }
 
-    // register the operators in the memory
-    // the only method to modify when adding a new operator into NARS
-    // an operator should contain at least two characters after "^""
+    /**
+     * Register all built-in operators in the Memory
+     * <p>
+     * The only method to modify when adding a new operator into NARS.
+     * An operator name should contain at least two characters after '^'.
+     * @return A Map between Operator name and object
+     */
     public static HashMap<String, Operator> setOperators() {
         HashMap<String, Operator> table = new HashMap<String, Operator>();
         table.put("^go-to", new GoTo("^go-to"));
         table.put("^pick", new Pick("^pick"));
         table.put("^open", new Open("^open"));
+        table.put("^break", new Break("^break"));
         return table;
+    }
+    
+    /**
+     * Display a message in the output stream to indicate the execution of an operation
+     * @param operation The content of the operation to be executed
+     */
+    private void showExecution(Statement operation) {
+        Term operator = operation.getPredicate();
+        Term arguments = operation.getSubject();
+        String argList = arguments.toString().substring(3);         // skip the product prefix "(*,"
+        System.out.println("EXECUTE: " + operator + "(" + argList);
     }
 }
 

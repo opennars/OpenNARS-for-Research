@@ -16,9 +16,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
@@ -31,20 +30,22 @@ import nars.storage.Bag;
  * Window display the priority distribution of items within a given bag
  */
 public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener {
-    /** The bag to be displayed */    
-    private Bag	bag;
-    /** The lowest level displayed */    
-    private int         showLevel;
-    
-    /* GUI components */    
-    private Button      playButton, stopButton, closeButton;
-    private TextArea	text;
-    private Label       valueLabel;
-    private Scrollbar   valueBar;
-    
-    /** The location of the display area, shifted according to the number of windows openned */    
+
+    /** The bag to be displayed */
+    private Bag bag;
+    /** The lowest level displayed */
+    private int showLevel;
+    /** Control buttons */
+    private Button playButton,  stopButton,  closeButton;
+    /** Display area */
+    private TextArea text;
+    /** Display label */
+    private Label valueLabel;
+    /** Adjustable display level */
+    private Scrollbar valueBar;
+    /** The location of the display area, shifted according to the number of windows openned */
     private static int counter;
-    
+
     /**
      * Constructor
      * @param b The bag to be displayed
@@ -58,10 +59,10 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
-        
+
         c.ipadx = 3;
         c.ipady = 3;
-        c.insets = new Insets(5,5,5,5);
+        c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
@@ -71,38 +72,38 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         text.setEditable(false);
         gridbag.setConstraints(text, c);
         add(text);
-        
+
         c.weighty = 0.0;
         c.gridwidth = 1;
         valueLabel = new Label(String.valueOf(showLevel), Label.RIGHT);
         gridbag.setConstraints(valueLabel, c);
         add(valueLabel);
-        
-        valueBar = new Scrollbar(Scrollbar.HORIZONTAL,showLevel,0,1,Parameters.BAG_LEVEL);
+
+        valueBar = new Scrollbar(Scrollbar.HORIZONTAL, showLevel, 0, 1, Parameters.BAG_LEVEL);
         valueBar.addAdjustmentListener(this);
         gridbag.setConstraints(valueBar, c);
         add(valueBar);
-        
+
         playButton = new Button("Play");
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
-        
+
         stopButton = new Button("Stop");
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
-        
+
         closeButton = new Button("Close");
         gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
         add(closeButton);
-        
+
         setBounds(400, 60 + counter * 20, 400, 270);
         counter++;
         setVisible(true);
     }
-    
+
     /**
      * Post the bag content
      * @param str The text
@@ -110,7 +111,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     public void post(String str) {
         text.setText(str);
     }
-    
+
     /**
      * The lowest display level
      * @return The level
@@ -118,7 +119,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     public int showLevel() {
         return showLevel;
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
@@ -142,11 +143,11 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
      */
     public void adjustmentValueChanged(AdjustmentEvent e) {
         if (e.getSource() == valueBar) {
-            int v = ((Scrollbar) valueBar).getValue();
+            int v = valueBar.getValue();
             valueLabel.setText(String.valueOf(v));
             valueBar.setValue(v);
             showLevel = v;
             bag.play();
         }
-    }   
+    }
 }

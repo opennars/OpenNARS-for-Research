@@ -16,61 +16,61 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.language;
 
 import java.util.*;
+
 import nars.io.Symbols;
-import nars.entity.TermLink;
 import nars.main.Memory;
 
 /**
  * A compound term whose extension is the difference of the intensions of its components
  */
 public class DifferenceInt extends CompoundTerm {
-    
+
     /**
-     * constructor with partial values, called by make
+     * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
      */
     private DifferenceInt(String n, ArrayList<Term> arg) {
         super(n, arg);
     }
-    
+
     /**
-     * constructor with full values, called by clone
-     * @param cs component list
-     * @param open open variable list
-     * @param closed closed variable list
-     * @param i syntactic complexity of the compound
+     * Constructor with full values, called by clone
      * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
      */
-    private DifferenceInt(String n, ArrayList<Term> cs, ArrayList<Variable> open, ArrayList<Variable> closed, short i) {
-        super(n, cs, open, closed, i);
+    private DifferenceInt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
-    
+
     /**
-     * override the cloning methed in Object
+     * Clone an object
      * @return A new object, to be casted into a DifferenceInt
      */
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new DifferenceInt(name, (ArrayList<Term>) cloneList(components),
-                (ArrayList<Variable>) cloneList(openVariables), (ArrayList<Variable>) cloneList(closedVariables), complexity);
+        return new DifferenceInt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
     }
-    
+
     /**
      * Try to make a new DifferenceExt. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argList The list of components
-     */     
+     */
     public static Term make(ArrayList<Term> argList) {
-        if (argList.size() == 1)    // special case from CompoundTerm.reduceComponent
+        if (argList.size() == 1) { // special case from CompoundTerm.reduceComponent
             return argList.get(0);
-        if (argList.size() != 2)
+        }
+        if (argList.size() != 2) {
             return null;
+        }
         String name = makeCompoundName(Symbols.DIFFERENCE_INT_OPERATOR, argList);
         Term t = Memory.nameToListedTerm(name);
         return (t != null) ? t : new DifferenceInt(name, argList);
@@ -82,9 +82,11 @@ public class DifferenceInt extends CompoundTerm {
      * @param t2 The second compoment
      * @return A compound generated or a term it reduced to
      */
+    @SuppressWarnings("unchecked")
     public static Term make(Term t1, Term t2) {
-        if (t1.equals(t2))
+        if (t1.equals(t2)) {
             return null;
+        }
         if ((t1 instanceof SetInt) && (t2 instanceof SetInt)) {
             TreeSet set = new TreeSet(((CompoundTerm) t1).cloneComponents());
             set.removeAll(((CompoundTerm) t2).cloneComponents());           // set difference
@@ -93,9 +95,9 @@ public class DifferenceInt extends CompoundTerm {
         ArrayList<Term> list = argumentsToList(t1, t2);
         return make(list);
     }
-    
+
     /**
-     * get the operator of the term.
+     * Get the operator of the term.
      * @return the operator of the term
      */
     public String operator() {

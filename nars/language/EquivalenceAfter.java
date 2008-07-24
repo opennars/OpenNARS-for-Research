@@ -16,21 +16,21 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.language;
 
 import java.util.*;
+
+import nars.inference.TemporalRules;
 import nars.io.Symbols;
 import nars.main.Memory;
-import nars.inference.*;
 
 /**
  * Temporal Implication relation, predicate after subject.
  */
 public class EquivalenceAfter extends Equivalence implements Temporal {
-    
+
     /**
      * constructor with partial values, called by make
      * @param n The name of the term
@@ -41,26 +41,26 @@ public class EquivalenceAfter extends Equivalence implements Temporal {
     }
 
     /**
-     * constructor with full values, called by clone
-     * @param cs component list
-     * @param open open variable list
-     * @param closed closed variable list
-     * @param i syntactic complexity of the compound
+     * Constructor with full values, called by clone
      * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
      */
-    private EquivalenceAfter(String n, ArrayList<Term> cs, ArrayList<Variable> open, ArrayList<Variable> closed, short i) {
-        super(n, cs, open, closed, i);
+    private EquivalenceAfter(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
-    
+
     /**
-     * override the cloning methed in Object
-     * @return A new object, to be casted into a Similarity
+     * Clone an object
+     * @return A new object
      */
+    @Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new EquivalenceAfter(name, (ArrayList<Term>) cloneList(components),
-                (ArrayList<Variable>) cloneList(openVariables), (ArrayList<Variable>) cloneList(closedVariables), complexity);
+        return new EquivalenceAfter(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
     }
-     
+
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
@@ -68,32 +68,41 @@ public class EquivalenceAfter extends Equivalence implements Temporal {
      * @return A compound generated or null
      */
     public static EquivalenceAfter make(Term subject, Term predicate) {
-        if (invalidStatement(subject, predicate))
+        if (invalidStatement(subject, predicate)) {
             return null;
+        }
         String name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
         Term t = Memory.nameToListedTerm(name);
-        if (t != null)
+        if (t != null) {
             return (EquivalenceAfter) t;
+        }
         ArrayList<Term> argument = argumentsToList(subject, predicate);
         return new EquivalenceAfter(name, argument);
     }
-    
+
     /**
-     * get the operator of the term.
+     * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.EQUIVALENCE_AFTER_RELATION;
     }
-    
+
     /**
      * Check if the compound is communitative.
-     * @return true for communitative
+     * @return The components are temporally ordered
      */
+    @Override
     public boolean isCommutative() {
         return false;
     }
 
+    /**
+     * Get the temporal order of the class
+     * @return AFTER since the components are temporally ordered
+     */
+    @Override
     public TemporalRules.Relation getTemporalOrder() {
         return TemporalRules.Relation.AFTER;
     }

@@ -16,51 +16,49 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.language;
 
 import java.util.*;
+
 import nars.io.Symbols;
-import nars.entity.TermLink;
 import nars.main.Memory;
 
 /**
  * An intensionally defined set, which contains one or more instances defining the Term.
  */
 public class SetInt extends CompoundTerm {
-    
+
     /**
-     * constructor with partial values, called by make
+     * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
      */
     private SetInt(String n, ArrayList<Term> arg) {
         super(n, arg);
     }
-    
+
     /**
      * constructor with full values, called by clone
-     * @param cs component list
-     * @param open open variable list
-     * @param closed closed variable list
-     * @param i syntactic complexity of the compound
      * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
      */
-    private SetInt(String n, ArrayList<Term> cs, ArrayList<Variable> open, ArrayList<Variable> closed, short i) {
-        super(n, cs, open, closed, i);
+    private SetInt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
-    
+
     /**
-     * override the cloning methed in Object
+     * Clone a SetInt
      * @return A new object, to be casted into a SetInt
      */
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new SetInt(name, (ArrayList<Term>) cloneList(components),
-                (ArrayList<Variable>) cloneList(openVariables), (ArrayList<Variable>) cloneList(closedVariables), complexity);
+        return new SetInt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
     }
-    
+
     /**
      * Try to make a new set from one component. Called by the inference rules.
      * @param t The compoment
@@ -71,7 +69,7 @@ public class SetInt extends CompoundTerm {
         set.add(t);
         return make(set);
     }
-    
+
     /**
      * Try to make a new SetExt. Called by StringParser.
      * @return the Term generated from the arguments
@@ -81,15 +79,16 @@ public class SetInt extends CompoundTerm {
         TreeSet<Term> set = new TreeSet<Term>(argList); // sort/merge arguments
         return make(set);
     }
-    
+
     /**
      * Try to make a new compound from a set of components. Called by the public make methods.
      * @param set a set of Term as compoments
      * @return the Term generated from the arguments
      */
     public static Term make(TreeSet<Term> set) {
-        if (set.isEmpty())
+        if (set.isEmpty()) {
             return null;
+        }
         ArrayList<Term> argument = new ArrayList<Term>(set);
         String name = makeSetName(Symbols.SET_INT_OPENER, argument, Symbols.SET_INT_CLOSER);
         Term t = Memory.nameToListedTerm(name);
@@ -97,17 +96,18 @@ public class SetInt extends CompoundTerm {
     }
 
     /**
-     * get the operator of the term.
+     * Get the operator of the term.
      * @return the operator of the term
      */
     public String operator() {
         return "" + Symbols.SET_INT_OPENER;
     }
-    
+
     /**
      * Check if the compound is communitative.
      * @return true for communitative
      */
+    @Override
     public boolean isCommutative() {
         return true;
     }
@@ -116,6 +116,7 @@ public class SetInt extends CompoundTerm {
      * Make a String representation of the set, override the default.
      * @return true for communitative
      */
+    @Override
     public String makeName() {
         return makeSetName(Symbols.SET_INT_OPENER, components, Symbols.SET_INT_CLOSER);
     }

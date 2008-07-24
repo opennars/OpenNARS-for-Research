@@ -16,33 +16,31 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.language;
 
-import java.util.*;
-import nars.io.Symbols;
-import nars.main.Memory;
-import nars.inference.*;
+import nars.inference.TemporalRules;
 
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
  * <p>
- * A Term may or may not have an associated Concept containing relations with other Terms. It
+ * A Term may have an associated Concept containing relations with other Terms. It
  * is not linked in the Term, because a Concept may be forgot, while the Term exists.
  */
 public class Term implements Cloneable, Comparable<Term> {
-    /**
-     * A Term is identified uniquely by its name, a sequence of characters in a given alphabet.
+
+    /** A Term is identified uniquely by its name, a sequence of characters in a 
+     * given alphabet (ASCII or Unicode)
      */
-    protected String name;              // name of the term, an ASCII string (can be changed to Unicode)
-    
+    protected String name;
+
     /**
      * Default constructor
      */
-    protected Term() {}
-    
+    protected Term() {
+    }
+
     /**
      * Constructor with a given name
      * @param name A String as the name of the Term
@@ -50,15 +48,16 @@ public class Term implements Cloneable, Comparable<Term> {
     public Term(String name) {
         this.name = name;
     }
-    
+
     /**
      * The same as getName, used in display.
      * @return The name of the term as a String
      */
+    @Override
     public final String toString() {
         return name;
     }
-    
+
     /**
      * Reporting the name of the current Term.
      * @return The name of the term as a String
@@ -66,7 +65,7 @@ public class Term implements Cloneable, Comparable<Term> {
     public String getName() {
         return name;
     }
-    
+
     /**
      * Default, to be overrided in variable Terms.
      * @return The name of the term as a String
@@ -74,55 +73,69 @@ public class Term implements Cloneable, Comparable<Term> {
     public String getConstantName() {
         return name;
     }
-    
+
     /**
      * Make a new Term with the same name.
      * @return The new Term
      */
+    @Override
     public Object clone() {
         return new Term(name);
     }
-    
+
     /**
      * Equal terms have identical name, though not necessarily the same reference.
      * @return Whether the two Terms are equal
      * @param that The Term to be compared with the current Term
      */
+    @Override
     public boolean equals(Object that) {
         return (that instanceof Term) && getName().equals(((Term) that).getName());
     }
-    
+
     /**
-     * The default complexity, for constant automic Term, is 1.
+     * Produce a hash code for the term
+     * @return An integer hash code
+     */
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        return hash;
+    }
+
+    /**
+     * The syntactic complexity, for constant automic Term, is 1.
      * @return The conplexity of the term, an integer
      */
     public int getComplexity() {
         return 1;
     }
-        
+
     /**
      * Check the relative order of two Terms.
+     * <p>
+     * based on the constant part first
      * @param that The Term to be compared with the current Term
      * @return The same as compareTo as defined on Strings when the constant parts are compared
      */
     public final int compareTo(Term that) {
-        int i = this.getConstantName().compareTo(that.getConstantName());       // based on the constant part first
+        int i = this.getConstantName().compareTo(that.getConstantName());
         return (i != 0) ? i : this.getName().compareTo(that.getName());
     }
-    
+
     /**
      * Check whether the current Term can name a Concept.
-     * @return a Term is constant by default
+     * @return A Term is constant by default
      */
     public boolean isConstant() {
         return true;
     }
-    
+
+    /**
+     * Get the temporal order in a term, which is NONE by default
+     * @return The default temporal order
+     */
     public TemporalRules.Relation getTemporalOrder() {
         return TemporalRules.Relation.NONE;
-    }
-    
-    public final boolean containQueryVariable() {                           // to be revised
-        return (name.indexOf(Symbols.QUERY_VARIABLE_TAG) >= 0);
     }
 }

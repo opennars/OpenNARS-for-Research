@@ -16,65 +16,56 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.main;
 
-import nars.entity.Base;
 import nars.io.*;
-import nars.gui.*;
+import nars.gui.MainWindow;
+import nars.entity.Stamp;
 
 /**
  * The control center of the system.
  * <p>
- * Create static main and inpit windows, reset memory, and manage system clock.
+ * Create static main window and input channel, reset memory, and manage system clock.
  */
-public class Center {   // One Center per NARS, all members are static
-    /**
-     * The unique main window of the system.
-     */
+public class Center {
+    /** The unique main window */
     public static MainWindow mainWindow;
-    /**
-     * The unique input window of the system.
-     */
-    public static InputWindow inputWindow;
-    /**
-     * System clock, relatively defined to guaranttee the repeatability of behaviors.
-     */
+    /** The unique input channel */
+    public static ExperienceIO experienceIO;
+    /** System clock, relatively defined to guaranttee the repeatability of behaviors */
     private static long clock;
-    /**
-     * Timer for fixed distance walking.
-     */
+    /** Timer for fixed distance walking */
     private static long stoper;
-    /**
-     * Running continously.
-     */
+    /** Flag for running continously */
     private static boolean running;
-    
+
     /**
      * Start the initial windows and memory. Called from NARS only.
      */
     public static void start() {
         mainWindow = new MainWindow();
-        inputWindow = new InputWindow();
+        experienceIO = new ExperienceIO();
         reset();
     }
-    
+
     /**
      * Reset the system with an empty memory and reset clock. Called locally and from MainWindow.
      */
     public static void reset() {
         stoper = 0;
         clock = 0;
-        Base.init();
-        Memory.init();
         running = false;
+        Stamp.init();
+        Record.init();
+        Memory.init();
+        mainWindow.init();
     }
-    
+
     /**
-     * Walk a fixed number of steps. Called from MainWindow only.
-     * @param i the number of steps of inference
+     * Walk a fixed number of steps or continously. Called from MainWindow only.
+     * @param i The number of steps of inference, or infinite if negative
      */
     public static void setStoper(long i) {
         if (i < 0) {
@@ -85,27 +76,22 @@ public class Center {   // One Center per NARS, all members are static
             stoper = i;
         }
     }
-    
+
     /**
-     * A clock tick. Called from NARS only.
+     * A clock tick. Run one working cycle or read input. Called from NARS only.
      */
     public static void tick() {
-        if (stoper == 0)
-            stoper = inputWindow.getInput();
+        if (stoper == 0) {
+            stoper = experienceIO.loadLine();
+        }
         if (running || (stoper > 0)) {
             clock++;
             Record.append(" --- " + clock + " ---\n");
             mainWindow.tickTimer();
             Memory.cycle();
-            if (stoper > 0)
+            if (stoper > 0) {
                 stoper--;
+            }
         }
-    }
-    
-    /**
-     * Redisplay the input window. Called from MainWindow only.
-     */
-    public static void showInputWindow() {
-        inputWindow.setVisible(true);
     }
 }

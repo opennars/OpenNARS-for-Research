@@ -16,23 +16,30 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.entity;
 
+import nars.inference.TemporalRules;
 import nars.language.Term;
-import nars.inference.*;
 
 /**
- * A Question is a sentence without a truth value needs evaluation, and may conain query variables
+ * A Question is a sentence without a truth value, and may conain query variables
  */
 public class Question extends Sentence {
 
-    public Question(Term term, char punc, TemporalRules.Relation s) {
+    /**
+     * COnstructor
+     * @param term The content
+     * @param punc The punctuation
+     * @param t The tense
+     * @param s The stamp
+     */
+    public Question(Term term, char punc, TemporalRules.Relation t, Stamp s) {
         content = term;
         punctuation = punc;
-        tense = s;
+        tense = t;
+        stamp = s;
     }
 }
-

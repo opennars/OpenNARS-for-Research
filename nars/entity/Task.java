@@ -16,70 +16,111 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.entity;
 
-import nars.main.NARS;
-import nars.language.*;
 import nars.inference.TemporalRules;
+import nars.language.Term;
+import nars.main.NARS;
 
 /**
- * A task to be processed.
+ * A task to be processed, consists of a Sentence and a BudgetValue
  */
 public class Task extends Item {
+    /** The sentence of the Task */
     private Sentence sentence;
-    protected boolean structual = false;        // whether it is based on a structual rule
-           
+    /** Whether it is derived by a structual rule */
+    protected boolean structual = false;        // 
+
+    /**
+     * Constructor
+     * @param s The sentence
+     * @param b The budget
+     */
     public Task(Sentence s, BudgetValue b) {
         super(b);
         sentence = s;
         key = sentence.toString();
     }
-    
+
+    /**
+     * Get the sentence
+     * @return The sentence
+     */
     public Sentence getSentence() {
         return sentence;
     }
 
+    /**
+     * Directly get the content of the sentence
+     * @return The content of the sentence
+     */
     public Term getContent() {
         return sentence.getContent();
     }
-    
+
+    /**
+     * Directly get the tense of the sentence
+     * @return The tense of the sentence
+     */
     public TemporalRules.Relation getTense() {
         return sentence.getTense();
     }
 
+    /**
+     * Check if a Task is derived by a StructuralRule
+     * @return Whether the Task is derived by a StructuralRule
+     */
     public boolean isStructual() {
         return structual;
     }
-    
+
+    /**
+     * Record if a Task is derived by a StructuralRule
+     */
     public void setStructual() {
         structual = true;
     }
 
+    /**
+     * Merge one Task into another
+     * @param that The other Task
+     */
     public void merge(Item that) {
-        ((BudgetValue) this).merge(that.getBudget());
+        super.merge(that);
         structual = (structual || ((Task) that).isStructual());
     }
 
+    /**
+     * Get a String representation of the Task
+     * @return The Task as a String
+     */
+    @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        if (NARS.isStandAlone())
+        if (NARS.isStandAlone()) {
             s.append(super.toString() + " ");
+        }
         s.append(sentence);
         return s.toString();
     }
 
+    /**
+     * Get a String representation of the Task, with reduced accuracy
+     * @return The Task as a String, with 2-digit accuracy for the values
+     */
+    @Override
     public String toString2() {
         StringBuffer s = new StringBuffer();
-        if (NARS.isStandAlone())
+        if (NARS.isStandAlone()) {
             s.append(super.toString2() + " ");
-        if (sentence instanceof Question)
+        }
+        if (sentence instanceof Question) {
             s.append(sentence);
-        else
+        } else {
             s.append(((Judgment) sentence).toString2());
+        }
         return s.toString();
     }
 }
-

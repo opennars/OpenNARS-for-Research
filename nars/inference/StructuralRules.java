@@ -16,39 +16,41 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.inference;
 
-import java.util.*;
+import java.util.ArrayList;
 
 import nars.entity.*;
 import nars.language.*;
-import nars.io.*;
-import nars.main.*;
+import nars.main.Memory;
 
 /**
- * Forward inference rules involving compound terms.
- * Input premises are one sentence and one BeliefLink.
+ * Single-premise inference rules involving compound terms.
+ * Input are one sentence (the premise) and one TermLink (indicating a component)
  */
 public final class StructuralRules {
-    
+
     /* -------------------- transform between compounds and components -------------------- */
-    
     /**
-     * {<A --> B>} |- <(A&C) --> (B&C)>
+     * {<S --> P>, S@(S&T)} |- <(S&T) --> (P&T)>
+     * {<S --> P>, S@(M-S)} |- <(M-P) --> (M-S)>
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
      * @param side The location of the indicated term in the premise
      */
     static void structuralCompose2(CompoundTerm compound, short index, Statement statement, short side) {
+        if (compound.equals(statement.componentAt(side))) {
+            return;
+        }
         Term sub = statement.getSubject();
         Term pred = statement.getPredicate();
         ArrayList<Term> components = compound.cloneComponents();
-        if (((side == 0) && components.contains(pred)) || ((side == 1) && components.contains(sub)))
-            return;     // both terms in compound
+        if (((side == 0) && components.contains(pred)) || ((side == 1) && components.contains(sub))) {
+            return;
+        }
         if (side == 0) {
             sub = compound;
             components.set(index, pred);
@@ -58,15 +60,18 @@ public final class StructuralRules {
             sub = CompoundTerm.make(compound, components);
             pred = compound;
         }
-        if ((sub == null) || (pred == null))
+        if ((sub == null) || (pred == null)) {
             return;
+        }
         Term content;
-        if (switchOrder(compound, index))
-            content = Statement.make(statement, pred, sub);     // {A --> B, A @ (C-A)} |- (C-B) --> (C-A)
-        else
-            content = Statement.make(statement, sub, pred);     // the other cases
-        if (content == null)
+        if (switchOrder(compound, index)) {
+            content = Statement.make(statement, pred, sub);
+        } else {
+            content = Statement.make(statement, sub, pred);
+        }
+        if (content == null) {
             return;
+        }
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
@@ -75,10 +80,12 @@ public final class StructuralRules {
             budget = BudgetFunctions.compoundBackwardWeak(content);
         } else {
             if (compound.size() > 1) {
-                if (sentence.isJudgment())
+                if (sentence.isJudgment()) {
                     truth = TruthFunctions.implying(truth);
-                else // Goal
+                } else {
+                    assert (sentence instanceof Goal);
                     truth = TruthFunctions.implied(truth);
+                }
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
@@ -86,37 +93,41 @@ public final class StructuralRules {
     }
 
     /**
-     * {<(A&C) --> (B&C)>} |- <A --> B>
+     * {<(S&T) --> (P&T)>, S@(S&T)} |- <S --> P>
      * @param statement The premise
      */
     static void structuralDecompose2(Statement statement) {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
-        if (subj.getClass() != pred.getClass())
+        if (subj.getClass() != pred.getClass()) {
             return;
+        }
         CompoundTerm sub = (CompoundTerm) subj;
         CompoundTerm pre = (CompoundTerm) pred;
-        if (sub.size() != pre.size())
+        if (sub.size() != pre.size()) {
             return;
+        }
         int index = -1;
         Term t1, t2;
         for (int i = 0; i < sub.size(); i++) {
             t1 = sub.componentAt(i);
             t2 = pre.componentAt(i);
             if (!t1.equals(t2)) {
-                if (index < 0)
+                if (index < 0) {
                     index = i;
-                else
+                } else {
                     return;
+                }
             }
         }
         t1 = sub.componentAt(index);
         t2 = pre.componentAt(index);
         Term content;
-        if (switchOrder(sub, (short) index))
+        if (switchOrder(sub, (short) index)) {
             content = Statement.make(statement, t2, t1);
-        else
+        } else {
             content = Statement.make(statement, t1, t2);
+        }
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
@@ -125,31 +136,40 @@ public final class StructuralRules {
             budget = BudgetFunctions.compoundBackward(content);
         } else {
             if (sub.size() > 1) {
-                if (sentence.isJudgment())
+                if (sentence.isJudgment()) {
                     truth = TruthFunctions.implied(truth);
-                else // Goal
+                } else {
+                    assert (sentence instanceof Goal);
                     truth = TruthFunctions.implying(truth);
+                }
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
+    /**
+     * List the cases where the direction of inheritance is revised in conclusion
+     * @param compound The compound term
+     * @param index The location of focus in the compound
+     * @return Whether the direction of inheritance should be revised
+     */
     private static boolean switchOrder(CompoundTerm compound, short index) {
         return ((((compound instanceof DifferenceExt) || (compound instanceof DifferenceInt)) && (index == 1)) ||
                 ((compound instanceof ImageExt) && (index != ((ImageExt) compound).getRelationIndex())) ||
                 ((compound instanceof ImageInt) && (index != ((ImageInt) compound).getRelationIndex())));
     }
-    
+
     /**
-     * {<A --> B>} |- <A --> (B&C)>
+     * {<S --> P>, P@(P&Q)} |- <S --> (P&Q)>
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
      */
     static void structuralCompose1(CompoundTerm compound, short index, Statement statement) {
-        if (!Memory.currentTask.getSentence().isJudgment())
+        if (!Memory.currentTask.getSentence().isJudgment()) {
             return;
+        }
         Term component = compound.componentAt(index);
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
@@ -157,42 +177,46 @@ public final class StructuralRules {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
         if (component.equals(subj)) {
-            if (compound instanceof IntersectionExt)                        // {A --> B, A @ (A&C)} |- (A&C) --> B
+            if (compound instanceof IntersectionExt) {
                 structuralStatement(compound, pred, TruthFunctions.implying(truth));
-            else if (compound instanceof IntersectionInt)                   // {A --> B, A @ (A|C)} |- (A|C) --> B
+            } else if (compound instanceof IntersectionInt) {
                 structuralStatement(compound, pred, TruthFunctions.implied(truth));
-            else if ((compound instanceof DifferenceExt) && (index == 0))   // {A --> B, A @ (A-C)} |- (A-C) --> B
+            } else if ((compound instanceof DifferenceExt) && (index == 0)) {
                 structuralStatement(compound, pred, TruthFunctions.implying(truth));
-            else if (compound instanceof DifferenceInt)
-                if (index == 0)                                             // {A --> B, A @ (A~C)} |- (A~C) --> B
+            } else if (compound instanceof DifferenceInt) {
+                if (index == 0) {
                     structuralStatement(compound, pred, TruthFunctions.implied(truth));
-                else                                                        // {A --> B, A @ (C~A)} |- (C~A) --> B
+                } else {
                     structuralStatement(compound, pred, TruthFunctions.negImply(truth));
+                }
+            }
         } else if (component.equals(pred)) {
-            if (compound instanceof IntersectionExt)                        // {B --> A, A @ (A&C)} |- B --> (A&C)
+            if (compound instanceof IntersectionExt) {
                 structuralStatement(subj, compound, TruthFunctions.implied(truth));
-            else if (compound instanceof IntersectionInt)                   // {B --> A, A @ (A|C)} |- B --> (A|C)
+            } else if (compound instanceof IntersectionInt) {
                 structuralStatement(subj, compound, TruthFunctions.implying(truth));
-            else if (compound instanceof DifferenceExt)
-                if (index == 0)                                             // {B --> A, A @ (A-C)} |- B --> (A-C)
+            } else if (compound instanceof DifferenceExt) {
+                if (index == 0) {
                     structuralStatement(subj, compound, TruthFunctions.implied(truth));
-                else                                                        // {B --> A, A @ (C-A)} |- B --> (C-A)
+                } else {
                     structuralStatement(subj, compound, TruthFunctions.negImply(truth));
-            else if ((compound instanceof DifferenceInt) && (index == 0))   // {B --> A, A @ (A~C)} |- B --> (A~C)
+                }
+            } else if ((compound instanceof DifferenceInt) && (index == 0)) {
                 structuralStatement(subj, compound, TruthFunctions.implying(truth));
+            }
         }
     }
-    
+
     /**
-     * {<(A&C) --> B>} |- <A --> B>
+     * {<(S&T) --> P>, S@(S&T)} |- <S --> P>
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
-     * @param side The location of the indicated term in the premise
      */
-    static void structuralDecompose1(CompoundTerm compound, short index, Statement statement, short side) {
-        if (!Memory.currentTask.getSentence().isJudgment())
+    static void structuralDecompose1(CompoundTerm compound, short index, Statement statement) {
+        if (!Memory.currentTask.getSentence().isJudgment()) {
             return;
+        }
         Term component = compound.componentAt(index);
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
@@ -200,54 +224,53 @@ public final class StructuralRules {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
         if (compound.equals(subj)) {
-            if (compound instanceof IntersectionExt)                        // {(A&C) --> B, A @ (A&C)} |- A --> B
+            if (compound instanceof IntersectionExt) {
                 structuralStatement(component, pred, TruthFunctions.implied(truth));
-            else if (compound instanceof IntersectionInt)                   // {(A|C) --> B, A @ (A|C)} |- A --> B
+            } else if (compound instanceof IntersectionInt) {
                 structuralStatement(component, pred, TruthFunctions.implying(truth));
-            else if ((compound instanceof DifferenceExt) && (index == 0))   // {(A-C) --> B, A @ (A-C)} |- A --> B
+            } else if ((compound instanceof DifferenceExt) && (index == 0)) {
                 structuralStatement(component, pred, TruthFunctions.implied(truth));
-            else if (compound instanceof DifferenceInt)
-                if (index == 0)                                             // {(A~C) --> B, A @ (A~C)} |- A --> B
+            } else if (compound instanceof DifferenceInt) {
+                if (index == 0) {
                     structuralStatement(component, pred, TruthFunctions.implying(truth));
-                else                                                        // {(C~A) --> B, A @ (C~A)} |- A --> B
+                } else {
                     structuralStatement(component, pred, TruthFunctions.negImply(truth));
+                }
+            }
         } else if (compound.equals(pred)) {
-            if (compound instanceof IntersectionExt)                        // {B --> (A&C), A @ (A&C)} |- B --> A
+            if (compound instanceof IntersectionExt) {
                 structuralStatement(subj, component, TruthFunctions.implying(truth));
-            else if (compound instanceof IntersectionInt)                   // {B --> (A&C), A @ (A&C)} |- B --> A
+            } else if (compound instanceof IntersectionInt) {
                 structuralStatement(subj, component, TruthFunctions.implied(truth));
-            else if (compound instanceof DifferenceExt)
-                if (index == 0)                                             // {B --> (A-C), A @ (A-C)} |- B --> A
+            } else if (compound instanceof DifferenceExt) {
+                if (index == 0) {
                     structuralStatement(subj, component, TruthFunctions.implying(truth));
-                else                                                        // {B --> (C-A), A @ (C-A)} |- B --> A
+                } else {
                     structuralStatement(subj, component, TruthFunctions.negImply(truth));
-            else if ((compound instanceof DifferenceInt) && (index == 0))   // {B --> (A~C), A @ (A~C)} |- B --> A
+                }
+            } else if ((compound instanceof DifferenceInt) && (index == 0)) {
                 structuralStatement(subj, component, TruthFunctions.implied(truth));
+            }
         }
     }
-    
+
     /**
      * Common final operations of the above two methods
      * @param subject The subject of the new task
      * @param predicate The predicate of the new task
      * @param truth The truth value of the new task
      */
-    private static void structuralStatement(Term subject, Term predicate, TruthValue truth) { // Inheritance only?
+    private static void structuralStatement(Term subject, Term predicate, TruthValue truth) {
         Task task = Memory.currentTask;
-        Sentence sentence = task.getSentence();
         Term content = Statement.make((Statement) task.getContent(), subject, predicate);
-        if (content == null)
+        if (content == null) {
             return;
+        }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-//        if (sentence instanceof Question)
-//            budget = BudgetFunctions.compoundBackward(content);
-//        else
-//            budget = BudgetFunctions.compoundForward(truth, content);
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
     /* -------------------- set transform -------------------- */
-    
     /**
      * {<S --> {P}>} |- <S <-> {P}>
      * @param compound The set compound
@@ -255,35 +278,49 @@ public final class StructuralRules {
      * @param side The location of the indicated term in the premise
      */
     static void transformSetRelation(CompoundTerm compound, Statement statement, short side) {
-        if (compound.size() > 1)
+        if (compound.size() > 1) {
             return;
-        if (statement instanceof Inheritance)
-            if (((compound instanceof SetExt) && (side == 0)) || ((compound instanceof SetInt) && (side == 1)))
+        }
+        if (statement instanceof Inheritance) {
+            if (((compound instanceof SetExt) && (side == 0)) || ((compound instanceof SetInt) && (side == 1))) {
                 return;
+            }
+        }
         Term sub = statement.getSubject();
         Term pre = statement.getPredicate();
         Term content;
         if (statement instanceof Inheritance) {
             content = Similarity.make(sub, pre);
         } else {
-            if (((compound instanceof SetExt) && (side == 0)) || ((compound instanceof SetInt) && (side == 1)))
+            if (((compound instanceof SetExt) && (side == 0)) || ((compound instanceof SetInt) && (side == 1))) {
                 content = Inheritance.make(pre, sub);
-            else
+            } else {
                 content = Inheritance.make(sub, pre);
+            }
         }
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
-        if (sentence instanceof Question)
+        if (sentence instanceof Question) {
             budget = BudgetFunctions.compoundBackward(content);
-        else
+        } else {
             budget = BudgetFunctions.compoundForward(truth, content);
+        }
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
     /* -------------------- products and images transform -------------------- */
-    
+    /**
+     * Equivalent transformation between products and images
+     * {<(*, S, M) --> P>, S@(*, S, M)} |- <S --> (/, P, _, M)>
+     * {<S --> (/, P, _, M)>, P@(/, P, _, M)} |- <(*, S, M) --> P>
+     * {<S --> (/, P, _, M)>, M@(/, P, _, M)} |- <M --> (/, P, S, _)>
+     * @param inh An Inheritance statement
+     * @param oldContent The whole content
+     * @param indices The indices of the TaskLink
+     * @param task The task
+     */
     static void transformProductImage(Inheritance inh, CompoundTerm oldContent, short[] indices, Task task) {
         Term subject = null;
         Term predicate = null;
@@ -291,14 +328,14 @@ public final class StructuralRules {
         short side = indices[indices.length - 2];
         CompoundTerm comp = (CompoundTerm) inh.componentAt(side);
         if (comp instanceof Product) {
-            if (side == 0) {           // Product as subject
+            if (side == 0) {
                 subject = comp.componentAt(index);
                 predicate = ImageExt.make((Product) comp, inh.getPredicate(), index);
             } else {
                 subject = ImageInt.make((Product) comp, inh.getSubject(), index);
                 predicate = comp.componentAt(index);
             }
-        } else if ((comp instanceof ImageExt) && (side == 1)) {   // ImageExt as predicate
+        } else if ((comp instanceof ImageExt) && (side == 1)) {
             if (index == ((ImageExt) comp).getRelationIndex()) {
                 subject = Product.make(comp, inh.getSubject(), index);
                 predicate = comp.componentAt(index);
@@ -306,7 +343,7 @@ public final class StructuralRules {
                 subject = comp.componentAt(index);
                 predicate = ImageExt.make((ImageExt) comp, inh.getSubject(), index);
             }
-        } else if ((comp instanceof ImageInt) && (side == 0)) {   // ImageInt as subject
+        } else if ((comp instanceof ImageInt) && (side == 0)) {
             if (index == ((ImageInt) comp).getRelationIndex()) {
                 subject = comp.componentAt(index);
                 predicate = Product.make(comp, inh.getPredicate(), index);
@@ -314,90 +351,103 @@ public final class StructuralRules {
                 subject = ImageInt.make((ImageInt) comp, inh.getPredicate(), index);
                 predicate = comp.componentAt(index);
             }
-        } else //        if ((subject == null) || (predicate == null))
+        } else {
             return;
+        }
         Inheritance newInh = Inheritance.make(subject, predicate);
         Term content = null;
-        if (indices.length == 2)
+        if (indices.length == 2) {
             content = newInh;
-        else if ((oldContent instanceof Statement) && (indices[0] == 1)) {
+        } else if ((oldContent instanceof Statement) && (indices[0] == 1)) {
             content = Statement.make((Statement) oldContent, oldContent.componentAt(0), newInh);
         } else {
             ArrayList<Term> componentList;
             Term condition = oldContent.componentAt(0);
             if ((oldContent instanceof Implication) && (condition instanceof Conjunction)) {
                 componentList = ((CompoundTerm) condition).cloneComponents();
-                componentList.set(indices[0], newInh);
+                componentList.set(indices[1], newInh);
                 Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
                 content = Implication.make(newCond, ((Statement) oldContent).getPredicate());
-            } else
+            } else {
                 componentList = oldContent.cloneComponents();
-            componentList.set(indices[0], newInh);
-            if (oldContent instanceof Conjunction)
-                content = CompoundTerm.make(oldContent, componentList);
-            else if ((oldContent instanceof Implication) || (oldContent instanceof Equivalence))
-                content = Statement.make((Statement) oldContent, componentList.get(0), componentList.get(1));
+                componentList.set(indices[0], newInh);
+                if (oldContent instanceof Conjunction) {
+                    content = CompoundTerm.make(oldContent, componentList);
+                } else if ((oldContent instanceof Implication) || (oldContent instanceof Equivalence)) {
+                    content = Statement.make((Statement) oldContent, componentList.get(0), componentList.get(1));
+                }
+            }
         }
-        if (content == null)
+        if (content == null) {
             return;
+        }
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
-        if (sentence instanceof Question)
+        if (sentence instanceof Question) {
             budget = BudgetFunctions.compoundBackward(content);
-        else
+        } else {
             budget = BudgetFunctions.compoundForward(truth, content);
+        }
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
     /* --------------- Disjunction and Conjunction transform --------------- */
-    
     /**
-     * {(&&, A, B)} |- A
+     * {(&&, A, B), A@(&&, A, B)} |- A
+     * {(||, A, B), A@(||, A, B)} |- A
      * @param compound The premise
      * @param component The recognized component in the premise
      * @param compoundTask Whether the compound comes from the task
      */
     static void structuralCompound(CompoundTerm compound, Term component, boolean compoundTask) {
+        if (!component.isConstant()) {
+            return;
+        }
         Term content = (compoundTask ? component : compound);
         Task task = Memory.currentTask;
+        if (task.isStructual()) {
+            return;
+        }
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence instanceof Question) {
-            budget = BudgetFunctions.backward(truth);
+            budget = BudgetFunctions.compoundBackward(content);
         } else {
-            if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction)))
+            if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction))) {
                 truth = TruthFunctions.implying(truth);
-            else
+            } else {
                 truth = TruthFunctions.implied(truth);
+            }
             budget = BudgetFunctions.forward(truth);
         }
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
     /* --------------- Negation related rules --------------- */
-    
     /**
-     * {A} |- (--, A)
+     * {A, A@(--, A)} |- (--, A)
      * @param content The premise
      */
     static void transformNegation(Term content) {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
-        if (sentence instanceof Judgment)
+        if (sentence instanceof Judgment) {
             truth = TruthFunctions.negation(truth);
+        }
         BudgetValue budget;
-        if (sentence instanceof Question)
+        if (sentence instanceof Question) {
             budget = BudgetFunctions.compoundBackward(content);
-        else
+        } else {
             budget = BudgetFunctions.compoundForward(truth, content);
+        }
         Memory.singlePremiseTask(budget, content, truth);
     }
-    
+
     /**
-     * {<A ==> B>} |- <(--B) ==> (--A)>
+     * {<A ==> B>, A@(--, A)} |- <(--, B) ==> (--, A)>
      * @param statement The premise
      */
     static void contraposition(Statement statement) {
@@ -409,13 +459,15 @@ public final class StructuralRules {
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence instanceof Question) {
-            if (content instanceof Implication)
+            if (content instanceof Implication) {
                 budget = BudgetFunctions.compoundBackwardWeak(content);
-            else
+            } else {
                 budget = BudgetFunctions.compoundBackward(content);
+            }
         } else {
-            if (content instanceof Implication)
+            if (content instanceof Implication) {
                 truth = TruthFunctions.contraposition(truth);
+            }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
         Memory.singlePremiseTask(budget, content, truth);

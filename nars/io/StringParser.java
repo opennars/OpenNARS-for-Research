@@ -16,11 +16,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.io;
 
-import java.util.*;
+import java.util.ArrayList;
 
 import nars.entity.*;
 import nars.inference.*;
@@ -45,13 +45,37 @@ public abstract class StringParser extends Symbols {
             super(s);
         }
     }
+    
+    /**
+     * Parse a line of input experience
+     * <p>
+     * called from ExperienceIO.loadLine
+     * @param buffer The line to be parsed
+     */
+    public static void parseExperience(StringBuffer buffer) {
+        int i = buffer.indexOf(":");
+        if (i > 0) {
+            String prefix = buffer.substring(0, i).trim();
+            if (prefix.equals("OUT")) {
+                return;
+            } else if (prefix.equals("IN")) {
+                buffer.delete(0, i+1);
+            } 
+        }
+        char c = buffer.charAt(buffer.length()-1);
+        if (c == '}') {
+            int j = buffer.lastIndexOf("{");
+            buffer.delete(j-1, buffer.length());
+        }
+        parseTask(buffer.toString().trim());
+    }
 
     /**
-     * The only public (static) method of the class, called from Memory.inputTask.
-     * @param buffer the single-line input String
-     * @return an input Task, or null if the input line cannot be parsed into a Task
+     * The only public (static) method of the class, called from InputWindow or locally.
+     * @param s the single-line input String
      */
-    public static Task parseTask(StringBuffer buffer) {
+    public static void parseTask(String s) {
+        StringBuffer buffer = new StringBuffer(s);
         try {
             String budgetString = getBudgetString(buffer);
             String truthString = getTruthString(buffer);
@@ -60,49 +84,52 @@ public abstract class StringParser extends Symbols {
             int last = str.length() - 1;
             char punc = str.charAt(last);
             TruthValue truth = parseTruth(truthString, punc);
-            BudgetValue budget = parseBudget(budgetString, punc, truth);
             Term content = parseTerm(str.substring(0, last));
-            Base base = (punc == QUESTION_MARK) ? null : new Base();
-            Sentence sentence = Sentence.make(content, punc, tense, truth, base);
+            Stamp stamp = new Stamp();
+            Sentence sentence = Sentence.make(content, punc, tense, truth, stamp);
             if (sentence == null) {
                 throw new InvalidInputException("invalid sentence");
             }
             sentence.setInput();
+            BudgetValue budget = parseBudget(budgetString, punc, truth);
             Task task = new Task(sentence, budget);
-            return task;
+            if (task != null) {
+                Memory.inputTask(task);
+            }
         } catch (InvalidInputException e) {
             System.out.println(" !!! INVALID INPUT: " + buffer + " --- " + e.getMessage());
-            return null;
         }
     }
 
     /* ---------- parse values ---------- */
     /**
-     * return the prefex of a task string that contains a BudgetValue
-     * @return a String containing a BudgetValue
+     * Return the prefex of a task string that contains a BudgetValue
      * @param s the input in a StringBuffer
+     * @return a String containing a BudgetValue
      * @throws nars.io.StringParser.InvalidInputException if the input cannot be parsed into a BudgetValue
      */
     private static String getBudgetString(StringBuffer s) throws InvalidInputException {
-        if (s.charAt(0) != BUDGET_VALUE_MARK) // use default
-        {
+        if (s.charAt(0) != BUDGET_VALUE_MARK) {
             return null;
-        }  // null values
+        }
         int i = s.indexOf(BUDGET_VALUE_MARK + "", 1);    // looking for the end
-        if (i < 0) // no matching closer
-        {
+        if (i < 0) {
             throw new InvalidInputException("missing budget closer");
         }
         String budgetString = s.substring(1, i).trim();
-        if (budgetString.length() == 0) // empty usage
-        {
+        if (budgetString.length() == 0) {
             throw new InvalidInputException("empty budget");
         }
-        s.delete(0, i + 1);                 // remaining input to be processed outside
+        s.delete(0, i + 1);
         return budgetString;
     }
 
-    private static TemporalRules.Relation parseTense(StringBuffer s) throws InvalidInputException {
+    /**
+     * Recognize the tense of an input sentence
+     * @param s the input in a StringBuffer
+     * @return a tense value
+     */
+    private static TemporalRules.Relation parseTense(StringBuffer s) {
         TemporalRules.Relation tense = TemporalRules.Relation.NONE;
         int i = s.indexOf(Symbols.TENSE_MARK);
         if (i > 0) {
@@ -120,7 +147,7 @@ public abstract class StringParser extends Symbols {
     }
 
     /**
-     * return the postfex of a task string that contains a TruthValue
+     * Return the postfix of a task string that contains a TruthValue
      * @return a String containing a TruthValue
      * @param s the input in a StringBuffer
      * @throws nars.io.StringParser.InvalidInputException if the input cannot be parsed into a TruthValue
@@ -150,10 +177,9 @@ public abstract class StringParser extends Symbols {
      * parse the input String into a TruthValue (or DesireValue)
      * @param s input String
      * @param type Task type
-     * @throws nars.io.StringParser.InvalidInputException If the String cannot be parsed into a TruthValue
      * @return the input TruthValue
      */
-    private static TruthValue parseTruth(String s, char type) throws InvalidInputException {
+    private static TruthValue parseTruth(String s, char type) {
         if (type == QUESTION_MARK) {
             return null;
         }
@@ -216,7 +242,7 @@ public abstract class StringParser extends Symbols {
      * Top-level method that parse a Term in general, which may recursively call itself.
      * <p>
      * There are 5 valid cases:
-     * 1. (Op, A1, ..., An) is a common CompoundTerm (including CompoundStatement);
+     * 1. (Op, A1, ..., An) is a CompoundTerm if Op is a built-in operator
      * 2. {A1, ..., An} is an SetExt;
      * 3. [A1, ..., An] is an SetInt;
      * 4. <T1 Re T2> is a Statement (including higher-order Statement);
@@ -338,10 +364,10 @@ public abstract class StringParser extends Symbols {
     }
 
     /**
-     * Parse a String into the argument list of a CompoundTerm.
+     * Parse a String into the argument get of a CompoundTerm.
      * @return the arguments in an ArrayList
      * @param s0 The String to be parsed
-     * @throws nars.io.StringParser.InvalidInputException the String cannot be parsed into an argument list
+     * @throws nars.io.StringParser.InvalidInputException the String cannot be parsed into an argument get
      */
     private static ArrayList<Term> parseArguments(String s0) throws InvalidInputException {
         String s = s0.trim();
@@ -410,7 +436,7 @@ public abstract class StringParser extends Symbols {
 
     /* ---------- recognize symbols ---------- */
     /**
-     * check CompoundTerm opener symbol
+     * Check CompoundTerm opener symbol
      * @return if the given String is an opener symbol
      * @param s The String to be checked
      * @param i The starting index
@@ -431,7 +457,7 @@ public abstract class StringParser extends Symbols {
     }
 
     /**
-     * check CompoundTerm closer symbol
+     * Check CompoundTerm closer symbol
      * @return if the given String is a closer symbol
      * @param s The String to be checked
      * @param i The starting index

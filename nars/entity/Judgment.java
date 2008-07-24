@@ -16,79 +16,73 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.entity;
 
-import nars.language.*;
-import nars.main.*;
+import nars.inference.TemporalRules;
 import nars.io.Symbols;
-import nars.entity.TruthValue;
-import nars.inference.*;
+import nars.language.Term;
+import nars.main.Parameters;
 
 /**
  * A Judgment is an piece of new knowledge to be absorbed.
  */
 public class Judgment extends Sentence {
-    
-    public Judgment(Term term, char punc, TemporalRules.Relation s, TruthValue t, Base b) {
+
+    /**
+     * Constructor
+     * @param term The content
+     * @param punc The punctuation
+     * @param s The tense
+     * @param t The truth value
+     * @param b The stamp
+     */
+    public Judgment(Term term, char punc, TemporalRules.Relation s, TruthValue t, Stamp b) {
         content = term;
         punctuation = punc;
         tense = s;
         truth = t;
-        base = b;
+        stamp = b;
     }
-    
-    // operation executed
+
+    /**
+     * Construct a Judgment to indicate an operation just executed
+     * @param g The goal that trigger the execution
+     */
     public Judgment(Goal g) {
         content = g.cloneContent();
         punctuation = Symbols.JUDGMENT_MARK;
         tense = TemporalRules.Relation.BEFORE;
         truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
-        base = new Base();
-    }
-    
-    public TruthValue getTruth() {
-        return truth;
+        stamp = new Stamp();
     }
 
-    public float getFrequency() {
-        return truth.getFrequency();
+    /**
+     * Check whether the judgment is equivalent to another one
+     * <p>
+     * The two may have different keys
+     * @param that The other judgment
+     * @return Whether the two are equivalent
+     */
+    boolean equivalentTo(Judgment that) {
+        assert content.equals(that.getContent());
+        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp())); 
     }
 
-    public float getConfidence() {
-        return truth.getConfidence();
-    }
-
-    public Base getBase() {
-        return base;
-    }
-
-    boolean equivalentTo(Judgment judgment2) {
-        return (truth.equals(judgment2.getTruth()) && base.equals(judgment2.getBase())); // may have different key
-    }
-
-    public float getExpectationDifference(Judgment that) {
-        return getTruth().getExpDifAbs(that.getTruth());
-    }
-    
-    public float solutionQuality(Sentence sentence) {
-        Term problem = sentence.getContent(); 
-        if (sentence instanceof Goal) 
+    /**
+     * Evaluate the quality of the judgment as a solution to a problem
+     * @param problem A goal or question
+     * @return The quality of the judgment as the solution
+     */
+    public float solutionQuality(Sentence problem) {
+        if (problem instanceof Goal) {
             return truth.getExpectation();
-        else if (problem.isConstant())          // "yes/no" question
-            return truth.getConfidence();                                 // by confidence
-        else                                                            // "what" question or goal
-            return truth.getExpectation() / content.getComplexity();      // by likelihood/simplicity, to be refined
-    }
-    
-    public boolean noOverlapping(Judgment judgment) {
-        Base b = Base.make(base, judgment.getBase());
-        if (b == null)
-            return false;
-        Memory.currentBase = b;
-        return true;
+        } else if (problem.getContent().isConstant()) {   // "yes/no" question
+            return truth.getConfidence();
+        } else {                                    // "what" question or goal
+            return truth.getExpectation() / content.getComplexity();
+        }
     }
 }
 

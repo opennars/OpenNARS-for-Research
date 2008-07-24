@@ -16,19 +16,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.entity;
 
-import java.util.*;
-import java.io.*;
+import java.util.ArrayList;
 
+import nars.gui.ConceptWindow;
 import nars.inference.*;
+import nars.io.Record;
 import nars.language.*;
-import nars.io.*;
-import nars.gui.*;
 import nars.main.*;
-import nars.operation.*;
+import nars.operation.Operator;
 import nars.storage.*;
 
 /**
@@ -39,46 +38,51 @@ import nars.storage.*;
  * those in a ConceptBag. All other access go through the Term that names the concept.
  */
 public final class Concept extends Item {
-    /* Constant term as the unique ID of the concept */
-    private Term term;
-    /* Direct Task lists (they may never be used for a Term that is not used as a Statement) */
-    private Question directQuestion;                // Question that can be directly answered
-    private ArrayList<Goal> directGoals;            // Goals that can be directly achieved
-    private ArrayList<Judgment> directBeliefs;      // Judgments with the same content
-    private boolean revisible = true;               // truth value of judgments can be revised
-    /* Link bags for indirect processing (for all concepts) */
-    private TaskLinkBag taskLinks;
-    private TermLinkBag termLinks;
-    /* Link templates of TermLink, only in concepts with CompoundTerm */
-    private ArrayList<TermLink> termLinkTemplates;
-    private boolean event = false;      // default
-    /* Display related fields */
-    private boolean showing;            // whether this concept has an active window
-    private ConceptWindow window;       // (direct) content display window
 
-    /* ---------- constructor ---------- */
+    /** The term is the unique ID of the concept */
+    private Term term;
+    /** Question directly asked about the term */
+    private Question directQuestion;
+    /** Goals directly requested on the term */
+    private ArrayList<Goal> directGoals;
+    /** Judgments directly made about the term */
+    private ArrayList<Judgment> directBeliefs;
+    /** Whether truth value of judgments can be revised */
+    private boolean revisible = true;               // 
+    /** Task links for indirect processing */
+    private TaskLinkBag taskLinks;
+    /** Term links between the term and its components and compounds */
+    private TermLinkBag termLinks;
+    /** Link templates of TermLink, only in concepts with CompoundTerm */
+    private ArrayList<TermLink> termLinkTemplates;
+    /** Whether the term specifies an event [to be refined] */
+    private boolean event = false;
+    /** Whether the content of the concept is being displayed */
+    private boolean showing = false;
+    /** The display window */
+    private ConceptWindow window = null;
+
+    /* ---------- constructor and intialization ---------- */
     /**
      * Constructor, called in Memory.getConcept only
-     * @param tm A constant term corresponding to the concept
+     * @param tm A term corresponding to the concept
      */
     public Concept(Term tm) {
         super();
-        term = tm;
         key = tm.toString();
-        directBeliefs = new ArrayList<Judgment>();
-        directGoals = new ArrayList<Goal>();
+        term = tm;
         directQuestion = null;
+        directGoals = new ArrayList<Goal>();
+        directBeliefs = new ArrayList<Judgment>();
         taskLinks = new TaskLinkBag();
         termLinks = new TermLinkBag();
         if (tm instanceof CompoundTerm) {
             termLinkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
             checkRevisibility();
             if (tm instanceof Temporal) {
-                markEvent();
+                markEventComponents();
             }
         }
-        showing = false;
-        window = null;
     }
 
     /**
@@ -91,10 +95,11 @@ public final class Concept extends Item {
     /**
      * Terms in temporal compounds is event
      */
-    private void markEvent() {
+    private void markEventComponents() {
+        Term component;
         for (TermLink tLink : termLinkTemplates) {
-            Term target = tLink.getTarget();
-            Concept concept = Memory.termToConcept(target);
+            component = tLink.getTarget();
+            Concept concept = Memory.termToConcept(component);
             if (concept != null) {
                 concept.setEvent();
             }
@@ -103,13 +108,14 @@ public final class Concept extends Item {
 
     /* ---------- direct processing of tasks ---------- */
     /**
-     * Directly process a new task, called in Memory.immediateProcess only
-     * Called exactly once on each task, using local information and finishing in a constant time
-     * Provide feedback in the priority value of the task
+     * Directly process a new task. Called exactly once on each task.
+     * Using local information and finishing in a constant time.
+     * Provide feedback in the budget value of the task.
+     * <p>
+     * called in Memory.immediateProcess only
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
-//        Memory.currentTask = task;
         Sentence sentence = task.getSentence();
         if (sentence instanceof Question) {
             processQuestion((Question) sentence, task);
@@ -118,9 +124,8 @@ public final class Concept extends Item {
         } else {
             processJudgment((Judgment) sentence, task);
         }
-        Memory.activateConcept(this, task.getBudget());
         if (showing) {
-            window.post(displayContent());
+            window.post(displayContent());  // show changes
         }
     }
 
@@ -130,7 +135,7 @@ public final class Concept extends Item {
      * @param task The task to be processed
      */
     private void processQuestion(Question ques, Task task) {
-        if (directQuestion == null) { // keep the existing one for answer information
+        if (directQuestion == null) {           // keep the existing one for answer information
             directQuestion = ques;
         }
         for (Judgment judg : directBeliefs) {
@@ -144,41 +149,51 @@ public final class Concept extends Item {
      * @param task The task to be processed
      */
     private void processGoal(Goal goal, Task task) {
+        boolean revised = false;
         if (revisible) {
-            reviseTable(goal, task, directGoals);       // revise desire
+            revised = reviseTable(goal, task, directGoals);     // revise desire
+        }
+        if (revised) {      // don't process this goal, but the revised version
+            return;
         }
         for (Judgment judg : directBeliefs) {
-            MatchingRules.trySolution(goal, judg, task);    // reality check
+            MatchingRules.trySolution(goal, judg, task);        // reality check
         }
-        float desire = 2 * goal.getTruth().getExpectation() - 1;
-        float qua = (desire < 0) ? 0 : desire;  // decision making
-        task.setQuality(qua);
-        if (task.aboveThreshold()) {
-            Term content = goal.getContent();
-            if (content instanceof Inheritance) {
-                Term pred = (((Inheritance) content).getPredicate());
-                if (pred instanceof Operator) {
-                    ((Operator) pred).call(task);   // directly archiving
+        Term content = goal.getContent();
+        if ((task.getPriority() >= Parameters.PRIORITY_THRESHOLD) && (content instanceof Inheritance)) {
+            Term pred = ((Inheritance) content).getPredicate();
+            if (pred instanceof Operator) {
+                float netDesire = goal.getTruth().getExpectation();
+                if (netDesire > Parameters.DECISION_THRESHOLD) {
+                    ((Operator) pred).call(task);
+                    task.setPriority(0.0f);        // each call is executed once
                     return;
                 }
             }
         }
-        if (task.getPriority() > 0) {
+        if (task.aboveThreshold()) {
             addToTable(goal, directGoals, Parameters.MAXMUM_GOALS_LENGTH);   // indirectly archiving
         }
     }
 
     /**
-     * To accept a new judgment as belief
-     * This method must be put as the last of the three orverloading methods
-     * @param s The judgment to be accepted
+     * To accept a new judgment as belief, and check for revisions and solutions
+     * @param judg The judgment to be accepted
      * @param task The task to be processed
      */
     private void processJudgment(Judgment judg, Task task) {
-        if (revisible) {
-            reviseTable(judg, task, directBeliefs);
+        if (judg.getTense() != TemporalRules.Relation.NONE) {
+            setEvent();
         }
-        if (task.getPriority() > 0) {               // if still valuable --- necessary???
+        if (revisible) {
+            boolean revised = reviseTable(judg, task, directBeliefs);
+            if (!revised) {
+                if (isEvent()) {
+                    TemporalRules.eventProcessing(task);
+                }
+            }
+        }
+        if (task.aboveThreshold()) {
             if (directQuestion != null) {
                 MatchingRules.trySolution(directQuestion, judg, task);
             }
@@ -194,7 +209,8 @@ public final class Concept extends Item {
      * @param task The task to be processed
      * @param table The table to be revised
      */
-    private void reviseTable(Judgment newSentence, Task task, ArrayList table) {
+    private boolean reviseTable(Judgment newSentence, Task task, ArrayList table) {
+        boolean revised = false;
         Judgment belief;
         for (int i = table.size() - 1; i >= 0; i--) {
             belief = (Judgment) table.get(i);
@@ -203,21 +219,28 @@ public final class Concept extends Item {
                     MatchingRules.update(task, belief);
                     table.remove(i);
                 } else {
-                    MatchingRules.revision(task, belief, false);
+                    revised |= MatchingRules.revision(task, belief, false);
                 }
             }
         }
+        return revised;
     }
 
+    /**
+     * Distinguish update from revision [to be refined]
+     * @param newBelief The new belief
+     * @param oldBelief The previous belief
+     * @return Whether the operation is update
+     */
     private boolean isUpdate(Judgment newBelief, Judgment oldBelief) {
         if (oldBelief.getTense() != TemporalRules.Relation.WHEN) {
-            return false;
+            return false;   // only update belief with present tense
         }
         if (newBelief.getTruth().getExpDifAbs(oldBelief.getTruth()) < 0.5) {
-            return false;
+            return false;   // update means major change in expectation
         }
-        if ((newBelief.getBase().latest() <= oldBelief.getBase().latest())) {
-            return false;
+        if ((newBelief.getStamp().latest() <= oldBelief.getStamp().latest())) {
+            return false;   // update previous experience with recent experience
         }
         return true;
     }
@@ -229,6 +252,7 @@ public final class Concept extends Item {
      * @param table The table to be revised
      * @param capacity The capacity of the table
      */
+    @SuppressWarnings("unchecked")
     private void addToTable(Judgment newJudgment, ArrayList table, int capacity) {
         float rank1 = BudgetFunctions.rankBelief(newJudgment);    // for the new belief
         Judgment judgment2;
@@ -254,7 +278,8 @@ public final class Concept extends Item {
 
     /* ---------- insert Links for indirect processing ---------- */
     /**
-     * Insert a TaskLink into the TaskLink bag, and build/activate the TermLinks
+     * Insert a TaskLink into the TaskLink bag
+     * <p>
      * called only from Memory.continuedProcess
      * @param taskLink The termLink to be inserted
      */
@@ -262,42 +287,44 @@ public final class Concept extends Item {
         BudgetValue budget = taskLink.getBudget();
         taskLinks.putIn(taskLink);
         Memory.activateConcept(this, budget);       // activate the concept
-        if (term instanceof CompoundTerm) {
-            buildTermLinks(budget);             // always recognize structure
-        }
     }
 
     /**
      * Recursively build TermLinks between a compound and its components
+     * <p>
+     * called only from Memory.continuedProcess
      * @param budget The budget of the task
      */
-    private void buildTermLinks(BudgetValue budget) {
+    public void buildTermLinks(BudgetValue budget) {
         Term t;
-        Concept c;
-        TermLink cLink1, cLink2;
+        Concept concept;
+        TermLink termLink1, termLink2;
         BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
         if (subBudget.aboveThreshold()) {
-            for (TermLink link : termLinkTemplates) {
-                t = link.getTarget();
-                c = Memory.getConcept(t);
-                cLink1 = new TermLink(t, link, subBudget);
-                insertTermLink(cLink1);   // this termLink to that
-                cLink2 = new TermLink(term, link, subBudget);
-                c.insertTermLink(cLink2);   // that termLink to this
-                if (t instanceof CompoundTerm) {
-                    c.buildTermLinks(subBudget);
+            for (TermLink template : termLinkTemplates) {
+                if (template.getType() != TermLink.TRANSFORM) {
+                    t = template.getTarget();
+                    concept = Memory.getConcept(t);
+                    termLink1 = new TermLink(t, template, subBudget);
+                    insertTermLink(termLink1);   // this termLink to that
+                    termLink2 = new TermLink(term, template, subBudget);
+                    concept.insertTermLink(termLink2);   // that termLink to this
+                    if (t instanceof CompoundTerm) {
+                        concept.buildTermLinks(subBudget);
+                    }
                 }
             }
         }
     }
 
     /**
-     * Insert a TermLink into the TermLink bag, called from buildTermLinks only
+     * Insert a TermLink into the TermLink bag
+     * <p>
+     * called from buildTermLinks only
      * @param termLink The termLink to be inserted
      */
     public void insertTermLink(TermLink termLink) {
         termLinks.putIn(termLink);
-        Memory.activateConcept(this, termLink.getBudget());
     }
 
     /* ---------- access local information ---------- */
@@ -338,18 +365,19 @@ public final class Concept extends Item {
     }
 
     /**
-     * Return the quality of the concept
+     * Recalculate the quality of the concept [to be refined]
      * @return The quality value
      */
     @Override
     public float getQuality() {
-        // re-calculate-and-set? consider syntactic complexity?
-        return UtilityFunctions.and(taskLinks.averagePriority(), termLinks.averagePriority());
+        float linkPriority = termLinks.averagePriority();
+        float termComplexityFactor = 1.0f / term.getComplexity();
+        return UtilityFunctions.or(linkPriority, termComplexityFactor);
     }
 
     /**
      * Return the templates for TermLinks, only called in Memory.continuedProcess
-     * @return The template list
+     * @return The template get
      */
     public ArrayList<TermLink> getTermLinkTemplates() {
         return termLinkTemplates;
@@ -357,17 +385,19 @@ public final class Concept extends Item {
 
     /**
      * Select a belief to interact with the given task in inference
-     * only called in RuleTables.reason
+     * <p>
      * get the first qualified one
+     * <p>
+     * only called in RuleTables.reason
      * @param task The selected task
      * @return The selected belief
      */
     public Judgment getBelief(Task task) {
-        Sentence sentence = task.getSentence();
+        Sentence taskSentence = task.getSentence();
         Judgment belief;
         for (int i = 0; i < directBeliefs.size(); i++) {
             belief = directBeliefs.get(i);
-            if ((sentence instanceof Question) || belief.noOverlapping((Judgment) sentence)) {
+            if (belief.noOverlapping(taskSentence)) {
                 Record.append(" * Selected Belief: " + belief + "\n");
                 return belief;
             }
@@ -380,29 +410,31 @@ public final class Concept extends Item {
      * An atomic step in a concept, only called in Memory.processConcept
      */
     public void fire() {
-        TaskLink tLink = (TaskLink) taskLinks.takeOut();
+        TaskLink tLink = taskLinks.takeOut();
         if (tLink == null) {
             return;
         }
         Memory.currentTaskLink = tLink;
         Memory.currentBeliefLink = null;
-//        if (NARS.isStandAlone())
         Record.append(" * Selected TaskLink: " + tLink + "\n");
         Task task = tLink.getTargetTask();
-//        Record.append(" * Selected Task: " + task + "\n");
         Memory.currentTask = task;
-        if ((tLink.getType() == TermLink.TRANSFORM) && !task.isStructual()) {
-            RuleTables.transformTask(task, tLink);      // inference from a TaskLink and the Task --- for Product and Image
-            return; // cannot be used otherwise
+        if (tLink.getType() == TermLink.TRANSFORM) {
+            RuleTables.transformTask(task, tLink);  // to turn this into structural inference as below?
+            return;
         }
-        TermLink mLink = (TermLink) termLinks.takeOut(tLink);  // to avoid repeated syllogism
-        if (mLink != null) {
-            if (NARS.isStandAlone()) {
-                Record.append(" * Selected TermLink: " + mLink + "\n");
+        int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
+        while (Memory.noResult() && (termLinkCount > 0)) {
+            TermLink termLink = termLinks.takeOut(tLink);
+            if (termLink != null) {
+                Record.append(" * Selected TermLink: " + termLink + "\n");
+                Memory.currentBeliefLink = termLink;
+                RuleTables.reason(tLink, termLink);
+                termLinks.putBack(termLink);
+                termLinkCount--;
+            } else {
+                termLinkCount = 0;
             }
-            Memory.currentBeliefLink = mLink;
-            RuleTables.reason(tLink, mLink);
-            termLinks.putBack(mLink);
         }
         taskLinks.putBack(tLink);
     }
@@ -427,7 +459,6 @@ public final class Concept extends Item {
         window.post(displayContent());
     }
 
-    // 
     /**
      * Stop display, called from ConceptWindow only
      */

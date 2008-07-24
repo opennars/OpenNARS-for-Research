@@ -16,19 +16,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.inference;
 
 import nars.entity.*;
 import nars.language.*;
-import nars.io.*;
-import nars.main.*;
+import nars.io.Symbols;
+import nars.main.Memory;
 
 /**
  * Compound term composition and decomposition rules, with two premises.
  * <p>
- * Forward inference only, except the last rule (abdDepOuter) can also be used backward.
+ * Forward inference only, except the last group (dependent variable introduction) 
+ * can also be used backward.
  */
 public final class CompositionalRules {
 
@@ -53,7 +54,7 @@ public final class CompositionalRules {
             return;
         }
         if (taskSentence.getTense() == belief.getTense()) {
-            Memory.currentTemporalRelation = taskSentence.getTense();
+            Memory.currentTense = taskSentence.getTense();
             Term component1, component2;
             component1 = content1.componentAt(1 - index);
             component2 = content2.componentAt(1 - index);
@@ -219,6 +220,7 @@ public final class CompositionalRules {
 
     /**
      * {(||, S, P), P} |- S
+     * {(&&, S, P), P} |- S
      * @param compound The compound term to be decomposed
      * @param component The part of the compound to be removed
      * @param compoundTask Whether the compound comes from the task
@@ -226,6 +228,9 @@ public final class CompositionalRules {
     static void decomposeStatement(CompoundTerm compound, Term component, boolean compoundTask) {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
+        if (sentence instanceof Question) {
+            return;
+        }
         Judgment belief = Memory.currentBelief;
         Term content = CompoundTerm.reduceComponents(compound, component);
         if (content == null) {
@@ -288,11 +293,12 @@ public final class CompositionalRules {
         TemporalRules.Relation tense1 = Memory.currentTask.getTense();
         TemporalRules.Relation tense2 = Memory.currentBelief.getTense();
         if (tense1 == tense2) {
-            Memory.currentTemporalRelation = tense1;
-            if (tense1 == TemporalRules.Relation.WHEN)
+            Memory.currentTense = tense1;
+            if (tense1 == TemporalRules.Relation.WHEN) {
                 return (Conjunction) ConjunctionParallel.make(state1, state2);
-            else
+            } else {
                 return (Conjunction) Conjunction.make(state1, state2);
+            }
         } else {
             return null;
         }
@@ -350,13 +356,14 @@ public final class CompositionalRules {
         }
         TruthValue truth = null;
         if (sentence instanceof Goal) {
-            truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth());
-        } // to be revised
+            truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth()); // [To be refined]
+        }
         else if (sentence instanceof Judgment) {
             truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth());
         } else {
+            assert (sentence instanceof Question);
             return;
-        } // don't do it for questions
+        } 
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
         Memory.doublePremiseTask(budget, content, truth);
     }

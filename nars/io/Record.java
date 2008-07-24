@@ -16,46 +16,103 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.io;
 
-import nars.gui.*;
+import java.awt.FileDialog;
+import java.io.*;
+
+import nars.gui.InferenceWindow;
 
 /**
- * Inference log, different for (demo) applet and (working) application
+ * Inference log, which record input/output of each inference step
  */
-public class Record {    
+public class Record {
+
     /** the display window */
     private static InferenceWindow window = new InferenceWindow();
     /** whether to display */
     private static boolean isReporting = false;
-    
-    /** initialize the window */
+    /** the log file */
+    private static PrintWriter logFile = null;
+
+    /** 
+     * Initialize the window and the file
+     */
     public static void init() {
         window.clear();
+        if (logFile != null) {
+            closeLogFile();
+        }
     }
-    
-    /** show the window */
+
+    /** 
+     * Show the window
+     */
     public static void show() {
         window.setVisible(true);
     }
-    
-    /** begin the display */
+
+    /** 
+     * Begin the display
+     */
     public static void play() {
         isReporting = true;
     }
-    
-    /** stop the display */
+
+    /**
+     * Stop the display
+     */
     public static void stop() {
         isReporting = false;
     }
 
-    /** add new text to display */
+    /** 
+     * Add new text to display
+     * @param s The line to be displayed
+     */
     public static void append(String s) {
-        if (isReporting)
+        if (isReporting) {
             window.append(s);
+        }
+        if (logFile != null) {
+            logFile.println(s);
+        }
+    }
+
+    /** 
+     * Open the log file
+     */
+    public static void openLogFile() {
+        FileDialog dialog = new FileDialog((FileDialog) null, "Inference Log", FileDialog.SAVE);
+        dialog.setVisible(true);
+        String directoryName = dialog.getDirectory();
+        String fileName = dialog.getFile();
+        try {
+            logFile = new PrintWriter(new FileWriter(directoryName + fileName));
+        } catch (IOException ex) {
+            System.out.println("i/o error: " + ex.getMessage());
+        }
+        window.switchBackground();
+        window.setVisible(true);
+    }
+
+    /** 
+     * Close the log file
+     */
+    public static void closeLogFile() {
+        logFile.close();
+        logFile = null;
+        window.resetBackground();
+    }
+
+    /** 
+     * Check file logging
+     * @return If the file logging is going on
+     */
+    public static boolean isLogging() {
+        return (logFile != null);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * GoTo.java
+ * Temporal.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -19,23 +19,11 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package nars.operation;
-
-import java.io.*;
-import java.util.ArrayList;
-import nars.entity.Task;
+package nars.language;
 
 /**
- * A class used in testing only.
+ * An interface for compound terms with temporal information in it
  */
-public class GoTo extends Operator {
-    public GoTo(String name) {
-        super(name);
-    }
-    
-    public ArrayList<Task> execute(Task task) {
-//        System.out.println("EXECUTE in " + name + " " + task.getSentence());
-        return null;
-    }
-}
+public interface Temporal {
 
+}

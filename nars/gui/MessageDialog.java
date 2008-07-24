@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.gui;
@@ -25,7 +25,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Pop-up message for the user
+ * Pop-up message for the user to accept
  */
 public class MessageDialog extends Dialog implements ActionListener {
     protected Button button;

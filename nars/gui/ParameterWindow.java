@@ -16,9 +16,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
@@ -28,15 +27,16 @@ import java.awt.event.*;
  * Window displaying a system parameter that can be adjusted in run time
  */
 public class ParameterWindow extends NarsFrame implements ActionListener, AdjustmentListener {
-    /* GUI components */
-    private Label       valueLabel;
-    private Button      hideButton, undoButton, defaultButton;
-    private Scrollbar   valueBar;
-    /* parameter values */
-    private int defaultValue;
-    private int previousValue;
-    private int currentValue;
-    
+
+    /** Display label */
+    private Label valueLabel;
+    /** Control buttons */
+    private Button hideButton,  undoButton,  defaultButton;
+    /** Adjusting bar */
+    private Scrollbar valueBar;
+    /** parameter values */
+    private int defaultValue,  previousValue,  currentValue;
+
     /**
      * Constructor
      * @param title Parameter name
@@ -47,7 +47,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         defaultValue = dft;
         previousValue = dft;
         currentValue = dft;
-        setLayout(new GridLayout(3,3,8,4));
+        setLayout(new GridLayout(3, 3, 8, 4));
         setBackground(SINGLE_WINDOW_COLOR);
         Label sp1 = new Label("");
         sp1.setBackground(SINGLE_WINDOW_COLOR);
@@ -59,7 +59,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         sp2.setBackground(SINGLE_WINDOW_COLOR);
         add(sp2);
         add(new Label("0", Label.RIGHT));
-        valueBar = new Scrollbar(Scrollbar.HORIZONTAL,dft,0,0,101);
+        valueBar = new Scrollbar(Scrollbar.HORIZONTAL, dft, 0, 0, 101);
         valueBar.addAdjustmentListener(this);
         add(valueBar);
         add(new Label("100", Label.LEFT));
@@ -74,7 +74,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         add(hideButton);
         this.setBounds(300, 300, 250, 120);
     }
-    
+
     /**
      * Get the value of the parameter
      * @return The current value
@@ -82,7 +82,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     public int value() {
         return currentValue;
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
@@ -102,14 +102,14 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
             setVisible(false);
         }
     }
-    
+
     /**
      * Handling scrollbar movement
      * @param e The AdjustmentEvent
      */
     public void adjustmentValueChanged(AdjustmentEvent e) {
         if (e.getSource() == valueBar) {
-            int v = ((Scrollbar) valueBar).getValue();
+            int v = valueBar.getValue();
             valueLabel.setText(String.valueOf(v));
             valueBar.setValue(v);
             currentValue = v;

@@ -16,13 +16,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package nars.storage;
 
 import nars.entity.TaskLink;
-import nars.gui.*;
+import nars.gui.MainWindow;
 import nars.main.Parameters;
 
 /**
@@ -30,10 +30,18 @@ import nars.main.Parameters;
  */
 public class TaskLinkBag extends Bag<TaskLink> {
 
+    /**
+     * Get the (constant) capacity of TaskLinkBag
+     * @return The capacity of TaskLinkBag
+     */
     protected int capacity() {
-        return Parameters.TASK_BAG_SIZE;
+        return Parameters.TASK_LINK_BAG_SIZE;
     }
     
+    /**
+     * Get the (adjustable) forget rate of TaskLinkBag
+     * @return The forget rate of TaskLinkBag
+     */
     protected int forgetRate() {
         return MainWindow.forgetTW.value();
     }

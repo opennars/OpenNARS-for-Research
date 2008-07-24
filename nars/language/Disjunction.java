@@ -16,23 +16,22 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.language;
 
 import java.util.*;
-import nars.inference.*;
-import nars.io.*;
+
+import nars.io.Symbols;
 import nars.main.Memory;
 
 /** 
  * A disjunction of Statements.
  */
 public class Disjunction extends CompoundTerm {
-    
+
     /**
-     * constructor with partial values, called by make
+     * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
      */
@@ -41,24 +40,23 @@ public class Disjunction extends CompoundTerm {
     }
 
     /**
-     * constructor with full values, called by clone
-     * @param cs component list
-     * @param open open variable list
-     * @param closed closed variable list
-     * @param i syntactic complexity of the compound
+     * Constructor with full values, called by clone
      * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
      */
-    private Disjunction(String n, ArrayList<Term> cs, ArrayList<Variable> open, ArrayList<Variable> closed, short i) {
-        super(n, cs, open, closed, i);
+    private Disjunction(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
-    
+
     /**
-     * override the cloning methed in Object
-     * @return A new object, to be casted into a Disjunction
+     * Clone an object
+     * @return A new object
      */
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Disjunction(name, (ArrayList<Term>) cloneList(components),
-                (ArrayList<Variable>) cloneList(openVariables), (ArrayList<Variable>) cloneList(closedVariables), complexity);
+        return new Disjunction(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
     }
 
     /**
@@ -67,16 +65,19 @@ public class Disjunction extends CompoundTerm {
      * @param term2 The first compoment
      * @return A Disjunction generated or a Term it reduced to
      */
+    @SuppressWarnings("unchecked")
     public static Term make(Term term1, Term term2) {
         TreeSet set;
         if (term1 instanceof Disjunction) {
             set = new TreeSet(((CompoundTerm) term1).cloneComponents());
-            if (term2 instanceof Disjunction)
-                set.addAll(((CompoundTerm) term2).cloneComponents());   // (&,(&,P,Q),(&,R,S)) = (&,P,Q,R,S)
-            else
-                set.add((Term) term2.clone());                          // (&,(&,P,Q),R) = (&,P,Q,R)
+            if (term2 instanceof Disjunction) {
+                set.addAll(((CompoundTerm) term2).cloneComponents());
+            } // (&,(&,P,Q),(&,R,S)) = (&,P,Q,R,S)
+            else {
+                set.add((Term) term2.clone());
+            }                          // (&,(&,P,Q),R) = (&,P,Q,R)
         } else if (term2 instanceof Disjunction) {
-            set = new TreeSet(((CompoundTerm) term2).cloneComponents()); 
+            set = new TreeSet(((CompoundTerm) term2).cloneComponents());
             set.add((Term) term1.clone());                              // (&,R,(&,P,Q)) = (&,P,Q,R)
         } else {
             set = new TreeSet();
@@ -85,7 +86,7 @@ public class Disjunction extends CompoundTerm {
         }
         return make(set);
     }
-    
+
     /**
      * Try to make a new IntersectionExt. Called by StringParser.
      * @param argList a list of Term as compoments
@@ -102,16 +103,17 @@ public class Disjunction extends CompoundTerm {
      * @return the Term generated from the arguments
      */
     public static Term make(TreeSet<Term> set) {
-        if (set.size() == 1)
-            return set.first();                         // special case: single component
+        if (set.size() == 1) {
+            return set.first();
+        }                         // special case: single component
         ArrayList<Term> argument = new ArrayList<Term>(set);
         String name = makeCompoundName(Symbols.DISJUNCTION_OPERATOR, argument);
         Term t = Memory.nameToListedTerm(name);
         return (t != null) ? t : new Disjunction(name, argument);
     }
-    
+
     /**
-     * get the operator of the term.
+     * Get the operator of the term.
      * @return the operator of the term
      */
     public String operator() {
@@ -119,10 +121,11 @@ public class Disjunction extends CompoundTerm {
     }
 
     /**
-     * Conjunction is communitative.
+     * Disjunction is communitative.
      * @return true for communitative
      */
+    @Override
     public boolean isCommutative() {
         return true;
-    }    
+    }
 }

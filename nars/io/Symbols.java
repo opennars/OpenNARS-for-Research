@@ -16,9 +16,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.io;
 
 import java.awt.*;
@@ -28,24 +27,23 @@ import java.awt.*;
  */
 public class Symbols {
 
-    // sentence delimitors
+    /* sentence type and delimitors */
     public static final char JUDGMENT_MARK = '.';
     public static final char QUESTION_MARK = '?';
     public static final char GOAL_MARK = '!';
 
-    // numerical value delimitors
-    // must be different from the Term opener/closer pairs
+    /* Tense markers */
+    public static final String TENSE_MARK = ":";
+    public static final String TENSE_PAST = ":\\:";
+    public static final String TENSE_PRESENT = ":|:";
+    public static final String TENSE_FUTURE = ":/:";
+
+    /* numerical value delimitors, must be different from the Term delimitors */
     public static final char BUDGET_VALUE_MARK = '$';
     public static final char TRUTH_VALUE_MARK = '%';
     public static final char VALUE_SEPARATOR = ';';
 
-    // special Term name prefix
-    public static final char VARIABLE_TAG = '#';
-    public static final char QUERY_VARIABLE_TAG = '?';
-    public static final char OPERATOR_TAG = '^';
-
-    // CompountTerm delimitors
-    // must use 4 different pairs, see CompoundTerm/fromString.
+    /* CompountTerm delimitors, must use 4 different pairs */
     public static final char COMPOUND_TERM_OPENER = '(';
     public static final char COMPOUND_TERM_CLOSER = ')';
     public static final char STATEMENT_OPENER = '<';
@@ -55,11 +53,11 @@ public class Symbols {
     public static final char SET_INT_OPENER = '[';
     public static final char SET_INT_CLOSER = ']';
     
+    /* special characors in argument list */
     public static final char ARGUMENT_SEPARATOR = ',';
     public static final char IMAGE_PLACE_HOLDER = '_';
 
-    // CompountTerm operators
-    // length = 1
+    /* CompountTerm operators, length = 1 */
     public static final String INTERSECTION_EXT_OPERATOR = "&";
     public static final String INTERSECTION_INT_OPERATOR = "|";
     public static final String DIFFERENCE_EXT_OPERATOR = "-";
@@ -68,22 +66,14 @@ public class Symbols {
     public static final String IMAGE_EXT_OPERATOR = "/";
     public static final String IMAGE_INT_OPERATOR = "\\";
 
-    // CompoundStatement operators
-    // length = 2
+    /* CompoundStatement operators, length = 2 */
     public static final String NEGATION_OPERATOR = "--";
     public static final String DISJUNCTION_OPERATOR = "||";
     public static final String CONJUNCTION_OPERATOR = "&&";
     public static final String SEQUENCE_OPERATOR = "&/";
     public static final String PARALLEL_OPERATOR = "&|";
 
-    // Tense markers
-    public static final String TENSE_MARK = ":";
-    public static final String TENSE_PAST = ":\\:";
-    public static final String TENSE_PRESENT = ":|:";
-    public static final String TENSE_FUTURE = ":/:";
-
-    // built-in relations
-    // length = 3
+    /* built-in relations, length = 3 */
     public static final String INHERITANCE_RELATION = "-->";
     public static final String SIMILARITY_RELATION = "<->";
     public static final String INSTANCE_RELATION = "{--";
@@ -97,15 +87,20 @@ public class Symbols {
     public static final String EQUIVALENCE_AFTER_RELATION = "</>";
     public static final String EQUIVALENCE_WHEN_RELATION = "<|>";
 
-    // Base, display only
-    public static final String Base_opener = " {";
-    public static final String Base_closer = "} ";
-    public static final String Base_separator = ";";
-    public static final String Base_separator0 = ": ";
+    /* special Term name prefix, single charactor */
+    public static final char VARIABLE_TAG = '#';
+    public static final char QUERY_VARIABLE_TAG = '?';
+    public static final char OPERATOR_TAG = '^';
+
+    /* Stamp, display only */
+    public static final String STAMP_OPENER = " {";
+    public static final String STAMP_CLOSER = "} ";
+    public static final String STAMP_SEPARATOR = ";";
+    public static final String STAMP_STARTER = ": ";
     
-    // TermLink type, display only
-    public static final String LinkToComponent_at1 = " @(";
-    public static final String LinkToComponent_at2 = ") _ ";
-    public static final String LinkToCompound_at1 = " _ @(";
-    public static final String LinkToCompound_at2 = ") ";
+    /* TermLink type, display only */
+    public static final String TO_COMPONENT_1 = " @(";
+    public static final String TO_COMPONENT_2 = ")_ ";
+    public static final String TO_COMPOUND_1 = " _@(";
+    public static final String TO_COMPOUND_2 = ") ";
 }

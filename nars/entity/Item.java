@@ -16,27 +16,36 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.entity;
 
 /**
  * An item is an object that can be put into a Bag,
- * and it participates in the resource competation of the system.
+ * to participate in the resource competation of the system.
+ * <p>
+ * It has a key and a budget.
  */
 public abstract class Item extends BudgetValue {
-    /**
-     * The key of the Item, unique in a Bag
-     */
+
+    /** The key of the Item, unique in a Bag */
     protected String key;   // uniquely define an Item in a bag
-    
-    protected Item() {}
-    
+
+    /**
+     * Default constructor
+     */
+    protected Item() {
+        super();
+    }
+
+    /**
+     * Constructor with initial budget
+     * @param v The initial budget
+     */
     protected Item(BudgetValue v) {
         super(v);
     }
-            
+
     /**
      * Get the current key
      * @return Current key value
@@ -44,30 +53,14 @@ public abstract class Item extends BudgetValue {
     public String getKey() {
         return key;
     }
-    
-    /**
-     * Set a new key value
-     * @param k New key value
-     */
-    public void setKey(String k) {
-        key = k;
-    }
 
     /**
      * Get current BudgetValue
+     * <p>
+     * This method is redundant, just to make the code more readable
      * @return Current BudgetValue
      */
     public BudgetValue getBudget() {
         return this;
-    }
-
-    /**
-     * Set new BudgetValue
-     * @param v new BudgetValue
-     */
-    public void setBudget(BudgetValue v) {      // is this necessary?
-        setPriority(v.getPriority());
-        setDurability(v.getDurability());
-        setQuality(v.getQuality());
     }
 }

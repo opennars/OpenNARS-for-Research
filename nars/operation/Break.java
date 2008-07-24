@@ -1,5 +1,5 @@
 /*
- * GoTo.java
+ * Break.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -28,14 +28,12 @@ import nars.entity.Task;
 /**
  * A class used in testing only.
  */
-public class GoTo extends Operator {
-    public GoTo(String name) {
+public class Break extends Operator {
+    public Break(String name) {
         super(name);
     }
-    
+
     public ArrayList<Task> execute(Task task) {
-//        System.out.println("EXECUTE in " + name + " " + task.getSentence());
         return null;
     }
 }
-

@@ -16,63 +16,103 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.entity;
 
 /**
  * A float value in [0, 1], with 4 digits accuracy.
  */
 public class ShortFloat implements Cloneable {
-    
-    // the values are saved as short integers (-32768 to 32767, only 0 to 10000 used),
-    // but used as float
+
+    /** To save space, the values are stored as short integers (-32768 to 32767, only 0 to 10000 used),
+    but used as float */
     private short value;
-    
+
+    /** 
+     * Constructor
+     * @param v The initial value
+     */
     public ShortFloat(float v) {
         setValue(v);
     }
-    
-    // access value
+
+    /**
+     * To access the value as float
+     * @return The current value in float
+     */
     public float getValue() {
         return (float) (value * 0.0001);
     }
 
-    public short getShortValue() {
+    /**
+     * To access the value as short
+     * @return The current value in short
+     */
+    short getShortValue() {
         return value;
     }
-    
-    // set new value, rounded, with validity checking
+
+    /**
+     * Set new value, rounded, with validity checking
+     * @param v The new value
+     */
     public void setValue(float v) {
-        if ((v < 0) || (v > 1))
+        if ((v < 0) || (v > 1)) {
             System.out.println("!!! Wrong value: " + v);
-        else
+        } else {
             value = (short) (v * 10000.0 + 0.5);
+        }
     }
-    
+
+    /**
+     * Compare two ShortFloat values
+     * @param that The other value to be compared
+     * @return Whether the two have the same value
+     */
+    @Override
     public boolean equals(Object that) {
         return ((that instanceof ShortFloat) && (value == ((ShortFloat) that).getShortValue()));
     }
-    
-    // full output
+
+    /**
+     * The hash code of the ShortFloat
+     * @return The hash code
+     */
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + this.value;
+        return hash;
+    }
+
+    /**
+     * Convert the value into a String
+     * @return The String representation, with 4 digits accuracy
+     */
+    @Override
     public String toString() {
-        if (value == 10000)
+        if (value == 10000) {
             return "1.0000";
-        else {
+        } else {
             String s = String.valueOf(value);
-            while (s.length() < 4)
+            while (s.length() < 4) {
                 s = "0" + s;
+            }
             return "0." + s;
         }
     }
-    
-    // output with 2 digits, rounded
+
+    /**
+     * Convert the value into a String
+     * @return The String representation, with 2 digits accuracy
+     */
     public String toString2() {
         String s = toString();
-        if (s.length() > 4)
+        if (s.length() > 4) {
             return s.substring(0, 4);
-        else
+        } else {
             return s;
+        }
     }
 }

@@ -16,17 +16,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.main;
 
 import java.util.*;
+
 import nars.entity.*;
+import nars.inference.*;
+import nars.io.*;
 import nars.language.*;
 import nars.operation.Operator;
 import nars.storage.*;
-import nars.io.*;
-import nars.inference.*;
 
 /**
  * The memory of the system.
@@ -34,46 +35,32 @@ import nars.inference.*;
 public class Memory {
 
     /* ---------- all members are static, with limited space ---------- */
-    /**
-     * Concept bag. Containing all Concepts of the system.
-     */
+    /** Concept bag. Containing all Concepts of the system */
     private static ConceptBag concepts;
-    /**
-     * Operators (built-in terms) table. Accessed by name.
-     */
+    /** Operators (built-in terms) table. Accessed by name */
     private static HashMap<String, Operator> operators;
-    // There is no global Term table, which may ask for unlimited space.
-    /**
-     * List of inference newTasks, to be processed in the next working cycle.
-     */
+    /* There is no global Term table, which may ask for unlimited space. */
+    /** List of inference newTasks, to be processed in the next working cycle */
     private static ArrayList<Task> newTasks;
-    /**
-     * New tasks with novel composed concepts, to be processed in the near future.
-     */
-    private static TaskBag taskBuffer;
+    /** New tasks with novel composed terms, for delayed and selective processing */
+    private static TaskBuffer novelTaskBuffer;
+    /** List of recent events, for temporal learning */
+    public static ArrayList<Task> recentEvents;
     /* ---------- global variables used to reduce method arguments ---------- */
-    /**
-     * Shortcut to the selected Term.
-     */
+    /** Shortcut to the selected Term */
     public static Term currentTerm;
-    /**
-     * Shortcut to the selected TaskLink.
-     */
+    /** Shortcut to the selected TaskLink */
     public static TaskLink currentTaskLink;
-    /**
-     * Shortcut to the selected Task.
-     */
+    /** Shortcut to the selected Task */
     public static Task currentTask;
-    /**
-     * Shortcut to the selected TermLink.
-     */
+    /** Shortcut to the selected TermLink */
     public static TermLink currentBeliefLink;
-    /**
-     * Shortcut to the selected belief (Sentence).
-     */
+    /** Shortcut to the selected belief */
     public static Judgment currentBelief;
-    public static Base currentBase;
-    public static TemporalRules.Relation currentTemporalRelation;
+    /** Shortcut to the derived Stamp */
+    public static Stamp currentStamp;
+    /** Shortcut to the derived tense */
+    public static TemporalRules.Relation currentTense;
 
     /* ---------- initialization ---------- */
     /**
@@ -82,15 +69,17 @@ public class Memory {
      * Called in Center.reset only
      */
     public static void init() {
-        concepts = new ConceptBag();         // initially empty
-        newTasks = new ArrayList<Task>();     // initially empty
-        taskBuffer = new TaskBag();       // initially empty
-        operators = Operator.setOperators(); // with operators created
+        concepts = new ConceptBag();            // initially empty, with capacity limit
+        operators = Operator.setOperators();    // with operators created, then remain constant
+        newTasks = new ArrayList<Task>();       // initially empty, without capacity limit
+        novelTaskBuffer = new TaskBuffer();        // initially empty, with capacity limit
+        recentEvents = new ArrayList<Task>(Parameters.MAXMUM_EVENTS_LENGTH);    // initially empty, with capacity limit
     }
 
     /* ---------- access utilities ---------- */
     /**
-     * Get a Term for a given name of a Concept or Operator, 
+     * Get a Term for a given name of a Concept or Operator
+     * <p>
      * called in StringParser and the make methods of compound terms.
      * @param name the name of a concept or operator
      * @return a Term or null (if no Concept/Operator has this name)
@@ -99,12 +88,14 @@ public class Memory {
         Concept concept = concepts.get(name);
         if (concept != null) {
             return concept.getTerm();
-        }           // Concept associated Term
+        }
         return operators.get(name);
     }
 
     /**
-     * Check if a string is an operator name, called in StringParser only.
+     * Check if a string is an operator name
+     * <p>
+     * called in StringParser only.
      * @param name the name of a possible operator
      * @return the corresponding operator or null
      */
@@ -113,7 +104,9 @@ public class Memory {
     }
 
     /**
-     * Get an existing Concept for a given name, called from Term and ConceptWindow.
+     * Get an existing Concept for a given name
+     * <p>
+     * called from Term and ConceptWindow.
      * @param name the name of a concept
      * @return a Concept or null
      */
@@ -131,7 +124,7 @@ public class Memory {
     }
 
     /**
-     * Get the Concept associated to a Term, or creat it.
+     * Get the Concept associated to a Term, or create it.
      * @param term indicating the concept
      * @return an existing Concept, or a new one
      */
@@ -139,58 +132,52 @@ public class Memory {
         String n = term.getName();
         Concept concept = concepts.get(n);
         if (concept == null) {
-            concept = new Concept(term);
-        }        // the only place to make a new Concept
+            concept = new Concept(term); // the only place to make a new Concept
+            concepts.putIn(concept);
+        }
         return concept;
     }
 
     /**
-     * Adjust the activation level of a Concept or Operator, called in Concept only.
+     * Adjust the activation level of a Concept
+     * <p>
+     * called in Concept.insertTaskLink only
      * @param c the concept to be adusted
      * @param b the new BudgetValue
      */
     public static void activateConcept(Concept c, BudgetValue b) {
-        BudgetValue budget;
-        if (concepts.contains(c)) {     // listed Concept
-            concepts.pickOut(c.getKey());
-            BudgetFunctions.activate(c, b);
-            concepts.putBack(c);
-        } else {                        // new Concept
-            BudgetFunctions.activate(c, b);
-            concepts.putIn(c);
-        }
+        concepts.pickOut(c.getKey());
+        BudgetFunctions.activate(c, b);
+        concepts.putBack(c);
+    }
+
+    /**
+     * Check if there is already any derived Task in the current cycle
+     * <p>
+     * called in Concept.fire only
+     * @return Whether in the current cycle there is already derived Task
+     */
+    public static boolean noResult() {
+        return (newTasks.size() == 0);
     }
 
     /* ---------- new task entries ---------- */
-    // There are three types of new tasks: (1) input, (2) derived, (3) activated
-    // They are all added into the newTasks list, to be processed in the next cycle.
-    // Some of them are reported and/or logged.
-    /**
-     * Input task comes from the InputWindow.
-     * @param str the input line
-     */
-    public static void inputTask(String str) {
-        Task task = StringParser.parseTask(new StringBuffer(str));       // the only place to call StringParser
-        if (task != null) {
-            inputTask(task);
-        }
-    }
-
+    /* There are several types of new tasks, all added into the 
+    newTasks list, to be processed in the next cycle.
+    Some of them are reported and/or logged. */
     /**
      * Input task processing.
      * @param task the input task
      */
     public static void inputTask(Task task) {
-        if (NARS.isStandAlone()) {
-            Record.append("!!! Input: " + task + "\n");
-        }   // append to inference record
-        if (task.aboveThreshold()) {                       // set a threshold?
-            report(task.getSentence(), true);             // report input
+        Record.append("!!! Input: " + task + "\n");
+        if (task.aboveThreshold()) {
+            report(task.getSentence(), true);    // report input
             newTasks.add(task);       // wait to be processed in the next cycle
-            taskBuffer.refresh();           // refresh display
+            novelTaskBuffer.refresh();           // refresh display
         } else {
             Record.append("!!! Ignored: " + task + "\n");
-        }   // append to inference record
+        }
     }
 
     /**
@@ -198,47 +185,48 @@ public class Memory {
      * @param task the derived task
      */
     private static void derivedTask(Task task) {
-        Record.append("!!! Derived: " + task.toString() + "\n");
+        Record.append("!!! Derived: " + task + "\n");
         if (task.aboveThreshold()) {
-            float budget = task.getBudget().singleValue();
+            float budget = task.getBudget().summary();
+            @SuppressWarnings("static-access")
             float minSilent = Center.mainWindow.silentW.value() / 100.0f;
-            if (budget > minSilent) {
+            if (budget > minSilent) {  // only report significient derived Tasks
                 report(task.getSentence(), false);
-            }        // report significient derived Tasks
+            }
             newTasks.add(task);
-            taskBuffer.refresh();
+            novelTaskBuffer.refresh();
         } else {
             Record.append("!!! Ignored: " + task + "\n");
-        }   // append to inference record
+        }
     }
 
     /**
-     * Reporting executed task, called from operation.Operator.
+     * Reporting executed task, and remember the event
+     * <p>
+     * called from Operator.call only
      * @param task the executed task
      */
-    public static void executedTask(Task task) {   // called by the inference rules
+    public static void executedTask(Task task) {
         Record.append("!!! Executed: " + task.getSentence() + "\n");
         Goal g = (Goal) task.getSentence();
         Judgment j = new Judgment(g);
         Task newTask = new Task(j, task.getBudget());
-        report(newTask.getSentence(), true);             // report input
+        report(newTask.getSentence(), false);
         newTasks.add(newTask);
-        taskBuffer.refresh();
+        novelTaskBuffer.refresh();
     }
 
     /**
-     * Activated task comes from MatchingRules.
+     * Activated task coming from MatchingRules.trySolution
      * @param budget The budget value of the new Task
      * @param sentence The content of the new Task
      * @param isInput Whether the question is input
      */
     public static void activatedTask(BudgetValue budget, Sentence sentence, boolean isInput) {
         Task task = new Task(sentence, budget);
-        if (NARS.isStandAlone()) {
-            Record.append("!!! Activated: " + task.toString() + "\n");
-        }
+        Record.append("!!! Activated: " + task.toString() + "\n");
         newTasks.add(task);
-        taskBuffer.refresh();
+        novelTaskBuffer.refresh();
     }
 
     /* --------------- new task building --------------- */
@@ -249,9 +237,11 @@ public class Memory {
      * @param truth The truth value of the new task
      */
     public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
-        Sentence newSentence = Sentence.make(currentTask.getSentence(), content, currentTemporalRelation, truth, currentBase);
-        Task newTask = new Task(newSentence, budget);
-        derivedTask(newTask);
+        if (content != null) {
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, currentTense, truth, currentStamp);
+            Task newTask = new Task(newSentence, budget);
+            derivedTask(newTask);
+        }
     }
 
     /**
@@ -262,22 +252,24 @@ public class Memory {
      */
     public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, sentence.getTense(), truth, sentence.getBase());
+        Sentence newSentence = Sentence.make(sentence, content, sentence.getTense(), truth, sentence.getStamp());
         Task newTask = new Task(newSentence, budget);
         newTask.setStructual();
         derivedTask(newTask);
     }
 
     /**
-     * Convert jusgment into different relation, called in MatchingRules
+     * Convert jusgment into different relation
+     * <p>
+     * called in MatchingRules
      * @param budget The budget value of the new task
      * @param truth The truth value of the new task
      */
     public static void convertedJudgment(TruthValue truth, BudgetValue budget) {
         Term content = Memory.currentTask.getContent();
         TemporalRules.Relation tense = Memory.currentBelief.getTense();
-        Base base = Memory.currentBelief.getBase();
-        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, tense, truth, base);
+        Stamp stamp = Memory.currentBelief.getStamp();
+        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, tense, truth, stamp);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructual();
         derivedTask(newTask);
@@ -285,11 +277,14 @@ public class Memory {
 
     /* ---------- system working cycle ---------- */
     /**
-     * An atomic working cycle of the system. Called from Center only.
+     * An atomic working cycle of the system: process new Tasks, then fire a concept
+     * <p>
+     * Called from Center.tick only
      */
     public static void cycle() {
-        processTask();      // tune relative frequency?
-        processConcept();   // use this order to check the new result
+        // keep the following order
+        processTask();
+        processConcept();
     }
 
     /**
@@ -298,91 +293,82 @@ public class Memory {
      */
     private static void processTask() {
         Task task;
-        int counter = newTasks.size();              // don't include new tasks produced in the current cycle
-        while (counter-- > 0) {                     // process the newTasks of the previous cycle
-            task = (Task) newTasks.remove(0);
-            if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) // new input or existing concept
-            {
-                currentTask = task;
+        int counter = newTasks.size();  // don't include new tasks produced in the current cycle
+        while (counter-- > 0) {
+            task = newTasks.remove(0);
+            if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
-            } // immediate process
-            else {
-                taskBuffer.putIn(task);
-            }             // postponed process
+            } else {
+                novelTaskBuffer.putIn(task);    // delayed processing
+            }
         }
-        task = (Task) taskBuffer.takeOut();         // select a task from taskBuffer
+        task = novelTaskBuffer.takeOut();       // select a task from novelTaskBuffer
         if (task != null) {
             immediateProcess(task);
-        }                       // immediate process
+        }
     }
 
     /**
      * Select a concept to fire.
      */
     private static void processConcept() {
-        Concept currentConcept = (Concept) concepts.takeOut();
+        Concept currentConcept = concepts.takeOut();
         if (currentConcept != null) {
             currentTerm = currentConcept.getTerm();
             Record.append(" * Selected Concept: " + currentTerm + "\n");
             concepts.putBack(currentConcept);   // current Concept remains in the bag all the time
             currentConcept.fire();              // a working cycle
-            taskBuffer.refresh();               // show new result
+            novelTaskBuffer.refresh();          // show new result
         }
     }
 
-    /* ---------- task / belief insertion ---------- */
+    /* ---------- task processing ---------- */
     /**
-     * Imediate processing of a new task
+     * Imediate processing of a new task, in constant time
      * Local processing, in one concept only
      * @param task the task to be accepted
      */
     private static void immediateProcess(Task task) {
-        if (NARS.isStandAlone()) {
-            Record.append("!!! Accept: " + task.toString() + "\n");
-        }
+        currentTask = task;
+        Record.append("!!! Insert: " + task + "\n");
         Term content = task.getContent();
-        if (content.isConstant()) {                        // does not creat concept for Query?
-            Concept c = getConcept(content);
-            c.directProcess(task);
-        }
-        if (task.aboveThreshold()) {
+        Concept c = getConcept(content);
+        c.directProcess(task);
+        if (task.aboveThreshold()) {    // still need to be processed
             continuedProcess(task, content);
         }
     }
 
     /**
-     * Link to a new task from all relevant concepts for distributed processing.
+     * Link to a new task from all relevant concepts for continued processing in
+     * the near future for unspecified time.
+     * <p>
      * The only method that calls the TaskLink constructor.
      * @param task The task to be linked
      * @param content The content of the task
      */
     private static void continuedProcess(Task task, Term content) {
-        TaskLink tLink;
-        Concept localConcept = null;                      // local Concept
+        TaskLink taskLink;
+        Concept contentConcept = getConcept(content);
         BudgetValue budget = task.getBudget();
-        localConcept = getConcept(content);
-        tLink = new TaskLink(task, null, budget);   // link type SELF
-        localConcept.insertTaskLink(tLink);
+        taskLink = new TaskLink(task, null, budget);   // link type: SELF
+        contentConcept.insertTaskLink(taskLink);
         if (content instanceof CompoundTerm) {
-            Term componentTerm;                     // componentTerm term
-            Concept componentConcept;               // componentTerm concept
-            ArrayList<TermLink> termLinks = (localConcept != null) ? localConcept.getTermLinkTemplates()
-                    : ((CompoundTerm) content).prepareComponentLinks();  // use saved
+            ArrayList<TermLink> termLinks = (contentConcept != null) ? contentConcept.getTermLinkTemplates()
+                    : ((CompoundTerm) content).prepareComponentLinks();  // use saved if exist
             BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
             if (subBudget.aboveThreshold()) {
-                for (int i = 0; i < termLinks.size(); i++) {
-                    TermLink mLink = termLinks.get(i);
-                    componentTerm = mLink.getTarget();
-                    componentConcept = getConcept(componentTerm);
-                    if (task.isStructual() && (mLink.getType() == TermLink.TRANSFORM)) { // avoid circular transform
-                        return;
+                Term componentTerm;
+                Concept componentConcept;
+                for (TermLink termLink : termLinks) {
+                    if (!(task.isStructual() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
+                        taskLink = new TaskLink(task, termLink, subBudget);
+                        componentTerm = termLink.getTarget();
+                        componentConcept = getConcept(componentTerm);
+                        componentConcept.insertTaskLink(taskLink);
                     }
-                    if ((content instanceof ConjunctionSequence) && (i > 0)) { // only link to the first component
-                        return;
-                    }
-                    tLink = new TaskLink(task, mLink, subBudget);
-                    componentConcept.insertTaskLink(tLink);               // componentTerm link to task                }
                 }
+                contentConcept.buildTermLinks(budget);  // recursively insert TermLink
             }
         }
     }
@@ -397,39 +383,41 @@ public class Memory {
     }
 
     /**
-     * Display buffered tasks, called from MainWindow.
+     * Display newd tasks, called from MainWindow.
      * @param s the window title
      */
-    public static void taskBufferStartPlay(String s) {
-        taskBuffer.startPlay(s);
+    public static void newTasksStartPlay(String s) {
+        novelTaskBuffer.startPlay(s);
     }
 
     /**
-     * Prepare buffered tasks for display, called from TaskBag.
-     * 
+     * Prepare buffered tasks for display, called from TaskBuffer.
      * @return the tasks as a String
      */
-    public static String resultsToString() {
+    public static String newTasksToString() {
         String s = " New Tasks: \n";
         for (int i = 0; i < newTasks.size(); i++) {
-            s += newTasks.get(i).toString() + "\n";
+            s += newTasks.get(i) + "\n";
+        }
+        s += "\n Recent Events:: \n";
+        for (int i = 0; i < recentEvents.size(); i++) {
+            s += recentEvents.get(i) + "\n";
         }
         s += "\n Task Buffer: \n";
         return s;
     }
 
     /**
-     * Display selected task.
+     * Display input/output sentence in the MainWindow.
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
      */
-//    public static void report(Task task, boolean input) {
     public static void report(Sentence sentence, boolean input) {
-        String s = " ";
+        String s;
         if (input) {
-            s += "IN: ";
+            s = "  IN: ";
         } else {
-            s += "OUT: ";
+            s = " OUT: ";
         }
         s += sentence.toString2() + "\n";
         Center.mainWindow.post(s);

@@ -16,9 +16,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
@@ -27,15 +26,17 @@ import java.awt.event.*;
 import nars.entity.Concept;
 
 /**
- * Window displaying a Concept
+ * Window displaying the content of a Concept, such as beliefs, goals, and questions
  */
 public class ConceptWindow extends NarsFrame implements ActionListener {
-    /* GUI components */
-    private Button      playButton, stopButton, closeButton;
-    private TextArea	text;
+
+    /** Control buttons */
+    private Button playButton,  stopButton,  closeButton;
+    /** Display area */
+    private TextArea text;
     /** The concept to be displayed */
-    private Concept     concept;
-    
+    private Concept concept;
+
     /**
      * Constructor
      * @param concept The concept to be displayed
@@ -47,10 +48,10 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
-        
+
         c.ipadx = 3;
         c.ipady = 3;
-        c.insets = new Insets(5,5,5,5);
+        c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
@@ -60,28 +61,28 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
         text.setEditable(false);
         gridbag.setConstraints(text, c);
         add(text);
-        
+
         c.weighty = 0.0;
         c.gridwidth = 1;
         playButton = new Button("Play");
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
-        
+
         stopButton = new Button("Stop");
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
-        
+
         closeButton = new Button("Close");
         gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
         add(closeButton);
-        
+
         setBounds(400, 60, 400, 270);
         setVisible(true);
     }
-    
+
     /**
      * Display the content of the concept
      * @param str The text to be displayed
@@ -89,7 +90,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
     public void post(String str) {
         text.setText(str);
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
