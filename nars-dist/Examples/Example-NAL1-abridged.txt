@@ -1,0 +1,52 @@
+********** revision
+  IN: <bird --> swimmer>.
+  IN: <bird --> swimmer>. %0.1;0.6%
+1
+ OUT: <bird --> swimmer>. %0.87;0.91% {2: 2;1} 
+
+********** deduction
+  IN: <bird --> animal>.
+  IN: <robin --> bird>.
+1
+ OUT: <robin --> animal>. %1.00;0.81% {2: 1;2} 
+
+********** abduction
+  IN: <sport --> competition>.
+  IN: <chess --> competition>. %0.8%
+1
+ OUT: <sport --> chess>. %1.00;0.39% {2: 1;2} 
+ OUT: <chess --> sport>. %0.80;0.44% {2: 1;2} 
+
+********** induction
+  IN: <swan --> swimmer>. %0.7%
+  IN: <swan --> bird>.
+1
+ OUT: <bird --> swimmer>. %0.70;0.44% {2: 1;2} 
+ OUT: <swimmer --> bird>. %1.00;0.36% {2: 1;2} 
+
+********** exemplification
+  IN: <robin --> bird>.
+  IN: <bird --> animal>.
+1
+ OUT: <animal --> robin>. %1.00;0.44% {2: 1;2} 
+
+********** conversion
+  IN: <bird --> swimmer>.
+  IN: <swimmer --> bird>?
+2
+ OUT: <swimmer --> bird>. %1.00;0.47% {1: 1} 
+
+********** "y/n" question 
+  IN: <bird --> swimmer>.
+  IN: <bird --> swimmer>?
+1
+ OUT: <bird --> swimmer>. %1.00;0.90% {1: 1} 
+
+********** "wh" question 
+  IN: <bird --> swimmer>.
+  IN: <?x --> swimmer>?
+1
+ OUT: <bird --> swimmer>. %1.00;0.90% {1: 1} 
+ OUT: <?1 --> bird>?  {2: 2;1} 
+ OUT: <bird --> ?1>?  {2: 2;1} 
+ OUT: <?1 <-> bird>?  {2: 2;1} 
