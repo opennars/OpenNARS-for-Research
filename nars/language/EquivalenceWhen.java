@@ -74,7 +74,7 @@ public class EquivalenceWhen extends Equivalence implements Temporal {
         if (subject.compareTo(predicate) > 0) {
             return make(predicate, subject);
         }
-        String name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
+        String name = makeStatementName(subject, Symbols.EQUIVALENCE_WHEN_RELATION, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (EquivalenceWhen) t;

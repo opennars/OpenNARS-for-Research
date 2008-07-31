@@ -71,7 +71,7 @@ public class EquivalenceAfter extends Equivalence implements Temporal {
         if (invalidStatement(subject, predicate)) {
             return null;
         }
-        String name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
+        String name = makeStatementName(subject, Symbols.EQUIVALENCE_AFTER_RELATION, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (EquivalenceAfter) t;

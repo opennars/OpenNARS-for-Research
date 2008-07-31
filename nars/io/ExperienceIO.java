@@ -103,8 +103,10 @@ public class ExperienceIO {
                 try {
                     cycle = new Long(line);
                 } catch (NumberFormatException e) {
-                    if (line.charAt(0) == '*') {
+                    if (line.charAt(0) == Symbols.RESET_MARK) {
                         Center.reset();
+                        saveLine(line);
+                    } else if (line.charAt(0) == Symbols.COMMENT_MARK) {
                         saveLine(line);
                     } else {
                         StringParser.parseExperience(new StringBuffer(line));

@@ -92,11 +92,18 @@ public class Symbols {
     public static final char QUERY_VARIABLE_TAG = '?';
     public static final char OPERATOR_TAG = '^';
 
+    /* experience line prefix */
+    public static final String INPUT_LINE = "IN";
+    public static final String OUTPUT_LINE = "OUT";
+    public static final char PREFIX_MARK = ':';
+    public static final char RESET_MARK = '*';
+    public static final char COMMENT_MARK = '/';
+
     /* Stamp, display only */
-    public static final String STAMP_OPENER = " {";
-    public static final String STAMP_CLOSER = "} ";
-    public static final String STAMP_SEPARATOR = ";";
-    public static final String STAMP_STARTER = ": ";
+    public static final char STAMP_OPENER = '{';
+    public static final char STAMP_CLOSER = '}';
+    public static final char STAMP_SEPARATOR = ';';
+    public static final char STAMP_STARTER = ':';
     
     /* TermLink type, display only */
     public static final String TO_COMPONENT_1 = " @(";

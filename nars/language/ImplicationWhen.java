@@ -71,7 +71,7 @@ public class ImplicationWhen extends Implication implements Temporal {
         if (invalidStatement(subject, predicate)) {
             return null;
         }
-        String name = makeStatementName(subject, Symbols.IMPLICATION_RELATION, predicate);
+        String name = makeStatementName(subject, Symbols.IMPLICATION_WHEN_RELATION, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (ImplicationWhen) t;

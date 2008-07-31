@@ -196,13 +196,13 @@ public class Stamp implements Cloneable {
      */
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer(Symbols.STAMP_OPENER + length + Symbols.STAMP_STARTER);
+        StringBuffer buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + length + Symbols.STAMP_STARTER + " ");
         for (int i = 0; i < length; i++) {
             buffer.append(Long.toString(list[i]));
             if (i < (length - 1)) {
-                buffer.append(Symbols.STAMP_SEPARATOR);
+                buffer.append(Symbols.STAMP_SEPARATOR + "");
             } else {
-                buffer.append(Symbols.STAMP_CLOSER);
+                buffer.append(Symbols.STAMP_CLOSER + " ");
             }
         }
         return buffer.toString();

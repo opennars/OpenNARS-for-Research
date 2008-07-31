@@ -53,18 +53,18 @@ public abstract class StringParser extends Symbols {
      * @param buffer The line to be parsed
      */
     public static void parseExperience(StringBuffer buffer) {
-        int i = buffer.indexOf(":");
+        int i = buffer.indexOf(PREFIX_MARK + "");
         if (i > 0) {
             String prefix = buffer.substring(0, i).trim();
-            if (prefix.equals("OUT")) {
+            if (prefix.equals(OUTPUT_LINE)) {
                 return;
-            } else if (prefix.equals("IN")) {
+            } else if (prefix.equals(INPUT_LINE)) {
                 buffer.delete(0, i+1);
             } 
         }
         char c = buffer.charAt(buffer.length()-1);
-        if (c == '}') {
-            int j = buffer.lastIndexOf("{");
+        if (c == STAMP_CLOSER) {
+            int j = buffer.lastIndexOf(STAMP_OPENER + "");
             buffer.delete(j-1, buffer.length());
         }
         parseTask(buffer.toString().trim());
