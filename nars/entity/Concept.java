@@ -299,18 +299,20 @@ public final class Concept extends Item {
         Term t;
         Concept concept;
         TermLink termLink1, termLink2;
-        BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
-        if (subBudget.aboveThreshold()) {
-            for (TermLink template : termLinkTemplates) {
-                if (template.getType() != TermLink.TRANSFORM) {
-                    t = template.getTarget();
-                    concept = Memory.getConcept(t);
-                    termLink1 = new TermLink(t, template, subBudget);
-                    insertTermLink(termLink1);   // this termLink to that
-                    termLink2 = new TermLink(term, template, subBudget);
-                    concept.insertTermLink(termLink2);   // that termLink to this
-                    if (t instanceof CompoundTerm) {
-                        concept.buildTermLinks(subBudget);
+        if (termLinkTemplates.size() > 0) {
+            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
+            if (subBudget.aboveThreshold()) {
+                for (TermLink template : termLinkTemplates) {
+                    if (template.getType() != TermLink.TRANSFORM) {
+                        t = template.getTarget();
+                        concept = Memory.getConcept(t);
+                        termLink1 = new TermLink(t, template, subBudget);
+                        insertTermLink(termLink1);   // this termLink to that
+                        termLink2 = new TermLink(term, template, subBudget);
+                        concept.insertTermLink(termLink2);   // that termLink to this
+                        if (t instanceof CompoundTerm) {
+                            concept.buildTermLinks(subBudget);
+                        }
                     }
                 }
             }

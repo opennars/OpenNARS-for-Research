@@ -356,19 +356,21 @@ public class Memory {
         if (content instanceof CompoundTerm) {
             ArrayList<TermLink> termLinks = (contentConcept != null) ? contentConcept.getTermLinkTemplates()
                     : ((CompoundTerm) content).prepareComponentLinks();  // use saved if exist
-            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
-            if (subBudget.aboveThreshold()) {
-                Term componentTerm;
-                Concept componentConcept;
-                for (TermLink termLink : termLinks) {
-                    if (!(task.isStructual() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
-                        taskLink = new TaskLink(task, termLink, subBudget);
-                        componentTerm = termLink.getTarget();
-                        componentConcept = getConcept(componentTerm);
-                        componentConcept.insertTaskLink(taskLink);
+            if (termLinks.size() > 0) {
+                BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
+                if (subBudget.aboveThreshold()) {
+                    Term componentTerm;
+                    Concept componentConcept;
+                    for (TermLink termLink : termLinks) {
+                        if (!(task.isStructual() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
+                            taskLink = new TaskLink(task, termLink, subBudget);
+                            componentTerm = termLink.getTarget();
+                            componentConcept = getConcept(componentTerm);
+                            componentConcept.insertTaskLink(taskLink);
+                        }
                     }
+                    contentConcept.buildTermLinks(budget);  // recursively insert TermLink
                 }
-                contentConcept.buildTermLinks(budget);  // recursively insert TermLink
             }
         }
     }

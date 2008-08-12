@@ -59,7 +59,7 @@ public abstract class Bag<Type extends Item> {
     /** defined in different bags */
     protected int capacity;
     /** current sum of occupied level */
-    protected int mass;
+    protected int mass = 0;
     /** index to get next level, kept in individual objects */
     protected int levelIndex;
     /** current take out level */
