@@ -258,6 +258,8 @@ public final class SyllogisticRules {
         } else {
             return;
         }
+        if ((content instanceof Statement) && ((Statement) content).invalid())
+            return;
         Sentence taskSentence = Memory.currentTask.getSentence();
         Sentence beliefSentence = Memory.currentBelief;
         TruthValue beliefTruth = beliefSentence.getTruth();

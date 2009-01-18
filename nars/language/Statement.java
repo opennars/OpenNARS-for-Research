@@ -296,6 +296,16 @@ public abstract class Statement extends CompoundTerm {
         }
         return false;
     }
+    
+    /**
+     * Check the validity of a potential Statement. [To be refined]
+     * <p>
+     * Minimum requirement: the two terms cannot be the same, or containing each other as component
+     * @return Whether The Statement is invalid
+     */
+    public boolean invalid() {
+        return invalidStatement(getSubject(), getPredicate());
+    }
 
     /**
      * Return the first component of the statement

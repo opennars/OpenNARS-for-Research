@@ -376,8 +376,11 @@ public final class RuleTables {
             } else if (Variable.unify(Variable.VarType.INDEPENDENT, component, content, statement, content)) {
                 SyllogisticRules.detachment(mainSentence, subSentence, index);
             } else if ((statement instanceof Implication) && (Memory.currentTask.getSentence().isJudgment())) {
-                SyllogisticRules.introVarIndInner((Statement) content, (Statement) statement.getPredicate(), statement);    // tense???
-                CompositionalRules.introVarDepInner(statement, statement.getPredicate(), content);  // tense???
+                Statement s2 = (Statement) statement.getPredicate();
+                if (s2.getSubject().equals(((Statement) content).getSubject())) {
+                    SyllogisticRules.introVarIndInner((Statement) content, s2, statement);    // tense???
+                    CompositionalRules.introVarDepInner(statement, s2, content);  // tense???
+                }
             }
         }
     }
