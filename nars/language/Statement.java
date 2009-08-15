@@ -133,6 +133,9 @@ public abstract class Statement extends CompoundTerm {
      * @return The Statement built
      */
     public static Statement make(Statement statement, Term subj, Term pred, TemporalValue t) {
+        if (t == null) {
+            return make(statement, subj, pred);
+        }
         if (statement instanceof Implication) {
             return Implication.make(subj, pred, t);
         }

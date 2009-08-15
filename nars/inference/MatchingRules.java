@@ -147,7 +147,7 @@ public final class MatchingRules {
         TemporalValue order1 = asym.getContent().getOrder();
         TemporalValue order2 = sym.getContent().getOrder();
         TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
-        if (order == null) {
+        if ((order1 != order2) && (order == null)) {
             return;
         }
         if (Memory.currentTask.getSentence().isJudgment()) {

@@ -120,13 +120,8 @@ public final class SyllogisticRules {
 //            truth3 = TruthFunctions.temporalInduction(truth3);
 //        }
         Statement statement1, statement2, statement3;
-        if (order == null) {
-            statement1 = Statement.make(st1, term1, term2);
-            statement2 = Statement.make(st1, term2, term1);
-        } else {
-            statement1 = Statement.make(st1, term1, term2, order);
-            statement2 = Statement.make(st1, term2, term1, TemporalValue.getReverse(order));
-        }
+        statement1 = Statement.make(st1, term1, term2, order);
+        statement2 = Statement.make(st1, term2, term1, TemporalValue.getReverse(order));
         statement3 = Statement.makeSym(st1, term1, term2, order);            
         Memory.doublePremiseTask(budget1, statement1, truth1);
         Memory.doublePremiseTask(budget2, statement2, truth2);
@@ -223,12 +218,7 @@ public final class SyllogisticRules {
         TemporalValue order1 = st1.getOrder();
         TemporalValue order2 = st2.getOrder();
         TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
-        Term statement;
-        if (order == null) {
-            statement = Statement.make(st1, term1, term2);
-        } else {
-            statement = Statement.make(st1, term1, term2, order);
-        }
+        Term statement = Statement.make(st1, term1, term2, order);
         Memory.doublePremiseTask(budget, statement, truth);
     }
 
