@@ -94,4 +94,13 @@ public class Center {
             }
         }
     }
+
+    /**
+     * Get the current time from the clock
+     * Called in nars.entity.Stamp
+     * @return The current time
+     */
+    public static long getTime() {
+        return clock;
+    }
 }

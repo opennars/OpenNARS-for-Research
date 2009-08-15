@@ -367,7 +367,7 @@ public final class StructuralRules {
                 componentList = ((CompoundTerm) condition).cloneComponents();
                 componentList.set(indices[1], newInh);
                 Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
-                content = Implication.make(newCond, ((Statement) oldContent).getPredicate());
+                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), null);
             } else {
                 componentList = oldContent.cloneComponents();
                 componentList.set(indices[0], newInh);
@@ -453,7 +453,7 @@ public final class StructuralRules {
     static void contraposition(Statement statement) {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
-        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), TemporalRules.reverse(statement.getTemporalOrder()));
+        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), TemporalValue.getReverse(statement.getOrder()));
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();

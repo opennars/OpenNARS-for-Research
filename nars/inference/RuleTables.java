@@ -55,7 +55,7 @@ public final class RuleTables {
             case TermLink.SELF:
                 switch (bLink.getType()) {
                     case TermLink.COMPONENT:
-                        if ((task.getSentence() instanceof Goal) && (taskTerm instanceof ConjunctionSequence) && (bIndex > 0)) { // more general solution?
+                        if ((task.getSentence() instanceof Goal) && Conjunction.isSequence(taskTerm) && (bIndex > 0)) { // more general solution?
                             return;
                         }
                         compoundAndSelf((CompoundTerm) taskTerm, beliefTerm, true);
@@ -91,7 +91,6 @@ public final class RuleTables {
                 switch (bLink.getType()) {
                     case TermLink.COMPOUND:
                         compoundAndCompound((CompoundTerm) taskTerm, (CompoundTerm) beliefTerm);
-//                        compoundAndCompound((CompoundTerm) taskTerm, tIndex, (CompoundTerm) beliefTerm, bIndex);
                         break;
                     case TermLink.COMPOUND_STATEMENT:
                         compoundAndStatement((CompoundTerm) taskTerm, tIndex, (Statement) beliefTerm, bIndex, beliefTerm);
@@ -403,7 +402,6 @@ public final class RuleTables {
             component2 = statement.componentAt(side);
         }
         if ((component2 != null) && Variable.unify(Variable.VarType.ALL, component, component2, conditional, statement)) {
-//        if ((component2 != null) && Variable.unify(Variable.VarType.INDEPENDENT, component, component2, conditional, statement)) {
             SyllogisticRules.conditionalDedInd(conditional, index, statement, side);
         }
     }
@@ -437,7 +435,6 @@ public final class RuleTables {
      * @param beliefTerm The compound from the belief
      */
     private static void compoundAndCompound(CompoundTerm taskTerm, CompoundTerm beliefTerm) {
-//    private static void compoundAndCompound(CompoundTerm taskTerm, int tIndex, CompoundTerm beliefTerm, int bIndex) {
         if (taskTerm.getClass() == beliefTerm.getClass()) {
             if (taskTerm.size() > beliefTerm.size()) {
                 compoundAndSelf(taskTerm, beliefTerm, true);

@@ -22,14 +22,14 @@ package nars.inference;
 
 import nars.entity.*;
 import nars.language.*;
-import nars.main.Memory;
+import nars.main.*;
 
 /**
  * Directly process a task by a oldBelief, with only two Terms in both. 
  * In matching, the new task is compared with all existing direct Tasks in that Concept, to carry out:
  * <p>
- * revision: between judgments on non-overlapping evidence; 
- * update: between judgments; 
+ * temporalRevision: between judgments on non-overlapping evidence; 
+ * temporalRevision: between judgments; 
  * satisfy: between a Judgment and a Question/Goal; 
  * merge: between items of the same type and stamp;
  * conversion: between different inheritance relations.
@@ -54,36 +54,22 @@ public final class MatchingRules {
     }
 
     /**
-     * Belief update
-     * <p>
-     * called from oncept.reviseTable
-     * @param task The task containing new belief
-     * @param oldBelief The previous belief with the same content
-     */
-    public static void update(Task task, Judgment oldBelief) {
-        BudgetValue budget = BudgetFunctions.update(task, oldBelief.getTruth());
-        Memory.currentTense = TemporalRules.Relation.BEFORE;
-        Memory.doublePremiseTask(budget, oldBelief.getContent(), oldBelief.getTruth());
-    }
-    // called from Concept (direct) and match (indirect)
-    /**
      * Belief revision
      * <p>
      * called from Concept.reviseTable and match
      * @param task The task containing new belief
      * @param oldBelief The previous belief with the same content
      * @param feedbackToLinks Whether to send feedback to the links
-     * @return Whether revision happened
+     * @return Whether temporalRevision happened
      */
     public static boolean revision(Task task, Judgment oldBelief, boolean feedbackToLinks) {
         Judgment newBelief = (Judgment) task.getSentence();
-        if (newBelief.getTense() == oldBelief.getTense()) {
+        if (TemporalRules.sameTime(newBelief, oldBelief)) {
             TruthValue tTruth = newBelief.getTruth();
             TruthValue bTruth = oldBelief.getTruth();
             TruthValue truth = TruthFunctions.revision(tTruth, bTruth);
             BudgetValue budget = BudgetFunctions.revise(tTruth, bTruth, truth, task, feedbackToLinks);
             Term content = newBelief.getContent();
-            Memory.currentTense = newBelief.getTense();
             Memory.doublePremiseTask(budget, content, truth);
             return true;
         } else {
@@ -98,13 +84,6 @@ public final class MatchingRules {
      * @param task The task to be processed
      */
     public static void trySolution(Sentence problem, Judgment belief, Task task) {
-        if (problem instanceof Goal) {
-            if (belief.getTense() == TemporalRules.Relation.AFTER) {
-                return;
-            }
-        } else if ((problem.getTense() != belief.getTense()) && (belief.getTense() != TemporalRules.Relation.NONE)) {
-            return;
-        }
         Judgment oldBest = problem.getBestSolution();
         if (betterSolution(belief, oldBest, problem)) {
             problem.setBestSolution(belief);
@@ -126,6 +105,11 @@ public final class MatchingRules {
         if (oldSol == null) {
             return true;
         } else {
+            if ((problem instanceof Question) && (problem.getTense() != null)) {
+                if(TemporalValue.closer(newSol.getTense(), oldSol.getTense(), problem.getTense())) {
+                    return true;
+                }
+            }
             return (newSol.solutionQuality(problem) > oldSol.solutionQuality(problem));
         }
     }
@@ -137,7 +121,12 @@ public final class MatchingRules {
     public static void matchReverse() {
         Task task = Memory.currentTask;
         Judgment belief = Memory.currentBelief;
-        if (task.getContent().getTemporalOrder() != TemporalRules.reverse(belief.getContent().getTemporalOrder())) {
+        TemporalValue t1 = task.getContent().getOrder();
+        TemporalValue t2 = belief.getContent().getOrder();
+        if (((t1 == null) && (t2 != null)) || ((t1 != null) && (t2 == null))) {
+            return;
+        }
+        if ((t1 != t2) && (t1.getDelta() + t2.getDelta() != 0)) {
             return;
         }
         Sentence sentence = task.getSentence();
@@ -146,7 +135,6 @@ public final class MatchingRules {
         } else {
             conversion();
         }
-
     }
 
     /**
@@ -156,9 +144,9 @@ public final class MatchingRules {
      * @param figure location of the shared term
      */
     public static void matchAsymSym(Sentence asym, Sentence sym, int figure) {
-        TemporalRules.Relation order1 = asym.getContent().getTemporalOrder();
-        TemporalRules.Relation order2 = sym.getContent().getTemporalOrder();
-        TemporalRules.Relation order = TemporalRules.temporalSyllogism(order1, order2, figure);
+        TemporalValue order1 = asym.getContent().getOrder();
+        TemporalValue order2 = sym.getContent().getOrder();
+        TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
         if (order == null) {
             return;
         }
@@ -178,18 +166,17 @@ public final class MatchingRules {
      */
     private static void inferToSym(Judgment judgment1, Judgment judgment2) {
         Statement s1 = (Statement) judgment1.getContent();
-        Statement s2 = (Statement) judgment2.getContent();
         Term t1 = s1.getSubject();
         Term t2 = s1.getPredicate();
         Term content;
         if (s1 instanceof Inheritance) {
             content = Similarity.make(t1, t2);
-        } else if (s1 instanceof ImplicationAfter) {
-            content = EquivalenceAfter.make(t1, t2);
-        } else if (s1 instanceof ImplicationBefore) {
-            content = EquivalenceAfter.make(t2, t1);
         } else {
-            content = Equivalence.make(t1, t2);
+            TemporalValue order = s1.getOrder();
+            if ((order != null) && order.getDelta() < 0)
+                content = Equivalence.make(t1, t2, TemporalValue.getReverse(order));
+            else
+                content = Equivalence.make(t1, t2, order);
         }
         TruthValue value1 = judgment1.getTruth();
         TruthValue value2 = judgment2.getTruth();
@@ -204,7 +191,7 @@ public final class MatchingRules {
      * @param asym The asymmetric premise
      * @param sym The symmetric premise
      */
-    private static void inferToAsym(Judgment asym, Judgment sym, TemporalRules.Relation order) {
+    private static void inferToAsym(Judgment asym, Judgment sym, TemporalValue order) {
         Statement statement = (Statement) asym.getContent();
         Term sub = statement.getPredicate();
         Term pre = statement.getSubject();

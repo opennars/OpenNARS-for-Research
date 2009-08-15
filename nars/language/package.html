@@ -30,17 +30,17 @@ Open-NARS implements the following formal language, Narsese.
                         | --]    // Property
                         | {-]    // InstanceProperty
                         | ==>    // Implication
-                        | =/>    // ImplicationAfter
-                        | =|>    // ImplicationWhen
-                        | =\>    // ImplicationBefore
+                        | =/>    // Implication (After)
+                        | =|>    // Implication (When)
+                        | =\>    // Implication (Before)
                         | <=>    // Equivalence
-                        | &lt;/>    // EquivalenceAfter
-                        | &lt;|>    // EquivalenceWhen
+                        | &lt;/>    // Equivalence (After)
+                        | &lt;|>    // Equivalence (When)
  &lt;compound-statement&gt; ::= (-- &lt;statement&gt;)                 // Negation
                         | (|| &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Disjunction
                         | (&& &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction
-                        | (&/ &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // ConjunctionSequence
-                        | (&| &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // ConjunctionParallel
+                        | (&/ &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction (Sequence)
+                        | (&| &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction (Parallel)
       &lt;compound-term&gt; ::= {&lt;term&gt;<sup>+</sup>}    // SetExt
                         | [&lt;term&gt;<sup>+</sup>]    // SetInt
                         | (& &lt;term&gt; &lt;term&gt;<sup>+</sup>)    // IntersectionExt

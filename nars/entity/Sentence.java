@@ -20,7 +20,6 @@
  */
 package nars.entity;
 
-import nars.inference.TemporalRules;
 import nars.io.Symbols;
 import nars.language.*;
 import nars.main.*;
@@ -36,8 +35,6 @@ public abstract class Sentence implements Cloneable {
     protected Term content;
     /** The punctuation also indicates the type of the Sentence: Judgment, Question, or Goal */
     protected char punctuation;
-    /** The tense of a Sentence can be BEFORE(past), WHEN(present), AFTER(future), or NONE */
-    protected TemporalRules.Relation tense = TemporalRules.Relation.NONE;
     /** The truth value of Judgment or desire value of Goal */
     protected TruthValue truth = null;
     /** Partial record of the derivation path */
@@ -46,6 +43,10 @@ public abstract class Sentence implements Cloneable {
     protected boolean input = false;
     /** For Question and Goal: best solution found so far */
     protected Judgment bestSolution = null;
+    /**
+     * Temporal order between the components
+     */
+    protected TemporalValue temporalOrder = null;
 
     /**
      * Make a Sentence from an input String. Called by StringParser.
@@ -56,20 +57,27 @@ public abstract class Sentence implements Cloneable {
      * @param stamp The stamp of the truth value (for Judgment or Goal)
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Term term, char punc, TemporalRules.Relation tense, TruthValue truth, Stamp stamp) {
+    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, TemporalValue tense) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
+        Sentence s = null;
         switch (punc) {
             case Symbols.JUDGMENT_MARK:
-                return new Judgment(term, punc, tense, truth, stamp);
+                s = new Judgment(term, punc, truth, stamp);
+                s.temporalOrder = tense;
+                break;
             case Symbols.GOAL_MARK:
-                return new Goal(term, punc, truth, stamp);
+                s = new Goal(term, punc, truth, stamp);
+                break;
             case Symbols.QUESTION_MARK:
-                return new Question(term, punc, tense, stamp);
+                s = new Question(term, punc, stamp);
+                s.temporalOrder = tense;
+                break;
             default:
                 return null;
         }
+        return s;
     }
 
     /**
@@ -81,17 +89,21 @@ public abstract class Sentence implements Cloneable {
      * @param stamp The stamp of the truth value (for Judgment or Goal)
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Sentence oldS, Term term, TemporalRules.Relation tense, TruthValue truth, Stamp stamp) {
+    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp, TemporalValue tense) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
+        Sentence s = null;
         if (oldS instanceof Question) {
-            return new Question(term, Symbols.QUESTION_MARK, tense, stamp);
+            s = new Question(term, Symbols.QUESTION_MARK, stamp);
+            s.temporalOrder = tense;
+        } else if (oldS instanceof Goal) {
+            s = new Goal(term, Symbols.GOAL_MARK, truth, stamp);
+        } else {
+            s = new Judgment(term, Symbols.JUDGMENT_MARK, truth, stamp);
+            s.temporalOrder = tense;
         }
-        if (oldS instanceof Goal) {
-            return new Goal(term, Symbols.GOAL_MARK, truth, stamp);
-        }
-        return new Judgment(term, Symbols.JUDGMENT_MARK, tense, truth, stamp);
+        return s;
     }
 
     /**
@@ -100,7 +112,7 @@ public abstract class Sentence implements Cloneable {
      */
     @Override
     public Object clone() {
-        return make(content, punctuation, tense, truth, stamp);
+        return make(content, punctuation, truth, stamp, temporalOrder);
     }
 
     /**
@@ -131,16 +143,8 @@ public abstract class Sentence implements Cloneable {
      * Get the tense of the Sentence
      * @return The tense of the Sentence
      */
-    public TemporalRules.Relation getTense() {
-        return tense;
-    }
-
-    /**
-     * Set the tense of the Sentence
-     * @param t The new tense of the Sentence
-     */
-    public void setTense(TemporalRules.Relation t) {
-        tense = t;
+    public TemporalValue getTense() {
+        return temporalOrder;
     }
 
     /**
@@ -212,6 +216,25 @@ public abstract class Sentence implements Cloneable {
     }
 
     /**
+     * Get a stable String representation for a Sentece
+     * Different from toString: tense symbol is replaced by the actual value
+     * @return String representation for a Sentece
+     */
+    public String toKey() {
+        StringBuffer s = new StringBuffer();
+        s.append(content.getName());
+        s.append(punctuation + " ");
+        if (temporalOrder != null) {
+            s.append(temporalOrder.getDelta() + " ");
+        }
+        if (truth != null) {
+            s.append(truth.toString());
+        }
+        s.append(stamp.toString());
+        return s.toString();
+    }
+
+    /**
      * Get a String representation of the sentence
      * @return The String
      */
@@ -258,16 +281,34 @@ public abstract class Sentence implements Cloneable {
      * Get a String representation of the tense of the sentence
      * @return The String
      */
-    private String tenseToString() {
-        if (tense == TemporalRules.Relation.BEFORE) {
-            return Symbols.TENSE_PAST + " ";
+    public String tenseToString() {
+        TemporalValue t = getTense();
+        if (t == null) {
+            return "";
         }
-        if (tense == TemporalRules.Relation.WHEN) {
-            return Symbols.TENSE_PRESENT + " ";
-        }
-        if (tense == TemporalRules.Relation.AFTER) {
+        int delta = (int) (getEventTime() - Center.getTime());
+        if (delta > 0) {
             return Symbols.TENSE_FUTURE + " ";
         }
-        return "";
+        if (delta < 0) {
+            return Symbols.TENSE_PAST + " ";
+        }
+        return Symbols.TENSE_PRESENT + " ";
+    }
+
+    /**
+     * Get the creation time of the truth-value from the Stamp
+     * @return The creation time of the truth-value
+     */
+    public long getCreationTime() {
+        return getStamp().getCreationTime();
+    }
+
+    /**
+     * Get the occurrence time of the event
+     * @return The occurrence time of the event
+     */
+    public long getEventTime() {
+        return getCreationTime() + getTense().getDelta();
     }
 }

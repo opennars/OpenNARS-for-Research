@@ -22,7 +22,7 @@ package nars.language;
 
 import java.util.*;
 
-import nars.inference.TemporalRules;
+import nars.entity.TemporalValue;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -32,12 +32,19 @@ import nars.main.Memory;
 public class Equivalence extends Statement {
 
     /**
+     * Temporal order between the components
+     */
+    private TemporalValue temporalOrder = null;
+
+    /**
      * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
+     * @param order The temporal order of the components
      */
-    protected Equivalence(String n, ArrayList<Term> arg) {
+    protected Equivalence(String n, ArrayList<Term> arg, TemporalValue order) {
         super(n, arg);
+        temporalOrder = order;
     }
 
     /**
@@ -46,9 +53,11 @@ public class Equivalence extends Statement {
      * @param cs Component list
      * @param open Open variable list
      * @param i Syntactic complexity of the compound
+     * @param order The temporal order of the components
      */
-    protected Equivalence(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+    protected Equivalence(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, TemporalValue order) {
         super(n, cs, open, i);
+        temporalOrder = order;
     }
 
     /**
@@ -57,45 +66,45 @@ public class Equivalence extends Statement {
      */
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Equivalence(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new Equivalence(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, temporalOrder);
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
      * @param predicate The second compoment
+     * @param order The temporal order of the components
      * @return A compound generated or null
      */
-    public static Equivalence make(Term subject, Term predicate) {
+    public static Equivalence make(Term subject, Term predicate, TemporalValue order) {  // to be extended to check if subject is Conjunction
+        if ((subject instanceof Implication) || (subject instanceof Equivalence)) {
+            return null;
+        }
+        if ((predicate instanceof Implication) || (predicate instanceof Equivalence)) {
+            return null;
+        }
         if (invalidStatement(subject, predicate)) {
             return null;
         }
-        if (subject.compareTo(predicate) > 0) {
-            return make(predicate, subject);
+        Term interm;
+        if ((subject.compareTo(predicate) > 0) && ((order == null) || (order.getDelta() == 0))) {
+            interm = subject;
+            subject = predicate;
+            predicate = interm;
+        } else if ((order != null) && (order.getDelta() < 0)) {
+            interm = subject;
+            subject = predicate;
+            predicate = interm;
+            order = TemporalValue.getReverse(order);
         }
-        String name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
+        String sym = getEquivalenceSymbol(order);
+        String name = makeStatementName(subject, sym, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (Equivalence) t;
         }
         ArrayList<Term> argument = argumentsToList(subject, predicate);
-        return new Equivalence(name, argument);
-    }
-
-    public static Equivalence make(Term subject, Term predicate, TemporalRules.Relation temporalOrder) {  // to be extended to check if subject is Conjunction
-        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Implication) || (predicate instanceof Equivalence)) {
-            return null;
-        }
-        switch (temporalOrder) {
-            case BEFORE:
-                return EquivalenceAfter.make(predicate, subject);
-            case WHEN:
-                return EquivalenceWhen.make(subject, predicate);
-            case AFTER:
-                return EquivalenceAfter.make(subject, predicate);
-            default:
-                return Equivalence.make(subject, predicate);
-        }
+        return new Equivalence(name, argument, order);
     }
 
     /**
@@ -103,7 +112,7 @@ public class Equivalence extends Statement {
      * @return the operator of the term
      */
     public String operator() {
-        return Symbols.EQUIVALENCE_RELATION;
+        return getEquivalenceSymbol(temporalOrder);
     }
 
     /**
@@ -112,6 +121,31 @@ public class Equivalence extends Statement {
      */
     @Override
     public boolean isCommutative() {
-        return true;
+        return ((temporalOrder == null) || (temporalOrder.getDelta() == 0));
+    }
+
+    /**
+     * Get the temporal order.
+     * @return the temporal order of the components
+     */
+    @Override
+    public TemporalValue getOrder() {
+        return temporalOrder;
+    }
+
+    /**
+     * Get the symbole of the relation by tense
+     * @param t The tense of the statement
+     * @return The String representation of the relation
+     */
+    public static String getEquivalenceSymbol(TemporalValue t) {
+        if (t == null)
+            return Symbols.EQUIVALENCE_RELATION;
+        int delta = t.getDelta();
+        if (delta > 0)
+            return Symbols.EQUIVALENCE_AFTER_RELATION;
+        if (delta < 0)
+            return "ERROR: UNKNOWN EQUIVALENCE";
+        return Symbols.EQUIVALENCE_WHEN_RELATION;
     }
 }

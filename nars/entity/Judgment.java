@@ -20,7 +20,6 @@
  */
 package nars.entity;
 
-import nars.inference.TemporalRules;
 import nars.io.Symbols;
 import nars.language.Term;
 import nars.main.Parameters;
@@ -34,14 +33,12 @@ public class Judgment extends Sentence {
      * Constructor
      * @param term The content
      * @param punc The punctuation
-     * @param s The tense
      * @param t The truth value
      * @param b The stamp
      */
-    public Judgment(Term term, char punc, TemporalRules.Relation s, TruthValue t, Stamp b) {
+    public Judgment(Term term, char punc, TruthValue t, Stamp b) {
         content = term;
         punctuation = punc;
-        tense = s;
         truth = t;
         stamp = b;
     }
@@ -53,7 +50,7 @@ public class Judgment extends Sentence {
     public Judgment(Goal g) {
         content = g.cloneContent();
         punctuation = Symbols.JUDGMENT_MARK;
-        tense = TemporalRules.Relation.BEFORE;
+        temporalOrder = new TemporalValue(0);
         truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
         stamp = new Stamp();
     }
@@ -67,7 +64,8 @@ public class Judgment extends Sentence {
      */
     boolean equivalentTo(Judgment that) {
         assert content.equals(that.getContent());
-        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp())); 
+        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp()) 
+                && TemporalValue.equal(temporalOrder, that.getTense())); 
     }
 
     /**
@@ -83,6 +81,17 @@ public class Judgment extends Sentence {
         } else {                                    // "what" question or goal
             return truth.getExpectation() / content.getComplexity();
         }
+    }
+    
+    /**
+     * Check if the judgment predict a future event
+     * @return Whether the judgment has a future sense
+     */
+    public boolean isFuture() {
+        if (temporalOrder == null)
+            return false;
+        long eventTime = stamp.getCreationTime() + temporalOrder.getDelta();
+        return eventTime > nars.main.Center.getTime();
     }
 }
 

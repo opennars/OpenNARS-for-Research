@@ -33,7 +33,7 @@ public class Parameters {
     /** TermLink decay rate in TermLinkBag, in [1, 99]. */
     public static final int TERM_LINK_FORGETTING_CYCLE = 50;
     /** Silent threshold for task reporting, in [0, 100]. */
-    public static final int SILENT_LEVEL = 100; // no spontaneous report
+    public static final int SILENT_LEVEL = 1; // spontaneous report
 
     /* ---------- time management ---------- */
     /** Task decay rate in TaskBuffer, in [1, 99]. */

@@ -50,11 +50,7 @@ public final class CompositionalRules {
         if (content1.getClass() != content2.getClass()) {
             return;
         }
-        if (content1.getTemporalOrder() != content2.getTemporalOrder()) {
-            return;
-        }
-        if (taskSentence.getTense() == belief.getTense()) {
-            Memory.currentTense = taskSentence.getTense();
+        if (TemporalRules.sameTime((Judgment) taskSentence, belief)) {
             Term component1, component2;
             component1 = content1.componentAt(1 - index);
             component2 = content2.componentAt(1 - index);
@@ -80,9 +76,9 @@ public final class CompositionalRules {
                     t4 = DifferenceExt.make(component2, component1);
                 } else if (content1 instanceof Implication) {
                     t1 = Disjunction.make(component1, component2);
-                    t2 = Conjunction.make(component1, component2);
-                    t3 = Conjunction.make(component1, Negation.make(component2));
-                    t4 = Conjunction.make(component2, Negation.make(component1));
+                    t2 = Conjunction.make(component1, component2, null);
+                    t3 = Conjunction.make(component1, Negation.make(component2), null);
+                    t4 = Conjunction.make(component2, Negation.make(component1), null);
                 }
                 processComposed(content1, component, t1, TruthFunctions.union(v1, v2));
                 processComposed(content1, component, t2, TruthFunctions.intersection(v1, v2));
@@ -95,7 +91,7 @@ public final class CompositionalRules {
                     t3 = DifferenceInt.make(component1, component2);
                     t4 = DifferenceInt.make(component2, component1);
                 } else if (content1 instanceof Implication) {
-                    t1 = Conjunction.make(component1, component2);
+                    t1 = Conjunction.make(component1, component2, null);
                     t2 = Disjunction.make(component1, component2);
                     t3 = Disjunction.make(component1, Negation.make(component2));
                     t4 = Disjunction.make(component2, Negation.make(component1));
@@ -290,14 +286,14 @@ public final class CompositionalRules {
             state1 = Statement.make(premise1, premise1.getSubject(), var1);
             state2 = Statement.make(premise2, premise2.getSubject(), var2);
         }
-        TemporalRules.Relation tense1 = Memory.currentTask.getTense();
-        TemporalRules.Relation tense2 = Memory.currentBelief.getTense();
+        TemporalValue tense1 = Memory.currentTask.getTense();
+        TemporalValue tense2 = Memory.currentBelief.getTense();
         if (tense1 == tense2) {
             Memory.currentTense = tense1;
-            if (tense1 == TemporalRules.Relation.WHEN) {
-                return (Conjunction) ConjunctionParallel.make(state1, state2);
+            if ((tense1 != null) && (tense1.getDelta() == 0)) {
+                return (Conjunction) Conjunction.make(state1, state2, tense1);
             } else {
-                return (Conjunction) Conjunction.make(state1, state2);
+                return (Conjunction) Conjunction.make(state1, state2, null);
             }
         } else {
             return null;

@@ -22,7 +22,7 @@ package nars.language;
 
 import java.util.*;
 
-import nars.inference.TemporalRules;
+import nars.entity.TemporalValue;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -30,14 +30,20 @@ import nars.main.Memory;
  * A Statement about an Inheritance relation.
  */
 public class Implication extends Statement {
-
+    
+    /**
+     * Temporal order between the components
+     */
+    private TemporalValue temporalOrder = null;
     /**
      * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
+     * @param order The temporal order of the components
      */
-    protected Implication(String n, ArrayList<Term> arg) {
+    protected Implication(String n, ArrayList<Term> arg, TemporalValue order) {
         super(n, arg);
+        temporalOrder = order;
     }
 
     /**
@@ -46,9 +52,11 @@ public class Implication extends Statement {
      * @param cs Component list
      * @param open Open variable list
      * @param i Syntactic complexity of the compound
+     * @param order The temporal order of the components
      */
-    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, TemporalValue order) {
         super(n, cs, open, i);
+        temporalOrder = order;
     }
 
     /**
@@ -57,47 +65,34 @@ public class Implication extends Statement {
      */
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Implication(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new Implication(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, temporalOrder);
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
      * @param predicate The second compoment
+     * @param order The temporal order of the components
      * @return A compound generated or a term it reduced to
      */
-    public static Implication make(Term subject, Term predicate) {  // to be extended to check if subject is Conjunction
-        if (invalidStatement(subject, predicate)) {
+    public static Implication make(Term subject, Term predicate, TemporalValue order) {
+        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence))
             return null;
-        }
-        String name = makeStatementName(subject, Symbols.IMPLICATION_RELATION, predicate);
+        if (invalidStatement(subject, predicate))
+            return null;
+        String sym = getSymbol(order);
+        String name = makeStatementName(subject, sym, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (Implication) t;
         }
         if (predicate instanceof Implication) {
             Term oldCondition = ((Implication) predicate).getSubject();
-            Term newCondition = Conjunction.make(subject, oldCondition);
-            return make(newCondition, ((Implication) predicate).getPredicate());
+            Term newCondition = Conjunction.make(subject, oldCondition, order);
+            return make(newCondition, ((Implication) predicate).getPredicate(), order);
         } else {
             ArrayList<Term> argument = argumentsToList(subject, predicate);
-            return new Implication(name, argument);
-        }
-    }
-
-    public static Implication make(Term subject, Term predicate, TemporalRules.Relation temporalOrder) {
-        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence)) {
-            return null;
-        }
-        switch (temporalOrder) {
-            case BEFORE:
-                return ImplicationBefore.make(subject, predicate);
-            case WHEN:
-                return ImplicationWhen.make(subject, predicate);
-            case AFTER:
-                return ImplicationAfter.make(subject, predicate);
-            default:
-                return Implication.make(subject, predicate);
+            return new Implication(name, argument, order);
         }
     }
 
@@ -106,6 +101,32 @@ public class Implication extends Statement {
      * @return the operator of the term
      */
     public String operator() {
-        return Symbols.IMPLICATION_RELATION;
+        return getSymbol(temporalOrder);
+    }
+        
+    
+    /**
+     * Get the order of the components.
+     * @return the order within the term
+     */
+    @Override
+    public TemporalValue getOrder() {
+        return temporalOrder;
+    }
+
+    /**
+     * Convert a TemporalValue into its String representation
+     * @param t The temporal value to be represented
+     * @return The the String representation
+     */
+    public static String getSymbol(TemporalValue t) {
+        if (t == null)
+            return Symbols.IMPLICATION_RELATION;
+        int delta = t.getDelta();
+        if (delta > 0)
+            return Symbols.IMPLICATION_AFTER_RELATION;
+        if (delta < 0)
+            return Symbols.IMPLICATION_BEFORE_RELATION;
+        return Symbols.IMPLICATION_WHEN_RELATION;
     }
 }

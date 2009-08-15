@@ -20,7 +20,7 @@
  */
 package nars.language;
 
-import nars.inference.TemporalRules;
+import nars.entity.TemporalValue;
 
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
@@ -132,10 +132,10 @@ public class Term implements Cloneable, Comparable<Term> {
     }
 
     /**
-     * Get the temporal order in a term, which is NONE by default
+     * Get the temporal order in a term, which is null by default
      * @return The default temporal order
      */
-    public TemporalRules.Relation getTemporalOrder() {
-        return TemporalRules.Relation.NONE;
+    public TemporalValue getOrder() {
+        return null;
     }
 }

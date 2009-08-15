@@ -21,8 +21,8 @@
 
 package nars.entity;
 
-import nars.inference.TemporalRules;
 import nars.language.Term;
+import nars.io.Symbols;
 
 /**
  * A Question is a sentence without a truth value, and may conain query variables
@@ -33,13 +33,22 @@ public class Question extends Sentence {
      * COnstructor
      * @param term The content
      * @param punc The punctuation
-     * @param t The tense
      * @param s The stamp
      */
-    public Question(Term term, char punc, TemporalRules.Relation t, Stamp s) {
+    public Question(Term term, char punc, Stamp s) {
         content = term;
         punctuation = punc;
-        tense = t;
         stamp = s;
+    }
+    
+    /**
+     * Construct a Judgment to indicate an operation just executed
+     * @param g The goal that trigger the execution
+     */
+    public Question(Goal g) {
+        content = g.cloneContent();
+        punctuation = Symbols.QUESTION_MARK;
+        temporalOrder = new TemporalValue(0);
+        stamp = new Stamp();
     }
 }

@@ -21,7 +21,6 @@
 
 package nars.entity;
 
-import nars.inference.TemporalRules;
 import nars.language.Term;
 
 /**
@@ -38,7 +37,7 @@ public class Goal extends Judgment {
      * @param s The stamp
      */
     public Goal(Term term, char punc, TruthValue t, Stamp s) {
-        super(term, punc, TemporalRules.Relation.NONE, t, s);
+        super(term, punc, t, s);
     }
 }
 

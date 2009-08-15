@@ -101,15 +101,6 @@ public final class TruthFunctions extends UtilityFunctions {
     static TruthValue negImply(TruthValue v1) {
         return negation(implying(v1));
     }
-        
-    /**
-     * Make temporal hypothesis
-     * @param v1 Truth value of the premise
-     * @return Truth value of the conclusion
-     */
-    static TruthValue temporalInduction(TruthValue v1) {
-        return implied(v1);
-    }
 
     /* ----- double argument functions, called in MatchingRules ----- */
     
@@ -127,10 +118,33 @@ public final class TruthFunctions extends UtilityFunctions {
         float w1 = c1 / (1 - c1);
         float w2 = c2 / (1 - c2);
         float f = (w1 * f1 + w2 * f2) / (w1 + w2);
-        float c = (w1 + w2) / (w1 + w2 + 1);
+        float c = w2c(w1 + w2);
         return new TruthValue(f, c);
     }
-    
+
+    /**
+     * Revision weighted by time difference
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @param t1 Creation time of the first truth value
+     * @param t2 Creation time of the second truth value
+     * @param t Target time of the resulting truth value
+     * @return Truth value of the conclusion
+     */
+    static TruthValue temporalRevision(TruthValue v1, TruthValue v2, long t1, long t2, long t) {
+        float f1 = v1.getFrequency();
+        float f2 = v2.getFrequency();
+        float c1 = v1.getConfidence();
+        float c2 = v2.getConfidence();
+        float w1 = c1 / (1 - c1);
+        float w2 = c2 / (1 - c2);
+        float d1 = w1 / (Math.abs(t - t1) + 1);
+        float d2 = w2 / (Math.abs(t - t2) + 1);
+        float f = (d1 * f1 + d2 * f2) / (d1 + d2);
+        float c = w2c(w1 + w2);
+        return new TruthValue(f, c);
+    }
+
     /* ----- double argument functions, called in SyllogisticRules ----- */
     
     /**
@@ -146,6 +160,39 @@ public final class TruthFunctions extends UtilityFunctions {
         float c2 = v2.getConfidence();
         float f = and(f1, f2);
         float c = and(c1, c2, f);
+        return new TruthValue(f, c);
+    }
+    /**
+     * {<S ==> M>, <M <=> P>} |- <S ==> P>
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
+    static TruthValue analogy(TruthValue v1, TruthValue v2) {
+        float f1 = v1.getFrequency();
+        float f2 = v2.getFrequency();
+        float c1 = v1.getConfidence();
+        float c2 = v2.getConfidence();
+        float f = and(f1, f2);
+//        float c0 = and(f2, c2);
+//        float c = and(c1, c0, c0);
+        float c = and(c1, c2, f2);      // 09-05-06
+        return new TruthValue(f, c);
+    }
+    
+    /**
+     * {<S <=> M>, <M <=> P>} |- <S <=> P>
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @return Truth value of the conclusion
+     */
+    static TruthValue resemblance(TruthValue v1, TruthValue v2) {
+        float f1 = v1.getFrequency();
+        float f2 = v2.getFrequency();
+        float c1 = v1.getConfidence();
+        float c2 = v2.getConfidence();
+        float f = and(f1, f2);
+        float c = and(c1, c2, or(f1, f2));
         return new TruthValue(f, c);
     }
     
@@ -209,38 +256,6 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
     
-    /**
-     * {<S ==> M>, <M <=> P>} |- <S ==> P>
-     * @param v1 Truth value of the first premise
-     * @param v2 Truth value of the second premise
-     * @return Truth value of the conclusion
-     */
-    static TruthValue analogy(TruthValue v1, TruthValue v2) {
-        float f1 = v1.getFrequency();
-        float f2 = v2.getFrequency();
-        float c1 = v1.getConfidence();
-        float c2 = v2.getConfidence();
-        float f = and(f1, f2);
-        float c0 = and(f2, c2);
-        float c = and(c1, c0, c0);
-        return new TruthValue(f, c);
-    }
-    
-    /**
-     * {<S <=> M>, <M <=> P>} |- <S <=> P>
-     * @param v1 Truth value of the first premise
-     * @param v2 Truth value of the second premise
-     * @return Truth value of the conclusion
-     */
-    static TruthValue resemblance(TruthValue v1, TruthValue v2) {
-        float f1 = v1.getFrequency();
-        float f2 = v2.getFrequency();
-        float c1 = v1.getConfidence();
-        float c2 = v2.getConfidence();
-        float f = and(f1, f2);
-        float c = and(c1, c2, or(f1, f2));
-        return new TruthValue(f, c);
-    }
     
     /* ----- desire-value functions, called in SyllogisticRules ----- */
     

@@ -92,7 +92,7 @@ public class ShortFloat implements Cloneable {
      */
     @Override
     public String toString() {
-        if (value == 10000) {
+        if (value >= 10000) {
             return "1.0000";
         } else {
             String s = String.valueOf(value);
@@ -104,11 +104,13 @@ public class ShortFloat implements Cloneable {
     }
 
     /**
-     * Convert the value into a String
+     * Round the value into a short String
      * @return The String representation, with 2 digits accuracy
      */
     public String toString2() {
+        value += 50;
         String s = toString();
+        value -= 50;
         if (s.length() > 4) {
             return s.substring(0, 4);
         } else {

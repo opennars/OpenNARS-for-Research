@@ -41,7 +41,7 @@ public class Task extends Item {
     public Task(Sentence s, BudgetValue b) {
         super(b);
         sentence = s;
-        key = sentence.toString();
+        key = sentence.toKey();
     }
 
     /**
@@ -64,7 +64,7 @@ public class Task extends Item {
      * Directly get the tense of the sentence
      * @return The tense of the sentence
      */
-    public TemporalRules.Relation getTense() {
+    public TemporalValue getTense() {
         return sentence.getTense();
     }
 

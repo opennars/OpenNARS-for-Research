@@ -22,7 +22,7 @@ package nars.language;
 
 import java.util.*;
 
-import nars.entity.TermLink;
+import nars.entity.*;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -135,14 +135,8 @@ public abstract class CompoundTerm extends Term {
         if (compound instanceof Disjunction) {
             return Disjunction.make(components);
         }
-        if (compound instanceof ConjunctionSequence) {
-            return ConjunctionSequence.make(components);
-        }
-        if (compound instanceof ConjunctionParallel) {
-            return ConjunctionParallel.make(components);
-        }
         if (compound instanceof Conjunction) {
-            return Conjunction.make(components);
+            return Conjunction.make(components, ((Conjunction) compound).getOrder());
         }
         return null;
     }
@@ -187,13 +181,10 @@ public abstract class CompoundTerm extends Term {
                 return Disjunction.make(arg);
             }
             if (op.equals(Symbols.CONJUNCTION_OPERATOR)) {
-                return Conjunction.make(arg);
+                return Conjunction.make(arg, null);
             }
-            if (op.equals(Symbols.SEQUENCE_OPERATOR)) {
-                return ConjunctionSequence.make(arg);
-            }
-            if (op.equals(Symbols.PARALLEL_OPERATOR)) {
-                return ConjunctionParallel.make(arg);
+            if (op.equals(Symbols.SEQUENCE_OPERATOR) || op.equals(Symbols.PARALLEL_OPERATOR)) {
+                return Conjunction.make(arg, new TemporalValue(op));
             }
         }
         if (isBuiltInOperator(op)) {
@@ -234,10 +225,7 @@ public abstract class CompoundTerm extends Term {
                     s.equals(Symbols.DISJUNCTION_OPERATOR) ||
                     s.equals(Symbols.CONJUNCTION_OPERATOR) ||
                     s.equals(Symbols.SEQUENCE_OPERATOR) ||
-                    s.equals(Symbols.PARALLEL_OPERATOR) ||
-                    s.equals(Symbols.TENSE_PAST) ||
-                    s.equals(Symbols.TENSE_PRESENT) ||
-                    s.equals(Symbols.TENSE_FUTURE));
+                    s.equals(Symbols.PARALLEL_OPERATOR));
         }
         return isBuiltInOperator(s);
     }

@@ -79,14 +79,18 @@ public abstract class StringParser extends Symbols {
         try {
             String budgetString = getBudgetString(buffer);
             String truthString = getTruthString(buffer);
-            TemporalRules.Relation tense = parseTense(buffer);
+            String tense = parseTense(buffer);
             String str = buffer.toString().trim();
             int last = str.length() - 1;
             char punc = str.charAt(last);
             TruthValue truth = parseTruth(truthString, punc);
             Term content = parseTerm(str.substring(0, last));
             Stamp stamp = new Stamp();
-            Sentence sentence = Sentence.make(content, punc, tense, truth, stamp);
+            Sentence sentence = null;
+            if (tense.length() == 0)
+                sentence = Sentence.make(content, punc, truth, stamp, null);
+            else
+                sentence = Sentence.make(content, punc, truth, stamp, new TemporalValue(tense));
             if (sentence == null) {
                 throw new InvalidInputException("invalid sentence");
             }
@@ -129,21 +133,24 @@ public abstract class StringParser extends Symbols {
      * @param s the input in a StringBuffer
      * @return a tense value
      */
-    private static TemporalRules.Relation parseTense(StringBuffer s) {
-        TemporalRules.Relation tense = TemporalRules.Relation.NONE;
+    private static String parseTense(StringBuffer s) {
         int i = s.indexOf(Symbols.TENSE_MARK);
+        String t = "";
         if (i > 0) {
-            String t = s.substring(i).trim();
-            if (t.equals(Symbols.TENSE_PAST)) {
-                tense = TemporalRules.Relation.BEFORE;
-            } else if (t.equals(Symbols.TENSE_PRESENT)) {
-                tense = TemporalRules.Relation.WHEN;
-            } else if (t.equals(Symbols.TENSE_FUTURE)) {
-                tense = TemporalRules.Relation.AFTER;
-            }
+            t = s.substring(i).trim();
             s.delete(i, s.length());
         }
-        return tense;
+        return t;
+    }
+    
+    private static int tenseToOrder(String t) {
+        if (t.equals(Symbols.TENSE_PAST)) {
+            return -1;
+        } else if (t.equals(Symbols.TENSE_PRESENT)) {
+            return 0;
+        } else { // (t.equals(Symbols.TENSE_FUTURE)) {
+            return 1;
+        }
     }
 
     /**

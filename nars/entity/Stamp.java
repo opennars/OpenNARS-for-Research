@@ -23,7 +23,7 @@ package nars.entity;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Parameters;
+import nars.main.*;
 import nars.inference.*;
 
 /**
@@ -32,12 +32,14 @@ import nars.inference.*;
  * The derived sentences inherits from its parents, then cut at the length limit.
  */
 public class Stamp implements Cloneable {
+    /** serial number, for the whole system */
+    private static long current = 0;
     /** serial numbers */
     private long[] list;
     /** current stamp length */
     private int length;
-    /** serial number, for the whole system */
-    private static long current = 0;
+    /** creation time of the stamp */
+    private final long creationTime = nars.main.Center.getTime();
 
     /**
      * Generate a new stamp, with a new serial number, for input sentence
@@ -157,37 +159,21 @@ public class Stamp implements Cloneable {
     }
 
     /**
-     * Get the latest Stamp in the list
-     * @return The largest number in the stamp
+     * Get the creationTime of the truth-value
+     * @return The creation time
      */
-    public long latest() {
-        TreeSet<Long> set = toSet();
-        Long number = set.last();
-        return (long) number;
+    public long getCreationTime() {
+        return creationTime;
     }
 
     /**
      * Compare two Stamps for their temporal order
-     * @param that The STamp to be compared
+     * @param that The Stamp to be compared
      * @return The temporal order
      */
-    public TemporalRules.Relation orderWith(Stamp that) {
-        TreeSet<Long> set1 = toSet();
-        TreeSet<Long> set2 = that.toSet();
-        long first1 = (long) set1.first();
-        long last1 = (long) set1.last();
-        long first2 = (long) set2.first();
-        long last2 = (long) set2.last();
-        if (last1 < first2) {
-            return TemporalRules.Relation.AFTER;
-        }
-        if (last2 < first1) {
-            return TemporalRules.Relation.BEFORE;
-        }
-        if ((first1 == first2) && (last1 == last2)) {
-            return TemporalRules.Relation.WHEN;
-        }
-        return null;
+    public TemporalValue orderWith(Stamp that) {
+        int delta = (int) (creationTime - that.getCreationTime());
+        return new TemporalValue(delta);
     }
 
     /**
@@ -196,7 +182,7 @@ public class Stamp implements Cloneable {
      */
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + length + Symbols.STAMP_STARTER + " ");
+        StringBuffer buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + creationTime + Symbols.STAMP_STARTER + " ");
         for (int i = 0; i < length; i++) {
             buffer.append(Long.toString(list[i]));
             if (i < (length - 1)) {
