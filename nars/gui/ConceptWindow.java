@@ -31,11 +31,13 @@ import nars.entity.Concept;
 public class ConceptWindow extends NarsFrame implements ActionListener {
 
     /** Control buttons */
-    private Button playButton,  stopButton,  closeButton;
+    private Button playButton,  stopButton,  playInNewWindowButton, closeButton;
     /** Display area */
     private TextArea text;
     /** The concept to be displayed */
     private Concept concept;
+    /** Used to adjust the screen position */
+    private static int instanceCount = 0;
 
     /**
      * Constructor
@@ -74,12 +76,19 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
         stopButton.addActionListener(this);
         add(stopButton);
 
+        playInNewWindowButton = new Button("Play in New Window");
+        gridbag.setConstraints(playInNewWindowButton, c);
+        playInNewWindowButton.addActionListener(this);
+        add(playInNewWindowButton);
+
         closeButton = new Button("Close");
         gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
         add(closeButton);
 
-        setBounds(400, 60, 400, 270);
+        // Offset the screen location of each new instance.
+        setBounds(400 + (instanceCount % 10) * 10, 60 + (instanceCount % 10) * 20, 400, 270);
+        ++instanceCount;
         setVisible(true);
     }
 
@@ -101,6 +110,9 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
             concept.play();
         } else if (s == stopButton) {
             concept.stop();
+        } else if (s == playInNewWindowButton) {
+            concept.stop();
+            concept.startPlay(false);
         } else if (s == closeButton) {
             concept.stop();
             dispose();
