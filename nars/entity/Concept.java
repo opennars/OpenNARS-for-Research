@@ -457,9 +457,7 @@ public final class Concept extends Item {
      * @param showLinks Whether to display the task links
      */
     public void startPlay(boolean showLinks) {
-    	if (window == null || !window.isVisible()) {
-    		window = new ConceptWindow(this);
-    	}
+  		window = new ConceptWindow(this);
         showing = true;
         window.post(displayContent());
         if (showLinks) {

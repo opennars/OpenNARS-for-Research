@@ -279,9 +279,7 @@ public abstract class Bag<Type extends Item> {
      * @param title The title of the window
      */
     public void startPlay(String title) {
-    	if (window == null || !window.isVisible()) {
-    		window = new BagWindow(this, title);
-    	}
+   		window = new BagWindow(this, title);
         showing = true;
         window.post(toString());
     }
