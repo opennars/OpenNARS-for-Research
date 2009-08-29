@@ -88,7 +88,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
             String name = termField.getText().trim();
             Concept concept = Memory.nameToConcept(name);
             if (concept != null) {
-                concept.startPlay();
+                concept.startPlay(true);
             }
         } else if (b == hideButton) {
             setVisible(false);

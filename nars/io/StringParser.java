@@ -142,16 +142,6 @@ public abstract class StringParser extends Symbols {
         }
         return t;
     }
-    
-    private static int tenseToOrder(String t) {
-        if (t.equals(Symbols.TENSE_PAST)) {
-            return -1;
-        } else if (t.equals(Symbols.TENSE_PRESENT)) {
-            return 0;
-        } else { // (t.equals(Symbols.TENSE_FUTURE)) {
-            return 1;
-        }
-    }
 
     /**
      * Return the postfix of a task string that contains a TruthValue

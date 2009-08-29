@@ -257,7 +257,7 @@ public final class Concept extends Item {
                 if (judg.getTense() != null) {
                     if (judg.getEventTime() < presentBelief.getEventTime()) {
                         return;
-                    }      
+                    }
                     if (judg.getTruth().getExpDifAbs(presentBelief.getTruth()) > 0.5) {
                         presentBelief = judg;
                     } else if (judg.noOverlapping(presentBelief)) {
@@ -265,7 +265,7 @@ public final class Concept extends Item {
                     } else if (presentBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
                         presentBelief = judg;
                     }
-                }                
+                }
             }
         }
     }
@@ -454,13 +454,16 @@ public final class Concept extends Item {
     /* ---------- display ---------- */
     /**
      * Start displaying contents and links, called from ConceptWindow only
+     * @param showLinks Whether to display the task links
      */
-    public void startPlay() {
+    public void startPlay(boolean showLinks) {
         window = new ConceptWindow(this);
         showing = true;
         window.post(displayContent());
-        taskLinks.startPlay("Task Links in " + term);
-        termLinks.startPlay("Term Links in " + term);
+        if (showLinks) {
+            taskLinks.startPlay("Task Links in " + term);
+            termLinks.startPlay("Term Links in " + term);
+        }
     }
 
     /**

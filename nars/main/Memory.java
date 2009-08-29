@@ -39,7 +39,6 @@ public class Memory {
     private static ConceptBag concepts;
     /** Operators (built-in terms) table. Accessed by name */
     private static HashMap<String, Operator> operators;
-    
     /* There is no global Term table, which may ask for unlimited space. */
     /** List of inference newTasks, to be processed in the next working cycle */
     private static ArrayList<Task> newTasks;
@@ -47,7 +46,6 @@ public class Memory {
     private static TaskBuffer novelTasks;
     /** List of recent events, for temporal learning */
     private static TaskBuffer recentEvents;
-    
     /* ---------- global variables used to reduce method arguments ---------- */
     /** Shortcut to the selected Term */
     public static Term currentTerm;
@@ -233,7 +231,7 @@ public class Memory {
             float minSilent = Center.mainWindow.silentW.value() / 100.0f;
             if (s > minSilent) {  // only report significient derived Tasks
                 report(task.getSentence(), false);
-            }            
+            }
         }
         newTasks.add(task);
         novelTasks.refresh();
@@ -308,6 +306,12 @@ public class Memory {
             task = newTasks.remove(0);
             if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
+                if (task.getSentence().isInput() && (task.getSentence() instanceof Question)) {
+                    Concept concept = Memory.nameToConcept(task.getSentence().getContent().getName());
+                    if (concept != null) {
+                        concept.startPlay(false);
+                    }
+                }
             } else {
                 novelTasks.putIn(task);    // delayed processing
             }

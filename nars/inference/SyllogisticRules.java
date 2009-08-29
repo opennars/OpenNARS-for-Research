@@ -122,7 +122,7 @@ public final class SyllogisticRules {
         Statement statement1, statement2, statement3;
         statement1 = Statement.make(st1, term1, term2, order);
         statement2 = Statement.make(st1, term2, term1, TemporalValue.getReverse(order));
-        statement3 = Statement.makeSym(st1, term1, term2, order);            
+        statement3 = Statement.makeSym(st1, term1, term2, order);
         Memory.doublePremiseTask(budget1, statement1, truth1);
         Memory.doublePremiseTask(budget2, statement2, truth2);
         Memory.doublePremiseTask(budget3, statement3, truth3);
@@ -246,8 +246,9 @@ public final class SyllogisticRules {
         } else {
             return;
         }
-        if ((content instanceof Statement) && ((Statement) content).invalid())
+        if ((content instanceof Statement) && ((Statement) content).invalid()) {
             return;
+        }
         Sentence taskSentence = Memory.currentTask.getSentence();
         Sentence beliefSentence = Memory.currentBelief;
         TruthValue beliefTruth = beliefSentence.getTruth();
@@ -286,7 +287,9 @@ public final class SyllogisticRules {
         TemporalValue tense0 = subSentence.getTense();
         TemporalValue order0 = statement.getOrder();
         TemporalValue tense;
-        if (side == 0) {
+        if (order0 == null) {
+            tense = tense0;
+        } else if (side == 0) {
             tense = TemporalRules.tenseSyllogistic(tense0, subSentence.getCreationTime(), order0);
         } else {
             tense = TemporalRules.tenseSyllogistic(tense0, subSentence.getCreationTime(), TemporalValue.getReverse(order0));
