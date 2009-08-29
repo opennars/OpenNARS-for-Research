@@ -453,11 +453,13 @@ public final class Concept extends Item {
 
     /* ---------- display ---------- */
     /**
-     * Start displaying contents and links, called from ConceptWindow only
+     * Start displaying contents and links, called from ConceptWindow or Memory.processTask only
      * @param showLinks Whether to display the task links
      */
     public void startPlay(boolean showLinks) {
-        window = new ConceptWindow(this);
+    	if (window == null || !window.isVisible()) {
+    		window = new ConceptWindow(this);
+    	}
         showing = true;
         window.post(displayContent());
         if (showLinks) {
