@@ -128,6 +128,9 @@ public final class StructuralRules {
         } else {
             content = Statement.make(statement, t1, t2);
         }
+    	if (content == null) {
+    		return;
+    	}
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
