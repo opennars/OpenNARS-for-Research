@@ -294,8 +294,9 @@ public final class Concept extends Item {
                 break;
             }
         }
-        if (table.size() == capacity) {
-            table.remove(capacity - 1);
+        if (table.size() >= capacity) {
+           while (table.size() > capacity)
+               table.remove(table.size() - 1);
         } else if (i == table.size()) {
             table.add(newJudgment);
         }
