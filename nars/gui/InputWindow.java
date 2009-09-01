@@ -99,9 +99,18 @@ public class InputWindow extends NarsFrame implements ActionListener {
         } else if (b == clearButton) {
             inputText.setText("");
         } else if (b == closeButton) {
-            setVisible(false);
-        }
+        	close();
+        }        
     }
+
+    private void close() {
+        setVisible(false);
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 
     /**
      * Get one input lines

@@ -221,8 +221,7 @@ public class MainWindow extends NarsFrame implements ActionListener {
             } else if (obj == walkButton) {
                 Center.setStoper(1);
             } else if (obj == exitButton) {
-                setVisible(false);
-                System.exit(0);
+            	close();
             }
         } else if (obj instanceof MenuItem) {
             String label = e.getActionCommand();
@@ -274,4 +273,14 @@ public class MainWindow extends NarsFrame implements ActionListener {
             }
         }
     }
+
+    private void close() {
+        setVisible(false);
+        System.exit(0);
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 }

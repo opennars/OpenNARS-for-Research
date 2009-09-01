@@ -131,11 +131,20 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         } else if (source == stopButton) {
             bag.stop();
         } else if (source == closeButton) {
-            bag.stop();
-            dispose();
-            counter--;
+        	close();
         }
     }
+
+    private void close() {
+        bag.stop();
+        dispose();
+        counter--;
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 
     /**
      * Handling scrollbar movement

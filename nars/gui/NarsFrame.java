@@ -22,11 +22,12 @@
 package nars.gui;
 
 import java.awt.*;
+import java.awt.event.*;
 
 /**
  * Specify shared properties of NARS windows
  */
-public abstract class NarsFrame extends Frame {
+public abstract class NarsFrame extends Frame implements WindowListener {
     /** Color for the background of the main window */
     static final Color MAIN_WINDOW_COLOR = new Color(120, 120, 255);
     /** Color for the background of the windows with unique instantiation */
@@ -45,6 +46,7 @@ public abstract class NarsFrame extends Frame {
     /** Default constructor */
     NarsFrame() {
         super();
+        addWindowListener(this);
     }
     
     /**
@@ -54,5 +56,34 @@ public abstract class NarsFrame extends Frame {
     NarsFrame(String title) {
         super(" " + title);
         setFont(NarsFont);
+        addWindowListener(this);
     }
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+	}
 }

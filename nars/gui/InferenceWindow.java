@@ -22,6 +22,7 @@ package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import nars.io.Record;
 
 /**
@@ -103,10 +104,19 @@ public class InferenceWindow extends NarsFrame implements ActionListener {
         } else if (s == stopButton) {
             Record.stop();
         } else if (s == hideButton) {
-            Record.stop();
-            dispose();
+        	close();
         }
     }
+
+    private void close() {
+        Record.stop();
+        dispose();
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 
     /**
      * Change background color to remind the on-going file saving

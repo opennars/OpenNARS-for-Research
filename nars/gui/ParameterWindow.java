@@ -98,10 +98,19 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
             valueBar.setValue(currentValue);
             valueLabel.setText(String.valueOf(currentValue));
         } else if (s == hideButton) {
-            previousValue = currentValue;
-            setVisible(false);
+        	close();
         }
     }
+
+    private void close() {
+        previousValue = currentValue;
+        setVisible(false);
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 
     /**
      * Handling scrollbar movement

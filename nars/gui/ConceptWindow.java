@@ -101,6 +101,15 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
     }
 
     /**
+     * This is called when Concept removes this as its window.
+     */
+    public void detachFromConcept() {
+    	// The Play and Stop buttons no longer do anything, so disable.
+    	playButton.setEnabled(false);
+    	stopButton.setEnabled(false);
+    }
+    
+    /**
      * Handling button click
      * @param e The ActionEvent
      */
@@ -114,8 +123,17 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
             concept.stop();
             concept.startPlay(false);
         } else if (s == closeButton) {
-            concept.stop();
-            dispose();
+        	close();
         }
     }
+
+    private void close() {
+        concept.stop();
+        dispose();
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 }

@@ -91,7 +91,16 @@ public class TermWindow extends NarsFrame implements ActionListener {
                 concept.startPlay(true);
             }
         } else if (b == hideButton) {
-            setVisible(false);
+        	close();
         }
     }
+
+    private void close() {
+        setVisible(false);
+    }
+    
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
 }

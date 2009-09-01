@@ -27,7 +27,7 @@ import java.awt.event.*;
 /**
  * Pop-up message for the user to accept
  */
-public class MessageDialog extends Dialog implements ActionListener {
+public class MessageDialog extends Dialog implements ActionListener, WindowListener {
     protected Button button;
     protected TextArea text;
     
@@ -52,6 +52,7 @@ public class MessageDialog extends Dialog implements ActionListener {
         this.add("South", p);
         setModal(true);
         setBounds(200, 250, 400, 180);
+        addWindowListener(this);
         setVisible(true);
     }
     
@@ -61,8 +62,41 @@ public class MessageDialog extends Dialog implements ActionListener {
      */    
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == button) {
-            this.setVisible(false);
-            this.dispose();
+        	close();
         }
     }
+    
+    private void close() {
+        this.setVisible(false);
+        this.dispose();
+    }
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		close();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+	}
 }
