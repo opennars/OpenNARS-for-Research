@@ -133,8 +133,9 @@ public abstract class Bag<Type extends Item> {
     /**
      * Add a new Item into the Bag
      * @param newItem The new Item
+     * @return Whether the new Item is added into the Bag
      */
-    public void putIn(Type newItem) {
+    public boolean putIn(Type newItem) {
         String newKey = newItem.getKey();
         Type oldItem = nameTable.put(newKey, newItem);
         if (oldItem != null) {                  // merge duplications
@@ -145,6 +146,9 @@ public abstract class Bag<Type extends Item> {
         if (overflowItem != null) {             // remove overflow
             String overflowKey = overflowItem.getKey();
             nameTable.remove(overflowKey);
+            return (overflowItem != newItem);
+        } else {
+            return true;
         }
     }
 
@@ -154,9 +158,9 @@ public abstract class Bag<Type extends Item> {
      * The only place where the forgetting rate is applied
      * @param oldItem The Item to put back
      */
-    public void putBack(Type oldItem) {
+    public boolean putBack(Type oldItem) {
         BudgetFunctions.forget(oldItem.getBudget(), forgetRate(), RELATIVE_THRESHOLD);
-        putIn(oldItem);
+        return putIn(oldItem);
     }
 
     /**

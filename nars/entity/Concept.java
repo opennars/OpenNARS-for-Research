@@ -295,8 +295,9 @@ public final class Concept extends Item {
             }
         }
         if (table.size() >= capacity) {
-           while (table.size() > capacity)
-               table.remove(table.size() - 1);
+            while (table.size() > capacity) {
+                table.remove(table.size() - 1);
+            }
         } else if (i == table.size()) {
             table.add(newJudgment);
         }
@@ -332,12 +333,14 @@ public final class Concept extends Item {
                     if (template.getType() != TermLink.TRANSFORM) {
                         t = template.getTarget();
                         concept = Memory.getConcept(t);
-                        termLink1 = new TermLink(t, template, subBudget);
-                        insertTermLink(termLink1);   // this termLink to that
-                        termLink2 = new TermLink(term, template, subBudget);
-                        concept.insertTermLink(termLink2);   // that termLink to this
-                        if (t instanceof CompoundTerm) {
-                            concept.buildTermLinks(subBudget);
+                        if (concept != null) {
+                            termLink1 = new TermLink(t, template, subBudget);
+                            insertTermLink(termLink1);   // this termLink to that
+                            termLink2 = new TermLink(term, template, subBudget);
+                            concept.insertTermLink(termLink2);   // that termLink to this
+                            if (t instanceof CompoundTerm) {
+                                concept.buildTermLinks(subBudget);
+                            }
                         }
                     }
                 }
@@ -458,10 +461,10 @@ public final class Concept extends Item {
      * @param showLinks Whether to display the task links
      */
     public void startPlay(boolean showLinks) {
-    	if (window != null && window.isVisible()){
-    		window.detachFromConcept();
-    	}
-  		window = new ConceptWindow(this);
+        if (window != null && window.isVisible()) {
+            window.detachFromConcept();
+        }
+        window = new ConceptWindow(this);
         showing = true;
         window.post(displayContent());
         if (showLinks) {

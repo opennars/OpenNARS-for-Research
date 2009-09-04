@@ -133,7 +133,10 @@ public class Memory {
         Concept concept = concepts.get(n);
         if (concept == null) {
             concept = new Concept(term); // the only place to make a new Concept
-            concepts.putIn(concept);
+            boolean created = concepts.putIn(concept);
+            if (!created) {
+                return null;
+            }
         }
         return concept;
     }
@@ -347,6 +350,9 @@ public class Memory {
         Record.append("!!! Insert: " + task + "\n");
         Term content = task.getContent();
         Concept c = getConcept(content);
+        if (c == null) {
+            return;
+        }
         c.directProcess(task);
         if (task.aboveThreshold()) {    // still need to be processed
             continuedProcess(task, content);
@@ -368,6 +374,9 @@ public class Memory {
     private static void continuedProcess(Task task, Term content) {
         TaskLink taskLink;
         Concept contentConcept = getConcept(content);
+        if (contentConcept == null) {
+            return;
+        }
         BudgetValue budget = task.getBudget();
         taskLink = new TaskLink(task, null, budget);   // link type: SELF
         contentConcept.insertTaskLink(taskLink);
@@ -384,7 +393,9 @@ public class Memory {
                             taskLink = new TaskLink(task, termLink, subBudget);
                             componentTerm = termLink.getTarget();
                             componentConcept = getConcept(componentTerm);
-                            componentConcept.insertTaskLink(taskLink);
+                            if (componentConcept != null) {
+                                componentConcept.insertTaskLink(taskLink);
+                            }
                         }
                     }
                     contentConcept.buildTermLinks(budget);  // recursively insert TermLink
