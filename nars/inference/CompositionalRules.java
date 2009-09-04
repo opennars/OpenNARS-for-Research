@@ -278,6 +278,9 @@ public final class CompositionalRules {
      * @param index The location of the shared term: 0 for subject, 1 for predicate
      */
     private static Conjunction introVarDep(Statement premise1, Statement premise2, int index) {
+        if (premise1.equals(premise2)) {
+            return null;
+        }
         Statement state1, state2;
         Variable var1 = new Variable(Symbols.VARIABLE_TAG + "0()");
         Variable var2 = new Variable(Symbols.VARIABLE_TAG + "0()");
