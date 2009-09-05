@@ -120,12 +120,12 @@ public class Variable extends Term {
     public VarType getType() {
         return type;
     }
-    
+
     /**
      * Set the scope of the variable
      * @param t The new scope
      */
-    public void setScope (CompoundTerm t) {
+    public void setScope(CompoundTerm t) {
         scope = t;
     }
 
@@ -198,9 +198,7 @@ public class Variable extends Term {
      * @return The matching result
      */
     public static boolean match(VarType type1, VarType type2) {
-        return ((type1 == type2) 
-                || (type1 == VarType.ALL) || (type1 == VarType.QUERY) || (type1 == VarType.ANONYMOUS) 
-                || (type2 == VarType.ALL) || (type2 == VarType.QUERY) || (type2 == VarType.ANONYMOUS));
+        return ((type1 == type2) || (type1 == VarType.ALL) || (type1 == VarType.QUERY) || (type1 == VarType.ANONYMOUS) || (type2 == VarType.ALL) || (type2 == VarType.QUERY) || (type2 == VarType.ANONYMOUS));
     }
 
     /**
@@ -220,8 +218,7 @@ public class Variable extends Term {
             return false;
         }
         HashMap<String, Term> substitute = findSubstitute(type, t1, t2, new HashMap<String, Term>()); // find substitution
-        if (substitute == null) // not unifiable
-        {
+        if (substitute == null) { // not unifiable
             return false;
         }
         if (!substitute.isEmpty()) {
@@ -268,19 +265,67 @@ public class Variable extends Term {
             if (!term1.getClass().equals(term2.getClass())) {
                 return null;
             }
-            if (!(((CompoundTerm) term1).size() == ((CompoundTerm) term2).size())) {
+            CompoundTerm cTerm1 = (CompoundTerm) term1;
+            CompoundTerm cTerm2 = (CompoundTerm) term2;
+            if (cTerm1.size() != (cTerm2).size()) {
                 return null;
             }
-            for (int i = 0; i < ((CompoundTerm) term1).size(); i++) {
-                t1 = ((CompoundTerm) term1).componentAt(i);
-                t2 = ((CompoundTerm) term2).componentAt(i);
-                HashMap<String, Term> newSubs = findSubstitute(type, t1, t2, subs);
+            HashMap<String, Term> newSubs;
+            if (cTerm1.isCommutative()) {
+                newSubs = findSubstitute(type, cTerm1.cloneComponents(), cTerm2.cloneComponents(), subs);
                 if (newSubs == null) {
                     return null;
+                } else {
+                    subs.putAll(newSubs);
                 }
-                subs.putAll(newSubs);
+            } else {
+                for (int i = 0; i < cTerm1.size(); i++) {
+                    t1 = cTerm1.componentAt(i);
+                    t2 = cTerm2.componentAt(i);
+                    newSubs = findSubstitute(type, t1, t2, subs);
+                    if (newSubs == null) {
+                        return null;
+                    } else {
+                        subs.putAll(newSubs);
+                    }
+                }
             }
             return subs;
+        }
+        return null;
+    }
+
+    /**
+     * To recursively find a substitution that can unify two sets of Term in any order
+     * @param type The type of Variable to be substituted
+     * @param list1 The first Term set to be unified
+     * @param list2 The second Term set to be unified
+     * @param subs The substitution formed so far
+     * @return The substitution that unifies the two lists
+     */
+    private static HashMap<String, Term> findSubstitute(VarType type, ArrayList<Term> list1, ArrayList<Term> list2, HashMap<String, Term> subs) {
+        if (list1.size() == 0) {
+            return subs;
+        }
+        Term t1 = list1.get(0);
+        Term t2;
+        HashMap<String, Term> newSub, newSubFirst, newSubRest;
+        for (int i = 0; i < list2.size(); i++) {
+            newSub = (HashMap<String, Term>) subs.clone();
+            t2 = list2.get(i);
+            newSubFirst = findSubstitute(type, t1, t2, newSub);
+            if (newSubFirst != null) {
+                newSub.putAll(newSubFirst);
+                ArrayList<Term> newList1 = (ArrayList<Term>) list1.clone();
+                newList1.remove(0);
+                ArrayList<Term> newList2 = (ArrayList<Term>) list2.clone();
+                newList2.remove(i);
+                newSubRest = findSubstitute(type, newList1, newList2, newSub);
+                if (newSubRest != null) {
+                    newSub.putAll(newSubRest);
+                    return newSub;
+                }
+            }
         }
         return null;
     }

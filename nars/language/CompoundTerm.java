@@ -87,6 +87,14 @@ public abstract class CompoundTerm extends Term {
         markVariables();
         name = makeName();
     }
+    
+    /**
+     * Change the name of a CompoundTerm, called after variable substitution
+     * @param s The new name
+     */
+    protected void setName(String s) {
+        name = s;
+    }
 
     /**
      * The complexity of the term is the sum of those of the components plus 1
@@ -137,6 +145,9 @@ public abstract class CompoundTerm extends Term {
         }
         if (compound instanceof Conjunction) {
             return Conjunction.make(components, ((Conjunction) compound).getOrder());
+        }
+        if (compound instanceof Statement) {
+            return Statement.make(((Statement) compound).operator(), components.get(0), components.get(1));
         }
         return null;
     }
@@ -262,9 +273,12 @@ public abstract class CompoundTerm extends Term {
         StringBuffer name = new StringBuffer();
         name.append(Symbols.COMPOUND_TERM_OPENER);
         name.append(op);
-        for (int i = 0; i < arg.size(); i++) {
+        for (Term t : arg) {
             name.append(Symbols.ARGUMENT_SEPARATOR);
-            name.append(arg.get(i).getName());
+            if (t instanceof CompoundTerm) {
+                ((CompoundTerm) t).setName(((CompoundTerm) t).makeName());
+            }
+            name.append(t.getName());
         }
         name.append(Symbols.COMPOUND_TERM_CLOSER);
         return name.toString();
@@ -622,6 +636,8 @@ public abstract class CompoundTerm extends Term {
 
     /**
      * Substitute a variable component according to a given substitution
+     * <p>
+     * This method cannot be changed into a static method retuning a new object with a different reference
      * @param subs The substitution
      * @param first Whether it is the first term in the mapping
      */
@@ -640,9 +656,14 @@ public abstract class CompoundTerm extends Term {
                 ((CompoundTerm) t1).substituteComponent(subs, first);
             }
         }
+        if (this.isCommutative()) {
+            TreeSet<Term> s = new TreeSet<Term>(components);
+            components = new ArrayList<Term>(s);
+        }
         markVariables();
         name = makeName();
     }
+
 
     /* ----- link CompoundTerm and its components ----- */
     /**
