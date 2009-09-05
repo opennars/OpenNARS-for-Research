@@ -471,7 +471,7 @@ public final class RuleTables {
                     if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
                         StructuralRules.structuralCompose2(compound, index, statement, side);
                     }    // {A --> B, A @ (A&C)} |- (A&C) --> (B&C)
-                } else if (statement instanceof Similarity) {
+                } else if ((statement instanceof Similarity) && !(compound instanceof Conjunction)) {
                     StructuralRules.structuralCompose2(compound, index, statement, side);
                 }       // {A <-> B, A @ (A&C)} |- (A&C) <-> (B&C)
             }

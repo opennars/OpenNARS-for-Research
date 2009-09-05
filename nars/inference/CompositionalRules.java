@@ -210,10 +210,8 @@ public final class CompositionalRules {
                 }
             }
         }
-        if (truth != null) {
-            BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-            Memory.doublePremiseTask(budget, content, truth);
-        }
+        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
+        Memory.doublePremiseTask(budget, content, truth);
     }
 
     /**
