@@ -24,6 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.entity.Concept;
+import nars.io.StringParser;
 import nars.main.Memory;
 
 /**
@@ -85,11 +86,13 @@ public class TermWindow extends NarsFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Button b = (Button) e.getSource();
         if (b == playButton) {
-            String name = termField.getText().trim();
-            Concept concept = Memory.nameToConcept(name);
-            if (concept != null) {
-                concept.startPlay(true);
-            }
+        	try {
+        		Concept concept = Memory.nameToConcept(StringParser.parseTerm(termField.getText()).getName());
+        		if (concept != null) {
+        			concept.startPlay(true);
+        		}
+        	} catch (StringParser.InvalidInputException exception) {
+        	}
         } else if (b == hideButton) {
         	close();
         }
