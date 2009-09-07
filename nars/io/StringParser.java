@@ -35,7 +35,7 @@ public abstract class StringParser extends Symbols {
     /**
      * All kinds of invalid input lines
      */
-    private static class InvalidInputException extends Exception {
+    public static class InvalidInputException extends Exception {
 
         /**
          * An invalid input line.
@@ -248,7 +248,7 @@ public abstract class StringParser extends Symbols {
      * @throws nars.io.StringParser.InvalidInputException the String cannot be parsed into a Term
      * @return the Term generated from the String
      */
-    private static Term parseTerm(String s0) throws InvalidInputException {
+    public static Term parseTerm(String s0) throws InvalidInputException {
         String s = s0.trim();
         if (s.length() == 0) {
             throw new InvalidInputException("missing content");
