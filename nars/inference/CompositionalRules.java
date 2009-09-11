@@ -210,8 +210,10 @@ public final class CompositionalRules {
                 }
             }
         }
-        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth);
+        if (truth != null) {
+            BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
+            Memory.doublePremiseTask(budget, content, truth);
+        }
     }
 
     /**
@@ -356,13 +358,12 @@ public final class CompositionalRules {
         TruthValue truth = null;
         if (sentence instanceof Goal) {
             truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth()); // [To be refined]
-        }
-        else if (sentence instanceof Judgment) {
+        } else if (sentence instanceof Judgment) {
             truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth());
         } else {
             assert (sentence instanceof Question);
             return;
-        } 
+        }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
         Memory.doublePremiseTask(budget, content, truth);
     }
