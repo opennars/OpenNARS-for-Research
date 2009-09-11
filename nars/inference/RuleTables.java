@@ -374,7 +374,7 @@ public final class RuleTables {
                 SyllogisticRules.detachment(mainSentence, subSentence, index);
             } else if (Variable.unify(Variable.VarType.INDEPENDENT, component, content, statement, content)) {
                 SyllogisticRules.detachment(mainSentence, subSentence, index);
-            } else if ((statement instanceof Implication) && (Memory.currentTask.getSentence().isJudgment())) {
+            } else if ((statement instanceof Implication) && (statement.getPredicate() instanceof Statement) && (Memory.currentTask.getSentence().isJudgment())) {
                 Statement s2 = (Statement) statement.getPredicate();
                 if (s2.getSubject().equals(((Statement) content).getSubject())) {
                     SyllogisticRules.introVarIndInner((Statement) content, s2, statement);    // tense???
