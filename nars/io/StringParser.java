@@ -35,17 +35,17 @@ public abstract class StringParser extends Symbols {
     /**
      * All kinds of invalid input lines
      */
-    public static class InvalidInputException extends Exception {
+    private static class InvalidInputException extends Exception {
 
         /**
          * An invalid input line.
          * @param s type of error
          */
-        public InvalidInputException(String s) {
+        InvalidInputException(String s) {
             super(s);
         }
     }
-    
+
     /**
      * Parse a line of input experience
      * <p>
@@ -59,19 +59,19 @@ public abstract class StringParser extends Symbols {
             if (prefix.equals(OUTPUT_LINE)) {
                 return;
             } else if (prefix.equals(INPUT_LINE)) {
-                buffer.delete(0, i+1);
-            } 
+                buffer.delete(0, i + 1);
+            }
         }
-        char c = buffer.charAt(buffer.length()-1);
+        char c = buffer.charAt(buffer.length() - 1);
         if (c == STAMP_CLOSER) {
             int j = buffer.lastIndexOf(STAMP_OPENER + "");
-            buffer.delete(j-1, buffer.length());
+            buffer.delete(j - 1, buffer.length());
         }
         parseTask(buffer.toString().trim());
     }
 
     /**
-     * The only public (static) method of the class, called from InputWindow or locally.
+     * Enter a new Task in String into the memory, called from InputWindow or locally.
      * @param s the single-line input String
      */
     public static void parseTask(String s) {
@@ -87,10 +87,11 @@ public abstract class StringParser extends Symbols {
             Term content = parseTerm(str.substring(0, last));
             Stamp stamp = new Stamp();
             Sentence sentence = null;
-            if (tense.length() == 0)
+            if (tense.length() == 0) {
                 sentence = Sentence.make(content, punc, truth, stamp, null);
-            else
+            } else {
                 sentence = Sentence.make(content, punc, truth, stamp, new TemporalValue(tense));
+            }
             if (sentence == null) {
                 throw new InvalidInputException("invalid sentence");
             }
@@ -245,49 +246,53 @@ public abstract class StringParser extends Symbols {
      * 4. <T1 Re T2> is a Statement (including higher-order Statement);
      * 5. otherwise it is a simple term.
      * @param s0 the String to be parsed
-     * @throws nars.io.StringParser.InvalidInputException the String cannot be parsed into a Term
      * @return the Term generated from the String
      */
-    public static Term parseTerm(String s0) throws InvalidInputException {
+    public static Term parseTerm(String s0) {
         String s = s0.trim();
-        if (s.length() == 0) {
-            throw new InvalidInputException("missing content");
+        try {
+            if (s.length() == 0) {
+                throw new InvalidInputException("missing content");
+            }
+            Term t = Memory.nameToListedTerm(s);    // existing constant or operator
+            if (t != null) {
+                return t;
+            }                           // existing Term
+            int index = s.length() - 1;
+            char first = s.charAt(0);
+            char last = s.charAt(index);
+            switch (first) {
+                case COMPOUND_TERM_OPENER:
+                    if (last == COMPOUND_TERM_CLOSER) {
+                        return parseCompoundTerm(s.substring(1, index));
+                    } else {
+                        throw new InvalidInputException("missing CompoundTerm closer");
+                    }
+                case SET_EXT_OPENER:
+                    if (last == SET_EXT_CLOSER) {
+                        return SetExt.make(parseArguments(s.substring(1, index) + ARGUMENT_SEPARATOR));
+                    } else {
+                        throw new InvalidInputException("missing ExtensionSet closer");
+                    }
+                case SET_INT_OPENER:
+                    if (last == SET_INT_CLOSER) {
+                        return SetInt.make(parseArguments(s.substring(1, index) + ARGUMENT_SEPARATOR));
+                    } else {
+                        throw new InvalidInputException("missing IntensionSet closer");
+                    }
+                case STATEMENT_OPENER:
+                    if (last == STATEMENT_CLOSER) {
+                        return parseStatement(s.substring(1, index));
+                    } else {
+                        throw new InvalidInputException("missing Statement closer");
+                    }
+                default:
+                    return parseSimpleTerm(s);
+            }
+        } catch (InvalidInputException e) {
+            System.out.println(" !!! INVALID INPUT: " + s + " --- " + e.getMessage());
         }
-        Term t = Memory.nameToListedTerm(s);    // existing constant or operator
-        if (t != null) {
-            return t;
-        }                           // existing Term
-        int index = s.length() - 1;
-        char first = s.charAt(0);
-        char last = s.charAt(index);
-        switch (first) {
-            case COMPOUND_TERM_OPENER:
-                if (last == COMPOUND_TERM_CLOSER) {
-                    return parseCompoundTerm(s.substring(1, index));
-                } else {
-                    throw new InvalidInputException("missing CompoundTerm closer");
-                }
-            case SET_EXT_OPENER:
-                if (last == SET_EXT_CLOSER) {
-                    return SetExt.make(parseArguments(s.substring(1, index) + ARGUMENT_SEPARATOR));
-                } else {
-                    throw new InvalidInputException("missing ExtensionSet closer");
-                }
-            case SET_INT_OPENER:
-                if (last == SET_INT_CLOSER) {
-                    return SetInt.make(parseArguments(s.substring(1, index) + ARGUMENT_SEPARATOR));
-                } else {
-                    throw new InvalidInputException("missing IntensionSet closer");
-                }
-            case STATEMENT_OPENER:
-                if (last == STATEMENT_CLOSER) {
-                    return parseStatement(s.substring(1, index));
-                } else {
-                    throw new InvalidInputException("missing Statement closer");
-                }
-            default:
-                return parseSimpleTerm(s);
-        }
+        return null;
     }
 
     /**

@@ -23,17 +23,24 @@ package nars.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-import nars.io.Record;
+import nars.io.*;
+import nars.language.Term;
 
 /**
  * Window displying inference log
  */
-public class InferenceWindow extends NarsFrame implements ActionListener {
+public class InferenceWindow extends NarsFrame implements ActionListener, ItemListener {
 
     /** Control buttons */
     private Button playButton,  stopButton,  hideButton;
     /** Display area */
     private TextArea text;
+    /** String to be catched */
+    private TextField watchText;
+    /** Type of catched text */
+    private Choice watchType;
+    /** Type of catched text */
+    private String watched = "";
 
     /**
      * Constructor
@@ -60,6 +67,19 @@ public class InferenceWindow extends NarsFrame implements ActionListener {
 
         c.weighty = 0.0;
         c.gridwidth = 1;
+
+        watchText = new TextField(20);
+        gridbag.setConstraints(watchText, c);
+        add(watchText);
+
+        watchType = new Choice();
+        watchType.add("No Watch");
+        watchType.add("Watch Term");
+        watchType.add("Watch String");
+        gridbag.setConstraints(watchType, c);
+        watchType.addItemListener(this);
+        add(watchType);
+
         playButton = new Button("Play");
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
@@ -91,6 +111,9 @@ public class InferenceWindow extends NarsFrame implements ActionListener {
      */
     public void append(String str) {
         text.append(str);
+        if (!watched.equals("") && (str.indexOf(watched) != -1)) {
+            Record.stop();
+        }
     }
 
     /**
@@ -104,7 +127,22 @@ public class InferenceWindow extends NarsFrame implements ActionListener {
         } else if (s == stopButton) {
             Record.stop();
         } else if (s == hideButton) {
-        	close();
+            close();
+        }
+    }
+
+    public void itemStateChanged(ItemEvent event) {
+        String request = watchText.getText().trim();
+        if (!request.equals("")) {
+            int i = watchType.getSelectedIndex();
+            if (i == 1) {
+                Term term = StringParser.parseTerm(request);
+                if (term != null) {
+                    watched = term.getName();
+                }
+            } else if (i == 2) {
+                watched = request;
+            }
         }
     }
 
@@ -112,11 +150,11 @@ public class InferenceWindow extends NarsFrame implements ActionListener {
         Record.stop();
         dispose();
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
 
     /**
      * Change background color to remind the on-going file saving

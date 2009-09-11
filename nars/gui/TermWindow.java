@@ -31,6 +31,7 @@ import nars.main.Memory;
  * Window accept a Term, then display the content of the corresponding Concept
  */
 public class TermWindow extends NarsFrame implements ActionListener {
+
     /** Display label */
     private Label termLabel;
     /** Input field for term name */
@@ -86,24 +87,21 @@ public class TermWindow extends NarsFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Button b = (Button) e.getSource();
         if (b == playButton) {
-        	try {
-        		Concept concept = Memory.nameToConcept(StringParser.parseTerm(termField.getText()).getName());
-        		if (concept != null) {
-        			concept.startPlay(true);
-        		}
-        	} catch (StringParser.InvalidInputException exception) {
-        	}
+            Concept concept = Memory.nameToConcept(StringParser.parseTerm(termField.getText()).getName());
+            if (concept != null) {
+                concept.startPlay(true);
+            }
         } else if (b == hideButton) {
-        	close();
+            close();
         }
     }
 
     private void close() {
         setVisible(false);
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
 }
