@@ -70,7 +70,7 @@ public final class MatchingRules {
             TruthValue truth = TruthFunctions.revision(tTruth, bTruth);
             BudgetValue budget = BudgetFunctions.revise(tTruth, bTruth, truth, task, feedbackToLinks);
             Term content = newBelief.getContent();
-            Memory.doublePremiseTask(budget, content, truth);
+            Memory.revisionTask(budget, content, truth, task.isStructural());
             return true;
         } else {
             return false;

@@ -20,7 +20,6 @@
  */
 package nars.entity;
 
-import nars.inference.TemporalRules;
 import nars.language.Term;
 import nars.main.NARS;
 
@@ -30,8 +29,8 @@ import nars.main.NARS;
 public class Task extends Item {
     /** The sentence of the Task */
     private Sentence sentence;
-    /** Whether it is derived by a structual rule */
-    protected boolean structual = false;        // 
+    /** Whether it is derived by a structural rule */
+    protected boolean structural = false;        // 
 
     /**
      * Constructor
@@ -72,15 +71,15 @@ public class Task extends Item {
      * Check if a Task is derived by a StructuralRule
      * @return Whether the Task is derived by a StructuralRule
      */
-    public boolean isStructual() {
-        return structual;
+    public boolean isStructural() {
+        return structural;
     }
 
     /**
      * Record if a Task is derived by a StructuralRule
      */
-    public void setStructual() {
-        structual = true;
+    public void setStructural() {
+        structural = true;
     }
 
     /**
@@ -89,7 +88,7 @@ public class Task extends Item {
      */
     public void merge(Item that) {
         super.merge(that);
-        structual = (structual || ((Task) that).isStructual());
+        structural = (structural || ((Task) that).isStructural());
     }
 
     /**

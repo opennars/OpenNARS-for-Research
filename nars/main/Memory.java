@@ -256,6 +256,24 @@ public class Memory {
     }
 
     /**
+     * The final operations of the revision rules, called from MatchingRules
+     * @param budget The budget value of the new task
+     * @param content The content of the new task
+     * @param truth The truth value of the new task
+     * @param structural Whether the old Task is derived by structural rules
+     */
+    public static void revisionTask(BudgetValue budget, Term content, TruthValue truth, boolean structural) {
+        if (content != null) {
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense);
+            Task newTask = new Task(newSentence, budget);
+            if (structural) {
+                newTask.setStructural();
+            }
+            derivedTask(newTask);
+        }
+    }
+
+    /**
      * Shared final operations by all single-premise rules, called in StructuralRules
      * @param budget The budget value of the new task
      * @param content The content of the new task
@@ -265,7 +283,7 @@ public class Memory {
         Sentence sentence = currentTask.getSentence();
         Sentence newSentence = Sentence.make(sentence, content, truth, sentence.getStamp(), sentence.getTense());
         Task newTask = new Task(newSentence, budget);
-        newTask.setStructual();
+        newTask.setStructural();
         derivedTask(newTask);
     }
 
@@ -282,7 +300,7 @@ public class Memory {
         Stamp stamp = Memory.currentBelief.getStamp();
         Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense);
         Task newTask = new Task(newJudgment, budget);
-        newTask.setStructual();
+        newTask.setStructural();
         derivedTask(newTask);
     }
 
@@ -389,7 +407,7 @@ public class Memory {
                     Term componentTerm;
                     Concept componentConcept;
                     for (TermLink termLink : termLinks) {
-                        if (!(task.isStructual() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
+                        if (!(task.isStructural() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
                             taskLink = new TaskLink(task, termLink, subBudget);
                             componentTerm = termLink.getTarget();
                             componentConcept = getConcept(componentTerm);

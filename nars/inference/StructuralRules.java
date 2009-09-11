@@ -409,7 +409,7 @@ public final class StructuralRules {
         }
         Term content = (compoundTask ? component : compound);
         Task task = Memory.currentTask;
-        if (task.isStructual()) {
+        if (task.isStructural()) {
             return;
         }
         Sentence sentence = task.getSentence();

@@ -420,7 +420,7 @@ public final class RuleTables {
             } else if (compound.containComponent(component)) {
                 StructuralRules.structuralCompound(compound, component, compoundTask);
             }
-        } else if ((compound instanceof Negation) && !Memory.currentTask.isStructual()) {
+        } else if ((compound instanceof Negation) && !Memory.currentTask.isStructural()) {
             if (compoundTask) {
                 StructuralRules.transformNegation(((Negation) compound).componentAt(0));
             } else {
@@ -465,7 +465,7 @@ public final class RuleTables {
                 }
             }
         } else {
-            if (!task.isStructual() && task.getSentence().isJudgment()) {
+            if (!task.isStructural() && task.getSentence().isJudgment()) {
                 if (statement instanceof Inheritance) {
                     StructuralRules.structuralCompose1(compound, index, statement);
                     if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
@@ -486,7 +486,7 @@ public final class RuleTables {
      * @param side The location of the current term in the statement
      */
     private static void componentAndStatement(CompoundTerm compound, short index, Statement statement, short side) {
-        if (!Memory.currentTask.isStructual()) {
+        if (!Memory.currentTask.isStructural()) {
             if (statement instanceof Inheritance) {
                 StructuralRules.structuralDecompose1(compound, index, statement);
                 if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
