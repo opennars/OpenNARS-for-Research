@@ -96,10 +96,10 @@ public class NARS extends Applet implements Runnable {
     public void run() {
         Thread thisThread = Thread.currentThread();
         while (narsThread == thisThread) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e){
-            }
+//            try {
+//                Thread.sleep(10);
+//            } catch (InterruptedException e){
+//            }
             Center.tick();
         }
     }

@@ -33,7 +33,8 @@ public class Parameters {
     /** TermLink decay rate in TermLinkBag, in [1, 99]. */
     public static final int TERM_LINK_FORGETTING_CYCLE = 50;
     /** Silent threshold for task reporting, in [0, 100]. */
-    public static final int SILENT_LEVEL = 1; // spontaneous report
+//    public static final int SILENT_LEVEL = 1; // spontaneous report
+    public static final int SILENT_LEVEL = 100; // spontaneous report
 
     /* ---------- time management ---------- */
     /** Task decay rate in TaskBuffer, in [1, 99]. */
@@ -91,11 +92,13 @@ public class Parameters {
     
     /* ---------- avoiding repeated reasoning ---------- */
     /** Maximum length of Stamp, a power of 2 */
-    public static final int MAXMUM_STAMP_LENGTH = 16;
+//    public static final int MAXMUM_STAMP_LENGTH = 16;
+    public static final int MAXMUM_STAMP_LENGTH = 8;
     /** Remember recently used TermLink on a Task */
     public static final int TERM_LINK_RECORD_LENGTH = 10;
     /** Maximum number of beliefs kept in a Concept */
-    public static final int MAXMUM_BELIEF_LENGTH = 8;
+//    public static final int MAXMUM_BELIEF_LENGTH = 8;
+    public static final int MAXMUM_BELIEF_LENGTH = 5;
     /** Maximum number of goals kept in a Concept */
     public static final int MAXMUM_GOALS_LENGTH = 5;
 }
