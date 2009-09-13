@@ -88,9 +88,9 @@ public abstract class StringParser extends Symbols {
             Stamp stamp = new Stamp();
             Sentence sentence = null;
             if (tense.length() == 0) {
-                sentence = Sentence.make(content, punc, truth, stamp, null);
+                sentence = Sentence.make(content, punc, truth, stamp, null, null, null);
             } else {
-                sentence = Sentence.make(content, punc, truth, stamp, new TemporalValue(tense));
+                sentence = Sentence.make(content, punc, truth, stamp, new TemporalValue(tense), null, null);
             }
             if (sentence == null) {
                 throw new InvalidInputException("invalid sentence");

@@ -246,10 +246,14 @@ public class Memory {
      * @param budget The budget value of the new task
      * @param content The content of the new task
      * @param truth The truth value of the new task
+     * @param premise1 The first premise to record in the new Judgment
+     * @param premise2 The second premise to record in the new Judgment
      */
-    public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
+    public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth, 
+    		Sentence premise1, Sentence premise2) {
         if (content != null) {
-            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense);
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense,
+            		premise1, premise2);
             Task newTask = new Task(newSentence, budget);
             derivedTask(newTask);
         }
@@ -261,10 +265,14 @@ public class Memory {
      * @param content The content of the new task
      * @param truth The truth value of the new task
      * @param structural Whether the old Task is derived by structural rules
+     * @param premise1 The first premise to record in the new Judgment. May be null.
+     * @param premise2 The second premise to record in the new Judgment. May be null.
      */
-    public static void revisionTask(BudgetValue budget, Term content, TruthValue truth, boolean structural) {
+    public static void revisionTask(BudgetValue budget, Term content, TruthValue truth, boolean structural,
+    		Sentence premise1, Sentence premise2) {
         if (content != null) {
-            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense);
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense,
+            		premise1, premise2);
             Task newTask = new Task(newSentence, budget);
             if (structural) {
                 newTask.setStructural();
@@ -278,10 +286,13 @@ public class Memory {
      * @param budget The budget value of the new task
      * @param content The content of the new task
      * @param truth The truth value of the new task
+     * @param premise The premise to record in the new Judgment
      */
-    public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth) {
+    public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth, 
+    		Sentence premise) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, truth, sentence.getStamp(), sentence.getTense());
+        Sentence newSentence = Sentence.make(sentence, content, truth, sentence.getStamp(), sentence.getTense(),
+        		premise, null);
         Task newTask = new Task(newSentence, budget);
         newTask.setStructural();
         derivedTask(newTask);
@@ -298,7 +309,8 @@ public class Memory {
         Term content = Memory.currentTask.getContent();
         TemporalValue tense = Memory.currentBelief.getTense();
         Stamp stamp = Memory.currentBelief.getStamp();
-        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense);
+        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense,
+        		Memory.currentTask.getSentence(), null);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructural();
         derivedTask(newTask);

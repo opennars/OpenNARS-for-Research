@@ -492,11 +492,14 @@ public final class Concept extends Item {
      * Collect direct belief, questions, and goals for display
      * @return String representation of direct content
      */
-    private String displayContent() {
+    public String displayContent() {
         StringBuffer buffer = new StringBuffer();
         if (presentBelief != null) {
             buffer.append("  Present Belief:\n");
-            buffer.append(presentBelief + "\n");
+        	if (presentBelief instanceof Judgment && window != null && window.getShowDerivation())
+        		buffer.append(((Judgment)presentBelief).toStringWithPremises(""));
+        	else
+        		buffer.append(presentBelief + "\n");
         }
         if (pastRecords.size() > 0) {
             buffer.append("\n  Beliefs:\n");

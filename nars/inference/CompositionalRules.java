@@ -123,7 +123,7 @@ public final class CompositionalRules {
             return;
         }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, Memory.currentTask.getSentence(), Memory.currentBelief);
     }
 
     /**
@@ -212,7 +212,7 @@ public final class CompositionalRules {
         }
         if (truth != null) {
             BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-            Memory.doublePremiseTask(budget, content, truth);
+            Memory.doublePremiseTask(budget, content, truth, sentence, belief);
         }
     }
 
@@ -267,7 +267,7 @@ public final class CompositionalRules {
             return;
         }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
 
     /* ---------------- dependent variable and conjunction ---------------- */
@@ -318,7 +318,8 @@ public final class CompositionalRules {
             TruthValue v2 = Memory.currentBelief.getTruth();
             TruthValue truth = TruthFunctions.intersection(v1, v2);
             BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-            Memory.doublePremiseTask(budget, content, truth);
+            Memory.doublePremiseTask(budget, content, truth, 
+            		Memory.currentTask.getSentence(), Memory.currentBelief);
         }
     }
 
@@ -365,7 +366,7 @@ public final class CompositionalRules {
             return;
         }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
 
     /**
@@ -393,6 +394,6 @@ public final class CompositionalRules {
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
 }

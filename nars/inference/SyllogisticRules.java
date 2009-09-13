@@ -68,8 +68,8 @@ public final class SyllogisticRules {
         TemporalValue order = TemporalRules.syllogistic(order1, order2);
         Statement content1 = Statement.make((Statement) sentence.getContent(), term1, term2, order);
         Statement content2 = Statement.make((Statement) sentence.getContent(), term2, term1, TemporalValue.getReverse(order));
-        Memory.doublePremiseTask(budget1, content1, truth1);
-        Memory.doublePremiseTask(budget2, content2, truth2);
+        Memory.doublePremiseTask(budget1, content1, truth1, sentence, belief);
+        Memory.doublePremiseTask(budget2, content2, truth2, belief, sentence);
     }
 
     /**
@@ -123,13 +123,13 @@ public final class SyllogisticRules {
         statement1 = Statement.make(st1, term1, term2, order);
         statement2 = Statement.make(st1, term2, term1, TemporalValue.getReverse(order));
         statement3 = Statement.makeSym(st1, term1, term2, order);
-        Memory.doublePremiseTask(budget1, statement1, truth1);
-        Memory.doublePremiseTask(budget2, statement2, truth2);
-        Memory.doublePremiseTask(budget3, statement3, truth3);
+        Memory.doublePremiseTask(budget1, statement1, truth1, taskSentence, belief);
+        Memory.doublePremiseTask(budget2, statement2, truth2, belief, taskSentence);
+        Memory.doublePremiseTask(budget3, statement3, truth3, taskSentence, belief);
         if (statement1.isConstant()) {
-            Memory.doublePremiseTask(budget1, introVarInd(belief, taskSentence, figure, true), truth1);
-            Memory.doublePremiseTask(budget2, introVarInd(taskSentence, belief, figure, true), truth2);
-            Memory.doublePremiseTask(budget3, introVarInd(taskSentence, belief, figure, false), truth3);
+            Memory.doublePremiseTask(budget1, introVarInd(belief, taskSentence, figure, true), truth1, belief, taskSentence);
+            Memory.doublePremiseTask(budget2, introVarInd(taskSentence, belief, figure, true), truth2, taskSentence, belief);
+            Memory.doublePremiseTask(budget3, introVarInd(taskSentence, belief, figure, false), truth3, taskSentence, belief);
         }
     }
 
@@ -185,7 +185,7 @@ public final class SyllogisticRules {
                 return;
         }
         Term content = Statement.make(asymSt, term1, term2, order);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, asym, sym);
     }
 
     /**
@@ -219,7 +219,7 @@ public final class SyllogisticRules {
         TemporalValue order2 = st2.getOrder();
         TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
         Term statement = Statement.make(st1, term1, term2, order);
-        Memory.doublePremiseTask(budget, statement, truth);
+        Memory.doublePremiseTask(budget, statement, truth, belief, sentence);
     }
 
     /* --------------- rules used only in conditional inference --------------- */
@@ -295,7 +295,7 @@ public final class SyllogisticRules {
             tense = TemporalRules.tenseSyllogistic(tense0, subSentence.getCreationTime(), TemporalValue.getReverse(order0));
         }
         Memory.currentTense = tense;
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, mainSentence, subSentence);
     }
 
     /**
@@ -396,7 +396,7 @@ public final class SyllogisticRules {
             budget = BudgetFunctions.forward(truth);
         }
         Memory.currentTense = tense;
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, taskSentence, belief);
     }
 
     /**
@@ -459,7 +459,7 @@ public final class SyllogisticRules {
                 }
                 budget = BudgetFunctions.forward(truth);
             }
-            Memory.doublePremiseTask(budget, content, truth);
+            Memory.doublePremiseTask(budget, content, truth, sentence, belief);
         }
         if (term2 != null) {
             if (term1 != null) {
@@ -482,7 +482,7 @@ public final class SyllogisticRules {
                 budget = BudgetFunctions.forward(truth);
             }
             Memory.currentTense = null;
-            Memory.doublePremiseTask(budget, content, truth);
+            Memory.doublePremiseTask(budget, content, truth, sentence, belief);
         }
         return true;
     }
@@ -576,7 +576,7 @@ public final class SyllogisticRules {
             return;
         }
         BudgetValue budget = BudgetFunctions.forward(truth);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, taskSentence, belief);
     }
 
     /**
@@ -639,8 +639,8 @@ public final class SyllogisticRules {
         BudgetValue budget2 = BudgetFunctions.temporalIndCom(task1.getBudget(), task2.getBudget(), truth2);
         BudgetValue budget3 = BudgetFunctions.temporalIndCom(task1.getBudget(), task2.getBudget(), truth3);
         Memory.currentTense = new TemporalValue(0);
-        Memory.doublePremiseTask(budget1, statement1, truth1);
-        Memory.doublePremiseTask(budget2, statement2, truth2);
-        Memory.doublePremiseTask(budget3, statement3, truth3);
+        Memory.doublePremiseTask(budget1, statement1, truth1, judg1, judg2);
+        Memory.doublePremiseTask(budget2, statement2, truth2, judg2, judg1);
+        Memory.doublePremiseTask(budget3, statement3, truth3, judg1, judg2);
     }
 }

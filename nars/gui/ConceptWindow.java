@@ -22,16 +22,19 @@ package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import nars.entity.Concept;
 
 /**
  * Window displaying the content of a Concept, such as beliefs, goals, and questions
  */
-public class ConceptWindow extends NarsFrame implements ActionListener {
+public class ConceptWindow extends NarsFrame implements ActionListener, ItemListener {
 
     /** Control buttons */
     private Button playButton,  stopButton,  playInNewWindowButton, closeButton;
+    private Checkbox showDerivationCheckbox;
     /** Display area */
     private TextArea text;
     /** The concept to be displayed */
@@ -76,6 +79,11 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
         stopButton.addActionListener(this);
         add(stopButton);
 
+        showDerivationCheckbox = new Checkbox("Derivation", true);
+        gridbag.setConstraints(showDerivationCheckbox, c);
+        showDerivationCheckbox.addItemListener(this);
+        add(showDerivationCheckbox);
+
         playInNewWindowButton = new Button("Play in New Window");
         gridbag.setConstraints(playInNewWindowButton, c);
         playInNewWindowButton.addActionListener(this);
@@ -104,9 +112,10 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
      * This is called when Concept removes this as its window.
      */
     public void detachFromConcept() {
-    	// The Play and Stop buttons no longer do anything, so disable.
+    	// The Play and Stop buttons and Derivation checkbox no longer do anything, so disable.
     	playButton.setEnabled(false);
     	stopButton.setEnabled(false);
+    	showDerivationCheckbox.setEnabled(false);
     }
     
     /**
@@ -133,7 +142,19 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
     }
     
 	@Override
-	public void windowClosing(WindowEvent arg0) {
+	public void windowClosing(WindowEvent e) {
 		close();
+	}
+
+	public boolean getShowDerivation() {
+		return showDerivationCheckbox.getState();
+	}
+	
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource() == showDerivationCheckbox) {
+			// Redisplay.  displayContent will check getShowDerivation().
+			post(concept.displayContent());
+		}
 	}
 }

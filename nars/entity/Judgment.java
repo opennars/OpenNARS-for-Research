@@ -22,25 +22,36 @@ package nars.entity;
 
 import nars.io.Symbols;
 import nars.language.Term;
+import nars.main.Memory;
 import nars.main.Parameters;
 
 /**
  * A Judgment is an piece of new knowledge to be absorbed.
  */
 public class Judgment extends Sentence {
-
+	public Judgment _premise1 = null;
+	public Judgment _premise2 = null;
+	
     /**
      * Constructor
      * @param term The content
      * @param punc The punctuation
      * @param t The truth value
      * @param b The stamp
+     * @param premise1 The first premise to record in the new Judgment. May be null.
+     * This is only used for display.  It is not used in processing.
+     * @param premise2 The second premise to record in the new Judgment. May be null.
+     * This is only used for display.  It is not used in processing.
      */
-    public Judgment(Term term, char punc, TruthValue t, Stamp b) {
+    public Judgment(Term term, char punc, TruthValue t, Stamp b, Sentence premise1, Sentence premise2) {
         content = term;
         punctuation = punc;
         truth = t;
         stamp = b;
+        if (premise1 instanceof Judgment)
+        	_premise1 = (Judgment)premise1;
+        if (premise2 instanceof Judgment)
+        	_premise2 = (Judgment)premise2;
     }
 
     /**
@@ -92,6 +103,15 @@ public class Judgment extends Sentence {
             return false;
         long eventTime = stamp.getCreationTime() + temporalOrder.getDelta();
         return eventTime > nars.main.Center.getTime();
+    }
+    
+    public String toStringWithPremises(String indentation) {
+    	String result = indentation + toString() + "\n";
+    	if (_premise1 != null)
+    		result = result + _premise1.toStringWithPremises(indentation + "  ");
+    	if (_premise2 != null)
+    		result = result + _premise2.toStringWithPremises(indentation + "  ");
+    	return result;
     }
 }
 

@@ -52,19 +52,22 @@ public abstract class Sentence implements Cloneable {
      * Make a Sentence from an input String. Called by StringParser.
      * @param term The content of the sentence
      * @param punc The puncuation (and therefore, type) of the sentence
-     * @param tense The tense of the sntense
      * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
      * @param stamp The stamp of the truth value (for Judgment or Goal)
+     * @param tense The tense of the sentence
+     * @param premise1 The first premise to record in the new Judgment. May be null.
+     * @param premise2 The second premise to record in the new Judgment. May be null.
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, TemporalValue tense) {
+    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, TemporalValue tense,
+    		Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
         Sentence s = null;
         switch (punc) {
             case Symbols.JUDGMENT_MARK:
-                s = new Judgment(term, punc, truth, stamp);
+                s = new Judgment(term, punc, truth, stamp, premise1, premise2);
                 s.temporalOrder = tense;
                 break;
             case Symbols.GOAL_MARK:
@@ -82,14 +85,17 @@ public abstract class Sentence implements Cloneable {
 
     /**
      * Make a derived Sentence from a template and some initial values. Called by Memory.
-     * @param term The content of the sentence
      * @param oldS A sample sentence providing the type of the new sentence
-     * @param tense The tense of the sentence
+     * @param term The content of the sentence
      * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
      * @param stamp The stamp of the truth value (for Judgment or Goal)
+     * @param tense The tense of the sentence
+     * @param premise1 The first premise to record in the new Judgment. May be null.
+     * @param premise2 The second premise to record in the new Judgment. May be null.
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp, TemporalValue tense) {
+    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp, TemporalValue tense,
+    		Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
@@ -100,7 +106,7 @@ public abstract class Sentence implements Cloneable {
         } else if (oldS instanceof Goal) {
             s = new Goal(term, Symbols.GOAL_MARK, truth, stamp);
         } else {
-            s = new Judgment(term, Symbols.JUDGMENT_MARK, truth, stamp);
+            s = new Judgment(term, Symbols.JUDGMENT_MARK, truth, stamp, premise1, premise2);
             s.temporalOrder = tense;
         }
         return s;
@@ -112,7 +118,11 @@ public abstract class Sentence implements Cloneable {
      */
     @Override
     public Object clone() {
-        return make(content, punctuation, truth, stamp, temporalOrder);
+    	if (this instanceof Judgment)
+    		return make(content, punctuation, truth, stamp, temporalOrder,
+    				((Judgment)this)._premise1, ((Judgment)this)._premise2);
+    	else
+    		return make(content, punctuation, truth, stamp, temporalOrder, null, null);
     }
 
     /**

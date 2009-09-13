@@ -126,7 +126,7 @@ public class TemporalRules {
         BudgetValue budget = BudgetFunctions.revise(tTruth, bTruth, truth, Memory.currentTask, feedbackToLinks);
         Term content = newBelief.getContent();
         Memory.currentTense = new TemporalValue((int) (time - Center.getTime()));
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, oldBelief, newBelief);
         return true;
     }
     

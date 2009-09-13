@@ -89,7 +89,7 @@ public final class StructuralRules {
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /**
@@ -148,7 +148,7 @@ public final class StructuralRules {
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /**
@@ -270,7 +270,7 @@ public final class StructuralRules {
             return;
         }
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, Memory.currentTask.getSentence());
     }
 
     /* -------------------- set transform -------------------- */
@@ -310,7 +310,7 @@ public final class StructuralRules {
         } else {
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /* -------------------- products and images transform -------------------- */
@@ -392,7 +392,7 @@ public final class StructuralRules {
         } else {
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /* --------------- Disjunction and Conjunction transform --------------- */
@@ -425,7 +425,7 @@ public final class StructuralRules {
             }
             budget = BudgetFunctions.forward(truth);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /* --------------- Negation related rules --------------- */
@@ -446,7 +446,7 @@ public final class StructuralRules {
         } else {
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 
     /**
@@ -473,6 +473,6 @@ public final class StructuralRules {
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-        Memory.singlePremiseTask(budget, content, truth);
+        Memory.singlePremiseTask(budget, content, truth, sentence);
     }
 }

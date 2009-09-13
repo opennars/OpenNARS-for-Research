@@ -70,7 +70,7 @@ public final class MatchingRules {
             TruthValue truth = TruthFunctions.revision(tTruth, bTruth);
             BudgetValue budget = BudgetFunctions.revise(tTruth, bTruth, truth, task, feedbackToLinks);
             Term content = newBelief.getContent();
-            Memory.revisionTask(budget, content, truth, task.isStructural());
+            Memory.revisionTask(budget, content, truth, task.isStructural(), oldBelief, newBelief);
             return true;
         } else {
             return false;
@@ -182,7 +182,7 @@ public final class MatchingRules {
         TruthValue value2 = judgment2.getTruth();
         TruthValue truth = TruthFunctions.intersection(value1, value2);
         BudgetValue budget = BudgetFunctions.forward(truth);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, judgment1, judgment2);
     }
 
     /**
@@ -198,7 +198,7 @@ public final class MatchingRules {
         Statement content = Statement.make(statement, sub, pre, order);
         TruthValue truth = TruthFunctions.reduceConjunction(sym.getTruth(), asym.getTruth());
         BudgetValue budget = BudgetFunctions.forward(truth);
-        Memory.doublePremiseTask(budget, content, truth);
+        Memory.doublePremiseTask(budget, content, truth, sym, asym);
     }
 
     /* -------------------- one-premise inference rules -------------------- */

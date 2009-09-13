@@ -37,7 +37,7 @@ public class Goal extends Judgment {
      * @param s The stamp
      */
     public Goal(Term term, char punc, TruthValue t, Stamp s) {
-        super(term, punc, t, s);
+        super(term, punc, t, s, null, null);
     }
 }
 
