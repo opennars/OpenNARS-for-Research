@@ -265,12 +265,14 @@ public final class StructuralRules {
      */
     private static void structuralStatement(Term subject, Term predicate, TruthValue truth) {
         Task task = Memory.currentTask;
-        Term content = Statement.make((Statement) task.getContent(), subject, predicate);
-        if (content == null) {
-            return;
+        Term oldContent = task.getContent();
+        if (oldContent instanceof Statement) {
+            Term content = Statement.make((Statement) oldContent, subject, predicate);
+            if (content != null) {
+                BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
+                Memory.singlePremiseTask(budget, content, truth, Memory.currentTask.getSentence());
+            }
         }
-        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.singlePremiseTask(budget, content, truth, Memory.currentTask.getSentence());
     }
 
     /* -------------------- set transform -------------------- */
