@@ -31,9 +31,9 @@ public class TruthValue { // implements Cloneable {
     /** The charactor that separates the factors in a truth value */
     private static final char SEPARATOR = Symbols.VALUE_SEPARATOR;
     /** The frequency factor of the truth value */
-    protected ShortFloat frequency;
+    private ShortFloat frequency;
     /** The confidence factor of the truth value */
-    protected ShortFloat confidence;
+    private ShortFloat confidence;
 
     /**
      * Constructor with two ShortFloats
@@ -42,7 +42,7 @@ public class TruthValue { // implements Cloneable {
      */
     public TruthValue(float f, float c) {
         frequency = new ShortFloat(f);
-        confidence = new ShortFloat(c);
+        confidence = (c < 1) ? new ShortFloat(c) : new ShortFloat(0.9999f);
     }
 
     /**
@@ -123,6 +123,12 @@ public class TruthValue { // implements Cloneable {
      * @return The String
      */
     public String toString2() {
-        return DELIMITER + frequency.toString2() + SEPARATOR + confidence.toString2() + DELIMITER;
+        String s1 = DELIMITER + frequency.toString2() + SEPARATOR;
+        String s2 = confidence.toString2();
+        if (s2.equals("1.00")) {
+            return s1 + "0.99" + DELIMITER;
+        } else {
+            return s1 + s2 + DELIMITER;
+        }
     }
 }
