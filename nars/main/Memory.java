@@ -310,7 +310,7 @@ public class Memory {
         TemporalValue tense = Memory.currentBelief.getTense();
         Stamp stamp = Memory.currentBelief.getStamp();
         Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense,
-        		Memory.currentTask.getSentence(), null);
+        		Memory.currentBelief, null);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructural();
         derivedTask(newTask);
