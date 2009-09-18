@@ -50,6 +50,16 @@ public class Stamp implements Cloneable {
         list = new long[length];
         list[0] = current;
     }
+    /**
+     * Generate a new stamp from an existing one, with the same list but different creation time
+     * <p>
+     * For single-premise rules
+     * @param old The stamp of the single premise
+     */
+    public Stamp(Stamp old) {
+        length = old.length();
+        list = old.getList();
+    }
 
     /**
      * Generate a new stamp for derived sentence by merging the two from parents
@@ -120,6 +130,14 @@ public class Stamp implements Cloneable {
      */
     long get(int i) {
         return list[i];
+    }
+
+    /**
+     * Get the list, called in this class only
+     * @return The list of numbers
+     */
+    long[] getList() {
+        return list;
     }
 
     /**

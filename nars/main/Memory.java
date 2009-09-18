@@ -291,7 +291,7 @@ public class Memory {
     public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth, 
     		Sentence premise) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, truth, sentence.getStamp(), sentence.getTense(),
+        Sentence newSentence = Sentence.make(sentence, content, truth, new Stamp(sentence.getStamp()), sentence.getTense(),
         		premise, null);
         Task newTask = new Task(newSentence, budget);
         newTask.setStructural();
@@ -308,7 +308,7 @@ public class Memory {
     public static void convertedJudgment(TruthValue truth, BudgetValue budget) {
         Term content = Memory.currentTask.getContent();
         TemporalValue tense = Memory.currentBelief.getTense();
-        Stamp stamp = Memory.currentBelief.getStamp();
+        Stamp stamp = new Stamp(Memory.currentBelief.getStamp());
         Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense,
         		Memory.currentBelief, null);
         Task newTask = new Task(newJudgment, budget);
