@@ -60,7 +60,7 @@ public abstract class Sentence implements Cloneable {
      * @return the Sentence generated from the arguments
      */
     public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, TemporalValue tense,
-    		Sentence premise1, Sentence premise2) {
+            Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
@@ -95,7 +95,7 @@ public abstract class Sentence implements Cloneable {
      * @return the Sentence generated from the arguments
      */
     public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp, TemporalValue tense,
-    		Sentence premise1, Sentence premise2) {
+            Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
@@ -118,11 +118,12 @@ public abstract class Sentence implements Cloneable {
      */
     @Override
     public Object clone() {
-    	if (this instanceof Judgment)
-    		return make(content, punctuation, truth, stamp, temporalOrder,
-    				((Judgment)this)._premise1, ((Judgment)this)._premise2);
-    	else
-    		return make(content, punctuation, truth, stamp, temporalOrder, null, null);
+        if (this instanceof Judgment) {
+            return make((Term) content.clone(), punctuation, truth, stamp, temporalOrder,
+                    ((Judgment) this)._premise1, ((Judgment) this)._premise2);
+        } else {
+            return make((Term) content.clone(), punctuation, truth, stamp, temporalOrder, null, null);
+        }
     }
 
     /**

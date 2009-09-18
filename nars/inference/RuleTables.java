@@ -365,7 +365,8 @@ public final class RuleTables {
      * @param subSentence The premise that is the subject or predicate of the first one
      * @param index The location of the second premise in the first
      */
-    private static void detachmentWithVar(Sentence mainSentence, Sentence subSentence, int index) {
+    private static void detachmentWithVar(Sentence originalMainSentence, Sentence subSentence, int index) {
+        Sentence mainSentence = (Sentence) originalMainSentence.clone();   // for substitution
         Statement statement = (Statement) mainSentence.getContent();
         Term component = statement.componentAt(index);
         Term content = subSentence.getContent();
