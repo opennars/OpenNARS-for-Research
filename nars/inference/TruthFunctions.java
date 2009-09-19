@@ -332,13 +332,17 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue union(TruthValue v1, TruthValue v2) {
+        return union(v1, v2, 1);
+    }
+
+    static TruthValue union(TruthValue v1, TruthValue v2, float discount) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = or(f1, f2);
         float c = or(and(f1, c1), and(f2, c2)) + and(1 - f1, 1 - f2, c1, c2);
-        return new TruthValue(f, c);
+        return new TruthValue(f, c * discount);
     }
     
     /**
@@ -348,13 +352,17 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue intersection(TruthValue v1, TruthValue v2) {
+        return intersection(v1, v2, 1);
+    }
+
+    static TruthValue intersection(TruthValue v1, TruthValue v2, float discount) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = and(f1, f2);
         float c = or(and(1 - f1, c1), and(1 - f2, c2)) + and(f1, f2, c1, c2);
-        return new TruthValue(f, c);
+        return new TruthValue(f, c * discount);
     }
     
     /**
@@ -365,7 +373,12 @@ public final class TruthFunctions extends UtilityFunctions {
      */
     static TruthValue difference(TruthValue v1, TruthValue v2) {
         TruthValue v0 = negation(v2);
-        return intersection(v1, v0);
+        return intersection(v1, v0, 1);
+    }
+
+    static TruthValue difference(TruthValue v1, TruthValue v2, float discount) {
+        TruthValue v0 = negation(v2);
+        return intersection(v1, v0, discount);
     }
     
     /**
@@ -386,7 +399,7 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue reduceConjunction(TruthValue v1, TruthValue v2) {
-        TruthValue v0 = intersection(negation(v1), v2);
+        TruthValue v0 = intersection(negation(v1), v2, 1);
         return negation(implying(v0));
     }
     
