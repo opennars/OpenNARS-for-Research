@@ -435,7 +435,7 @@ public final class StructuralRules {
      * {A, A@(--, A)} |- (--, A)
      * @param content The premise
      */
-    static void transformNegation(Term content) {
+    public static void transformNegation(Term content) {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();

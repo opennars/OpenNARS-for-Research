@@ -83,9 +83,6 @@ public final class Concept extends Item {
         if (tm instanceof CompoundTerm) {
             termLinkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
             checkRevisibility();
-//            if (tm instanceof Temporal) {
-//                markEventComponents();
-//            }
         }
     }
 
@@ -400,6 +397,14 @@ public final class Concept extends Item {
     }
 
     /**
+     * Get the present belief
+     * @return The present belief
+     */
+    public Judgment getBelief() {
+        return presentBelief;
+    }
+
+    /**
      * Select a belief to interact with the given task in inference
      * <p>
      * get the first qualified one
@@ -439,6 +444,7 @@ public final class Concept extends Item {
             RuleTables.transformTask(task, tLink);  // to turn this into structural inference as below?
             return;
         }
+        generateNegation(task);
         int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
         while (Memory.noResult() && (termLinkCount > 0)) {
             TermLink termLink = termLinks.takeOut(tLink);
@@ -453,6 +459,22 @@ public final class Concept extends Item {
             }
         }
         taskLinks.putBack(tLink);
+    }
+
+    /**
+     * Directly express a negative judgment as a negation
+     * @param task The task to be processed
+     */
+    private void generateNegation(Task task) {
+        if (task.getSentence() instanceof Judgment) {
+            Sentence s = task.getSentence();
+            if (s.getTruth().getFrequency() < 0.5) {
+                Term t = Negation.make(s.getContent());
+                if (t != null) {
+                    StructuralRules.transformNegation(t);
+                }
+            }
+        }
     }
 
     /* ---------- display ---------- */
@@ -496,10 +518,11 @@ public final class Concept extends Item {
         StringBuffer buffer = new StringBuffer();
         if (presentBelief != null) {
             buffer.append("  Present Belief:\n");
-        	if (presentBelief instanceof Judgment && window != null && window.getShowDerivation())
-        		buffer.append(((Judgment)presentBelief).toStringWithPremises(""));
-        	else
-        		buffer.append(presentBelief + "\n");
+            if (presentBelief instanceof Judgment && window != null && window.getShowDerivation()) {
+                buffer.append(((Judgment) presentBelief).toStringWithPremises(""));
+            } else {
+                buffer.append(presentBelief + "\n");
+            }
         }
         if (pastRecords.size() > 0) {
             buffer.append("\n  Beliefs:\n");
