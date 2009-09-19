@@ -75,9 +75,19 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue implying(TruthValue v1) {
+        return implying(v1, 1);
+    }
+
+    /**
+     * {<A ==> B>, A} |- B
+     * @param v1 Truth value of the premise
+     * @param discount Confidence discount factor for new CompoundTerm
+     * @return Truth value of the conclusion
+     */
+    static TruthValue implying(TruthValue v1, float discount) {
         float f1 = v1.getFrequency();
         float c1 = v1.getConfidence();
-        float c = and(f1, c1);
+        float c = and(f1, c1) * discount;
         return new TruthValue(f1, c);
     }
 
@@ -87,9 +97,19 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue implied(TruthValue v1) {
+        return implied(v1, 1);
+    }
+
+    /**
+     * {<A ==> B>, B} |- A
+     * @param v1 Truth value of the premise
+     * @param discount Confidence discount factor for new CompoundTerm
+     * @return Truth value of the conclusion
+     */
+    static TruthValue implied(TruthValue v1, float discount) {
         float f1 = v1.getFrequency();
         float c1 = v1.getConfidence();
-        float c = w2c(c1);
+        float c = w2c(c1) * discount;
         return new TruthValue(f1, c);
     }
     
@@ -174,9 +194,7 @@ public final class TruthFunctions extends UtilityFunctions {
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = and(f1, f2);
-//        float c0 = and(f2, c2);
-//        float c = and(c1, c0, c0);
-        float c = and(c1, c2, f2);      // 09-05-06
+        float c = and(c1, c2, f2);
         return new TruthValue(f, c);
     }
     
@@ -335,6 +353,13 @@ public final class TruthFunctions extends UtilityFunctions {
         return union(v1, v2, 1);
     }
 
+    /**
+     * {<M --> S>, <M <-> P>} |- <M --> (S|P)>
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @param discount Confidence discount factor for new CompoundTerm
+     * @return Truth value of the conclusion
+     */
     static TruthValue union(TruthValue v1, TruthValue v2, float discount) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
@@ -355,6 +380,13 @@ public final class TruthFunctions extends UtilityFunctions {
         return intersection(v1, v2, 1);
     }
 
+    /**
+     * {<M --> S>, <M <-> P>} |- <M --> (S&P)>
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @param discount Confidence discount factor for new CompoundTerm
+     * @return Truth value of the conclusion
+     */
     static TruthValue intersection(TruthValue v1, TruthValue v2, float discount) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
@@ -376,6 +408,13 @@ public final class TruthFunctions extends UtilityFunctions {
         return intersection(v1, v0, 1);
     }
 
+    /**
+     * {<M --> S>, <M <-> P>} |- <M --> (S-P)>
+     * @param v1 Truth value of the first premise
+     * @param v2 Truth value of the second premise
+     * @param discount Confidence discount factor for new CompoundTerm
+     * @return Truth value of the conclusion
+     */
     static TruthValue difference(TruthValue v1, TruthValue v2, float discount) {
         TruthValue v0 = negation(v2);
         return intersection(v1, v0, discount);

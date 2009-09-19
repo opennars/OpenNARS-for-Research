@@ -51,14 +51,17 @@ public final class StructuralRules {
         if (((side == 0) && components.contains(pred)) || ((side == 1) && components.contains(sub))) {
             return;
         }
+        float discount;
         if (side == 0) {
             sub = compound;
             components.set(index, pred);
             pred = CompoundTerm.make(compound, components);
+            discount = estimateCorrelation(pred);
         } else {
             components.set(index, sub);
             sub = CompoundTerm.make(compound, components);
             pred = compound;
+            discount = estimateCorrelation(sub);
         }
         if ((sub == null) || (pred == null)) {
             return;
@@ -81,15 +84,48 @@ public final class StructuralRules {
         } else {
             if (compound.size() > 1) {
                 if (sentence.isJudgment()) {
-                    truth = TruthFunctions.implying(truth);
+                    truth = TruthFunctions.implying(truth, discount);
                 } else {
                     assert (sentence instanceof Goal);
-                    truth = TruthFunctions.implied(truth);
+                    truth = TruthFunctions.implied(truth, discount);
                 }
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
         Memory.singlePremiseTask(budget, content, truth, sentence);
+    }
+
+    /**
+     * Estimate the correlation between the two components in a compound
+     * @param content One of the premises
+     * @param component1 One component
+     * @param component2 The other component
+     * @return The correlation discount, 1 means no correlation found, 0 for full correlation
+     */
+    private static float estimateCorrelation(Term term) {
+        if (term instanceof CompoundTerm) {
+            CompoundTerm compound = (CompoundTerm) term;
+            if (compound.size() == 2) {
+                Statement s = null;
+                if ((compound instanceof IntersectionExt) || (compound instanceof IntersectionInt)
+                 || (compound instanceof DifferenceExt) || (compound instanceof DifferenceInt)) {
+                    s = Similarity.make(compound.componentAt(0), compound.componentAt(1));
+                } else if ((compound instanceof Disjunction) || (compound instanceof Conjunction)) {
+                    s = Equivalence.make(compound.componentAt(0), compound.componentAt(1), null);
+                }
+                if (s != null) {
+                    Concept c = Memory.termToConcept(s);
+                    if (c != null) {
+                        Sentence b = c.getBelief();
+                        if (b != null) {
+                            TruthValue tc = b.getTruth();
+                            return 1 - Math.abs(2 * tc.getExpectation() - 1);
+                        }
+                    }
+                }
+            }
+        }
+        return 1;
     }
 
     /**
