@@ -87,5 +87,14 @@ public class UtilityFunctions {
     public static float w2c(float w) {
         return w / (w + Parameters.NEAR_FUTURE);
     }
+
+    /**
+     * A function to convert confidence to weight
+     * @param c confidence, in [0, 1)
+     * @return The corresponding weight of evidence, a non-negative real number
+     */
+    public static float c2w(float c) {
+        return Parameters.NEAR_FUTURE * c / (1 - c);
+    }
 }
 

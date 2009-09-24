@@ -135,10 +135,11 @@ public final class TruthFunctions extends UtilityFunctions {
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
-        float w1 = c1 / (1 - c1);
-        float w2 = c2 / (1 - c2);
-        float f = (w1 * f1 + w2 * f2) / (w1 + w2);
-        float c = w2c(w1 + w2);
+        float w1 = c2w(c1);
+        float w2 = c2w(c2);
+        float w = w1 + w2;
+        float f = (w1 * f1 + w2 * f2) / w;
+        float c = w2c(w);
         return new TruthValue(f, c);
     }
 
@@ -156,8 +157,8 @@ public final class TruthFunctions extends UtilityFunctions {
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
-        float w1 = c1 / (1 - c1);
-        float w2 = c2 / (1 - c2);
+        float w1 = c2w(c1);
+        float w2 = c2w(c2);
         float d1 = w1 / (Math.abs(t - t1) + 1);
         float d2 = w2 / (Math.abs(t - t2) + 1);
         float f = (d1 * f1 + d2 * f2) / (d1 + d2);
