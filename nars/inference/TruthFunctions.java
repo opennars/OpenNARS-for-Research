@@ -75,7 +75,7 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue implying(TruthValue v1) {
-        return implying(v1, 1);
+        return implying(v1, w2c(1));
     }
 
     /**
@@ -97,7 +97,7 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue implied(TruthValue v1) {
-        return implied(v1, 1);
+        return implied(v1, w2c(1));
     }
 
     /**
