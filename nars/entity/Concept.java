@@ -57,6 +57,7 @@ public final class Concept extends Item {
     private ArrayList<Judgment> predictions; // event only
     /** Most recent and confidence judgment */
     private Judgment presentBelief = null;
+    private Judgment perfectBelief = null;
     /** Whether truth value of judgments can be revised */
     private boolean revisible = true;               // 
     /** Whether the content of the concept is being displayed */
@@ -264,6 +265,39 @@ public final class Concept extends Item {
                     }
                 }
             }
+        }
+
+        if (judg.getTruth().getFrequency() == 1.0 || judg.getTruth().getFrequency() == 0.0) {
+        	if (perfectBelief == null) {
+        		perfectBelief = judg;            
+        	} else {
+        		if (perfectBelief.getTense() == null) {
+        			if (judg.getTense() == null) {
+        				if (perfectBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
+        					perfectBelief = judg;
+        				}
+        			} else {    // judg.getTense() != null
+        				if (judg.getEventTime() == Center.getTime()) {
+        					perfectBelief = judg;
+        				}
+        			}
+        		} else {    // presentBelief.getTense() != null
+        			if (judg.getTense() != null) {
+        				if (judg.getEventTime() < perfectBelief.getEventTime()) {
+        					return;
+        				}
+        				if (judg.getTruth().getExpDifAbs(perfectBelief.getTruth()) > 0.5) {
+        					perfectBelief = judg;
+        				// Don't do temporalRevision since it has side effects.
+        				//} else if (judg.noOverlapping(perfectBelief)) {
+        				//	  TemporalRules.temporalRevision(judg, perfectBelief, Center.getTime(), false);
+        				} 
+        				else if (perfectBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
+        					perfectBelief = judg;
+        				}
+        			}
+        		}
+        	}
         }
     }
 
@@ -517,11 +551,19 @@ public final class Concept extends Item {
     public String displayContent() {
         StringBuffer buffer = new StringBuffer();
         if (presentBelief != null) {
-            buffer.append("  Present Belief:\n");
+            buffer.append(presentBelief == perfectBelief ? "  Present & Perfect Belief:\n" : "  Present Belief:\n");
             if (presentBelief instanceof Judgment && window != null && window.getShowDerivation()) {
                 buffer.append(((Judgment) presentBelief).toStringWithPremises(""));
             } else {
                 buffer.append(presentBelief + "\n");
+            }
+        }
+        if (perfectBelief != null && perfectBelief != presentBelief) {
+            buffer.append("  Perfect Belief:\n");
+            if (perfectBelief instanceof Judgment && window != null && window.getShowDerivation()) {
+                buffer.append(((Judgment) perfectBelief).toStringWithPremises(""));
+            } else {
+                buffer.append(perfectBelief + "\n");
             }
         }
         if (pastRecords.size() > 0) {
