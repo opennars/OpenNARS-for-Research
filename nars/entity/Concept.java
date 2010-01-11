@@ -48,18 +48,15 @@ public final class Concept extends Item {
     /** Link templates of TermLink, only in concepts with CompoundTerm */
     private ArrayList<TermLink> termLinkTemplates;
     /** Question directly asked about the term */
-    private ArrayList<Question> pendingQuestions;
+    private ArrayList<Question> questions;
     /** Goals directly requested on the term */
-    private ArrayList<Goal> pendingGoals;
+    private ArrayList<Goal> goals;
     /** Judgments directly made about the term, with non-future tense */
-    private ArrayList<Judgment> pastRecords;
-    /** Judgments directly made about the term, with future tense */
-    private ArrayList<Judgment> predictions; // event only
+    private ArrayList<Judgment> beliefs;
     /** Most recent and confidence judgment */
-    private Judgment presentBelief = null;
-    private Judgment perfectBelief = null;
+//    private Judgment perfectBelief = null;  // stored for demo and debugging purpose only
     /** Whether truth value of judgments can be revised */
-    private boolean revisible = true;               // 
+    private boolean revisible = true;
     /** Whether the content of the concept is being displayed */
     private boolean showing = false;
     /** The display window */
@@ -75,10 +72,9 @@ public final class Concept extends Item {
         super();
         key = tm.toString();
         term = tm;
-        pendingQuestions = new ArrayList<Question>();
-        pendingGoals = new ArrayList<Goal>();
-        pastRecords = new ArrayList<Judgment>();
-        predictions = new ArrayList<Judgment>();
+        questions = new ArrayList<Question>();
+        goals = new ArrayList<Goal>();
+        beliefs = new ArrayList<Judgment>();
         taskLinks = new TaskLinkBag();
         termLinks = new TermLinkBag();
         if (tm instanceof CompoundTerm) {
@@ -113,7 +109,7 @@ public final class Concept extends Item {
             processJudgment((Judgment) sentence, task);
         }
         if (showing) {
-            window.post(displayContent());  // show changes
+            window.post(displayContent());
         }
     }
 
@@ -124,24 +120,17 @@ public final class Concept extends Item {
      */
     private void processQuestion(Question ques, Task task) {
         boolean duplicate = false;
-        for (Question q : pendingQuestions) {           // keep the existing one for answer information
-            if (q.equals(ques)) {
+        for (Question q : questions) {
+            if (q.getContent().equals(ques.getContent()) && (q.getEventTime() == ques.getEventTime())) {
                 duplicate = true;
+                break;
             }
         }
         if (!duplicate) {
-            pendingQuestions.add(ques);
+            questions.add(ques);
         }
-        if ((ques.temporalOrder == null) || ques.temporalOrder.getDelta() < 0) {
-            for (Judgment judg : pastRecords) {
-                MatchingRules.trySolution(ques, judg, task);    // look for better answer
-            }
-        } else if (ques.temporalOrder.getDelta() > 0) {
-            for (Judgment judg : predictions) {
-                MatchingRules.trySolution(ques, judg, task);    // look for better answer
-            }
-        } else if (presentBelief != null) {
-            MatchingRules.trySolution(ques, presentBelief, task);
+        for (Judgment judg : beliefs) {
+            MatchingRules.trySolution(ques, judg, task);
         }
     }
 
@@ -153,28 +142,28 @@ public final class Concept extends Item {
     private void processGoal(Goal goal, Task task) {
         boolean revised = false;
         if (revisible) {
-            revised = reviseTable(goal, task, pendingGoals);     // revise desire
-            if (revised) {      // don't process this goal, but the revised version
+            revised = reviseTable(goal, goals);
+            if (revised) {
                 return;
             }
         }
-        if (presentBelief != null) {
-            MatchingRules.trySolution(goal, presentBelief, task);   // reality check
-        }
-        Term content = goal.getContent();
-        if ((task.getPriority() >= Parameters.PRIORITY_THRESHOLD) && (content instanceof Inheritance)) {
-            Term pred = ((Inheritance) content).getPredicate();
-            if (pred instanceof Operator) {
-                float netDesire = goal.getTruth().getExpectation();
-                if (netDesire > Parameters.DECISION_THRESHOLD) {
-                    ((Operator) pred).call(task);
-                    task.setPriority(0.0f);        // each call is executed once
-                    return;
-                }
-            }
+        for (Judgment judg : beliefs) {
+            MatchingRules.trySolution(goal, judg, task); 
         }
         if (task.aboveThreshold()) {
-            addToTable(goal, pendingGoals, Parameters.MAXMUM_GOALS_LENGTH);   // indirectly archiving
+            Term content = goal.getContent();
+            if (content instanceof Inheritance) {
+                Term pred = ((Inheritance) content).getPredicate();
+                if (pred instanceof Operator) {
+                    float netDesire = goal.getTruth().getExpectation();
+                    if (netDesire > Parameters.DECISION_THRESHOLD) {
+                        ((Operator) pred).call(task);
+                        task.setPriority(0.0f);   // each operation call is executed once
+                        return;
+                    }
+                }
+            }
+            addToTable(goal, goals, Parameters.MAXMUM_GOALS_LENGTH); 
             Question ques = new Question(goal);
             Memory.activatedTask(task.getBudget(), ques, false);
         }
@@ -187,118 +176,51 @@ public final class Concept extends Item {
      */
     private void processJudgment(Judgment judg, Task task) {
         if (revisible) {
-            boolean revised;
-            if (judg.isFuture()) {
-                revised = reviseTable(judg, task, predictions);
-            } else {
-                revised = reviseTable(judg, task, pastRecords);
-            }
-            if (!revised) {
-                tryUpdate(judg);
-            }
+            reviseTable(judg, beliefs);
         }
         if (task.aboveThreshold()) {
-            for (Question ques : pendingQuestions) {
+            for (Question ques : questions) {
                 MatchingRules.trySolution(ques, judg, task);
             }
-            for (Goal goal : pendingGoals) {
+            for (Goal goal : goals) {
                 MatchingRules.trySolution(goal, judg, task);
             }
-            if (judg.isFuture()) {
-                addToTable(judg, predictions, Parameters.MAXMUM_BELIEF_LENGTH);
-            } else {
-                addToTable(judg, pastRecords, Parameters.MAXMUM_BELIEF_LENGTH);
-            }
+            addToTable(judg, beliefs, Parameters.MAXMUM_BELIEF_LENGTH);
+//            generateNegation(task);   // may be recovered in the future
         }
     }
+
+    /**
+     * Directly express a negative judgment as a negation
+     * @param task The task to be processed
+     */
+//    private void generateNegation(Task task) {
+//        if (task.getSentence() instanceof Judgment) {
+//            Sentence s = task.getSentence();
+//            if (s.getTruth().getFrequency() < 0.5) {
+//                Term t = Negation.make(s.getContent());
+//                if (t != null) {
+//                    StructuralRules.transformNegation(t);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Revise existing beliefs or goals
-     * @param task The task to be processed
+     * @param judg The judgment (belief or goal) to be processed
      * @param table The table to be revised
-     * @return Whether the new belief triggered a temporalRevision
+     * @return Whether the new belief triggered a revision
      */
-    private boolean reviseTable(Judgment newSentence, Task task, ArrayList table) {
+    private boolean reviseTable(Judgment judg, ArrayList table) {
         boolean revised = false;
-        Judgment belief;
-        for (int i = table.size() - 1; i >= 0; i--) {
-            belief = (Judgment) table.get(i);
-            if ((table == predictions) && !newSentence.isFuture()) {
-                table.remove(i);
-                addToTable(belief, pastRecords, Parameters.MAXMUM_BELIEF_LENGTH);
-            } else if (belief.noOverlapping(newSentence)) {
-                revised |= MatchingRules.revision(task, belief, false);
+        for (Object belief : table) {
+            if (judg.noOverlapping((Judgment) belief)) {
+                MatchingRules.revision(judg, (Judgment) belief, false);
+                revised = true;
             }
         }
         return revised;
-    }
-
-    /**
-     * To temporalRevision the presentBelief
-     * @param judg The new belief
-     */
-    private void tryUpdate(Judgment judg) {
-        if (presentBelief == null) {
-            presentBelief = judg;
-        } else {    // presentBelief != null
-            if (presentBelief.getTense() == null) {
-                if (judg.getTense() == null) {
-                    if (presentBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
-                        presentBelief = judg;
-                    }
-                } else {    // judg.getTense() != null
-                    if (judg.getEventTime() == Center.getTime()) {
-                        presentBelief = judg;
-                    }
-                }
-            } else {    // presentBelief.getTense() != null
-                if (judg.getTense() != null) {
-                    if (judg.getEventTime() < presentBelief.getEventTime()) {
-                        return;
-                    }
-                    if (judg.getTruth().getExpDifAbs(presentBelief.getTruth()) > 0.5) {
-                        presentBelief = judg;
-                    } else if (judg.noOverlapping(presentBelief)) {
-                        TemporalRules.temporalRevision(judg, presentBelief, Center.getTime(), false);
-                    } else if (presentBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
-                        presentBelief = judg;
-                    }
-                }
-            }
-        }
-
-        if (judg.getTruth().getFrequency() == 1.0 || judg.getTruth().getFrequency() == 0.0) {
-        	if (perfectBelief == null) {
-        		perfectBelief = judg;            
-        	} else {
-        		if (perfectBelief.getTense() == null) {
-        			if (judg.getTense() == null) {
-        				if (perfectBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
-        					perfectBelief = judg;
-        				}
-        			} else {    // judg.getTense() != null
-        				if (judg.getEventTime() == Center.getTime()) {
-        					perfectBelief = judg;
-        				}
-        			}
-        		} else {    // presentBelief.getTense() != null
-        			if (judg.getTense() != null) {
-        				if (judg.getEventTime() < perfectBelief.getEventTime()) {
-        					return;
-        				}
-        				if (judg.getTruth().getExpDifAbs(perfectBelief.getTruth()) > 0.5) {
-        					perfectBelief = judg;
-        				// Don't do temporalRevision since it has side effects.
-        				//} else if (judg.noOverlapping(perfectBelief)) {
-        				//	  TemporalRules.temporalRevision(judg, perfectBelief, Center.getTime(), false);
-        				} 
-        				else if (perfectBelief.getTruth().getConfidence() < judg.getTruth().getConfidence()) {
-        					perfectBelief = judg;
-        				}
-        			}
-        		}
-        	}
-        }
     }
 
     /**
@@ -314,9 +236,9 @@ public final class Concept extends Item {
         Judgment judgment2;
         float rank2;
         int i;
-        for (i = 0; i < table.size(); i++) {        // go through everyone
+        for (i = 0; i < table.size(); i++) { 
             judgment2 = (Judgment) table.get(i);
-            rank2 = BudgetFunctions.rankBelief(judgment2); // previous belief
+            rank2 = BudgetFunctions.rankBelief(judgment2); 
             if (rank1 >= rank2) {
                 if (newJudgment.equivalentTo(judgment2)) {
                     return;
@@ -344,7 +266,7 @@ public final class Concept extends Item {
     public void insertTaskLink(TaskLink taskLink) {
         BudgetValue budget = taskLink.getBudget();
         taskLinks.putIn(taskLink);
-        Memory.activateConcept(this, budget);       // activate the concept
+        Memory.activateConcept(this, budget);
     }
 
     /**
@@ -356,6 +278,7 @@ public final class Concept extends Item {
     public void buildTermLinks(BudgetValue budget) {
         Term t;
         Concept concept;
+
         TermLink termLink1, termLink2;
         if (termLinkTemplates.size() > 0) {
             BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
@@ -412,7 +335,7 @@ public final class Concept extends Item {
     }
 
     /**
-     * Recalculate the quality of the concept [to be refined]
+     * Recalculate the quality of the concept [to be refined to show extension/intension balance]
      * @return The quality value
      */
     @Override
@@ -431,14 +354,6 @@ public final class Concept extends Item {
     }
 
     /**
-     * Get the present belief
-     * @return The present belief
-     */
-    public Judgment getBelief() {
-        return presentBelief;
-    }
-
-    /**
      * Select a belief to interact with the given task in inference
      * <p>
      * get the first qualified one
@@ -450,11 +365,19 @@ public final class Concept extends Item {
     public Judgment getBelief(Task task) {
         Sentence taskSentence = task.getSentence();
         Judgment belief;
-        for (int i = 0; i < pastRecords.size(); i++) {
-            belief = pastRecords.get(i);
-            if (belief.noOverlapping(taskSentence)) {
-                Record.append(" * Selected Belief: " + belief + "\n");
-                return belief;
+        for (int i = 0; i < beliefs.size(); i++) {
+            belief = beliefs.get(i);
+            Record.append(" * Selected Belief: " + belief + "\n");
+            if (taskSentence.noOverlapping(belief)) {
+                long time1 = taskSentence.getEventTime();
+                long time2 = belief.getEventTime();
+                if ((time1 == time2) || (time2 == Stamp.ALWAYS) || (taskSentence instanceof Goal)) {
+                    return belief;
+                }
+                Judgment belief2 = (Judgment) belief.clone();
+                TruthValue v = TruthFunctions.temporalCasting(belief.getTruth(), time2, time1, taskSentence.getCreationTime());
+                belief2.setTruth(v);
+                return belief2;
             }
         }
         return null;
@@ -473,12 +396,11 @@ public final class Concept extends Item {
         Memory.currentBeliefLink = null;
         Record.append(" * Selected TaskLink: " + tLink + "\n");
         Task task = tLink.getTargetTask();
-        Memory.currentTask = task;
+        Memory.currentTask = task;  // one of the two places where this variable is set
         if (tLink.getType() == TermLink.TRANSFORM) {
             RuleTables.transformTask(task, tLink);  // to turn this into structural inference as below?
             return;
         }
-        generateNegation(task);
         int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
         while (Memory.noResult() && (termLinkCount > 0)) {
             TermLink termLink = termLinks.takeOut(tLink);
@@ -493,22 +415,6 @@ public final class Concept extends Item {
             }
         }
         taskLinks.putBack(tLink);
-    }
-
-    /**
-     * Directly express a negative judgment as a negation
-     * @param task The task to be processed
-     */
-    private void generateNegation(Task task) {
-        if (task.getSentence() instanceof Judgment) {
-            Sentence s = task.getSentence();
-            if (s.getTruth().getFrequency() < 0.5) {
-                Term t = Negation.make(s.getContent());
-                if (t != null) {
-                    StructuralRules.transformNegation(t);
-                }
-            }
-        }
     }
 
     /* ---------- display ---------- */
@@ -550,43 +456,29 @@ public final class Concept extends Item {
      */
     public String displayContent() {
         StringBuffer buffer = new StringBuffer();
-        if (presentBelief != null) {
-            buffer.append(presentBelief == perfectBelief ? "  Present & Perfect Belief:\n" : "  Present Belief:\n");
-            if (presentBelief instanceof Judgment && window != null && window.getShowDerivation()) {
-                buffer.append(((Judgment) presentBelief).toStringWithPremises(""));
-            } else {
-                buffer.append(presentBelief + "\n");
-            }
-        }
-        if (perfectBelief != null && perfectBelief != presentBelief) {
-            buffer.append("  Perfect Belief:\n");
-            if (perfectBelief instanceof Judgment && window != null && window.getShowDerivation()) {
-                buffer.append(((Judgment) perfectBelief).toStringWithPremises(""));
-            } else {
-                buffer.append(perfectBelief + "\n");
-            }
-        }
-        if (pastRecords.size() > 0) {
+//        if (perfectBelief != null && perfectBelief != presentBelief) {
+//            buffer.append("  Perfect Belief:\n");
+//            if (perfectBelief instanceof Judgment && window != null && window.getShowDerivation()) {
+//                buffer.append(((Judgment) perfectBelief).toStringWithPremises(""));
+//            } else {
+//                buffer.append(perfectBelief + "\n");
+//            }
+//        }
+        if (beliefs.size() > 0) {
             buffer.append("\n  Beliefs:\n");
-            for (Sentence s : pastRecords) {
+            for (Sentence s : beliefs) {
                 buffer.append(s + "\n");
             }
         }
-        if (predictions.size() > 0) {
-            buffer.append("\n  Predictions:\n");
-            for (Sentence s : predictions) {
-                buffer.append(s + "\n");
-            }
-        }
-        if (pendingGoals.size() > 0) {
+        if (goals.size() > 0) {
             buffer.append("\n  Goals:\n");
-            for (Sentence s : pendingGoals) {
+            for (Sentence s : goals) {
                 buffer.append(s + "\n");
             }
         }
-        if (pendingQuestions.size() > 0) {
+        if (questions.size() > 0) {
             buffer.append("\n  Question:\n");
-            for (Sentence s : pendingQuestions) {
+            for (Sentence s : questions) {
                 buffer.append(s + "\n");
             }
         }

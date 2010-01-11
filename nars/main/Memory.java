@@ -58,9 +58,7 @@ public class Memory {
     /** Shortcut to the selected belief */
     public static Judgment currentBelief;
     /** Shortcut to the derived Stamp */
-    public static Stamp currentStamp;
-    /** Shortcut to the derived tense */
-    public static TemporalValue currentTense;
+    public static Stamp newStamp;
 
     /* ---------- initialization ---------- */
     /**
@@ -249,11 +247,10 @@ public class Memory {
      * @param premise1 The first premise to record in the new Judgment
      * @param premise2 The second premise to record in the new Judgment
      */
-    public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth, 
-    		Sentence premise1, Sentence premise2) {
+    public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth,
+            Sentence premise1, Sentence premise2) {
         if (content != null) {
-            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense,
-            		premise1, premise2);
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, newStamp, premise1, premise2);
             Task newTask = new Task(newSentence, budget);
             derivedTask(newTask);
         }
@@ -264,17 +261,15 @@ public class Memory {
      * @param budget The budget value of the new task
      * @param content The content of the new task
      * @param truth The truth value of the new task
-     * @param structural Whether the old Task is derived by structural rules
      * @param premise1 The first premise to record in the new Judgment. May be null.
      * @param premise2 The second premise to record in the new Judgment. May be null.
      */
-    public static void revisionTask(BudgetValue budget, Term content, TruthValue truth, boolean structural,
-    		Sentence premise1, Sentence premise2) {
+    public static void revisionTask(BudgetValue budget, Term content, TruthValue truth,
+            Sentence premise1, Sentence premise2) {
         if (content != null) {
-            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, currentStamp, currentTense,
-            		premise1, premise2);
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, newStamp, premise1, premise2);
             Task newTask = new Task(newSentence, budget);
-            if (structural) {
+            if (currentTask.isStructural()) {
                 newTask.setStructural();
             }
             derivedTask(newTask);
@@ -288,11 +283,9 @@ public class Memory {
      * @param truth The truth value of the new task
      * @param premise The premise to record in the new Judgment
      */
-    public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth, 
-    		Sentence premise) {
+    public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth, Sentence premise) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, truth, new Stamp(sentence.getStamp()), sentence.getTense(),
-        		premise, null);
+        Sentence newSentence = Sentence.make(sentence, content, truth, new Stamp(sentence.getStamp()), premise, null);
         Task newTask = new Task(newSentence, budget);
         newTask.setStructural();
         derivedTask(newTask);
@@ -307,10 +300,8 @@ public class Memory {
      */
     public static void convertedJudgment(TruthValue truth, BudgetValue budget) {
         Term content = Memory.currentTask.getContent();
-        TemporalValue tense = Memory.currentBelief.getTense();
         Stamp stamp = new Stamp(Memory.currentBelief.getStamp());
-        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, tense,
-        		Memory.currentBelief, null);
+        Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, Memory.currentBelief, null);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructural();
         derivedTask(newTask);
@@ -339,12 +330,12 @@ public class Memory {
             task = newTasks.remove(0);
             if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
-                if (task.getSentence().isInput() && (task.getSentence() instanceof Question)) {
-                    Concept concept = Memory.nameToConcept(task.getSentence().getContent().getName());
-                    if (concept != null) {
-                        concept.startPlay(false);
-                    }
-                }
+//                if (task.getSentence().isInput() && (task.getSentence() instanceof Question)) {
+//                    Concept concept = Memory.nameToConcept(task.getSentence().getContent().getName());
+//                    if (concept != null) {
+//                        concept.startPlay(false);
+//                    }
+//                }
             } else {
                 novelTasks.putIn(task);    // delayed processing
             }
@@ -376,7 +367,10 @@ public class Memory {
      * @param task the task to be accepted
      */
     private static void immediateProcess(Task task) {
-        currentTask = task;
+        currentTask = task; // one of the two places where this variable is set
+        currentBelief = null;
+        currentTaskLink = null;
+        currentBeliefLink = null;
         Record.append("!!! Insert: " + task + "\n");
         Term content = task.getContent();
         Concept c = getConcept(content);
@@ -387,7 +381,7 @@ public class Memory {
         if (task.aboveThreshold()) {    // still need to be processed
             continuedProcess(task, content);
             Sentence s = task.getSentence();
-            if (s.isJudgment() && (s.getTense() != null)) {
+            if (s.isJudgment() && s.isTemporal()) {
                 eventProcessing(task);
             }
         }
@@ -442,11 +436,10 @@ public class Memory {
      */
     private static void eventProcessing(Task event1) {
         Task event2 = recentEvents.takeOut();
-        if ((event2 != null) && event1.getSentence().noOverlapping(event2.getSentence())) {
-            long time1 = event1.getSentence().getEventTime();
-            long time2 = event2.getSentence().getEventTime();
-            TemporalValue order = new TemporalValue((int) (time2 - time1));
-            SyllogisticRules.temporalIndCom(event1, event2, order);
+        if (event2 != null) {
+            if (event1.getSentence().noOverlapping(event2.getSentence())) {
+                SyllogisticRules.temporalIndCom(event1, event2);
+            }
             recentEvents.putBack(event2);
         }
         recentEvents.putIn(event1);

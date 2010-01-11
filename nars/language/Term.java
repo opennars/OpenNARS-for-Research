@@ -20,8 +20,6 @@
  */
 package nars.language;
 
-import nars.entity.TemporalValue;
-
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
  * <p>
@@ -54,7 +52,7 @@ public class Term implements Cloneable, Comparable<Term> {
      * @return The name of the term as a String
      */
     @Override
-    public final String toString() {
+    public String toString() {
         return name;
     }
 
@@ -132,10 +130,18 @@ public class Term implements Cloneable, Comparable<Term> {
     }
 
     /**
-     * Get the temporal order in a term, which is null by default
-     * @return The default temporal order
+     * Whether there is a temporal order in the term, which is false by default
+     * @return The default value
      */
-    public TemporalValue getOrder() {
-        return null;
+    public boolean isTemporal() {
+        return false;
+    }
+
+    /**
+     * Obtain the temporal order in the term
+     * @return The default value
+     */
+    public int getOrder() {
+        return 0;
     }
 }

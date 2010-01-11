@@ -22,8 +22,8 @@ package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+//import java.beans.PropertyChangeEvent;
+//import java.beans.PropertyChangeListener;
 
 import nars.entity.Concept;
 
@@ -33,7 +33,7 @@ import nars.entity.Concept;
 public class ConceptWindow extends NarsFrame implements ActionListener, ItemListener {
 
     /** Control buttons */
-    private Button playButton,  stopButton,  playInNewWindowButton, closeButton;
+    private Button playButton, stopButton, playInNewWindowButton, closeButton;
     private Checkbox showDerivationCheckbox;
     /** Display area */
     private TextArea text;
@@ -112,12 +112,12 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
      * This is called when Concept removes this as its window.
      */
     public void detachFromConcept() {
-    	// The Play and Stop buttons and Derivation checkbox no longer do anything, so disable.
-    	playButton.setEnabled(false);
-    	stopButton.setEnabled(false);
-    	showDerivationCheckbox.setEnabled(false);
+        // The Play and Stop buttons and Derivation checkbox no longer do anything, so disable.
+        playButton.setEnabled(false);
+        stopButton.setEnabled(false);
+        showDerivationCheckbox.setEnabled(false);
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
@@ -132,7 +132,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
             concept.stop();
             concept.startPlay(false);
         } else if (s == closeButton) {
-        	close();
+            close();
         }
     }
 
@@ -140,21 +140,21 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
         concept.stop();
         dispose();
     }
-    
-	@Override
-	public void windowClosing(WindowEvent e) {
-		close();
-	}
 
-	public boolean getShowDerivation() {
-		return showDerivationCheckbox.getState();
-	}
-	
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == showDerivationCheckbox) {
-			// Redisplay.  displayContent will check getShowDerivation().
-			post(concept.displayContent());
-		}
-	}
+    @Override
+    public void windowClosing(WindowEvent e) {
+        close();
+    }
+
+    public boolean getShowDerivation() {
+        return showDerivationCheckbox.getState();
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getSource() == showDerivationCheckbox) {
+            // Redisplay.  displayContent will check getShowDerivation().
+            post(concept.displayContent());
+        }
+    }
 }

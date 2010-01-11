@@ -22,16 +22,16 @@ package nars.entity;
 
 import nars.io.Symbols;
 import nars.language.Term;
-import nars.main.Memory;
 import nars.main.Parameters;
 
 /**
  * A Judgment is an piece of new knowledge to be absorbed.
  */
 public class Judgment extends Sentence {
-	public Judgment _premise1 = null;
-	public Judgment _premise2 = null;
-	
+
+    public Judgment _premise1 = null;
+    public Judgment _premise2 = null;
+
     /**
      * Constructor
      * @param term The content
@@ -48,10 +48,12 @@ public class Judgment extends Sentence {
         punctuation = punc;
         truth = t;
         stamp = b;
-        if (premise1 instanceof Judgment)
-        	_premise1 = (Judgment)premise1;
-        if (premise2 instanceof Judgment)
-        	_premise2 = (Judgment)premise2;
+        if (premise1 instanceof Judgment) {
+            _premise1 = (Judgment) premise1;
+        }
+        if (premise2 instanceof Judgment) {
+            _premise2 = (Judgment) premise2;
+        }
     }
 
     /**
@@ -61,9 +63,8 @@ public class Judgment extends Sentence {
     public Judgment(Goal g) {
         content = g.cloneContent();
         punctuation = Symbols.JUDGMENT_MARK;
-        temporalOrder = new TemporalValue(0);
         truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
-        stamp = new Stamp();
+        stamp = new Stamp(0, true);
     }
 
     /**
@@ -75,43 +76,24 @@ public class Judgment extends Sentence {
      */
     boolean equivalentTo(Judgment that) {
         assert content.equals(that.getContent());
-        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp()) 
-                && TemporalValue.equal(temporalOrder, that.getTense())); 
+        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp()));
+    }
+
+    public void setTruth(TruthValue v) {
+        truth = v;
     }
 
     /**
-     * Evaluate the quality of the judgment as a solution to a problem
-     * @param problem A goal or question
-     * @return The quality of the judgment as the solution
+     * To display the premises used to derive a judgment
      */
-    public float solutionQuality(Sentence problem) {
-        if (problem instanceof Goal) {
-            return truth.getExpectation();
-        } else if (problem.getContent().isConstant()) {   // "yes/no" question
-            return truth.getConfidence();
-        } else {                                    // "what" question or goal
-            return truth.getExpectation() / content.getComplexity();
-        }
-    }
-    
-    /**
-     * Check if the judgment predict a future event
-     * @return Whether the judgment has a future sense
-     */
-    public boolean isFuture() {
-        if (temporalOrder == null)
-            return false;
-        long eventTime = stamp.getCreationTime() + temporalOrder.getDelta();
-        return eventTime > nars.main.Center.getTime();
-    }
-    
-    public String toStringWithPremises(String indentation) {
-    	String result = indentation + toString() + "\n";
-    	if (_premise1 != null)
-    		result = result + _premise1.toStringWithPremises(indentation + "  ");
-    	if (_premise2 != null)
-    		result = result + _premise2.toStringWithPremises(indentation + "  ");
-    	return result;
-    }
+//    public String toStringWithPremises(String indentation) {
+//        String result = indentation + toString() + "\n";
+//        if (_premise1 != null) {
+//            result = result + _premise1.toStringWithPremises(indentation + "  ");
+//        }
+//        if (_premise2 != null) {
+//            result = result + _premise2.toStringWithPremises(indentation + "  ");
+//        }
+//        return result;
+//    }
 }
-

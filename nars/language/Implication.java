@@ -22,7 +22,6 @@ package nars.language;
 
 import java.util.*;
 
-import nars.entity.TemporalValue;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -30,20 +29,47 @@ import nars.main.Memory;
  * A Statement about an Inheritance relation.
  */
 public class Implication extends Statement {
-    
+
     /**
-     * Temporal order between the components
+     * Whether there is a temporal order between the components
      */
-    private TemporalValue temporalOrder = null;
+    private boolean isTemporal = false;
+    /**
+     * Temporal distance between the components
+     */
+    private int temporalDistance = 0;
+
+    /**
+     * Constructor with partial values, called by make
+     * @param n The name of the term
+     * @param arg The component list of the term
+     */
+    protected Implication(String n, ArrayList<Term> arg) {
+        super(n, arg);
+    }
+
     /**
      * Constructor with partial values, called by make
      * @param n The name of the term
      * @param arg The component list of the term
      * @param order The temporal order of the components
      */
-    protected Implication(String n, ArrayList<Term> arg, TemporalValue order) {
+    protected Implication(String n, ArrayList<Term> arg, int order) {
         super(n, arg);
-        temporalOrder = order;
+        isTemporal = true;
+        temporalDistance = order;
+        name = makeName();          // repeat to get the temporal operator
+    }
+
+    /**
+     * Constructor with full values, called by clone
+     * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
+     */
+    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
 
     /**
@@ -54,9 +80,11 @@ public class Implication extends Statement {
      * @param i Syntactic complexity of the compound
      * @param order The temporal order of the components
      */
-    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, TemporalValue order) {
+    protected Implication(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, int order) {
         super(n, cs, open, i);
-        temporalOrder = order;
+        isTemporal = true;
+        temporalDistance = order;
+        name = makeName();          // repeat to get the temporal operator
     }
 
     /**
@@ -65,22 +93,31 @@ public class Implication extends Statement {
      */
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Implication(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, temporalOrder);
+        if (isTemporal) {
+            return new Implication(name, (ArrayList<Term>) cloneList(components),
+                    (ArrayList<Variable>) cloneList(openVariables), complexity, temporalDistance);
+        } else {
+            return new Implication(name, (ArrayList<Term>) cloneList(components),
+                    (ArrayList<Variable>) cloneList(openVariables), complexity);
+        }
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
      * @param predicate The second compoment
+     * @param temporal Whether there is a temporal relation
      * @param order The temporal order of the components
      * @return A compound generated or a term it reduced to
      */
-    public static Implication make(Term subject, Term predicate, TemporalValue order) {
-        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence))
+    public static Implication make(Term subject, Term predicate, boolean temporal, int order) {
+        if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence)) {
             return null;
-        if (invalidStatement(subject, predicate))
+        }
+        if (invalidStatement(subject, predicate)) {
             return null;
-        String sym = getSymbol(order);
+        }
+        String sym = temporal ? getSymbol(order) : Symbols.IMPLICATION_RELATION;
         String name = makeStatementName(subject, sym, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
@@ -88,11 +125,21 @@ public class Implication extends Statement {
         }
         if (predicate instanceof Implication) {
             Term oldCondition = ((Implication) predicate).getSubject();
-            Term newCondition = Conjunction.make(subject, oldCondition, order);
-            return make(newCondition, ((Implication) predicate).getPredicate(), order);
+            Term newCondition;
+            if (temporal) {
+                newCondition = Conjunction.make(subject, oldCondition, order);
+                return make(newCondition, ((Implication) predicate).getPredicate(), true, order);
+            } else {
+                newCondition = Conjunction.make(subject, oldCondition, -1);
+                return make(newCondition, ((Implication) predicate).getPredicate(), false, 0);
+            }
         } else {
             ArrayList<Term> argument = argumentsToList(subject, predicate);
-            return new Implication(name, argument, order);
+            if (temporal) {
+                return new Implication(name, argument, order);
+            } else {
+                return new Implication(name, argument);
+            }
         }
     }
 
@@ -101,17 +148,19 @@ public class Implication extends Statement {
      * @return the operator of the term
      */
     public String operator() {
-        return getSymbol(temporalOrder);
+        if (isTemporal) {
+            return getSymbol(temporalDistance);
+        }
+        return Symbols.IMPLICATION_RELATION;
     }
-        
-    
+
     /**
      * Get the order of the components.
      * @return the order within the term
      */
     @Override
-    public TemporalValue getOrder() {
-        return temporalOrder;
+    public int getOrder() {
+        return temporalDistance;
     }
 
     /**
@@ -119,14 +168,18 @@ public class Implication extends Statement {
      * @param t The temporal value to be represented
      * @return The the String representation
      */
-    public static String getSymbol(TemporalValue t) {
-        if (t == null)
-            return Symbols.IMPLICATION_RELATION;
-        int delta = t.getDelta();
-        if (delta > 0)
+    public static String getSymbol(int t) {
+        if (t > 0) {
             return Symbols.IMPLICATION_AFTER_RELATION;
-        if (delta < 0)
+        }
+        if (t < 0) {
             return Symbols.IMPLICATION_BEFORE_RELATION;
+        }
         return Symbols.IMPLICATION_WHEN_RELATION;
+    }
+
+    @Override
+    public boolean isTemporal() {
+        return isTemporal;
     }
 }

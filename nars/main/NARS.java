@@ -30,26 +30,27 @@ import java.applet.*;
  * Manage the internal working thread. Communicate with Center only.
  */
 public class NARS extends Applet implements Runnable {
+
     /**
      * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.2.0     August 2009  \n";
+            "     Open-NARS     Version 1.3.0     January 2010  \n";
     /**
      * The project websites.
      */
     public static final String WEBSITE =
-      " Open-NARS website:  http://code.google.com/p/open-nars/ \n" +
-      "      NARS website:  http://nars.wang.googlepages.com/ ";
+            " Open-NARS website:  http://code.google.com/p/open-nars/ \n" +
+            "      NARS website:  http://sites.google.com/site/narswang/ ";
     /**
      * Flag to distinguish the two running modes of the project.
      */
-    private static boolean standAlone = false;  // application or applet
+//    private static boolean standAlone = false;  // application or applet
     /**
      * The internal working thread of the system.
      */
     Thread narsThread = null;
-    
+
     /**
      * The entry point of the standalone application.
      * <p>
@@ -57,12 +58,12 @@ public class NARS extends Applet implements Runnable {
      * @param args no arguments are used
      */
     public static void main(String args[]) {
-        standAlone = true;
+//        standAlone = true;
         NARS nars = new NARS();
         nars.init();
         nars.start();
     }
-    
+
     /**
      * Initialize the system at the control center.
      */
@@ -70,7 +71,7 @@ public class NARS extends Applet implements Runnable {
     public void init() {
         Center.start();
     }
-       
+
     /**
      * Start the thread if necessary, called when the page containing the applet first appears on the screen.
      */
@@ -81,7 +82,7 @@ public class NARS extends Applet implements Runnable {
             narsThread.start();
         }
     }
-    
+
     /**
      * Called when the page containing the applet is no longer on the screen.
      */
@@ -89,21 +90,21 @@ public class NARS extends Applet implements Runnable {
     public void stop() {
         narsThread = null;
     }
-    
+
     /**
      * Repeatedly execute NARS working cycle. This method is called when the Runnable's thread is started.
      */
     public void run() {
         Thread thisThread = Thread.currentThread();
         while (narsThread == thisThread) {
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e){
-//            }
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+            }
             Center.tick();
         }
     }
-    
+
     /**
      * Whether the project running as an application.
      * @return true for application; false for applet.
@@ -112,7 +113,7 @@ public class NARS extends Applet implements Runnable {
         return true;    // make the application and the applet identical, for now
 //        return standAlone;
     }
-    
+
     /**
      * Provide system information for the applet.
      * @return The string containing the information about the applet.

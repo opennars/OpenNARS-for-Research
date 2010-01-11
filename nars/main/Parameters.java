@@ -33,8 +33,7 @@ public class Parameters {
     /** TermLink decay rate in TermLinkBag, in [1, 99]. */
     public static final int TERM_LINK_FORGETTING_CYCLE = 50;
     /** Silent threshold for task reporting, in [0, 100]. */
-//    public static final int SILENT_LEVEL = 1; // spontaneous report
-    public static final int SILENT_LEVEL = 100; // spontaneous report
+    public static final int SILENT_LEVEL = 1;
 
     /* ---------- time management ---------- */
     /** Task decay rate in TaskBuffer, in [1, 99]. */
@@ -45,8 +44,10 @@ public class Parameters {
     public static final int MAX_REASONED_TERM_LINK = 3;
 
     /* ---------- logical parameters ---------- */
-    /** Horizon, the amount of evidence coming in the near future. */
-    public static final int NEAR_FUTURE = 1;    // or 2, can be float
+    /** Evidential Horizon, the amount of future evidence to be considered. */
+    public static final int HORIZON = 1;    // or 2, can be float
+    /** Reliance factor, the empirical confidence of analytical truth. */
+    public static final float RELIANCE = (float) 0.9;    // the same as default confidence
     /** The desireability threthold for an operation to be executed. */
     public static final float DECISION_THRESHOLD = (float) 0.66;
     /** Range of temporal induction in input events. */
@@ -92,12 +93,10 @@ public class Parameters {
     
     /* ---------- avoiding repeated reasoning ---------- */
     /** Maximum length of Stamp, a power of 2 */
-//    public static final int MAXMUM_STAMP_LENGTH = 16;
     public static final int MAXMUM_STAMP_LENGTH = 8;
     /** Remember recently used TermLink on a Task */
     public static final int TERM_LINK_RECORD_LENGTH = 10;
     /** Maximum number of beliefs kept in a Concept */
-//    public static final int MAXMUM_BELIEF_LENGTH = 8;
     public static final int MAXMUM_BELIEF_LENGTH = 5;
     /** Maximum number of goals kept in a Concept */
     public static final int MAXMUM_GOALS_LENGTH = 5;

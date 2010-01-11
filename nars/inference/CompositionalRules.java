@@ -11,7 +11,7 @@
  * (at your option) any later version.
  *
  * Open-NARS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the abduction warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -50,89 +50,59 @@ public final class CompositionalRules {
         if (content1.getClass() != content2.getClass()) {
             return;
         }
-        if (TemporalRules.sameTime((Judgment) taskSentence, belief)) {
-            Term component1, component2;
-            component1 = content1.componentAt(1 - index);
-            component2 = content2.componentAt(1 - index);
-            Term component = content1.componentAt(index);
-            if ((component1 instanceof CompoundTerm) && ((CompoundTerm) component1).containAllComponents(component2)) {
-                decomposeCompound((CompoundTerm) component1, component2, component, index, true);
-                return;
-            } else if ((component2 instanceof CompoundTerm) && ((CompoundTerm) component2).containAllComponents(component1)) {
-                decomposeCompound((CompoundTerm) component2, component1, component, index, false);
-                return;
-            }
-            Term t1 = null;
-            Term t2 = null;
-            Term t3 = null;
-            Term t4 = null;
-            TruthValue v1 = taskSentence.getTruth();
-            TruthValue v2 = belief.getTruth();
-            float discount = estimateCorrelation(content1, component1, component2);
-            if (index == 0) {
-                if (content1 instanceof Inheritance) {
-                    t1 = IntersectionInt.make(component1, component2);
-                    t2 = IntersectionExt.make(component1, component2);
-                    t3 = DifferenceExt.make(component1, component2);
-                    t4 = DifferenceExt.make(component2, component1);
-                } else if (content1 instanceof Implication) {
-                    t1 = Disjunction.make(component1, component2);
-                    t2 = Conjunction.make(component1, component2, null);
-                    t3 = Conjunction.make(component1, Negation.make(component2), null);
-                    t4 = Conjunction.make(component2, Negation.make(component1), null);
-                }
-                processComposed(content1, component, t1, TruthFunctions.union(v1, v2, discount));
-                processComposed(content1, component, t2, TruthFunctions.intersection(v1, v2, discount));
-                processComposed(content1, component, t3, TruthFunctions.difference(v1, v2, discount));
-                processComposed(content1, component, t4, TruthFunctions.difference(v2, v1, discount));
-            } else {
-                if (content1 instanceof Inheritance) {
-                    t1 = IntersectionExt.make(component1, component2);
-                    t2 = IntersectionInt.make(component1, component2);
-                    t3 = DifferenceInt.make(component1, component2);
-                    t4 = DifferenceInt.make(component2, component1);
-                } else if (content1 instanceof Implication) {
-                    t1 = Conjunction.make(component1, component2, null);
-                    t2 = Disjunction.make(component1, component2);
-                    t3 = Disjunction.make(component1, Negation.make(component2));
-                    t4 = Disjunction.make(component2, Negation.make(component1));
-                }
-                processComposed(content1, t1, component, TruthFunctions.union(v1, v2, discount));
-                processComposed(content1, t2, component, TruthFunctions.intersection(v1, v2, discount));
-                processComposed(content1, t3, component, TruthFunctions.difference(v1, v2, discount));
-                processComposed(content1, t4, component, TruthFunctions.difference(v2, v1, discount));
-            }
+        Term component1, component2;
+        component1 = content1.componentAt(1 - index);
+        component2 = content2.componentAt(1 - index);
+        Term component = content1.componentAt(index);
+        if ((component1 instanceof CompoundTerm) && ((CompoundTerm) component1).containAllComponents(component2)) {
+            decomposeCompound((CompoundTerm) component1, component2, component, index, true);
+            return;
+        } else if ((component2 instanceof CompoundTerm) && ((CompoundTerm) component2).containAllComponents(component1)) {
+            decomposeCompound((CompoundTerm) component2, component1, component, index, false);
+            return;
         }
-        if (content1.isConstant()) {
+        Term t1 = null;
+        Term t2 = null;
+        Term t3 = null;
+        Term t4 = null;
+        TruthValue v1 = taskSentence.getTruth();
+        TruthValue v2 = belief.getTruth();
+        if (index == 0) {
+            if (content1 instanceof Inheritance) {
+                t1 = IntersectionInt.make(component1, component2);
+                t2 = IntersectionExt.make(component1, component2);
+                t3 = DifferenceExt.make(component1, component2);
+                t4 = DifferenceExt.make(component2, component1);
+            } else if (content1 instanceof Implication) {
+                t1 = Disjunction.make(component1, component2);
+                t2 = Conjunction.make(component1, component2, -1);
+                t3 = Conjunction.make(component1, Negation.make(component2), -1);
+                t4 = Conjunction.make(component2, Negation.make(component1), -1);
+            }
+            processComposed(content1, component, t1, TruthFunctions.union(v1, v2));
+            processComposed(content1, component, t2, TruthFunctions.intersection(v1, v2));
+            processComposed(content1, component, t3, TruthFunctions.difference(v1, v2));
+            processComposed(content1, component, t4, TruthFunctions.difference(v2, v1));
+        } else {
+            if (content1 instanceof Inheritance) {
+                t1 = IntersectionExt.make(component1, component2);
+                t2 = IntersectionInt.make(component1, component2);
+                t3 = DifferenceInt.make(component1, component2);
+                t4 = DifferenceInt.make(component2, component1);
+            } else if (content1 instanceof Implication) {
+                t1 = Conjunction.make(component1, component2, -1);
+                t2 = Disjunction.make(component1, component2);
+                t3 = Disjunction.make(component1, Negation.make(component2));
+                t4 = Disjunction.make(component2, Negation.make(component1));
+            }
+            processComposed(content1, t1, component, TruthFunctions.union(v1, v2));
+            processComposed(content1, t2, component, TruthFunctions.intersection(v1, v2));
+            processComposed(content1, t3, component, TruthFunctions.difference(v1, v2));
+            processComposed(content1, t4, component, TruthFunctions.difference(v2, v1));
+        }
+        if (content1.containNoVariable()) { // even closed veraibles are not allowed
             introVarDepOuter(content1, content2, index);
         }
-    }
-
-    /**
-     * Estimate the correlation between the two components in a compound
-     * @param content One of the premises
-     * @param component1 One component
-     * @param component2 The other component
-     * @return The correlation discount, 1 means no correlation found, 0 for full correlation
-     */
-    private static float estimateCorrelation(Statement content, Term component1, Term component2) {
-        Statement s = null;
-        if (content instanceof Inheritance) {
-            s = Similarity.make(component1, component2);
-        } else if (content instanceof Implication) {
-            s = Equivalence.make(component1, component2, null);
-        }
-        if (s != null) {
-            Concept c = Memory.termToConcept(s);
-            if (c != null) {
-                Sentence b = c.getBelief();
-                if (b != null) {
-                    TruthValue tc = b.getTruth();
-                    return 1 - Math.abs(2 * tc.getExpectation() - 1);
-                }
-            }
-        }
-        return 1;
     }
 
     /**
@@ -183,16 +153,13 @@ public final class CompositionalRules {
             v2 =
                     sentence.getTruth();
         }
-
         TruthValue truth = null;
         Term content;
-
         if (index == 0) {
             content = Statement.make(oldContent, term1, term2);
             if (content == null) {
                 return;
             }
-
             if (oldContent instanceof Inheritance) {
                 if (compound instanceof IntersectionExt) {
                     truth = TruthFunctions.reduceConjunction(v1, v2);
@@ -208,7 +175,6 @@ public final class CompositionalRules {
                     } else {
                         truth = TruthFunctions.reduceConjunctionNeg(v1, v2);
                     }
-
                 }
             } else if (oldContent instanceof Implication) {
                 if (compound instanceof Conjunction) {
@@ -216,14 +182,12 @@ public final class CompositionalRules {
                 } else if (compound instanceof Disjunction) {
                     truth = TruthFunctions.reduceDisjunction(v1, v2);
                 }
-
             }
         } else {
             content = Statement.make(oldContent, term2, term1);
             if (content == null) {
                 return;
             }
-
             if (oldContent instanceof Inheritance) {
                 if (compound instanceof IntersectionInt) {
                     truth = TruthFunctions.reduceConjunction(v1, v2);
@@ -239,7 +203,6 @@ public final class CompositionalRules {
                     } else {
                         truth = TruthFunctions.reduceConjunctionNeg(v1, v2);
                     }
-
                 }
             } else if (oldContent instanceof Implication) {
                 if (compound instanceof Disjunction) {
@@ -247,14 +210,12 @@ public final class CompositionalRules {
                 } else if (compound instanceof Conjunction) {
                     truth = TruthFunctions.reduceDisjunction(v1, v2);
                 }
-
             }
         }
         if (truth != null) {
             BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
             Memory.doublePremiseTask(budget, content, truth, sentence, belief);
         }
-
     }
 
     /**
@@ -270,24 +231,19 @@ public final class CompositionalRules {
         if (sentence instanceof Question) {
             return;
         }
-
         Judgment belief = Memory.currentBelief;
         Term content = CompoundTerm.reduceComponents(compound, component);
         if (content == null) {
             return;
         }
-
         TruthValue v1, v2;
         if (compoundTask) {
             v1 = sentence.getTruth();
-            v2 =
-                    belief.getTruth();
+            v2 = belief.getTruth();
         } else {
             v1 = belief.getTruth();
-            v2 =
-                    sentence.getTruth();
+            v2 = sentence.getTruth();
         }
-
         TruthValue truth = null;
         if (compound instanceof Conjunction) {
             if (sentence instanceof Goal) {
@@ -296,11 +252,9 @@ public final class CompositionalRules {
                 } else {
                     return;
                 }
-
             } else if (sentence instanceof Judgment) {
                 truth = TruthFunctions.reduceConjunction(v1, v2);
             }
-
         } else if (compound instanceof Disjunction) {
             if (sentence instanceof Goal) {
                 if (compoundTask) {
@@ -308,15 +262,12 @@ public final class CompositionalRules {
                 } else {
                     return;
                 }
-
             } else if (sentence instanceof Judgment) {
                 truth = TruthFunctions.reduceDisjunction(v1, v2);
             }
-
         } else {
             return;
         }
-
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
         Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
@@ -332,34 +283,32 @@ public final class CompositionalRules {
         if (premise1.equals(premise2)) {
             return null;
         }
-
         Statement state1, state2;
         Variable var1 = new Variable(Symbols.VARIABLE_TAG + "0()");
         Variable var2 = new Variable(Symbols.VARIABLE_TAG + "0()");
         if (index == 0) {
             state1 = Statement.make(premise1, var1, premise1.getPredicate());
-            state2 =
-                    Statement.make(premise2, var2, premise2.getPredicate());
+            state2 = Statement.make(premise2, var2, premise2.getPredicate());
         } else {
             state1 = Statement.make(premise1, premise1.getSubject(), var1);
-            state2 =
-                    Statement.make(premise2, premise2.getSubject(), var2);
+            state2 = Statement.make(premise2, premise2.getSubject(), var2);
         }
-
-        TemporalValue tense1 = Memory.currentTask.getTense();
-        TemporalValue tense2 = Memory.currentBelief.getTense();
-        if (tense1 == tense2) {
-            Memory.currentTense = tense1;
-            if ((tense1 != null) && (tense1.getDelta() == 0)) {
-                return (Conjunction) Conjunction.make(state1, state2, tense1);
-            } else {
-                return (Conjunction) Conjunction.make(state1, state2, null);
-            }
-
+        long time1 = Memory.currentTask.getSentence().getEventTime();   // which is which???
+        long time2 = Memory.currentBelief.getEventTime();
+        Term c;
+        if ((time1 == Stamp.ALWAYS) || (time2 == Stamp.ALWAYS)) {
+            c = Conjunction.make(state1, state2, -1);
         } else {
-            return null;
+            int dif = (int) (time2 - time1);
+            if (dif == 0) {
+                c = Conjunction.make(state1, state2, 0);
+            } else if (dif > 0) {
+                c = Conjunction.make(state1, state2, 1);
+            } else {
+                c = Conjunction.make(state2, state1, 1);
+            }
         }
-
+        return (Conjunction) c;
     }
 
     /**
@@ -378,7 +327,6 @@ public final class CompositionalRules {
             Memory.doublePremiseTask(budget, content, truth,
                     Memory.currentTask.getSentence(), Memory.currentBelief);
         }
-
     }
 
     /**
@@ -391,7 +339,6 @@ public final class CompositionalRules {
         if (!(component instanceof Statement) || !(component.getClass() == premise.getClass())) {
             return;
         }
-
         Statement premise1 = (Statement) premise;
         Statement premise2 = (Statement) component;
         int index;
@@ -402,12 +349,10 @@ public final class CompositionalRules {
         } else {
             return;
         }
-
         Term innerContent = introVarDep(premise1, premise2, index);
         if (innerContent == null) {
             return;
         }
-
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         Judgment belief = Memory.currentBelief;
@@ -417,7 +362,6 @@ public final class CompositionalRules {
         } else if (compound instanceof Conjunction) {
             content = CompoundTerm.replaceComponent(compound, component, innerContent);
         }
-
         TruthValue truth = null;
         if (sentence instanceof Goal) {
             truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth()); // [To be refined]
@@ -427,7 +371,6 @@ public final class CompositionalRules {
             assert (sentence instanceof Question);
             return;
         }
-
         BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
         Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
@@ -438,7 +381,7 @@ public final class CompositionalRules {
      * @param component The part of the compound to be removed
      * @param compoundTask Whether the compound comes from the task
      */
-    static void abdVarDepOuter(CompoundTerm compound, Term component, boolean compoundTask) {
+    static void anaVarDepOuter(CompoundTerm compound, Term component, boolean compoundTask) {
         Term content = CompoundTerm.reduceComponents(compound, component);
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
@@ -447,19 +390,16 @@ public final class CompositionalRules {
         TruthValue v2 = belief.getTruth();
         TruthValue truth = null;
         BudgetValue budget;
-
         if (sentence instanceof Question) {
             budget = (compoundTask ? BudgetFunctions.backward(v2) : BudgetFunctions.backwardWeak(v2));
         } else {
             if (sentence instanceof Goal) {
                 truth = (compoundTask ? TruthFunctions.desireStrong(v1, v2) : TruthFunctions.desireWeak(v1, v2));
             } else {
-                truth = (compoundTask ? TruthFunctions.existAnalogy(v1, v2) : TruthFunctions.existAnalogy(v2, v1));
+                truth = (compoundTask ? TruthFunctions.anonymousAnalogy(v1, v2) : TruthFunctions.anonymousAnalogy(v2, v1));
             }
-
             budget = BudgetFunctions.compoundForward(truth, content);
         }
-
         Memory.doublePremiseTask(budget, content, truth, sentence, belief);
     }
 }

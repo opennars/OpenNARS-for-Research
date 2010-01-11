@@ -11,7 +11,7 @@
  * (at your option) any later version.
  *
  * Open-NARS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the abduction warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -63,11 +63,13 @@ public final class SyllogisticRules {
             budget1 = BudgetFunctions.forward(truth1);
             budget2 = BudgetFunctions.forward(truth2);
         }
-        TemporalValue order1 = sentence.getContent().getOrder();
-        TemporalValue order2 = belief.getContent().getOrder();
-        TemporalValue order = TemporalRules.syllogistic(order1, order2);
-        Statement content1 = Statement.make((Statement) sentence.getContent(), term1, term2, order);
-        Statement content2 = Statement.make((Statement) sentence.getContent(), term2, term1, TemporalValue.getReverse(order));
+        int order1 = sentence.getContent().getOrder();
+        int order2 = belief.getContent().getOrder();
+        int order = temporalSyllogism(order1, order2, 21);
+        boolean temporal = (sentence.isTemporal() || belief.isTemporal());
+        Statement content = (Statement) sentence.getContent();
+        Statement content1 = Statement.make(content, term1, term2, temporal, order);
+        Statement content2 = Statement.make(content, term2, term1, temporal, -order);
         Memory.doublePremiseTask(budget1, content1, truth1, sentence, belief);
         Memory.doublePremiseTask(budget2, content2, truth2, belief, sentence);
     }
@@ -110,19 +112,14 @@ public final class SyllogisticRules {
             budget2 = BudgetFunctions.forward(truth2);
             budget3 = BudgetFunctions.forward(truth3);
         }
-        TemporalValue order1 = st1.getOrder();
-        TemporalValue order2 = st2.getOrder();
-        TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
-//        if (tense == null) {
-//            tense = TemporalValue.WHEN;
-//            truth1 = TruthFunctions.temporalInduction(truth1);
-//            truth2 = TruthFunctions.temporalInduction(truth2);
-//            truth3 = TruthFunctions.temporalInduction(truth3);
-//        }
+        int order1 = st1.getOrder();
+        int order2 = st2.getOrder();
+        int order = temporalSyllogism(order1, order2, figure);
+        boolean temporal = (taskSentence.isTemporal() || belief.isTemporal());
         Statement statement1, statement2, statement3;
-        statement1 = Statement.make(st1, term1, term2, order);
-        statement2 = Statement.make(st1, term2, term1, TemporalValue.getReverse(order));
-        statement3 = Statement.makeSym(st1, term1, term2, order);
+        statement1 = Statement.make(st1, term1, term2, temporal, order);
+        statement2 = Statement.make(st1, term2, term1, temporal, -order);
+        statement3 = Statement.makeSym(st1, term1, term2, temporal, order);
         Memory.doublePremiseTask(budget1, statement1, truth1, taskSentence, belief);
         Memory.doublePremiseTask(budget2, statement2, truth2, belief, taskSentence);
         Memory.doublePremiseTask(budget3, statement3, truth3, taskSentence, belief);
@@ -169,22 +166,23 @@ public final class SyllogisticRules {
             }
             budget = BudgetFunctions.forward(truth);
         }
-        TemporalValue order1 = asymSt.getOrder();
-        TemporalValue order2 = symSt.getOrder();
-        TemporalValue order;
+        int order1 = asymSt.getOrder();
+        int order2 = symSt.getOrder();
+        int order;
         switch (figure) {
             case 11:
             case 12:
-                order = TemporalRules.syllogistic(order2, order1, figure);
+                order = temporalSyllogism(order2, order1, figure);
                 break;
             case 21:
             case 22:
-                order = TemporalRules.syllogistic(order1, order2, figure);
+                order = temporalSyllogism(order1, order2, figure);
                 break;
             default:
                 return;
         }
-        Term content = Statement.make(asymSt, term1, term2, order);
+        boolean temporal = (asym.isTemporal() || sym.isTemporal());
+        Term content = Statement.make(asymSt, term1, term2, temporal, order);
         Memory.doublePremiseTask(budget, content, truth, asym, sym);
     }
 
@@ -204,7 +202,6 @@ public final class SyllogisticRules {
         Statement st2 = (Statement) sentence.getContent();
         TruthValue truth = null;
         BudgetValue budget;
-        Task task = Memory.currentTask;
         if (sentence instanceof Question) {
             budget = BudgetFunctions.backward(belief.getTruth());
         } else {
@@ -215,10 +212,11 @@ public final class SyllogisticRules {
             }
             budget = BudgetFunctions.forward(truth);
         }
-        TemporalValue order1 = st1.getOrder();
-        TemporalValue order2 = st2.getOrder();
-        TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
-        Term statement = Statement.make(st1, term1, term2, order);
+        int order1 = st1.getOrder();
+        int order2 = st2.getOrder();
+        int order = temporalSyllogism(order1, order2, figure);
+        boolean temporal = (sentence.isTemporal() || belief.isTemporal());
+        Term statement = Statement.make(st1, term1, term2, temporal, order);
         Memory.doublePremiseTask(budget, statement, truth, belief, sentence);
     }
 
@@ -228,20 +226,16 @@ public final class SyllogisticRules {
      * {<<M --> S> ==> <M --> P>>, <M --> P>} |- <M --> S>
      * @param mainSentence The implication/equivalence premise
      * @param subSentence The premise on part of s1
-     * @param s The location of s2 in s1
+     * @param side The location of s2 in s1
      */
-    static void detachment(Sentence mainSentence, Sentence subSentence, int s) {
+    static void detachment(Sentence mainSentence, Sentence subSentence, int side) {
         Statement statement = (Statement) mainSentence.getContent();
         Term subject = statement.getSubject();
         Term predicate = statement.getPredicate();
-        Term term = subSentence.getContent();
         Term content;
-        int side;
-        if (term.equals(subject)) {
-            side = 0;
+        if (side == 0) { // term.equals(subject)) {
             content = predicate;
-        } else if (term.equals(predicate)) {
-            side = 1;
+        } else if (side == 1) { //  term.equals(predicate)) {
             content = subject;
         } else {
             return;
@@ -275,7 +269,7 @@ public final class SyllogisticRules {
                 }
             } else {
                 if (statement instanceof Equivalence) {
-                    truth = TruthFunctions.analogy(truth1, truth2);
+                    truth = TruthFunctions.analogy(truth2, truth1);
                 } else if (side == 0) {
                     truth = TruthFunctions.deduction(truth1, truth2);
                 } else {
@@ -284,17 +278,12 @@ public final class SyllogisticRules {
             }
             budget = BudgetFunctions.forward(truth);
         }
-        TemporalValue tense0 = subSentence.getTense();
-        TemporalValue order0 = statement.getOrder();
-        TemporalValue tense;
-        if (order0 == null) {
-            tense = tense0;
-        } else if (side == 0) {
-            tense = TemporalRules.tenseSyllogistic(tense0, subSentence.getCreationTime(), order0);
+        int dif = statement.getOrder();
+        if (side == 0) {
+             Memory.newStamp.adjustEventTime(dif);
         } else {
-            tense = TemporalRules.tenseSyllogistic(tense0, subSentence.getCreationTime(), TemporalValue.getReverse(order0));
+             Memory.newStamp.adjustEventTime(- dif);
         }
-        Memory.currentTense = tense;
         Memory.doublePremiseTask(budget, content, truth, mainSentence, subSentence);
     }
 
@@ -314,23 +303,6 @@ public final class SyllogisticRules {
         boolean deduction = (side != 0);
         HashMap substitute = Variable.findSubstitute(Variable.VarType.ALL, premise2, belief.getContent());
         boolean conditionalTask = (substitute != null);
-        TemporalValue tense1 = (conditionalTask ? taskSentence.getTense() : belief.getTense());
-        TemporalValue tense2 = (conditionalTask ? belief.getTense() : taskSentence.getTense());
-        TemporalValue order1 = premise1.getOrder();
-        TemporalValue order2 = premise2.getOrder();
-        if ((side == -1) && (tense2 != null) && (tense2.getDelta() > 0)) {
-            return;
-        }
-        if ((side == 0) && (order2 != null) && (order2.getDelta() > 0)) {
-            return;
-        }
-        if ((side == 1) && (order2 != null) && (order2.getDelta() < 0)) {
-            return;
-        }
-        TemporalValue tense = TemporalRules.syllogistic(tense1, tense2);
-        if (tense != null) {
-            tense = new TemporalValue(0);
-        }
         Term commonComponent;
         Term newComponent = null;
         if (side == 0) {
@@ -360,8 +332,10 @@ public final class SyllogisticRules {
             }
         }
         Term content;
+        boolean temporal = (taskSentence.isTemporal() || belief.isTemporal());
+        int order = premise1.getOrder() + premise2.getOrder();
         if (newCondition != null) {
-            content = Statement.make(premise1, newCondition, premise1.getPredicate(), order1);
+            content = Statement.make(premise1, newCondition, premise1.getPredicate(), temporal, order);
         } else {
             content = premise1.getPredicate();
         }
@@ -395,7 +369,6 @@ public final class SyllogisticRules {
             }
             budget = BudgetFunctions.forward(truth);
         }
-        Memory.currentTense = tense;
         Memory.doublePremiseTask(budget, content, truth, taskSentence, belief);
     }
 
@@ -414,8 +387,8 @@ public final class SyllogisticRules {
         if (!(cond1 instanceof Conjunction) && !(cond2 instanceof Conjunction)) {
             return false;
         }
-        TemporalValue order1 = st1.getOrder();
-        TemporalValue order2 = st2.getOrder();
+        int order1 = st1.getOrder();
+        int order2 = st2.getOrder();
         if (order1 != order2) {
             return false;
         }
@@ -433,6 +406,7 @@ public final class SyllogisticRules {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         Judgment belief = Memory.currentBelief;
+        boolean temporal = (sentence.isTemporal() || belief.isTemporal());
         TruthValue value1 = sentence.getTruth();
         TruthValue value2 = belief.getTruth();
         boolean keepOrder = (Variable.findSubstitute(Variable.VarType.INDEPENDENT, st1, task.getContent()) != null);
@@ -441,7 +415,7 @@ public final class SyllogisticRules {
         BudgetValue budget;
         if (term1 != null) {
             if (term2 != null) {
-                content = Statement.make(st2, term2, term1, order2);
+                content = Statement.make(st2, term2, term1, temporal, order2);
             } else {
                 content = term1;
             }
@@ -463,7 +437,7 @@ public final class SyllogisticRules {
         }
         if (term2 != null) {
             if (term1 != null) {
-                content = Statement.make(st1, term1, term2, order1);
+                content = Statement.make(st1, term1, term2, temporal, order1);
             } else {
                 content = term2;
             }
@@ -481,7 +455,6 @@ public final class SyllogisticRules {
                 }
                 budget = BudgetFunctions.forward(truth);
             }
-            Memory.currentTense = null;
             Memory.doublePremiseTask(budget, content, truth, sentence, belief);
         }
         return true;
@@ -509,17 +482,15 @@ public final class SyllogisticRules {
             state1 = Statement.make(premise1, premise1.getSubject(), v1);
             state2 = Statement.make(premise2, premise2.getSubject(), v2);
         }
-        TemporalValue tense1 = sentence1.getTense();
-        TemporalValue tense2 = sentence2.getTense();
-        TemporalValue tense = TemporalRules.tenseInduction(tense1, tense2);
-        if (tense == null) {
-            return null;
-        }
+        long time1 = sentence1.getEventTime();  // override Concept.getBelief?
+        long time2 = sentence2.getEventTime();
+        int dif = (int) (time2 - time1);
+        boolean temporal = (sentence1.isTemporal() && sentence2.isTemporal());
         Statement content;
         if (isImplication) {
-            content = Implication.make(state1, state2, tense);
+            content = Implication.make(state1, state2, temporal, dif);
         } else {
-            content = Equivalence.make(state1, state2, tense);
+            content = Equivalence.make(state1, state2, temporal, dif);
         }
         return content;
     }
@@ -554,23 +525,17 @@ public final class SyllogisticRules {
         }
         Sentence belief = Memory.currentBelief;
         Term compound, content;
-        TemporalValue tense;
         TruthValue truth;
         if (premise1.equals(taskSentence.getContent())) {
-            truth = TruthFunctions.abduction(taskSentence.getTruth(), belief.getTruth());
-            tense = TemporalRules.tenseInduction(taskSentence.getTense(), belief.getTense());
+            truth = TruthFunctions.induction(belief.getTruth(), taskSentence.getTruth());
         } else {
-            truth = TruthFunctions.abduction(belief.getTruth(), taskSentence.getTruth());
-            tense = TemporalRules.tenseInduction(belief.getTense(), taskSentence.getTense());
+            truth = TruthFunctions.induction(taskSentence.getTruth(), belief.getTruth());
         }
-        if (tense == null) {
-            return;
-        }
-        if ((oldCompound instanceof Implication) && (tense == oldCompound.getOrder())) {
+        if (oldCompound instanceof Implication) {
             compound = Statement.make((Statement) oldCompound, oldCompound.componentAt(0), state2);
             content = Statement.make((Statement) oldCompound, state1, compound);
         } else if (oldCompound instanceof Conjunction) {
-            compound = Implication.make(state1, state2, tense);
+            compound = Implication.make(state1, state2, false, 0);
             content = CompoundTerm.replaceComponent(oldCompound, premise2, compound);
         } else {
             return;
@@ -583,16 +548,10 @@ public final class SyllogisticRules {
      * {<M ==> S>, <M ==> P>} |- {<S ==> P>, <P ==> S>, <S <=> P>}
      * @param task1 The first premise
      * @param task2 The second premise
-     * @param order Temporal order of the terms in conclusion
      */
-    public static void temporalIndCom(Task task1, Task task2, TemporalValue order) {
+    public static void temporalIndCom(Task task1, Task task2) {
         Judgment judg1 = (Judgment) task1.getSentence();
         Judgment judg2 = (Judgment) task2.getSentence();
-        Stamp stamp = Stamp.make(judg1.getStamp(), judg2.getStamp());
-        if (stamp == null) {
-            return;
-        }
-        Memory.currentStamp = stamp;
         Term term1 = judg1.getContent();
         Term term2 = judg2.getContent();
         if ((term1 instanceof Inheritance) && (term2 instanceof Inheritance)) {
@@ -627,9 +586,12 @@ public final class SyllogisticRules {
                 }
             }
         }
-        Statement statement1 = Implication.make(term1, term2, order);
-        Statement statement2 = Implication.make(term2, term1, TemporalValue.getReverse(order));
-        Statement statement3 = Equivalence.make(term1, term2, order);
+        long time1 = judg1.getEventTime();
+        long time2 = judg2.getEventTime();
+        int distance = (int) (time2 - time1);
+        Statement statement1 = Implication.make(term1, term2, true, distance);
+        Statement statement2 = Implication.make(term2, term1, true, -distance);
+        Statement statement3 = Equivalence.make(term1, term2, true, distance);
         TruthValue value1 = judg1.getTruth();
         TruthValue value2 = judg2.getTruth();
         TruthValue truth1 = TruthFunctions.induction(value1, value2);
@@ -638,9 +600,30 @@ public final class SyllogisticRules {
         BudgetValue budget1 = BudgetFunctions.temporalIndCom(task1.getBudget(), task2.getBudget(), truth1);
         BudgetValue budget2 = BudgetFunctions.temporalIndCom(task1.getBudget(), task2.getBudget(), truth2);
         BudgetValue budget3 = BudgetFunctions.temporalIndCom(task1.getBudget(), task2.getBudget(), truth3);
-        Memory.currentTense = new TemporalValue(0);
         Memory.doublePremiseTask(budget1, statement1, truth1, judg1, judg2);
         Memory.doublePremiseTask(budget2, statement2, truth2, judg2, judg1);
         Memory.doublePremiseTask(budget3, statement3, truth3, judg1, judg2);
+    }
+
+    /**
+     * Temporal inference in syllogism, with figure
+     * @param r1 The first premise, containing the subject of the conclusion
+     * @param r2 The second premise, containing the predicate of the conclusion
+     * @param figure The location of the shared term
+     * @return The temporal order in the conclusion
+     */
+    public static int temporalSyllogism(int r1, int r2, int figure) {
+        switch (figure) {
+            case 11:
+                return -r1 + r2;
+            case 12:
+                return -r1 - r2;
+            case 21:
+                return r1 + r2;
+            case 22:
+                return r1 - r2;
+            default:
+                return 0;
+        }
     }
 }

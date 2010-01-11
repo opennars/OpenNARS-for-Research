@@ -43,10 +43,6 @@ public abstract class Sentence implements Cloneable {
     protected boolean input = false;
     /** For Question and Goal: best solution found so far */
     protected Judgment bestSolution = null;
-    /**
-     * Temporal order between the components
-     */
-    protected TemporalValue temporalOrder = null;
 
     /**
      * Make a Sentence from an input String. Called by StringParser.
@@ -54,13 +50,11 @@ public abstract class Sentence implements Cloneable {
      * @param punc The puncuation (and therefore, type) of the sentence
      * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
      * @param stamp The stamp of the truth value (for Judgment or Goal)
-     * @param tense The tense of the sentence
      * @param premise1 The first premise to record in the new Judgment. May be null.
      * @param premise2 The second premise to record in the new Judgment. May be null.
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, TemporalValue tense,
-            Sentence premise1, Sentence premise2) {
+    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
         }
@@ -68,14 +62,12 @@ public abstract class Sentence implements Cloneable {
         switch (punc) {
             case Symbols.JUDGMENT_MARK:
                 s = new Judgment(term, punc, truth, stamp, premise1, premise2);
-                s.temporalOrder = tense;
                 break;
             case Symbols.GOAL_MARK:
                 s = new Goal(term, punc, truth, stamp);
                 break;
             case Symbols.QUESTION_MARK:
                 s = new Question(term, punc, stamp);
-                s.temporalOrder = tense;
                 break;
             default:
                 return null;
@@ -89,12 +81,11 @@ public abstract class Sentence implements Cloneable {
      * @param term The content of the sentence
      * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
      * @param stamp The stamp of the truth value (for Judgment or Goal)
-     * @param tense The tense of the sentence
      * @param premise1 The first premise to record in the new Judgment. May be null.
      * @param premise2 The second premise to record in the new Judgment. May be null.
      * @return the Sentence generated from the arguments
      */
-    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp, TemporalValue tense,
+    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp,
             Sentence premise1, Sentence premise2) {
         if (term instanceof CompoundTerm) {
             ((CompoundTerm) term).renameVariables();
@@ -102,12 +93,10 @@ public abstract class Sentence implements Cloneable {
         Sentence s = null;
         if (oldS instanceof Question) {
             s = new Question(term, Symbols.QUESTION_MARK, stamp);
-            s.temporalOrder = tense;
         } else if (oldS instanceof Goal) {
             s = new Goal(term, Symbols.GOAL_MARK, truth, stamp);
         } else {
             s = new Judgment(term, Symbols.JUDGMENT_MARK, truth, stamp, premise1, premise2);
-            s.temporalOrder = tense;
         }
         return s;
     }
@@ -119,10 +108,10 @@ public abstract class Sentence implements Cloneable {
     @Override
     public Object clone() {
         if (this instanceof Judgment) {
-            return make((Term) content.clone(), punctuation, truth, stamp, temporalOrder,
+            return make((Term) content.clone(), punctuation, truth, stamp,
                     ((Judgment) this)._premise1, ((Judgment) this)._premise2);
         } else {
-            return make((Term) content.clone(), punctuation, truth, stamp, temporalOrder, null, null);
+            return make((Term) content.clone(), punctuation, truth, stamp, null, null);
         }
     }
 
@@ -148,14 +137,6 @@ public abstract class Sentence implements Cloneable {
      */
     public void setContent(Term t) {
         content = t;
-    }
-
-    /**
-     * Get the tense of the Sentence
-     * @return The tense of the Sentence
-     */
-    public TemporalValue getTense() {
-        return temporalOrder;
     }
 
     /**
@@ -206,13 +187,13 @@ public abstract class Sentence implements Cloneable {
     }
 
     /**
-     * Set the best-so-far solution for a Question or Goal
+     * Set the best-so-far solution for a Question or Goal, and report answer for input question
      * @param judg The solution to be remembered
      */
     public void setBestSolution(Judgment judg) {
         bestSolution = judg;
         if (input) {
-            Memory.report(judg, false);     // report answer to input question
+            Memory.report(judg, false);
         }
     }
 
@@ -222,8 +203,8 @@ public abstract class Sentence implements Cloneable {
      * @return Whether the two have overlapping stamps
      */
     public boolean noOverlapping(Sentence that) {
-        Memory.currentStamp = Stamp.make(stamp, that.getStamp());
-        return (Memory.currentStamp != null);
+        Memory.newStamp = Stamp.make(stamp, that.getStamp());
+        return (Memory.newStamp != null);
     }
 
     /**
@@ -235,9 +216,6 @@ public abstract class Sentence implements Cloneable {
         StringBuffer s = new StringBuffer();
         s.append(content.getName());
         s.append(punctuation + " ");
-        if (temporalOrder != null) {
-            s.append(temporalOrder.getDelta() + " ");
-        }
         if (truth != null) {
             s.append(truth.toString());
         }
@@ -252,7 +230,7 @@ public abstract class Sentence implements Cloneable {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        s.append(content.getName());
+        s.append(content.toString());
         s.append(punctuation + " ");
         s.append(tenseToString());
         if (truth != null) {
@@ -292,12 +270,11 @@ public abstract class Sentence implements Cloneable {
      * Get a String representation of the tense of the sentence
      * @return The String
      */
-    public String tenseToString() {
-        TemporalValue t = getTense();
-        if (t == null) {
+    private String tenseToString() {
+        if (!isTemporal()) {
             return "";
         }
-        int delta = (int) (getEventTime() - Center.getTime());
+        long delta = getEventTime() - Center.getTime();
         if (delta > 0) {
             return Symbols.TENSE_FUTURE + " ";
         }
@@ -320,6 +297,10 @@ public abstract class Sentence implements Cloneable {
      * @return The occurrence time of the event
      */
     public long getEventTime() {
-        return getCreationTime() + getTense().getDelta();
+        return getStamp().getEventTime();
+    }
+
+    public boolean isTemporal() {
+        return (getEventTime() != Stamp.ALWAYS);
     }
 }

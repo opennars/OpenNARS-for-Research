@@ -60,14 +60,6 @@ public class Task extends Item {
     }
 
     /**
-     * Directly get the tense of the sentence
-     * @return The tense of the sentence
-     */
-    public TemporalValue getTense() {
-        return sentence.getTense();
-    }
-
-    /**
      * Check if a Task is derived by a StructuralRule
      * @return Whether the Task is derived by a StructuralRule
      */

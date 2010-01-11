@@ -264,11 +264,6 @@ public final class RuleTables {
      * @param figure The location of the shared term
      */
     private static void asymmetricSymmetric(Sentence asym, Sentence sym, int figure) {
-        if (asym.getTense() == sym.getTense()) {
-            Memory.currentTense = asym.getTense();
-        } else {
-            return;
-        }
         Statement asymSt = (Statement) asym.cloneContent();
         Statement symSt = (Statement) sym.cloneContent();
         Term t1, t2;
@@ -327,11 +322,6 @@ public final class RuleTables {
      * @param figure The location of the shared term
      */
     private static void symmetricSymmetric(Judgment belief, Sentence taskSentence, int figure) {
-        if (taskSentence.getTense() == belief.getTense()) {
-            Memory.currentTense = taskSentence.getTense();
-        } else {
-            return;
-        }
         Statement s1 = (Statement) belief.cloneContent();
         Statement s2 = (Statement) taskSentence.cloneContent();
         switch (figure) {
@@ -361,7 +351,7 @@ public final class RuleTables {
     /* ----- conditional inferences ----- */
     /**
      * The detachment rule, with variable unification
-     * @param mainSentence The premise that is an Implication or Equivalence
+     * @param originalMainSentence The premise that is an Implication or Equivalence
      * @param subSentence The premise that is the subject or predicate of the first one
      * @param index The location of the second premise in the first
      */
@@ -459,7 +449,7 @@ public final class RuleTables {
         if (component.getClass() == statement.getClass()) {
             if ((compound instanceof Conjunction) && (Memory.currentBelief != null)) {
                 if (Variable.unify(Variable.VarType.DEPENDENT, component, statement, compound, statement)) {
-                    CompositionalRules.abdVarDepOuter(compound, component, statement.equals(beliefTerm));
+                    CompositionalRules.anaVarDepOuter(compound, component, statement.equals(beliefTerm));
                 } else if (task.getSentence().isJudgment()) {
                     SyllogisticRules.introVarIndInner(statement, (Statement) component, compound);
                     CompositionalRules.introVarDepInner(compound, component, statement);

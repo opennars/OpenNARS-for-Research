@@ -30,7 +30,7 @@ import nars.io.Symbols;
 public class Question extends Sentence {
 
     /**
-     * COnstructor
+     * Constructor
      * @param term The content
      * @param punc The punctuation
      * @param s The stamp
@@ -42,13 +42,12 @@ public class Question extends Sentence {
     }
     
     /**
-     * Construct a Judgment to indicate an operation just executed
-     * @param g The goal that trigger the execution
+     * Construct a question to check whether a goal has been achieved
+     * @param g The goal that trigger the question
      */
     public Question(Goal g) {
         content = g.cloneContent();
         punctuation = Symbols.QUESTION_MARK;
-        temporalOrder = new TemporalValue(0);
-        stamp = new Stamp();
+        stamp = new Stamp(0, true);
     }
 }

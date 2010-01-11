@@ -22,7 +22,6 @@ package nars.language;
 
 import java.util.*;
 
-import nars.entity.TemporalValue;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -32,9 +31,22 @@ import nars.main.Memory;
 public class Equivalence extends Statement {
 
     /**
-     * Temporal order between the components
+     * Whether there is a temporal order between the components
      */
-    private TemporalValue temporalOrder = null;
+    private boolean isTemporal = false;
+    /**
+     * Temporal distance between the components
+     */
+    private int temporalDistance = 0;
+
+    /**
+     * Constructor with partial values, called by make
+     * @param n The name of the term
+     * @param arg The component list of the term
+     */
+    protected Equivalence(String n, ArrayList<Term> arg) {
+        super(n, arg);
+    }
 
     /**
      * Constructor with partial values, called by make
@@ -42,9 +54,22 @@ public class Equivalence extends Statement {
      * @param arg The component list of the term
      * @param order The temporal order of the components
      */
-    protected Equivalence(String n, ArrayList<Term> arg, TemporalValue order) {
+    protected Equivalence(String n, ArrayList<Term> arg, int order) {
         super(n, arg);
-        temporalOrder = order;
+        isTemporal = true;
+        temporalDistance = order;
+        name = makeName();          // repeat to get the temporal operator
+    }
+
+    /**
+     * Constructor with full values, called by clone
+     * @param n The name of the term
+     * @param cs Component list
+     * @param open Open variable list
+     * @param i Syntactic complexity of the compound
+     */
+    protected Equivalence(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
+        super(n, cs, open, i);
     }
 
     /**
@@ -55,9 +80,11 @@ public class Equivalence extends Statement {
      * @param i Syntactic complexity of the compound
      * @param order The temporal order of the components
      */
-    protected Equivalence(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, TemporalValue order) {
+    protected Equivalence(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, int order) {
         super(n, cs, open, i);
-        temporalOrder = order;
+        isTemporal = true;
+        temporalDistance = order;
+        name = makeName();          // repeat to get the temporal operator
     }
 
     /**
@@ -66,17 +93,24 @@ public class Equivalence extends Statement {
      */
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Equivalence(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, temporalOrder);
+        if (isTemporal) {
+            return new Equivalence(name, (ArrayList<Term>) cloneList(components),
+                    (ArrayList<Variable>) cloneList(openVariables), complexity, temporalDistance);
+        } else {
+            return new Equivalence(name, (ArrayList<Term>) cloneList(components),
+                    (ArrayList<Variable>) cloneList(openVariables), complexity);
+        }
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
      * @param predicate The second compoment
+     * @param temporal Whether the components are temporally related
      * @param order The temporal order of the components
      * @return A compound generated or null
      */
-    public static Equivalence make(Term subject, Term predicate, TemporalValue order) {  // to be extended to check if subject is Conjunction
+    public static Equivalence make(Term subject, Term predicate, boolean temporal, int order) {  // to be extended to check if subject is Conjunction
         if ((subject instanceof Implication) || (subject instanceof Equivalence)) {
             return null;
         }
@@ -87,24 +121,28 @@ public class Equivalence extends Statement {
             return null;
         }
         Term interm;
-        if ((subject.compareTo(predicate) > 0) && ((order == null) || (order.getDelta() == 0))) {
+        if ((subject.compareTo(predicate) > 0) && (order == 0)) {
             interm = subject;
             subject = predicate;
             predicate = interm;
-        } else if ((order != null) && (order.getDelta() < 0)) {
+        } else if (order < 0) {
             interm = subject;
             subject = predicate;
             predicate = interm;
-            order = TemporalValue.getReverse(order);
+            order = 0 - order;
         }
-        String sym = getEquivalenceSymbol(order);
+        String sym = getEquivalenceSymbol(temporal, order);
         String name = makeStatementName(subject, sym, predicate);
         Term t = Memory.nameToListedTerm(name);
         if (t != null) {
             return (Equivalence) t;
         }
         ArrayList<Term> argument = argumentsToList(subject, predicate);
-        return new Equivalence(name, argument, order);
+        if (temporal) {
+            return new Equivalence(name, argument, order);
+        } else {
+            return new Equivalence(name, argument);
+        }
     }
 
     /**
@@ -112,7 +150,7 @@ public class Equivalence extends Statement {
      * @return the operator of the term
      */
     public String operator() {
-        return getEquivalenceSymbol(temporalOrder);
+        return getEquivalenceSymbol(isTemporal, temporalDistance);
     }
 
     /**
@@ -121,7 +159,7 @@ public class Equivalence extends Statement {
      */
     @Override
     public boolean isCommutative() {
-        return ((temporalOrder == null) || (temporalOrder.getDelta() == 0));
+        return (temporalDistance == 0);
     }
 
     /**
@@ -129,23 +167,31 @@ public class Equivalence extends Statement {
      * @return the temporal order of the components
      */
     @Override
-    public TemporalValue getOrder() {
-        return temporalOrder;
+    public int getOrder() {
+        return temporalDistance;
     }
 
     /**
      * Get the symbole of the relation by tense
-     * @param t The tense of the statement
+     * @param temporal Whether the components are temprally related
+     * @param distance The temporal distance between the components
      * @return The String representation of the relation
      */
-    public static String getEquivalenceSymbol(TemporalValue t) {
-        if (t == null)
+    public static String getEquivalenceSymbol(boolean temporal, int distance) {
+        if (!temporal) {
             return Symbols.EQUIVALENCE_RELATION;
-        int delta = t.getDelta();
-        if (delta > 0)
+        }
+        if (distance > 0) {
             return Symbols.EQUIVALENCE_AFTER_RELATION;
-        if (delta < 0)
+        }
+        if (distance < 0) {
             return "ERROR: UNKNOWN EQUIVALENCE";
+        }
         return Symbols.EQUIVALENCE_WHEN_RELATION;
+    }
+
+    @Override
+    public boolean isTemporal() {
+        return isTemporal;
     }
 }

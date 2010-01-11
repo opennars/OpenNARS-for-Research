@@ -85,7 +85,7 @@ public class UtilityFunctions {
      * @return The corresponding confidence, in [0, 1)
      */
     public static float w2c(float w) {
-        return w / (w + Parameters.NEAR_FUTURE);
+        return w / (w + Parameters.HORIZON);
     }
 
     /**
@@ -94,7 +94,7 @@ public class UtilityFunctions {
      * @return The corresponding weight of evidence, a non-negative real number
      */
     public static float c2w(float c) {
-        return Parameters.NEAR_FUTURE * c / (1 - c);
+        return Parameters.HORIZON * c / (1 - c);
     }
 }
 

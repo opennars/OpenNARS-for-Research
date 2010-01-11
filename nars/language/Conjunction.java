@@ -22,7 +22,6 @@ package nars.language;
 
 import java.util.*;
 
-import nars.entity.TemporalValue;
 import nars.io.Symbols;
 import nars.main.Memory;
 
@@ -32,9 +31,9 @@ import nars.main.Memory;
 public class Conjunction extends CompoundTerm {
 
     /**
-     * Temporal order between the components
+     * Temporal order between the components: 1 for sequential, 0 for parallel, -1 for N/A
      */
-    private TemporalValue temporalOrder = null;
+    private int temporalOrder = -1;
 
     /**
      * Constructor with partial values, called by make
@@ -42,9 +41,10 @@ public class Conjunction extends CompoundTerm {
      * @param arg The component list of the term
      * @param order The temporal order of the components
      */
-    protected Conjunction(String n, ArrayList<Term> arg, TemporalValue order) {
+    protected Conjunction(String n, ArrayList<Term> arg, int order) {
         super(n, arg);
         temporalOrder = order;
+        name = makeName();          // repeat to get the temporal operator
     }
 
     /**
@@ -55,9 +55,10 @@ public class Conjunction extends CompoundTerm {
      * @param i Syntactic complexity of the compound
      * @param order The temporal order of the components
      */
-    protected Conjunction(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, TemporalValue order) {
+    protected Conjunction(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i, int order) {
         super(n, cs, open, i);
         temporalOrder = order;
+        name = makeName();          // repeat to get the temporal operator
     }
 
     /**
@@ -82,14 +83,11 @@ public class Conjunction extends CompoundTerm {
      * @param t The given temporal value
      * @return String representation of the order
      */
-    public static String getConjunctionSymbol(TemporalValue t) {
-        if (t == null)
+    public static String getConjunctionSymbol(int t) {
+        if (t == -1)
             return Symbols.CONJUNCTION_OPERATOR;
-        int delta = t.getDelta();
-        if (delta > 0)
+        if (t == 1)
             return Symbols.SEQUENCE_OPERATOR;
-        if (delta < 0)
-            return "ERROR: UNKNOWN CONJUNCTION";
         return Symbols.PARALLEL_OPERATOR;
     }
 
@@ -99,7 +97,7 @@ public class Conjunction extends CompoundTerm {
      */
     @Override
     public boolean isCommutative() {
-        return ((temporalOrder == null) || (temporalOrder.getDelta() == 0));
+        return (temporalOrder < 1);
     }
 
 
@@ -108,7 +106,7 @@ public class Conjunction extends CompoundTerm {
      * @return Temporal order of the components
      */
     @Override
-    public TemporalValue getOrder() {
+    public int getOrder() {
         return temporalOrder;
     }
 
@@ -118,14 +116,7 @@ public class Conjunction extends CompoundTerm {
      * @return If the term is a paralel conjunction
      */
     public static boolean isParallel(Term t) {
-        if (t instanceof Conjunction) {
-            Conjunction c = (Conjunction) t;
-            TemporalValue temp = c.getOrder();
-            if (temp != null && (temp.getDelta() == 0)) {
-                return true;
-            }
-        }
-        return false;
+        return ((t instanceof Conjunction) && (((Conjunction) t).getOrder() == 0));
     }
 
     /**
@@ -134,14 +125,12 @@ public class Conjunction extends CompoundTerm {
      * @return If the term is a sequential conjunction
      */
     public static boolean isSequence(Term t) {
-        if (t instanceof Conjunction) {
-            Conjunction c = (Conjunction) t;
-            TemporalValue temp = c.getOrder();
-            if (temp != null && (temp.getDelta() == 1)) {
-                return true;
-            }
-        }
-        return false;
+        return ((t instanceof Conjunction) && (((Conjunction) t).getOrder() == 1));
+    }
+
+    @Override
+    public boolean isTemporal() {
+        return (temporalOrder >= 0);
     }
 
     /**
@@ -150,9 +139,13 @@ public class Conjunction extends CompoundTerm {
      * @param argList the list of arguments
      * @param order The temporal order of the components
      */
-    public static Term make(ArrayList<Term> argList, TemporalValue order) {
-        if ((order != null) && (order.getDelta() > 0)) {
-            String name = makeCompoundName(Symbols.SEQUENCE_OPERATOR, argList);
+    public static Term make(ArrayList<Term> argList, int order) {
+        if (order == 1) {
+            String name;
+            if (argList.size() == 1) {
+                return argList.get(0);
+            }
+            name = makeCompoundName(Symbols.SEQUENCE_OPERATOR, argList);
             Term t = Memory.nameToListedTerm(name);
             return (t != null) ? t : new Conjunction(name, argList, order);            
         } else {
@@ -167,7 +160,7 @@ public class Conjunction extends CompoundTerm {
      * @param order The temporal order of the components
      * @return the Term generated from the arguments
      */
-    public static Term make(TreeSet<Term> set, TemporalValue order) {
+    public static Term make(TreeSet<Term> set, int order) {
         if (set.isEmpty()) {
             return null;
         }                         // special case: no component
@@ -190,8 +183,8 @@ public class Conjunction extends CompoundTerm {
      * @return A compound generated or a term it reduced to
      */
     @SuppressWarnings("unchecked")
-    public static Term make(Term term1, Term term2, TemporalValue order) {
-        if ((order != null) && order.getDelta() > 0) { 
+    public static Term make(Term term1, Term term2, int order) {
+        if (order == 1) {
             ArrayList<Term> argument;
             if (isSequence(term2)) { // to be refined to check other cases
                 argument = ((CompoundTerm) term2).cloneComponents();
@@ -204,7 +197,7 @@ public class Conjunction extends CompoundTerm {
             return make(argument, order);          
         } else { // to be refined to check other cases
             TreeSet set;
-            if ((order != null) && (order.getDelta() == 0)) {
+            if (order == 0) {
                 if (isParallel(term1)) {
                     set = new TreeSet(((CompoundTerm) term1).cloneComponents());
                     if (isParallel(term2)) {

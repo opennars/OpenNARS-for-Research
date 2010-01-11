@@ -11,7 +11,7 @@
  * (at your option) any later version.
  *
  * Open-NARS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the abduction warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -28,8 +28,8 @@ import nars.main.*;
  * Directly process a task by a oldBelief, with only two Terms in both. 
  * In matching, the new task is compared with all existing direct Tasks in that Concept, to carry out:
  * <p>
- * temporalRevision: between judgments on non-overlapping evidence; 
- * temporalRevision: between judgments; 
+ * revision: between judgments on non-overlapping evidence;
+ * revision: between judgments;
  * satisfy: between a Judgment and a Question/Goal; 
  * merge: between items of the same type and stamp;
  * conversion: between different inheritance relations.
@@ -47,9 +47,9 @@ public final class MatchingRules {
     public static void match(Task task, Judgment belief) {
         Sentence sentence = task.getSentence();
         if (sentence.isJudgment()) {
-            revision(task, belief, true);
+            revision((Judgment) sentence, belief, true);
         } else {
-            trySolution(sentence, belief, null);
+            trySolution(sentence, belief, task);
         }
     }
 
@@ -57,24 +57,27 @@ public final class MatchingRules {
      * Belief revision
      * <p>
      * called from Concept.reviseTable and match
-     * @param task The task containing new belief
+     * @param newBelief The new belief in task
      * @param oldBelief The previous belief with the same content
      * @param feedbackToLinks Whether to send feedback to the links
-     * @return Whether temporalRevision happened
      */
-    public static boolean revision(Task task, Judgment oldBelief, boolean feedbackToLinks) {
-        Judgment newBelief = (Judgment) task.getSentence();
-        if (TemporalRules.sameTime(newBelief, oldBelief)) {
-            TruthValue tTruth = newBelief.getTruth();
-            TruthValue bTruth = oldBelief.getTruth();
-            TruthValue truth = TruthFunctions.revision(tTruth, bTruth);
-            BudgetValue budget = BudgetFunctions.revise(tTruth, bTruth, truth, task, feedbackToLinks);
-            Term content = newBelief.getContent();
-            Memory.revisionTask(budget, content, truth, task.isStructural(), oldBelief, newBelief);
-            return true;
-        } else {
-            return false;
+    public static void revision(Judgment newBelief, Judgment oldBelief, boolean feedbackToLinks) {
+        long time1 = newBelief.getEventTime();
+        long time2 = oldBelief.getEventTime();
+        TruthValue newTruth = newBelief.getTruth();
+        TruthValue oldTruth = oldBelief.getTruth();
+        if ((time1 != time2) && (time2 >= 0)) {
+            oldTruth = TruthFunctions.temporalCasting(oldTruth, time2, time1, Memory.currentTask.getSentence().getCreationTime());
+            Term term1 = newBelief.getContent();
+            Term term2 = oldBelief.getContent();
+            if (term2.isTemporal() && (!term1.isTemporal() || (term2.getOrder() != term1.getOrder()))) {
+                oldTruth = TruthFunctions.temporalCasting(oldTruth, term2.getOrder(), term1.getOrder(), 0);
+            }
         }
+        TruthValue truth = TruthFunctions.revision(newTruth, oldTruth);
+        BudgetValue budget = BudgetFunctions.revise(newTruth, oldTruth, truth, feedbackToLinks);
+        Term content = newBelief.getContent();
+        Memory.revisionTask(budget, content, truth, oldBelief, newBelief);
     }
 
     /**
@@ -85,32 +88,39 @@ public final class MatchingRules {
      */
     public static void trySolution(Sentence problem, Judgment belief, Task task) {
         Judgment oldBest = problem.getBestSolution();
-        if (betterSolution(belief, oldBest, problem)) {
-            problem.setBestSolution(belief);
-            BudgetValue budget = BudgetFunctions.solutionEval(problem, belief, task);
-            if ((budget != null) && budget.aboveThreshold()) {
-                Memory.activatedTask(budget, belief, problem.isInput());
+        if (oldBest != null) {
+            float oldQ = solutionQuality(problem, oldBest);
+            float newQ = solutionQuality(problem, belief);
+            if (oldQ >= newQ) {
+                return;
             }
+        }
+        problem.setBestSolution(belief);
+        BudgetValue budget = BudgetFunctions.solutionEval(problem, belief, task);
+        if ((budget != null) && budget.aboveThreshold()) {
+            Memory.activatedTask(budget, belief, problem.isInput());
         }
     }
 
     /**
-     * Compare the quality of two solutions
-     * @param newSol A new solution
-     * @param oldSol A old solution
-     * @param problem The problem
-     * @return Whether the new one is better
+     * Evaluate the quality of the judgment as a solution to a problem
+     * @param problem A goal or question
+     * @param solution The solution to be evaluated
+     * @return The quality of the judgment as the solution
      */
-    private static boolean betterSolution(Judgment newSol, Judgment oldSol, Sentence problem) {
-        if (oldSol == null) {
-            return true;
-        } else {
-            if ((problem instanceof Question) && (problem.getTense() != null)) {
-                if(TemporalValue.closer(newSol.getTense(), oldSol.getTense(), problem.getTense())) {
-                    return true;
-                }
-            }
-            return (newSol.solutionQuality(problem) > oldSol.solutionQuality(problem));
+    public static float solutionQuality(Sentence problem, Judgment solution) {
+        long t1 = problem.getEventTime();
+        long t2 = solution.getEventTime();
+        TruthValue truth = solution.getTruth();
+        if ((t2 != Stamp.ALWAYS) && (t1 != t2)) {
+            truth = TruthFunctions.temporalCasting(truth, t2, t1, problem.getCreationTime());
+        }
+        if (problem instanceof Goal) {
+            return truth.getExpectation();
+        } else if (problem.getContent().isConstant()) {   // "yes/no" question
+            return truth.getConfidence();
+        } else {                                    // "what" question or goal
+            return truth.getExpectation() / solution.getContent().getComplexity();
         }
     }
 
@@ -121,14 +131,6 @@ public final class MatchingRules {
     public static void matchReverse() {
         Task task = Memory.currentTask;
         Judgment belief = Memory.currentBelief;
-        TemporalValue t1 = task.getContent().getOrder();
-        TemporalValue t2 = belief.getContent().getOrder();
-        if (((t1 == null) && (t2 != null)) || ((t1 != null) && (t2 == null))) {
-            return;
-        }
-        if ((t1 != t2) && (t1.getDelta() + t2.getDelta() != 0)) {
-            return;
-        }
         Sentence sentence = task.getSentence();
         if (sentence.isJudgment()) {
             inferToSym((Judgment) sentence, belief);
@@ -144,10 +146,10 @@ public final class MatchingRules {
      * @param figure location of the shared term
      */
     public static void matchAsymSym(Sentence asym, Sentence sym, int figure) {
-        TemporalValue order1 = asym.getContent().getOrder();
-        TemporalValue order2 = sym.getContent().getOrder();
-        TemporalValue order = TemporalRules.syllogistic(order1, order2, figure);
-        if ((order1 != order2) && (order == null)) {
+        int order1 = asym.getContent().getOrder();
+        int order2 = sym.getContent().getOrder();
+        int order = SyllogisticRules.temporalSyllogism(order1, order2, figure);
+        if ((order1 != order2) && (order == 0)) {
             return;
         }
         if (Memory.currentTask.getSentence().isJudgment()) {
@@ -172,11 +174,12 @@ public final class MatchingRules {
         if (s1 instanceof Inheritance) {
             content = Similarity.make(t1, t2);
         } else {
-            TemporalValue order = s1.getOrder();
-            if ((order != null) && order.getDelta() < 0)
-                content = Equivalence.make(t1, t2, TemporalValue.getReverse(order));
-            else
-                content = Equivalence.make(t1, t2, order);
+            int order = s1.getOrder();
+            if (order < 0) {
+                content = Equivalence.make(t1, t2, true, - order);
+            } else {
+                content = Equivalence.make(t1, t2, judgment1.isTemporal(), order);
+            }
         }
         TruthValue value1 = judgment1.getTruth();
         TruthValue value2 = judgment2.getTruth();
@@ -191,11 +194,11 @@ public final class MatchingRules {
      * @param asym The asymmetric premise
      * @param sym The symmetric premise
      */
-    private static void inferToAsym(Judgment asym, Judgment sym, TemporalValue order) {
+    private static void inferToAsym(Judgment asym, Judgment sym, int order) {
         Statement statement = (Statement) asym.getContent();
         Term sub = statement.getPredicate();
         Term pre = statement.getSubject();
-        Statement content = Statement.make(statement, sub, pre, order);
+        Statement content = Statement.make(statement, sub, pre, sym.isTemporal(), order);
         TruthValue truth = TruthFunctions.reduceConjunction(sym.getTruth(), asym.getTruth());
         BudgetValue budget = BudgetFunctions.forward(truth);
         Memory.doublePremiseTask(budget, content, truth, sym, asym);
@@ -220,9 +223,9 @@ public final class MatchingRules {
     private static void convertRelation() {
         TruthValue truth = Memory.currentBelief.getTruth();
         if (((Statement) Memory.currentTask.getContent()).isCommutative()) {
-            truth = TruthFunctions.implied(truth);
+            truth = TruthFunctions.abduction(truth, 1.0f);
         } else {
-            truth = TruthFunctions.implying(truth);
+            truth = TruthFunctions.deduction(truth, 1.0f);
         }
         BudgetValue budget = BudgetFunctions.forward(truth);
         Memory.convertedJudgment(truth, budget);

@@ -23,7 +23,6 @@ package nars.language;
 import java.util.ArrayList;
 
 import nars.io.Symbols;
-import nars.entity.TemporalValue;
 
 /**
  * A statement is a compound term, consisting of a subject, a predicate,
@@ -84,19 +83,25 @@ public abstract class Statement extends CompoundTerm {
             return InstanceProperty.make(subject, predicate);
         }
         if (relation.equals(Symbols.IMPLICATION_RELATION)) {
-            return Implication.make(subject, predicate, null);
+            return Implication.make(subject, predicate, false, 0);
         }
         if (relation.equals(Symbols.EQUIVALENCE_RELATION)) {
-            return Equivalence.make(subject, predicate, null);
+            return Equivalence.make(subject, predicate, false, 0);
         }
-        if (relation.equals(Symbols.IMPLICATION_AFTER_RELATION) ||
-            relation.equals(Symbols.IMPLICATION_WHEN_RELATION) ||
-            relation.equals(Symbols.IMPLICATION_BEFORE_RELATION)) {
-            return Implication.make(subject, predicate, new TemporalValue(relation));
+        if (relation.equals(Symbols.IMPLICATION_AFTER_RELATION)) {
+            return Implication.make(subject, predicate, true, 1);
         }
-        if (relation.equals(Symbols.EQUIVALENCE_AFTER_RELATION) ||
-            relation.equals(Symbols.EQUIVALENCE_WHEN_RELATION)) {
-            return Equivalence.make(subject, predicate, new TemporalValue(relation));
+        if (relation.equals(Symbols.IMPLICATION_WHEN_RELATION)) {
+            return Implication.make(subject, predicate, true, 0);
+        }
+        if (relation.equals(Symbols.IMPLICATION_BEFORE_RELATION)) {
+            return Implication.make(subject, predicate, true, -1);
+        }
+        if (relation.equals(Symbols.EQUIVALENCE_AFTER_RELATION)) {
+            return Equivalence.make(subject, predicate, true, 1);
+        }
+        if (relation.equals(Symbols.EQUIVALENCE_WHEN_RELATION)) {
+            return Equivalence.make(subject, predicate, true, 0);
         }
         return null;
     }
@@ -116,10 +121,10 @@ public abstract class Statement extends CompoundTerm {
             return Similarity.make(subj, pred);
         }
         if (statement instanceof Implication) {
-            return Implication.make(subj, pred, null);
+            return Implication.make(subj, pred, ((Implication) statement).isTemporal(), statement.getOrder());
         }
         if (statement instanceof Equivalence) {
-            return Equivalence.make(subj, pred, null);
+            return Equivalence.make(subj, pred, ((Equivalence) statement).isTemporal(), statement.getOrder());
         }
         return null;
     }
@@ -129,24 +134,25 @@ public abstract class Statement extends CompoundTerm {
      * @param statement A sample statement providing the class type
      * @param subj The first component
      * @param pred The second component
-     * @param t The temporal order of the statement
+     * @param temporal Whether there is a temporal relation between the components
+     * @param distance The temporal distance between the components
      * @return The Statement built
      */
-    public static Statement make(Statement statement, Term subj, Term pred, TemporalValue t) {
-        if (t == null) {
+    public static Statement make(Statement statement, Term subj, Term pred, boolean temporal, int distance) {
+        if (!temporal) {
             return make(statement, subj, pred);
         }
         if (statement instanceof Implication) {
-            return Implication.make(subj, pred, t);
+            return Implication.make(subj, pred, true, distance);
         }
         if (statement instanceof Equivalence) {
-            if (t.getDelta() < 0) {
-                return Equivalence.make(pred, subj, TemporalValue.getReverse(t));
+            if (distance < 0) {
+                return Equivalence.make(pred, subj, true, 0 - distance);
             } else {
-                return Equivalence.make(subj, pred, t);
+                return Equivalence.make(subj, pred, true, distance);
             }
         }
-        return null;
+        return make(statement, subj, pred);
     }
 
     /**
@@ -154,19 +160,22 @@ public abstract class Statement extends CompoundTerm {
      * @param statement A sample asymmetric statement providing the class type
      * @param subj The first component
      * @param pred The second component
-     * @param t The temporal order of the statement
+     * @param temporal Whether there is a temporal relation between the components
+     * @param distance The temporal distance between the components
      * @return The Statement built
      */
-    public static Statement makeSym(Statement statement, Term subj, Term pred, TemporalValue t) {
+    public static Statement makeSym(Statement statement, Term subj, Term pred, boolean temporal, int distance) {
         if (statement instanceof Inheritance) {
             return Similarity.make(subj, pred);
         }
         if (statement instanceof Implication) {
-            if ((t != null) && (t.getDelta() < 0)) {
-                return Equivalence.make(pred, subj, TemporalValue.getReverse(t));
-            } else {
-                return Equivalence.make(subj, pred, t);
+            if (!temporal) {
+                return Equivalence.make(subj, pred, false, distance);
             }
+            if (distance < 0) {
+                return Equivalence.make(pred, subj, true, 0 - distance);
+            }
+            return Equivalence.make(subj, pred, true, distance);
         }
         return null;
     }

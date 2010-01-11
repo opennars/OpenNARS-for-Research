@@ -83,15 +83,15 @@ public abstract class StringParser extends Symbols {
             String str = buffer.toString().trim();
             int last = str.length() - 1;
             char punc = str.charAt(last);
+            Stamp stamp;
+            if (tense.length() > 0) {
+                stamp = new Stamp(tense);
+            } else {
+                stamp = new Stamp();
+            }
             TruthValue truth = parseTruth(truthString, punc);
             Term content = parseTerm(str.substring(0, last));
-            Stamp stamp = new Stamp();
-            Sentence sentence = null;
-            if (tense.length() == 0) {
-                sentence = Sentence.make(content, punc, truth, stamp, null, null, null);
-            } else {
-                sentence = Sentence.make(content, punc, truth, stamp, new TemporalValue(tense), null, null);
-            }
+            Sentence sentence = Sentence.make(content, punc, truth, stamp, null, null);
             if (sentence == null) {
                 throw new InvalidInputException("invalid sentence");
             }
@@ -152,18 +152,15 @@ public abstract class StringParser extends Symbols {
      */
     private static String getTruthString(StringBuffer s) throws InvalidInputException {
         int last = s.length() - 1;
-        if (s.charAt(last) != TRUTH_VALUE_MARK) // use default
-        {
+        if (s.charAt(last) != TRUTH_VALUE_MARK) {       // use default
             return null;
         }
         int first = s.indexOf(TRUTH_VALUE_MARK + "");    // looking for the beginning
-        if (first == last) // no matching closer
-        {
+        if (first == last) { // no matching closer
             throw new InvalidInputException("missing truth mark");
         }
         String truthString = s.substring(first + 1, last).trim();
-        if (truthString.length() == 0) // empty usage
-        {
+        if (truthString.length() == 0) {                // empty usage
             throw new InvalidInputException("empty truth");
         }
         s.delete(first, last + 1);                 // remaining input to be processed outside

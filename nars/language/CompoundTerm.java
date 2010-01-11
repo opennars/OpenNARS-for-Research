@@ -192,10 +192,13 @@ public abstract class CompoundTerm extends Term {
                 return Disjunction.make(arg);
             }
             if (op.equals(Symbols.CONJUNCTION_OPERATOR)) {
-                return Conjunction.make(arg, null);
+                return Conjunction.make(arg, -1);
             }
-            if (op.equals(Symbols.SEQUENCE_OPERATOR) || op.equals(Symbols.PARALLEL_OPERATOR)) {
-                return Conjunction.make(arg, new TemporalValue(op));
+            if (op.equals(Symbols.SEQUENCE_OPERATOR)) {
+                return Conjunction.make(arg, 1);
+            }
+            if (op.equals(Symbols.PARALLEL_OPERATOR)) {
+                return Conjunction.make(arg, 0);
             }
         }
         if (isBuiltInOperator(op)) {
@@ -364,13 +367,20 @@ public abstract class CompoundTerm extends Term {
     public boolean isConstant() {
         return (openVariables == null);
     }
+    /**
+     * check if the term contains any variable
+     * @return if the name contains no variable
+     */
+    public boolean containNoVariable() {
+        return (name.indexOf(Symbols.VARIABLE_TAG) < 0);
+    }
 
     /**
      * Check if the order of the components matters
      * <p>
-     * commutative CompoundTerms: Sets, Intersections;
-     * communative Statements: Similarity, Equivalence, EquivalenceWhen;
-     * communative CompoundStatements: Disjunction, Conjunction, ConjunctionParallel
+     * commutative CompoundTerms: Sets, Intersections
+     * communative Statements: Similarity, Equivalence (except the one with a temporal order)
+     * communative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
      * @return The default value is false
      */
     public boolean isCommutative() {
@@ -726,4 +736,3 @@ public abstract class CompoundTerm extends Term {
         }
     }
 }
-

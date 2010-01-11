@@ -11,7 +11,7 @@
  * (at your option) any later version.
  *
  * Open-NARS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the abduction warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -24,13 +24,15 @@ import java.util.ArrayList;
 
 import nars.entity.*;
 import nars.language.*;
-import nars.main.Memory;
+import nars.main.*;
 
 /**
  * Single-premise inference rules involving compound terms.
  * Input are one sentence (the premise) and one TermLink (indicating a component)
  */
 public final class StructuralRules {
+
+    private static final float RELIANCE = Parameters.RELIANCE;
 
     /* -------------------- transform between compounds and components -------------------- */
     /**
@@ -51,17 +53,14 @@ public final class StructuralRules {
         if (((side == 0) && components.contains(pred)) || ((side == 1) && components.contains(sub))) {
             return;
         }
-        float discount;
         if (side == 0) {
             sub = compound;
             components.set(index, pred);
             pred = CompoundTerm.make(compound, components);
-            discount = estimateCorrelation(pred);
         } else {
             components.set(index, sub);
             sub = CompoundTerm.make(compound, components);
             pred = compound;
-            discount = estimateCorrelation(sub);
         }
         if ((sub == null) || (pred == null)) {
             return;
@@ -84,48 +83,14 @@ public final class StructuralRules {
         } else {
             if (compound.size() > 1) {
                 if (sentence.isJudgment()) {
-                    truth = TruthFunctions.implying(truth, discount);
+                    truth = TruthFunctions.deduction(truth, RELIANCE);
                 } else {
-                    assert (sentence instanceof Goal);
-                    truth = TruthFunctions.implied(truth, discount);
+                    return;
                 }
             }
             budget = BudgetFunctions.compoundForward(truth, content);
         }
         Memory.singlePremiseTask(budget, content, truth, sentence);
-    }
-
-    /**
-     * Estimate the correlation between the two components in a compound
-     * @param content One of the premises
-     * @param component1 One component
-     * @param component2 The other component
-     * @return The correlation discount, 1 means no correlation found, 0 for full correlation
-     */
-    private static float estimateCorrelation(Term term) {
-        if (term instanceof CompoundTerm) {
-            CompoundTerm compound = (CompoundTerm) term;
-            if (compound.size() == 2) {
-                Statement s = null;
-                if ((compound instanceof IntersectionExt) || (compound instanceof IntersectionInt)
-                 || (compound instanceof DifferenceExt) || (compound instanceof DifferenceInt)) {
-                    s = Similarity.make(compound.componentAt(0), compound.componentAt(1));
-                } else if ((compound instanceof Disjunction) || (compound instanceof Conjunction)) {
-                    s = Equivalence.make(compound.componentAt(0), compound.componentAt(1), null);
-                }
-                if (s != null) {
-                    Concept c = Memory.termToConcept(s);
-                    if (c != null) {
-                        Sentence b = c.getBelief();
-                        if (b != null) {
-                            TruthValue tc = b.getTruth();
-                            return 1 - Math.abs(2 * tc.getExpectation() - 1);
-                        }
-                    }
-                }
-            }
-        }
-        return 1;
     }
 
     /**
@@ -176,10 +141,10 @@ public final class StructuralRules {
         } else {
             if (sub.size() > 1) {
                 if (sentence.isJudgment()) {
-                    truth = TruthFunctions.implied(truth);
+                    return;
                 } else {
                     assert (sentence instanceof Goal);
-                    truth = TruthFunctions.implying(truth);
+                    truth = TruthFunctions.deduction(truth, RELIANCE);
                 }
             }
             budget = BudgetFunctions.compoundForward(truth, content);
@@ -213,35 +178,37 @@ public final class StructuralRules {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
+        TruthValue truthDed = TruthFunctions.deduction(truth, RELIANCE);
+        TruthValue truthNDed = TruthFunctions.negation(TruthFunctions.deduction(truth, RELIANCE));
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
         if (component.equals(subj)) {
             if (compound instanceof IntersectionExt) {
-                structuralStatement(compound, pred, TruthFunctions.implying(truth));
+                structuralStatement(compound, pred, truthDed);
             } else if (compound instanceof IntersectionInt) {
-                structuralStatement(compound, pred, TruthFunctions.implied(truth));
+                return;
             } else if ((compound instanceof DifferenceExt) && (index == 0)) {
-                structuralStatement(compound, pred, TruthFunctions.implying(truth));
+                structuralStatement(compound, pred, truthDed);
             } else if (compound instanceof DifferenceInt) {
                 if (index == 0) {
-                    structuralStatement(compound, pred, TruthFunctions.implied(truth));
+                    return;
                 } else {
-                    structuralStatement(compound, pred, TruthFunctions.negImply(truth));
+                    structuralStatement(compound, pred, truthNDed);
                 }
             }
         } else if (component.equals(pred)) {
             if (compound instanceof IntersectionExt) {
-                structuralStatement(subj, compound, TruthFunctions.implied(truth));
+                return;
             } else if (compound instanceof IntersectionInt) {
-                structuralStatement(subj, compound, TruthFunctions.implying(truth));
+                structuralStatement(subj, compound, truthDed);
             } else if (compound instanceof DifferenceExt) {
                 if (index == 0) {
-                    structuralStatement(subj, compound, TruthFunctions.implied(truth));
+                    return;
                 } else {
-                    structuralStatement(subj, compound, TruthFunctions.negImply(truth));
+                    structuralStatement(subj, compound, truthNDed);
                 }
             } else if ((compound instanceof DifferenceInt) && (index == 0)) {
-                structuralStatement(subj, compound, TruthFunctions.implying(truth));
+                structuralStatement(subj, compound, truthDed);
             }
         }
     }
@@ -260,35 +227,37 @@ public final class StructuralRules {
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
+        TruthValue truthDed = TruthFunctions.deduction(truth, RELIANCE);
+        TruthValue truthNDed = TruthFunctions.negation(TruthFunctions.deduction(truth, RELIANCE));
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
         if (compound.equals(subj)) {
             if (compound instanceof IntersectionExt) {
-                structuralStatement(component, pred, TruthFunctions.implied(truth));
+                return;
             } else if (compound instanceof IntersectionInt) {
-                structuralStatement(component, pred, TruthFunctions.implying(truth));
+                structuralStatement(component, pred, truthDed);
             } else if ((compound instanceof DifferenceExt) && (index == 0)) {
-                structuralStatement(component, pred, TruthFunctions.implied(truth));
+                return;
             } else if (compound instanceof DifferenceInt) {
                 if (index == 0) {
-                    structuralStatement(component, pred, TruthFunctions.implying(truth));
+                    structuralStatement(component, pred, truthDed);
                 } else {
-                    structuralStatement(component, pred, TruthFunctions.negImply(truth));
+                    structuralStatement(component, pred, truthNDed);
                 }
             }
         } else if (compound.equals(pred)) {
             if (compound instanceof IntersectionExt) {
-                structuralStatement(subj, component, TruthFunctions.implying(truth));
+                structuralStatement(subj, component, truthDed);
             } else if (compound instanceof IntersectionInt) {
-                structuralStatement(subj, component, TruthFunctions.implied(truth));
+                return;
             } else if (compound instanceof DifferenceExt) {
                 if (index == 0) {
-                    structuralStatement(subj, component, TruthFunctions.implying(truth));
+                    structuralStatement(subj, component, truthDed);
                 } else {
-                    structuralStatement(subj, component, TruthFunctions.negImply(truth));
+                    structuralStatement(subj, component, truthNDed);
                 }
             } else if ((compound instanceof DifferenceInt) && (index == 0)) {
-                structuralStatement(subj, component, TruthFunctions.implied(truth));
+                return;
             }
         }
     }
@@ -408,7 +377,7 @@ public final class StructuralRules {
                 componentList = ((CompoundTerm) condition).cloneComponents();
                 componentList.set(indices[1], newInh);
                 Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
-                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), null);
+                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), false, 0);
             } else {
                 componentList = oldContent.cloneComponents();
                 componentList.set(indices[0], newInh);
@@ -457,9 +426,11 @@ public final class StructuralRules {
             budget = BudgetFunctions.compoundBackward(content);
         } else {
             if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction))) {
-                truth = TruthFunctions.implying(truth);
+                truth = TruthFunctions.deduction(truth, RELIANCE);
+            } else if (sentence instanceof Goal) {
+                truth = TruthFunctions.abduction(truth, RELIANCE);
             } else {
-                truth = TruthFunctions.implied(truth);
+                return;
             }
             budget = BudgetFunctions.forward(truth);
         }
@@ -494,9 +465,9 @@ public final class StructuralRules {
     static void contraposition(Statement statement) {
         Term subj = statement.getSubject();
         Term pred = statement.getPredicate();
-        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), TemporalValue.getReverse(statement.getOrder()));
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
+        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), sentence.isTemporal(), -statement.getOrder());
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence instanceof Question) {

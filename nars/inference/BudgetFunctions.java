@@ -21,7 +21,7 @@
 package nars.inference;
 
 import nars.entity.*;
-import nars.language.Term;
+import nars.language.*;
 import nars.main.Memory;
 
 /**
@@ -73,7 +73,7 @@ public final class BudgetFunctions extends UtilityFunctions {
         boolean judgmentTask = task.getSentence().isJudgment();
         float quality;
         if (problem instanceof Question) {
-            quality = solution.solutionQuality((Question) problem);
+            quality = MatchingRules.solutionQuality((Question) problem, solution);
         } else {
             assert (problem instanceof Goal);
             quality = solution.getTruth().getExpectation();
@@ -98,11 +98,11 @@ public final class BudgetFunctions extends UtilityFunctions {
      * @param tTruth The truth value of the judgment in the task
      * @param bTruth The truth value of the belief
      * @param truth The truth value of the conclusion of revision
-     * @param task The task to be immediatedly or continuely processed
      * @return The budget for the new task 
      */
-    static BudgetValue revise(TruthValue tTruth, TruthValue bTruth, TruthValue truth, Task task, boolean feedbackToLinks) {
+    static BudgetValue revise(TruthValue tTruth, TruthValue bTruth, TruthValue truth, boolean feedbackToLinks) {
         float difT = truth.getExpDifAbs(tTruth);
+        Task task = Memory.currentTask;
         task.decPriority(1 - difT);
         task.decDurability(1 - difT);
         if (feedbackToLinks) {
@@ -261,11 +261,13 @@ public final class BudgetFunctions extends UtilityFunctions {
      * @return Budget of the conclusion task
      */
     private static BudgetValue budgetInference(float qual, int complexity) {
-        TaskLink tLink = Memory.currentTaskLink;
-        TermLink bLink = Memory.currentBeliefLink;
-        float priority = tLink.getPriority();
-        float durability = tLink.getDurability();
+        Item t = Memory.currentTaskLink;
+        if (t == null)
+            t = Memory.currentTask;
+        float priority = t.getPriority();
+        float durability = t.getDurability();
         float quality = (float) (qual / Math.sqrt(complexity));
+        TermLink bLink = Memory.currentBeliefLink;
         if (bLink != null) {
             priority = aveAri(priority, bLink.getPriority());
             durability = aveAri(durability, bLink.getDurability());
