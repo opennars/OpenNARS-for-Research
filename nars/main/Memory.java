@@ -299,7 +299,21 @@ public class Memory {
      * @param truth The truth value of the new task
      */
     public static void convertedJudgment(TruthValue truth, BudgetValue budget) {
-        Term content = Memory.currentTask.getContent();
+        Statement content = (Statement) Memory.currentTask.getContent();
+        Statement beliefContent = (Statement) Memory.currentBelief.getContent();
+        Term subj = content.getSubject();
+        Term pred = content.getPredicate();
+        Term subjB = beliefContent.getSubject();
+        Term predB = beliefContent.getPredicate();
+        Term otherTerm;
+        if ((subj instanceof Variable) && (((Variable) subj).getType() == Variable.VarType.QUERY)) {
+            otherTerm = (pred.equals(subjB)) ? predB : subjB;
+            content = Statement.make(content, otherTerm, pred);
+        }
+        if ((pred instanceof Variable) && (((Variable) pred).getType() == Variable.VarType.QUERY)) {
+            otherTerm = (subj.equals(subjB)) ? predB : subjB;
+            content = Statement.make(content, subj, otherTerm);
+        }
         Stamp stamp = new Stamp(Memory.currentBelief.getStamp());
         Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, Memory.currentBelief, null);
         Task newTask = new Task(newJudgment, budget);
