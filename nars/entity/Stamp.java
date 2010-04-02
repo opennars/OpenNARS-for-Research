@@ -264,6 +264,7 @@ public class Stamp implements Cloneable {
 
     /**
      * Get a String form of the Stamp for display
+     * Format: {creationTime [: eventTime] : trail}
      * @return The Stamp as a String
      */
     @Override

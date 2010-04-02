@@ -73,6 +73,9 @@ public abstract class Operator extends Term {
         table.put("^pick", new Pick("^pick"));
         table.put("^open", new Open("^open"));
         table.put("^break", new Break("^break"));
+        table.put("^drop", new Break("^drop"));
+        table.put("^throw", new Break("^throw"));
+        table.put("^strike", new Break("^strike"));
         return table;
     }
     
