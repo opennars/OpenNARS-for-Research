@@ -33,7 +33,6 @@ public class Strike extends Operator {
     }
 
     public ArrayList<Task> execute(Task task) {
-//        System.out.println("EXECUTE in " + name + " " + task);
         return null;
     }
 }

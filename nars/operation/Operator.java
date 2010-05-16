@@ -41,7 +41,7 @@ public abstract class Operator extends Term {
     /**
      * Required method for every operation, specifying the operation
      * @param task The task with the arguments to be passed to the operator
-     * @return The direct collectable results and feedback of the execution
+     * @return The direct collectable results and feedback of the reportExecution
      */
     public abstract ArrayList<Task> execute(Task task);
 
@@ -51,7 +51,7 @@ public abstract class Operator extends Term {
      */
     public void call(Task task) {
         ArrayList<Task> feedback = execute(task);
-        showExecution((Statement) task.getContent());
+        reportExecution((Statement) task.getContent());
         Memory.executedTask(task);
         if (feedback != null) {
             for (Task t : feedback) {
@@ -69,21 +69,25 @@ public abstract class Operator extends Term {
      */
     public static HashMap<String, Operator> setOperators() {
         HashMap<String, Operator> table = new HashMap<String, Operator>();
+        /* operators for internal operations */
+        
+        /* operators for testing examples */
         table.put("^go-to", new GoTo("^go-to"));
         table.put("^pick", new Pick("^pick"));
         table.put("^open", new Open("^open"));
         table.put("^break", new Break("^break"));
-        table.put("^drop", new Break("^drop"));
-        table.put("^throw", new Break("^throw"));
-        table.put("^strike", new Break("^strike"));
+        table.put("^drop", new Drop("^drop"));
+        table.put("^throw", new Throw("^throw"));
+        table.put("^strike", new Strike("^strike"));
         return table;
     }
     
     /**
-     * Display a message in the output stream to indicate the execution of an operation
+     * Display a message in the output stream to indicate the reportExecution of an operation
+     * <p>
      * @param operation The content of the operation to be executed
      */
-    private void showExecution(Statement operation) {
+    private void reportExecution(Statement operation) {
         Term operator = operation.getPredicate();
         Term arguments = operation.getSubject();
         String argList = arguments.toString().substring(3);         // skip the product prefix "(*,"

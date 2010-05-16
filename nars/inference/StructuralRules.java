@@ -54,13 +54,17 @@ public final class StructuralRules {
             return;
         }
         if (side == 0) {
-            sub = compound;
-            components.set(index, pred);
-            pred = CompoundTerm.make(compound, components);
+            if (components.contains(sub)) {
+                sub = compound;
+                components.set(index, pred);
+                pred = CompoundTerm.make(compound, components);
+            }
         } else {
-            components.set(index, sub);
-            sub = CompoundTerm.make(compound, components);
-            pred = compound;
+            if (components.contains(pred)) {
+                components.set(index, sub);
+                sub = CompoundTerm.make(compound, components);
+                pred = compound;
+            }
         }
         if ((sub == null) || (pred == null)) {
             return;

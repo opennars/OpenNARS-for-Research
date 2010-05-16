@@ -248,6 +248,17 @@ public abstract class Statement extends CompoundTerm {
         if ((predicate instanceof CompoundTerm) && ((CompoundTerm) predicate).containComponent(subject)) {
             return true;
         }
+        if ((subject instanceof Statement) && (predicate instanceof Statement)) {
+            Statement s1 = (Statement) subject;
+            Statement s2 = (Statement) predicate;
+            Term t11 = s1.getSubject();
+            Term t12 = s1.getPredicate();
+            Term t21 = s2.getSubject();
+            Term t22 = s2.getPredicate();
+            if (t11.equals(t22) && t12.equals(t21)) {
+                return true;
+            }
+        }
         return false;
     }
 

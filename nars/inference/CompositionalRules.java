@@ -133,11 +133,13 @@ public final class CompositionalRules {
      * @param compoundTask Whether the compound comes from the task
      */
     private static void decomposeCompound(CompoundTerm compound, Term component, Term term1, int index, boolean compoundTask) {
+        if (compound instanceof Statement) {
+            return;
+        }
         Term term2 = CompoundTerm.reduceComponents(compound, component);
         if (term2 == null) {
             return;
         }
-
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
         Judgment belief = Memory.currentBelief;

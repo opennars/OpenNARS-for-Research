@@ -306,11 +306,13 @@ public class Memory {
         Term subjB = beliefContent.getSubject();
         Term predB = beliefContent.getPredicate();
         Term otherTerm;
-        if ((subj instanceof Variable) && (((Variable) subj).getType() == Variable.VarType.QUERY)) {
+        if (subj.getName().indexOf(Symbols.QUERY_VARIABLE_TAG) >= 0) {
+//        if ((subj instanceof Variable) && (((Variable) subj).getType() == Variable.VarType.QUERY)) {
             otherTerm = (pred.equals(subjB)) ? predB : subjB;
             content = Statement.make(content, otherTerm, pred);
         }
-        if ((pred instanceof Variable) && (((Variable) pred).getType() == Variable.VarType.QUERY)) {
+        if (pred.getName().indexOf(Symbols.QUERY_VARIABLE_TAG) >= 0) {
+//        if ((pred instanceof Variable) && (((Variable) pred).getType() == Variable.VarType.QUERY)) {
             otherTerm = (subj.equals(subjB)) ? predB : subjB;
             content = Statement.make(content, subj, otherTerm);
         }
