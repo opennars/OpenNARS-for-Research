@@ -194,4 +194,16 @@ public class Equivalence extends Statement {
     public boolean isTemporal() {
         return isTemporal;
     }
+
+    /**
+     * Given operations special treatment, used in display only.
+     * @return The name of the term as a String
+     */
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer(Symbols.STATEMENT_OPENER + "");
+        buf.append(getSubject() + operator());
+        buf.append(getPredicate().toString() + Symbols.STATEMENT_CLOSER);
+        return buf.toString();
+    }
 }

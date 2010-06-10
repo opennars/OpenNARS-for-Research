@@ -297,7 +297,7 @@ public abstract class CompoundTerm extends Term {
     protected static String makeSetName(char opener, ArrayList<Term> arg, char closer) {
         StringBuffer name = new StringBuffer();
         name.append(opener);
-        name.append(arg.get(0).toString());
+        name.append(arg.get(0).getName());
         for (int i = 1; i < arg.size(); i++) {
             name.append(Symbols.ARGUMENT_SEPARATOR);
             name.append(arg.get(i).getName());

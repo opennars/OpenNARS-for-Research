@@ -23,6 +23,8 @@ package nars.language;
 import java.util.ArrayList;
 
 import nars.io.Symbols;
+import nars.main.Memory;
+import nars.operation.Operator;
 
 /**
  * A statement is a compound term, consisting of a subject, a predicate,
@@ -286,5 +288,35 @@ public abstract class Statement extends CompoundTerm {
      */
     public Term getPredicate() {
         return components.get(1);
+    }
+
+    /**
+     * Return the operator if the statement is an operation
+     * @return The second component
+     */
+    public String getOperatorName() {           // useful???
+        if (this instanceof Inheritance) {
+            Term t = getPredicate();
+            String s = t.getName();
+            Operator op = Memory.nameToOperator(s);
+            if (op != null) {
+                return op.getName();
+            } else if (getSubject() instanceof ImageInt) {
+                ImageInt subj = (ImageInt) getSubject();
+                s = subj.componentAt(subj.getRelationIndex()).getName();
+                op = Memory.nameToOperator(s);
+                if (op != null) {
+                    return s;
+                }
+            } else if (getPredicate() instanceof ImageExt) {
+                ImageExt pred = (ImageExt) getPredicate();
+                s = pred.componentAt(pred.getRelationIndex()).getName();
+                op = Memory.nameToOperator(s);
+                if (op != null) {
+                    return s;
+                }
+            }
+        }
+        return null;
     }
 }

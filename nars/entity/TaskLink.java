@@ -23,7 +23,7 @@ package nars.entity;
 import java.util.*;
 
 import nars.language.Term;
-import nars.main.Parameters;
+import nars.main.*;
 
 /**
  * Reference to a Task.
@@ -36,7 +36,9 @@ public class TaskLink extends TermLink {
     /** The Task linked. The "target" field in TermLink is not used here. */
     private Task targetTask;
     /** Remember the TermLinks that has been used recently with this TaskLink */
-    private ArrayList<String> record;
+    private String recordedLinks[];
+    private long recordingTime[];
+    int counter, first;
 
     /**
      * Constructor
@@ -56,7 +58,10 @@ public class TaskLink extends TermLink {
             type = template.getType();
             index = template.getIndices();
         }
-        record = new ArrayList<String>(Parameters.TERM_LINK_RECORD_LENGTH);
+        recordedLinks = new String[Parameters.TERM_LINK_RECORD_LENGTH];
+        recordingTime = new long[Parameters.TERM_LINK_RECORD_LENGTH];
+        counter = 0;
+        first = 0;
         setKey();   // as defined in TermLink
         key += t.getKey();
     }
@@ -70,25 +75,23 @@ public class TaskLink extends TermLink {
     }
 
     /**
-     * Get the TermLink record
+     * Get the TermLink recordedLinks
      * @return The list of TermLinks recently used
      */
-    ArrayList<String> getRecord() {
-        return record;
+    String[] getRecordedLinks() {
+        return recordedLinks;
     }
 
-    /**
-     * Merge one TaskLink into another
-     * @param that The other TaskLink
-     */
-    public void merge(Item that) {
-        super.merge(that);                              // merge the budgets
-        ArrayList<String> v = ((TaskLink) that).getRecord();
-        for (int i = 0; i < v.size(); i++) {            // merge the records
-            if (record.size() <= Parameters.TERM_LINK_RECORD_LENGTH) {
-                record.add(v.get(i));
-            }
-        }
+    long[] getRecordingTime() {
+        return recordingTime;
+    }
+
+    int getCounter() {
+        return counter;
+    }
+
+    int getFirst() {
+        return first;
     }
 
     /**
@@ -105,14 +108,24 @@ public class TaskLink extends TermLink {
             return false;
         }
         String linkKey = termLink.getKey();
-        for (String recorded : record) {
-            if (linkKey.equals(recorded)) {
-                return false;
+        int next = 0;
+        int i;
+        for (i = 0; i < counter; i++) {
+            next = (i + first) % Parameters.TERM_LINK_RECORD_LENGTH;
+            if (linkKey.equals(recordedLinks[next])) {
+                if (Center.getTime() < recordingTime[next] + Parameters.TERM_LINK_RECORD_LENGTH) {
+                    return false;
+                } else {
+                    recordingTime[next] = Center.getTime();
+                    return true;
+                }
             }
         }
-        record.add(linkKey);       // add knowledge reference to record
-        if (record.size() > Parameters.TERM_LINK_RECORD_LENGTH) { // keep a constant length
-            record.remove(0);
+        next = (i + first) % Parameters.TERM_LINK_RECORD_LENGTH;
+        recordedLinks[next] = linkKey;       // add knowledge reference to recordedLinks
+        recordingTime[next] = Center.getTime();
+        if (counter < Parameters.TERM_LINK_RECORD_LENGTH) { // keep a constant length
+            counter++;
         }
         return true;
     }

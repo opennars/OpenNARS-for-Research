@@ -20,6 +20,8 @@
  */
 package nars.language;
 
+import java.util.ArrayList;
+
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
  * <p>
@@ -28,7 +30,8 @@ package nars.language;
  */
 public class Term implements Cloneable, Comparable<Term> {
 
-    /** A Term is identified uniquely by its name, a sequence of characters in a 
+    /**
+     * A Term is identified uniquely by its name, a sequence of characters in a
      * given alphabet (ASCII or Unicode)
      */
     protected String name;
@@ -48,7 +51,7 @@ public class Term implements Cloneable, Comparable<Term> {
     }
 
     /**
-     * The same as getName, used in display.
+     * The same as getName by default, used in display only.
      * @return The name of the term as a String
      */
     @Override
@@ -143,5 +146,14 @@ public class Term implements Cloneable, Comparable<Term> {
      */
     public int getOrder() {
         return 0;
+    }
+
+    /**
+     * Get the operator of the term if it is an operation, with an optional opeartor.
+     * @param opName An optional operator name to be matched
+     * @return The list representation of the operation
+     */
+    public ArrayList<Term> isOperation(String opName) {
+        return null;
     }
 }

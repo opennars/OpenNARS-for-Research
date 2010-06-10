@@ -314,8 +314,8 @@ public abstract class StringParser extends Symbols {
         if ((prefix == VARIABLE_TAG) || (prefix == QUERY_VARIABLE_TAG)) {
             term = new Variable(s);         // the only place to directly call this constructor
         } else {
-            term = new Term(s);
-        }             // the only place to directly call this constructor
+            term = new Term(s);             // the only place to directly call this constructor
+        }             
         return term;
     }
 

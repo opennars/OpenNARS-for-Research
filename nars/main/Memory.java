@@ -167,37 +167,18 @@ public class Memory {
     newTasks list, to be processed in the next cycle.
     Some of them are reported and/or logged. */
     /**
-     * Input task processing.
-     * @param task the input task
+     * Input task processing. Invoked by the outside or inside enviornment.
+     * Outside: StringParser (input); Inside: Operator (feedback).
+     * Input tasks with low priority are ignored, and the others are put into task buffer.
+     * @param task The input task
      */
     public static void inputTask(Task task) {
-        Record.append("!!! Input: " + task + "\n");
         if (task.aboveThreshold()) {
+            Record.append("!!! Perceived: " + task + "\n");
             report(task.getSentence(), true);    // report input
             newTasks.add(task);       // wait to be processed in the next cycle
-            novelTasks.refresh();           // refresh display
         } else {
-            Record.append("!!! Ignored: " + task + "\n");
-        }
-    }
-
-    /**
-     * Derived task comes from the inference rules.
-     * @param task the derived task
-     */
-    private static void derivedTask(Task task) {
-        Record.append("!!! Derived: " + task + "\n");
-        if (task.aboveThreshold()) {
-            float budget = task.getBudget().summary();
-            @SuppressWarnings("static-access")
-            float minSilent = Center.mainWindow.silentW.value() / 100.0f;
-            if (budget > minSilent) {  // only report significient derived Tasks
-                report(task.getSentence(), false);
-            }
-            newTasks.add(task);
-            novelTasks.refresh();
-        } else {
-            Record.append("!!! Ignored: " + task + "\n");
+            Record.append("!!! Neglected: " + task + "\n");
         }
     }
 
@@ -210,15 +191,14 @@ public class Memory {
     public static void executedTask(Task task) {
         Record.append("!!! Executed: " + task.getSentence() + "\n");
         Goal g = (Goal) task.getSentence();
-        Judgment j = new Judgment(g);
+        Judgment j = new Judgment(g);   // perceived execution
         Task newTask = new Task(j, task.getBudget());
         report(newTask.getSentence(), false);
         newTasks.add(newTask);
-        novelTasks.refresh();
     }
 
     /**
-     * Activated task coming from MatchingRules.trySolution
+     * Activated task called in MatchingRules.trySolution and Concept.processGoal
      * @param budget The budget value of the new Task
      * @param sentence The content of the new Task
      * @param isInput Whether the question is input
@@ -235,7 +215,25 @@ public class Memory {
             }
         }
         newTasks.add(task);
-        novelTasks.refresh();
+    }
+
+    /**
+     * Derived task comes from the inference rules.
+     * @param task the derived task
+     */
+    private static void derivedTask(Task task) {
+        if (task.aboveThreshold()) {
+            Record.append("!!! Derived: " + task + "\n");
+            float budget = task.getBudget().summary();
+            @SuppressWarnings("static-access")
+            float minSilent = Center.mainWindow.silentW.value() / 100.0f;
+            if (budget > minSilent) {  // only report significient derived Tasks
+                report(task.getSentence(), false);
+            }
+            newTasks.add(task);
+        } else {
+            Record.append("!!! Ignored: " + task + "\n");
+        }
     }
 
     /* --------------- new task building --------------- */
@@ -254,6 +252,28 @@ public class Memory {
             Task newTask = new Task(newSentence, budget);
             derivedTask(newTask);
         }
+    }
+
+    public static void predictionWithConfirmation(BudgetValue budget, Term content, TruthValue truth,
+            Sentence premise1, Sentence premise2) {
+        if (content != null) {
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, newStamp, premise1, premise2);
+            Task newTask = new Task(newSentence, budget);
+            derivedTask(newTask);
+            Question ques = new Question((Judgment) newSentence);
+            newTask = new Task(ques, budget);
+            derivedTask(newTask);
+        }
+    }
+
+    public static void lackConfirmation(Term content, long t) {
+        TruthValue tv = new TruthValue(0f, 2*Parameters.DEFAULT_CONFIRMATION_EXPECTATION - 1);
+        BudgetValue bv = new BudgetValue(Parameters.DEFAULT_JUDGMENT_PRIORITY, Parameters.DEFAULT_JUDGMENT_DURABILITY, 1);
+        Stamp st = new Stamp();
+        st.setEventTime(t);
+        Judgment j = new Judgment(content, '.', tv, st, null, null);
+        Task newTask = new Task(j, bv);
+        derivedTask(newTask);
     }
 
     /**
@@ -328,11 +348,14 @@ public class Memory {
      * An atomic working cycle of the system: process new Tasks, then fire a concept
      * <p>
      * Called from Center.tick only
+     * <p>
+     * In the future, it is possible to adjust the occuring ratio of the two actions
      */
     public static void cycle() {
         // keep the following order
         processTask();
         processConcept();
+        novelTasks.refresh();           // refresh display
     }
 
     /**
@@ -346,12 +369,6 @@ public class Memory {
             task = newTasks.remove(0);
             if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
-//                if (task.getSentence().isInput() && (task.getSentence() instanceof Question)) {
-//                    Concept concept = Memory.nameToConcept(task.getSentence().getContent().getName());
-//                    if (concept != null) {
-//                        concept.startPlay(false);
-//                    }
-//                }
             } else {
                 novelTasks.putIn(task);    // delayed processing
             }
@@ -372,13 +389,12 @@ public class Memory {
             Record.append(" * Selected Concept: " + currentTerm + "\n");
             concepts.putBack(currentConcept);   // current Concept remains in the bag all the time
             currentConcept.fire();              // a working cycle
-            novelTasks.refresh();          // show new result
         }
     }
 
     /* ---------- task processing ---------- */
     /**
-     * Imediate processing of a new task, in constant time
+     * Immediate processing of a new task, in constant time
      * Local processing, in one concept only
      * @param task the task to be accepted
      */
@@ -390,15 +406,10 @@ public class Memory {
         Record.append("!!! Insert: " + task + "\n");
         Term content = task.getContent();
         Concept c = getConcept(content);
-        if (c == null) {
-            return;
-        }
-        c.directProcess(task);
-        if (task.aboveThreshold()) {    // still need to be processed
-            continuedProcess(task, content);
-            Sentence s = task.getSentence();
-            if (s.isJudgment() && s.isTemporal()) {
-                eventProcessing(task);
+        if (c != null) {
+            boolean toContinue = c.directProcess(task);
+            if (toContinue && task.aboveThreshold()) {    // still need to be processed
+                linkToTask(task, content, c);
             }
         }
     }
@@ -411,17 +422,13 @@ public class Memory {
      * @param task The task to be linked
      * @param content The content of the task
      */
-    private static void continuedProcess(Task task, Term content) {
-        TaskLink taskLink;
-        Concept contentConcept = getConcept(content);
-        if (contentConcept == null) {
-            return;
-        }
+    private static void linkToTask(Task task, Term content, Concept contentConcept) {
         BudgetValue budget = task.getBudget();
-        taskLink = new TaskLink(task, null, budget);   // link type: SELF
+        TaskLink taskLink = new TaskLink(task, null, budget);   // link type: SELF
         contentConcept.insertTaskLink(taskLink);
         if (content instanceof CompoundTerm) {
-            ArrayList<TermLink> termLinks = (contentConcept != null) ? contentConcept.getTermLinkTemplates()
+            ArrayList<TermLink> termLinks = (contentConcept != null)
+                    ? contentConcept.getTermLinkTemplates()
                     : ((CompoundTerm) content).prepareComponentLinks();  // use saved if exist
             if (termLinks.size() > 0) {
                 BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinks.size());
@@ -450,7 +457,7 @@ public class Memory {
      * called in Memory.immediateProcess
      * @param event1 A new event
      */
-    private static void eventProcessing(Task event1) {
+    public static void eventProcessing(Task event1) {
         Task event2 = recentEvents.takeOut();
         if (event2 != null) {
             if (event1.getSentence().noOverlapping(event2.getSentence())) {

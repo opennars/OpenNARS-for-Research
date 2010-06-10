@@ -66,12 +66,12 @@ public final class MatchingRules {
         long time2 = oldBelief.getEventTime();
         TruthValue newTruth = newBelief.getTruth();
         TruthValue oldTruth = oldBelief.getTruth();
-        if ((time1 != time2) && (time2 >= 0)) {
+        if (time1 != time2) {
             oldTruth = TruthFunctions.temporalCasting(oldTruth, time2, time1, Memory.currentTask.getSentence().getCreationTime());
             Term term1 = newBelief.getContent();
             Term term2 = oldBelief.getContent();
             if (term2.isTemporal() && (!term1.isTemporal() || (term2.getOrder() != term1.getOrder()))) {
-                oldTruth = TruthFunctions.temporalCasting(oldTruth, term2.getOrder(), term1.getOrder(), 0);
+                oldTruth = TruthFunctions.temporalCasting(oldTruth, term2.getOrder(), term1.getOrder(), 0); // to be refined
             }
         }
         TruthValue truth = TruthFunctions.revision(newTruth, oldTruth);
@@ -87,11 +87,24 @@ public final class MatchingRules {
      * @param task The task to be processed
      */
     public static void trySolution(Sentence problem, Judgment belief, Task task) {
+        if (problem instanceof Question) {
+            long taskTime = problem.getEventTime();
+            long beliefTime = belief.getEventTime();
+            if (taskTime != beliefTime) {
+                belief = (Judgment) belief.clone();
+                TruthValue castedTruth = TruthFunctions.temporalCasting(belief.getTruth(), beliefTime, taskTime, problem.getCreationTime());
+                belief.setTruth(castedTruth);
+                belief.getStamp().setEventTime(taskTime);
+            }
+        }
         Judgment oldBest = problem.getBestSolution();
         if (oldBest != null) {
             float oldQ = solutionQuality(problem, oldBest);
             float newQ = solutionQuality(problem, belief);
             if (oldQ >= newQ) {
+                if (problem instanceof Question) {
+                    ((Question) problem).checkFeedback();
+                }
                 return;
             }
         }
@@ -109,11 +122,11 @@ public final class MatchingRules {
      * @return The quality of the judgment as the solution
      */
     public static float solutionQuality(Sentence problem, Judgment solution) {
-        long t1 = problem.getEventTime();
-        long t2 = solution.getEventTime();
+        long taskTime = problem.getEventTime();
+        long beliefTime = solution.getEventTime();
         TruthValue truth = solution.getTruth();
-        if ((t2 != Stamp.ALWAYS) && (t1 != t2)) {
-            truth = TruthFunctions.temporalCasting(truth, t2, t1, problem.getCreationTime());
+        if ((beliefTime != Stamp.ALWAYS) && (taskTime != beliefTime)) {
+            truth = TruthFunctions.temporalCasting(truth, beliefTime, taskTime, problem.getCreationTime());
         }
         if (problem instanceof Goal) {
             return truth.getExpectation();
@@ -176,9 +189,9 @@ public final class MatchingRules {
         } else {
             int order = s1.getOrder();
             if (order < 0) {
-                content = Equivalence.make(t1, t2, true, - order);
+                content = Equivalence.make(t1, t2, true, -order);
             } else {
-                content = Equivalence.make(t1, t2, judgment1.isTemporal(), order);
+                content = Equivalence.make(t1, t2, judgment1.isEvent(), order);
             }
         }
         TruthValue value1 = judgment1.getTruth();
@@ -198,7 +211,7 @@ public final class MatchingRules {
         Statement statement = (Statement) asym.getContent();
         Term sub = statement.getPredicate();
         Term pre = statement.getSubject();
-        Statement content = Statement.make(statement, sub, pre, sym.isTemporal(), order);
+        Statement content = Statement.make(statement, sub, pre, sym.isEvent(), order);
         TruthValue truth = TruthFunctions.reduceConjunction(sym.getTruth(), asym.getTruth());
         BudgetValue budget = BudgetFunctions.forward(truth);
         Memory.doublePremiseTask(budget, content, truth, sym, asym);

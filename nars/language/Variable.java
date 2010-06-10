@@ -172,7 +172,7 @@ public class Variable extends Term {
                 if (dependency != null) {
                     for (Variable v : dependency) {
                         if (v.getType() == VarType.INDEPENDENT) {
-                            buffer.append(v.toString());
+                            buffer.append(v.getName());
                         }
                     }
                 }
@@ -363,5 +363,10 @@ public class Variable extends Term {
             subs.put(name1, term);
             return subs;
         }
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

@@ -20,8 +20,6 @@
  */
 package nars.io;
 
-import java.awt.*;
-
 /**
  * The ASCII symbols used in I/O.
  */
@@ -30,7 +28,7 @@ public class Symbols {
     /* sentence type and delimitors */
     public static final char JUDGMENT_MARK = '.';
     public static final char QUESTION_MARK = '?';
-    public static final char GOAL_MARK = '!';
+    public static final char GOAL_MARK = '!';   //QUESTION_GOAL_MARK = '@';
 
     /* Tense markers */
     public static final String TENSE_MARK = ":";

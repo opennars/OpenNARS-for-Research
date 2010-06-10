@@ -23,11 +23,13 @@ package nars.entity;
 
 import nars.language.Term;
 import nars.io.Symbols;
+import nars.main.*;
 
 /**
  * A Question is a sentence without a truth value, and may conain query variables
  */
 public class Question extends Sentence {
+    private boolean needFeedback = false;
 
     /**
      * Constructor
@@ -49,5 +51,29 @@ public class Question extends Sentence {
         content = g.cloneContent();
         punctuation = Symbols.QUESTION_MARK;
         stamp = new Stamp(0, true);
+    }
+
+    /**
+     * Construct a question to check whether a prediction can be confirmed
+     * @param j The judgment that provides a default answer
+     */
+    public Question(Judgment j) {
+        content = j.cloneContent();
+        punctuation = Symbols.QUESTION_MARK;
+        stamp = Memory.newStamp;
+        bestSolution = j;
+        needFeedback = (stamp.getEventTime() >= Center.getTime());
+    }
+
+    public void checkFeedback() {
+        if (needFeedback) {
+            if (stamp.getEventTime() <= Center.getTime()) {
+                needFeedback = false; // only do once
+                if ((bestSolution == null) ||
+                        (bestSolution.getTruth().getExpectation() < Parameters.DEFAULT_CONFIRMATION_EXPECTATION)) {
+                    Memory.lackConfirmation(content, stamp.getEventTime());
+                }
+            }
+        }
     }
 }

@@ -85,5 +85,60 @@ public class Inheritance extends Statement {
     public String operator() {
         return Symbols.INHERITANCE_RELATION;
     }
+
+    /**
+     * Get the operator of the term if it is an operation, with an optional opeartor.
+     * @param opName An optional operator name to be matched
+     * @return The list representation of the operation
+     */
+    @Override
+    public ArrayList<Term> isOperation(String opName) {
+        ArrayList<Term> list = null;
+        Term subj = getSubject();
+        Term pred = getPredicate();
+        Term operator;
+        String str;
+        if (subj instanceof Product) {
+            str = pred.getName();
+            if ((opName == null) || (opName.equals(str))) {
+                operator = Memory.nameToOperator(str);
+                if (operator != null) {
+                    list = ((CompoundTerm) subj).cloneComponents();
+                    list.add(0, operator);
+                }
+            }
+        } else if (pred instanceof ImageExt) {
+            int index = ((ImageExt) pred).getRelationIndex();
+            str = ((ImageExt) pred).componentAt(index).getName();
+            if ((opName == null) || (opName.equals(str))) {
+                operator = Memory.nameToOperator(str);
+                if (operator != null) {
+                    list = ((ImageExt) pred).cloneComponents();
+                    list.set(index, subj);
+                    list.add(0, operator);
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Given operations special treatment, used in display only.
+     * @return The name of the term as a String
+     */
+    @Override
+    public String toString() {
+        ArrayList<Term> list = isOperation(null);
+        if (list == null) {
+            return super.toString();
+        } else {
+            StringBuffer buf = new StringBuffer("(");
+            for (Term t : list) {
+                buf.append(t.toString() + ',');
+            }
+            buf.setCharAt(buf.length()-1, ')');
+            return buf.toString();
+        }
+    }
 }
 

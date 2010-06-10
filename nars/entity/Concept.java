@@ -70,7 +70,7 @@ public final class Concept extends Item {
      */
     public Concept(Term tm) {
         super();
-        key = tm.toString();
+        key = tm.getName();
         term = tm;
         questions = new ArrayList<Question>();
         goals = new ArrayList<Goal>();
@@ -98,57 +98,63 @@ public final class Concept extends Item {
      * <p>
      * called in Memory.immediateProcess only
      * @param task The task to be processed
+     * @return Whether to continue the processing of the task
      */
-    public void directProcess(Task task) {
+    public boolean directProcess(Task task) {
         Sentence sentence = task.getSentence();
+        boolean toContinue;
         if (sentence instanceof Question) {
-            processQuestion((Question) sentence, task);
+            toContinue = processQuestion((Question) sentence, task);
         } else if (sentence instanceof Goal) {
-            processGoal((Goal) sentence, task);
+            toContinue = processGoal((Goal) sentence, task);
         } else {
-            processJudgment((Judgment) sentence, task);
+            toContinue = processJudgment((Judgment) sentence, task);
         }
         if (showing) {
             window.post(displayContent());
         }
+        return toContinue;
     }
 
     /**
      * To answer a question by existing beliefs
      * @param ques The question to be answered
      * @param task The task to be processed
+     * @return Whether to continue the processing of the task
      */
-    private void processQuestion(Question ques, Task task) {
-        boolean duplicate = false;
+    private boolean processQuestion(Question ques, Task task) {
+        boolean toContinue = true;
         for (Question q : questions) {
             if (q.getContent().equals(ques.getContent()) && (q.getEventTime() == ques.getEventTime())) {
-                duplicate = true;
+                toContinue = false;
                 break;
             }
         }
-        if (!duplicate) {
+        if (toContinue) {
             questions.add(ques);
         }
         for (Judgment judg : beliefs) {
             MatchingRules.trySolution(ques, judg, task);
         }
+        return toContinue;
     }
 
     /**
      * Direct processing a new goal
      * @param goal The goal to be processed
      * @param task The task to be processed
+     * @return Whether to continue the processing of the task
      */
-    private void processGoal(Goal goal, Task task) {
+    private boolean processGoal(Goal goal, Task task) {
         boolean revised = false;
         if (revisible) {
             revised = reviseTable(goal, goals);
             if (revised) {
-                return;
+                return false;
             }
         }
         for (Judgment judg : beliefs) {
-            MatchingRules.trySolution(goal, judg, task); 
+            MatchingRules.trySolution(goal, judg, task);
         }
         if (task.aboveThreshold()) {
             Term content = goal.getContent();
@@ -158,14 +164,16 @@ public final class Concept extends Item {
                     float netDesire = goal.getTruth().getExpectation();
                     if (netDesire > Parameters.DECISION_THRESHOLD) {
                         ((Operator) pred).call(task);
-                        task.setPriority(0.0f);   // each operation call is executed once
-                        return;
+                        return false;
                     }
                 }
             }
-            addToTable(goal, goals, Parameters.MAXMUM_GOALS_LENGTH); 
+            addToTable(goal, goals, Parameters.MAXMUM_GOALS_LENGTH);
             Question ques = new Question(goal);
             Memory.activatedTask(task.getBudget(), ques, false);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -173,8 +181,9 @@ public final class Concept extends Item {
      * To accept a new judgment as belief, and check for revisions and solutions
      * @param judg The judgment to be accepted
      * @param task The task to be processed
+     * @return Whether to continue the processing of the task
      */
-    private void processJudgment(Judgment judg, Task task) {
+    private boolean processJudgment(Judgment judg, Task task) {
         if (revisible) {
             reviseTable(judg, beliefs);
         }
@@ -187,6 +196,12 @@ public final class Concept extends Item {
             }
             addToTable(judg, beliefs, Parameters.MAXMUM_BELIEF_LENGTH);
 //            generateNegation(task);   // may be recovered in the future
+            if (judg.isEvent()) {
+                Memory.eventProcessing(task);
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -205,7 +220,6 @@ public final class Concept extends Item {
 //            }
 //        }
 //    }
-
     /**
      * Revise existing beliefs or goals
      * @param judg The judgment (belief or goal) to be processed
@@ -236,9 +250,9 @@ public final class Concept extends Item {
         Judgment judgment2;
         float rank2;
         int i;
-        for (i = 0; i < table.size(); i++) { 
+        for (i = 0; i < table.size(); i++) {
             judgment2 = (Judgment) table.get(i);
-            rank2 = BudgetFunctions.rankBelief(judgment2); 
+            rank2 = BudgetFunctions.rankBelief(judgment2);
             if (rank1 >= rank2) {
                 if (newJudgment.equivalentTo(judgment2)) {
                     return;
@@ -369,13 +383,13 @@ public final class Concept extends Item {
             belief = beliefs.get(i);
             Record.append(" * Selected Belief: " + belief + "\n");
             if (taskSentence.noOverlapping(belief)) {
-                long time1 = taskSentence.getEventTime();
-                long time2 = belief.getEventTime();
-                if ((time1 == time2) || (time2 == Stamp.ALWAYS) || (taskSentence instanceof Goal)) {
+                long taskTime = taskSentence.getEventTime();
+                long beliefTime = belief.getEventTime();
+                if ((taskTime == beliefTime) || (beliefTime == Stamp.ALWAYS) || (taskSentence instanceof Goal)) {
                     return belief;
                 }
-                Judgment belief2 = (Judgment) belief.clone();
-                TruthValue v = TruthFunctions.temporalCasting(belief.getTruth(), time2, time1, taskSentence.getCreationTime());
+                Judgment belief2 = (Judgment) belief.clone();   // will this mess up priority adjustment?
+                TruthValue v = TruthFunctions.temporalCasting(belief.getTruth(), beliefTime, taskTime, taskSentence.getCreationTime());
                 belief2.setTruth(v);
                 return belief2;
             }
@@ -397,6 +411,9 @@ public final class Concept extends Item {
         Record.append(" * Selected TaskLink: " + tLink + "\n");
         Task task = tLink.getTargetTask();
         Memory.currentTask = task;  // one of the two places where this variable is set
+        if (task.getSentence() instanceof Question) {
+            ((Question) task.getSentence()).checkFeedback();
+        }
         if (tLink.getType() == TermLink.TRANSFORM) {
             RuleTables.transformTask(task, tLink);  // to turn this into structural inference as below?
             return;

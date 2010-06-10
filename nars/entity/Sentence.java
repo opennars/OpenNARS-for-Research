@@ -199,6 +199,8 @@ public abstract class Sentence implements Cloneable {
 
     /**
      * Check whether one sentence has stamp overlapping with another one, and change the system cash
+     * <p>
+     * Normally 'this' is a task, and 'that' is a belief
      * @param that The sentence to be checked against
      * @return Whether the two have overlapping stamps
      */
@@ -251,7 +253,7 @@ public abstract class Sentence implements Cloneable {
      */
     public String toString2() {
         StringBuffer s = new StringBuffer();
-        s.append(content.getName());
+        s.append(content.toString());
         s.append(punctuation + " ");
         s.append(tenseToString());
         if (truth != null) {
@@ -271,7 +273,7 @@ public abstract class Sentence implements Cloneable {
      * @return The String
      */
     private String tenseToString() {
-        if (!isTemporal()) {
+        if (!isEvent()) {
             return "";
         }
         long delta = getEventTime() - Center.getTime();
@@ -300,7 +302,11 @@ public abstract class Sentence implements Cloneable {
         return getStamp().getEventTime();
     }
 
-    public boolean isTemporal() {
+    /**
+     * Check if the truth-value of the Sentence is about a certain time
+     * @return Whether the sentence is about an event
+     */
+    public boolean isEvent() {
         return (getEventTime() != Stamp.ALWAYS);
     }
 }

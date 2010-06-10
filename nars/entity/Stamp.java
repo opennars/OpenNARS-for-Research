@@ -218,8 +218,8 @@ public class Stamp implements Cloneable {
         if (!(that instanceof Stamp)) {
             return false;
         }
-        if ((creationTime != ((Stamp) that).getCreationTime()) || eventTime != ((Stamp) that).getEventTime()) {
-            return false;
+        if (eventTime != ((Stamp) that).getEventTime()) {
+            return false;       // creation time does not matter
         }
         TreeSet<Long> set1 = toSet();
         TreeSet<Long> set2 = ((Stamp) that).toSet();
@@ -256,10 +256,20 @@ public class Stamp implements Cloneable {
      * Adjust the eventTime of the truth-value
      * @param d The direction and extent of the change
      */
-    public void adjustEventTime(int d) {
-        if (eventTime != ALWAYS) {
-            eventTime += d;
-        }
+//    public void adjustEventTime(int d) {
+//        if (eventTime != ALWAYS) {
+//            eventTime += d;
+//        } else {
+//            eventTime = d + Center.getTime();
+//        }
+//    }
+
+    /**
+     * Set the eventTime of the truth-value
+     * @param t The new event time
+     */
+    public void setEventTime(long t) {
+        eventTime = t;
     }
 
     /**

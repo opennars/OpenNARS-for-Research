@@ -97,7 +97,7 @@ public final class TruthFunctions extends UtilityFunctions {
     public static TruthValue temporalCasting(TruthValue v1, long t1, long t2, long t) {
         float f1 = v1.getFrequency();
         float c1 = v1.getConfidence();
-        float c = w2c(c1);
+        float c = w2c(c1);      // minimum has nothing to do with distance
         if (t2 != Stamp.ALWAYS) {
             float c2 = c1 * (1 - Math.abs(t1 - t2) / (float) (Math.abs(t - t1) + Math.abs(t - t2)));
             if (c2 > c) {

@@ -84,10 +84,12 @@ public class Conjunction extends CompoundTerm {
      * @return String representation of the order
      */
     public static String getConjunctionSymbol(int t) {
-        if (t == -1)
+        if (t == -1) {
             return Symbols.CONJUNCTION_OPERATOR;
-        if (t == 1)
+        }
+        if (t == 1) {
             return Symbols.SEQUENCE_OPERATOR;
+        }
         return Symbols.PARALLEL_OPERATOR;
     }
 
@@ -99,7 +101,6 @@ public class Conjunction extends CompoundTerm {
     public boolean isCommutative() {
         return (temporalOrder < 1);
     }
-
 
     /**
      * Return the temporal order.
@@ -147,7 +148,7 @@ public class Conjunction extends CompoundTerm {
             }
             name = makeCompoundName(Symbols.SEQUENCE_OPERATOR, argList);
             Term t = Memory.nameToListedTerm(name);
-            return (t != null) ? t : new Conjunction(name, argList, order);            
+            return (t != null) ? t : new Conjunction(name, argList, order);
         } else {
             TreeSet<Term> set = new TreeSet<Term>(argList); // sort/merge arguments
             return make(set, order);
@@ -194,7 +195,7 @@ public class Conjunction extends CompoundTerm {
                 argument.add(term1);
                 argument.add(term2);
             }
-            return make(argument, order);          
+            return make(argument, order);
         } else { // to be refined to check other cases
             TreeSet set;
             if (order == 0) {
@@ -210,7 +211,7 @@ public class Conjunction extends CompoundTerm {
                     set.add((Term) term1.clone());   // (&,R,(&,P,Q)) = (&,P,Q,R)
                 } else {
                     set = new TreeSet();
-                    set.add(term1); 
+                    set.add(term1);
                     set.add(term2);
                     return make(set, order);
                 }
@@ -235,5 +236,19 @@ public class Conjunction extends CompoundTerm {
             }
         }
         return null; // report error? how about compound sets?
+    }
+
+    /**
+     * Given operations special treatment, used in display only.
+     * @return The name of the term as a String
+     */
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer(Symbols.COMPOUND_TERM_OPENER + operator() + ",");
+        for (Term t : components) {
+            buf.append(t.toString() + Symbols.ARGUMENT_SEPARATOR);
+        }
+        buf.setCharAt(buf.length() - 1, Symbols.COMPOUND_TERM_CLOSER);
+        return buf.toString();
     }
 }

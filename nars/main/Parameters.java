@@ -60,6 +60,8 @@ public class Parameters {
     public static final float PRIORITY_THRESHOLD = (float) 0.06;
 
     /* ---------- default input values ---------- */
+    /** Default expectation for conformation. */
+    public static final float DEFAULT_CONFIRMATION_EXPECTATION = (float) 0.8;
     /** Default confidence of input judgment. */
     public static final float DEFAULT_JUDGMENT_CONFIDENCE = (float) 0.9;
     /** Default priority of input judgment */

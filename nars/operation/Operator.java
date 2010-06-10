@@ -69,7 +69,9 @@ public abstract class Operator extends Term {
      */
     public static HashMap<String, Operator> setOperators() {
         HashMap<String, Operator> table = new HashMap<String, Operator>();
+        
         /* operators for internal operations */
+        table.put("^wait", new Wait("^wait"));
         
         /* operators for testing examples */
         table.put("^go-to", new GoTo("^go-to"));
@@ -79,6 +81,7 @@ public abstract class Operator extends Term {
         table.put("^drop", new Drop("^drop"));
         table.put("^throw", new Throw("^throw"));
         table.put("^strike", new Strike("^strike"));
+
         return table;
     }
     
@@ -87,7 +90,7 @@ public abstract class Operator extends Term {
      * <p>
      * @param operation The content of the operation to be executed
      */
-    private void reportExecution(Statement operation) {
+    protected void reportExecution(Statement operation) {
         Term operator = operation.getPredicate();
         Term arguments = operation.getSubject();
         String argList = arguments.toString().substring(3);         // skip the product prefix "(*,"

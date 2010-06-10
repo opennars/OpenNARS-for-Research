@@ -381,7 +381,8 @@ public final class StructuralRules {
                 componentList = ((CompoundTerm) condition).cloneComponents();
                 componentList.set(indices[1], newInh);
                 Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
-                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), false, 0);
+                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), 
+                        ((Statement) oldContent).isTemporal(), oldContent.getOrder());
             } else {
                 componentList = oldContent.cloneComponents();
                 componentList.set(indices[0], newInh);
@@ -471,7 +472,7 @@ public final class StructuralRules {
         Term pred = statement.getPredicate();
         Task task = Memory.currentTask;
         Sentence sentence = task.getSentence();
-        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), sentence.isTemporal(), -statement.getOrder());
+        Term content = Statement.make(statement, Negation.make(pred), Negation.make(subj), sentence.isEvent(), -statement.getOrder());
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence instanceof Question) {
