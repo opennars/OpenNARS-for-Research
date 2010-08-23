@@ -55,12 +55,18 @@ public final class StructuralRules {
         }
         if (side == 0) {
             if (components.contains(sub)) {
+                if (pred instanceof CompoundTerm) {
+                    return;
+                }
                 sub = compound;
                 components.set(index, pred);
                 pred = CompoundTerm.make(compound, components);
             }
         } else {
             if (components.contains(pred)) {
+                if (sub instanceof CompoundTerm) {
+                    return;
+                }
                 components.set(index, sub);
                 sub = CompoundTerm.make(compound, components);
                 pred = compound;
@@ -377,11 +383,11 @@ public final class StructuralRules {
         } else {
             ArrayList<Term> componentList;
             Term condition = oldContent.componentAt(0);
-            if ((oldContent instanceof Implication) && (condition instanceof Conjunction)) {
+            if (((oldContent instanceof Implication) || (oldContent instanceof Equivalence)) && (condition instanceof Conjunction)) {
                 componentList = ((CompoundTerm) condition).cloneComponents();
                 componentList.set(indices[1], newInh);
                 Term newCond = CompoundTerm.make((CompoundTerm) condition, componentList);
-                content = Implication.make(newCond, ((Statement) oldContent).getPredicate(), 
+                content = Statement.make((Statement) oldContent, newCond, ((Statement) oldContent).getPredicate(),
                         ((Statement) oldContent).isTemporal(), oldContent.getOrder());
             } else {
                 componentList = oldContent.cloneComponents();
@@ -433,7 +439,11 @@ public final class StructuralRules {
             if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction))) {
                 truth = TruthFunctions.deduction(truth, RELIANCE);
             } else if (sentence instanceof Goal) {
-                truth = TruthFunctions.abduction(truth, RELIANCE);
+                if (compound.getOrder() > 0) {
+                    truth = TruthFunctions.deduction(truth, RELIANCE);
+                } else {
+                    truth = TruthFunctions.abduction(truth, RELIANCE);
+                }
             } else {
                 return;
             }

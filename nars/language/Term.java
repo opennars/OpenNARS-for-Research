@@ -153,7 +153,7 @@ public class Term implements Cloneable, Comparable<Term> {
      * @param opName An optional operator name to be matched
      * @return The list representation of the operation
      */
-    public ArrayList<Term> isOperation(String opName) {
+    public ArrayList<Term> parseOperation(String opName) {
         return null;
     }
 }

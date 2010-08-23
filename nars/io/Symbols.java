@@ -27,8 +27,9 @@ public class Symbols {
 
     /* sentence type and delimitors */
     public static final char JUDGMENT_MARK = '.';
+    public static final char GOAL_MARK = '!';
     public static final char QUESTION_MARK = '?';
-    public static final char GOAL_MARK = '!';   //QUESTION_GOAL_MARK = '@';
+    public static final char QUEST_MARK = '@';
 
     /* Tense markers */
     public static final String TENSE_MARK = ":";

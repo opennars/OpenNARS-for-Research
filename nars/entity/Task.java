@@ -26,7 +26,7 @@ import nars.main.NARS;
 /**
  * A task to be processed, consists of a Sentence and a BudgetValue
  */
-public class Task extends Item {
+public class Task extends Item implements Cloneable {
     /** The sentence of the Task */
     private Sentence sentence;
     /** Whether it is derived by a structural rule */
@@ -40,7 +40,11 @@ public class Task extends Item {
     public Task(Sentence s, BudgetValue b) {
         super(b);
         sentence = s;
-        key = sentence.toKey();
+        key = sentence.forTaskKey();
+    }
+
+    public Object clone() {
+        return new Task(sentence, (BudgetValue) this);
     }
 
     /**

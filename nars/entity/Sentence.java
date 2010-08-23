@@ -20,6 +20,8 @@
  */
 package nars.entity;
 
+import java.util.*;
+
 import nars.io.Symbols;
 import nars.language.*;
 import nars.main.*;
@@ -69,6 +71,9 @@ public abstract class Sentence implements Cloneable {
             case Symbols.QUESTION_MARK:
                 s = new Question(term, punc, stamp);
                 break;
+            case Symbols.QUEST_MARK:
+                s = new Quest(term, punc, stamp);
+                break;
             default:
                 return null;
         }
@@ -91,7 +96,9 @@ public abstract class Sentence implements Cloneable {
             ((CompoundTerm) term).renameVariables();
         }
         Sentence s = null;
-        if (oldS instanceof Question) {
+        if (oldS instanceof Quest) {
+            s = new Quest(term, Symbols.QUEST_MARK, stamp);
+        } else if (oldS instanceof Question) {
             s = new Question(term, Symbols.QUESTION_MARK, stamp);
         } else if (oldS instanceof Goal) {
             s = new Goal(term, Symbols.GOAL_MARK, truth, stamp);
@@ -108,10 +115,10 @@ public abstract class Sentence implements Cloneable {
     @Override
     public Object clone() {
         if (this instanceof Judgment) {
-            return make((Term) content.clone(), punctuation, truth, stamp,
+            return make((Term) content.clone(), punctuation, truth, (Stamp) stamp.clone(),
                     ((Judgment) this)._premise1, ((Judgment) this)._premise2);
         } else {
-            return make((Term) content.clone(), punctuation, truth, stamp, null, null);
+            return make((Term) content.clone(), punctuation, truth, (Stamp) stamp.clone(), null, null);
         }
     }
 
@@ -164,6 +171,14 @@ public abstract class Sentence implements Cloneable {
     }
 
     /**
+     * Distinguish Question from Quest ("instanceof Question" doesn't work)
+     * @return Whether the object is a Question
+     */
+    public boolean isQuestion() {
+        return (punctuation == Symbols.QUESTION_MARK);
+    }
+
+    /**
      * Check input sentence
      * @return Whether the
      */
@@ -210,11 +225,11 @@ public abstract class Sentence implements Cloneable {
     }
 
     /**
-     * Get a stable String representation for a Sentece
+     * Get a stable String representation for a Sentece, called from Task only
      * Different from toString: tense symbol is replaced by the actual value
      * @return String representation for a Sentece
      */
-    public String toKey() {
+    public String forTaskKey() {
         StringBuffer s = new StringBuffer();
         s.append(content.getName());
         s.append(punctuation + " ");
@@ -223,6 +238,36 @@ public abstract class Sentence implements Cloneable {
         }
         s.append(stamp.toString());
         return s.toString();
+    }
+
+    public Term toTerm() {
+        String opName;
+        switch (punctuation) {
+            case Symbols.JUDGMENT_MARK:
+                opName = "^believe";
+                break;
+            case Symbols.GOAL_MARK:
+                opName = "^want";
+                break;
+            case Symbols.QUESTION_MARK:
+                opName = "^wonder";
+                break;
+            case Symbols.QUEST_MARK:
+                opName = "^assess";
+                break;
+            default:
+                return null;
+        }
+        Term opTerm = Memory.nameToOperator(opName);
+        ArrayList<Term> arg = new ArrayList<Term>();
+        arg.add(content);
+        if (truth != null) {
+            String word = truth.toWord();
+            arg.add(new Term(word));
+        }
+        Term argTerm = Product.make(arg);
+        Term operation = Inheritance.make(argTerm, opTerm);
+        return operation;
     }
 
     /**

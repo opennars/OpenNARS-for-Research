@@ -1,5 +1,5 @@
 /*
- * Open.java
+ * Consider.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -21,23 +21,28 @@
 
 package nars.operation;
 
-import java.io.*;
 import java.util.ArrayList;
-import nars.entity.Task;
-import nars.main.Memory;
+import nars.entity.*;
+import nars.language.*;
+import nars.main.*;
 
 /**
- * A class used in testing only.
+ * To activate a group of Terms
  */
-public class Open extends Operator {
-    public Open(String name) {
+public class Consider extends Operator {
+    public Consider(String name) {
         super(name);
     }
-
-    public ArrayList<Task> execute(Task task) {
+    
+    public ArrayList<Task> execute(Task t) {
+        Task task = (Task) t.clone();
+        Inheritance content = (Inheritance) task.getContent();
+        ArrayList<Term> list = content.parseOperation("^consider");
+        Term v = list.get(1);
+        Term term = Memory.mostActive();
+        Variable.unify(Variable.VarType.QUERY, v, term, content, term);
         Memory.executedTask(task);
         return null;
     }
 }
-
 

@@ -46,6 +46,11 @@ public class Memory {
     private static TaskBuffer novelTasks;
     /** List of recent events, for temporal learning */
     private static TaskBuffer recentEvents;
+    /* ---------- global variables used to record emotional values ---------- */
+    /** average desire-value */
+    private static float happy;
+    /** average priority */
+    private static float busy;
     /* ---------- global variables used to reduce method arguments ---------- */
     /** Shortcut to the selected Term */
     public static Term currentTerm;
@@ -59,6 +64,7 @@ public class Memory {
     public static Judgment currentBelief;
     /** Shortcut to the derived Stamp */
     public static Stamp newStamp;
+    /* ---------- global variables used to record emotional values ---------- */
 
     /* ---------- initialization ---------- */
     /**
@@ -72,6 +78,8 @@ public class Memory {
         newTasks = new ArrayList<Task>();       // initially empty, without capacity limit
         novelTasks = new TaskBuffer();        // initially empty, with capacity limit
         recentEvents = new TaskBuffer();      // with a different capacity?
+        happy = 0.5f;
+        busy = 0.5f;
     }
 
     /* ---------- access utilities ---------- */
@@ -162,6 +170,10 @@ public class Memory {
         return (newTasks.size() == 0);
     }
 
+    public static Term mostActive() {
+        return concepts.mostActive();
+    }
+
     /* ---------- new task entries ---------- */
     /* There are several types of new tasks, all added into the 
     newTasks list, to be processed in the next cycle.
@@ -183,17 +195,39 @@ public class Memory {
     }
 
     /**
-     * Reporting executed task, and remember the event
+     * Reporting executed task, and rememberAction the event
      * <p>
      * called from Operator.call only
      * @param task the executed task
      */
     public static void executedTask(Task task) {
         Record.append("!!! Executed: " + task.getSentence() + "\n");
-        Goal g = (Goal) task.getSentence();
-        Judgment j = new Judgment(g);   // perceived execution
+//        Goal g = (Goal) task.getSentence();
+//        Judgment j = new Judgment(g.cloneContent());   // perceived execution
+//        Task newTask = new Task(j, task.getBudget());
+//        report(newTask.getSentence(), false);
+//        newTasks.add(newTask);
+    }
+
+    /**
+     * To rememberAction an internal action as an operation
+     * <p>
+     * called from Concept
+     * @param task The task processed
+     */
+    public static void rememberAction(Task task) {
+        Term content = task.getContent();
+        if (content instanceof Inheritance) {
+            if (((Inheritance) content).parseOperation(null) != null)
+                return;     // to present infinite recursions
+        }
+        Sentence sentence = task.getSentence();
+        TruthValue truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
+        Stamp stamp = (Stamp) task.getSentence().getStamp().clone();
+        stamp.setEventTime(Center.getTime());
+        Judgment j = new Judgment(sentence.toTerm(), truth, stamp);
         Task newTask = new Task(j, task.getBudget());
-        report(newTask.getSentence(), false);
+        Record.append("Remembered: " + j.toString2());
         newTasks.add(newTask);
     }
 
@@ -231,8 +265,40 @@ public class Memory {
                 report(task.getSentence(), false);
             }
             newTasks.add(task);
+            rememberInference(task);
         } else {
             Record.append("!!! Ignored: " + task + "\n");
+        }
+    }
+
+    private static void rememberInference(Task derived) {
+        Sentence sentence = derived.getSentence();
+        TruthValue t1 = sentence.getTruth();
+        if ((t1 != null) && t1.toWord().equals("UNSURE")) {
+            return;
+        }
+        Term pred = sentence.getContent();
+        if (!((pred instanceof Inheritance) && ((Inheritance) pred).parseOperation(null) != null)) {
+             pred = sentence.toTerm();
+        }
+        Term subj = currentTask.getSentence().getContent();
+        if (!((subj instanceof Inheritance) && ((Inheritance) subj).parseOperation(null) != null)) {
+             subj = currentTask.getSentence().toTerm();
+        }
+        if (currentBelief != null) {
+            Term b = currentBelief.toTerm();
+            Term c = Conjunction.make(subj, b, -1);
+            subj = c;
+        } else {
+            return;     // temporary solution
+        }
+        Term imp = Implication.make(subj, pred, false, 0);
+        if (imp != null) {
+            TruthValue truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
+            Judgment j = new Judgment(imp, truth, sentence.getStamp());
+            Task newTask = new Task(j, derived.getBudget());
+            Record.append("Remembered: " + j.toString2());
+            newTasks.add(newTask);
         }
     }
 
@@ -248,7 +314,7 @@ public class Memory {
     public static void doublePremiseTask(BudgetValue budget, Term content, TruthValue truth,
             Sentence premise1, Sentence premise2) {
         if (content != null) {
-            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, newStamp, premise1, premise2);
+            Sentence newSentence = Sentence.make(currentTask.getSentence(), content, truth, (Stamp) newStamp.clone(), premise1, premise2);
             Task newTask = new Task(newSentence, budget);
             derivedTask(newTask);
         }
@@ -305,7 +371,7 @@ public class Memory {
      */
     public static void singlePremiseTask(BudgetValue budget, Term content, TruthValue truth, Sentence premise) {
         Sentence sentence = currentTask.getSentence();
-        Sentence newSentence = Sentence.make(sentence, content, truth, new Stamp(sentence.getStamp()), premise, null);
+        Sentence newSentence = Sentence.make(sentence, content, truth, (Stamp) sentence.getStamp().clone(), premise, null);
         Task newTask = new Task(newSentence, budget);
         newTask.setStructural();
         derivedTask(newTask);
@@ -336,7 +402,7 @@ public class Memory {
             otherTerm = (subj.equals(subjB)) ? predB : subjB;
             content = Statement.make(content, subj, otherTerm);
         }
-        Stamp stamp = new Stamp(Memory.currentBelief.getStamp());
+        Stamp stamp = (Stamp) Memory.currentBelief.getStamp().clone();
         Sentence newJudgment = Sentence.make(content, Symbols.JUDGMENT_MARK, truth, stamp, Memory.currentBelief, null);
         Task newTask = new Task(newJudgment, budget);
         newTask.setStructural();
@@ -352,28 +418,36 @@ public class Memory {
      * In the future, it is possible to adjust the occuring ratio of the two actions
      */
     public static void cycle() {
-        // keep the following order
-        processTask();
-        processConcept();
-        novelTasks.refresh();           // refresh display
+        processNewTask();
+        if (noResult()) {
+            processNovelTask();
+        }
+        if (noResult()) {
+            processConcept();
+        }
+        novelTasks.refresh();
     }
 
     /**
      * Process the newTasks accumulated in the previous cycle, accept input ones
      * and those that corresponding to existing concepts, plus one from the buffer.
      */
-    private static void processTask() {
+    private static void processNewTask() {
         Task task;
         int counter = newTasks.size();  // don't include new tasks produced in the current cycle
         while (counter-- > 0) {
             task = newTasks.remove(0);
+            adjustBusy(task.summary(), task.getPriority());
             if (task.getSentence().isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
             } else {
                 novelTasks.putIn(task);    // delayed processing
             }
         }
-        task = novelTasks.takeOut();       // select a task from novelTasks
+    }
+
+    private static void processNovelTask() {
+        Task task = novelTasks.takeOut();       // select a task from novelTasks
         if (task != null) {
             immediateProcess(task);
         }
@@ -383,6 +457,7 @@ public class Memory {
      * Select a concept to fire.
      */
     private static void processConcept() {
+        resetCurrent();
         Concept currentConcept = concepts.takeOut();
         if (currentConcept != null) {
             currentTerm = currentConcept.getTerm();
@@ -392,6 +467,15 @@ public class Memory {
         }
     }
 
+    private static void resetCurrent() {
+        currentTerm = null;
+        currentTaskLink = null;
+        currentTask = null;
+        currentBeliefLink = null;
+        currentBelief = null;
+        newStamp = null;
+    }
+
     /* ---------- task processing ---------- */
     /**
      * Immediate processing of a new task, in constant time
@@ -399,18 +483,13 @@ public class Memory {
      * @param task the task to be accepted
      */
     private static void immediateProcess(Task task) {
+        resetCurrent();
         currentTask = task; // one of the two places where this variable is set
-        currentBelief = null;
-        currentTaskLink = null;
-        currentBeliefLink = null;
         Record.append("!!! Insert: " + task + "\n");
         Term content = task.getContent();
         Concept c = getConcept(content);
         if (c != null) {
-            boolean toContinue = c.directProcess(task);
-            if (toContinue && task.aboveThreshold()) {    // still need to be processed
-                linkToTask(task, content, c);
-            }
+            c.directProcess(task);
         }
     }
 
@@ -422,7 +501,7 @@ public class Memory {
      * @param task The task to be linked
      * @param content The content of the task
      */
-    private static void linkToTask(Task task, Term content, Concept contentConcept) {
+    public static void linkToTask(Task task, Term content, Concept contentConcept) {
         BudgetValue budget = task.getBudget();
         TaskLink taskLink = new TaskLink(task, null, budget);   // link type: SELF
         contentConcept.insertTaskLink(taskLink);
@@ -465,8 +544,39 @@ public class Memory {
             }
             recentEvents.putBack(event2);
         }
-        recentEvents.putIn(event1);
+        Term content = event1.getContent();
+        if (!(content instanceof Implication) && !(content instanceof Equivalence)) {
+            recentEvents.putIn(event1);
+        }
     }
+
+    /* ---------- status evaluation ---------- */
+
+    public static float happyValue() {
+        return happy;
+    }
+
+    public static float busyValue() {
+        return busy;
+    }
+
+    public static void adjustHappy(float newValue, float weight) {
+        float oldV = happy;
+        happy += newValue * weight;
+        happy /= 1.0f + weight;
+        if (Math.abs(oldV - happy) > 0.1) {
+            Record.append("HAPPY: " + (int) (oldV*10.0) + " to " + (int) (happy*10.0) + "\n");
+        }
+    }
+    public static void adjustBusy(float newValue, float weight) {
+        float oldV = busy;
+        busy += newValue * weight;
+        busy /= (1.0f + weight);
+        if (Math.abs(oldV - busy) > 0.1) {
+            Record.append("BUSY: " + (int) (oldV*10.0) + " to " + (int) (busy*10.0) + "\n");
+        }
+    }
+
 
     /* ---------- display ---------- */
     /**

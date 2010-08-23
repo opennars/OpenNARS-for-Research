@@ -1,5 +1,5 @@
 /*
- * Open.java
+ * Remind.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -18,26 +18,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.operation;
 
-import java.io.*;
 import java.util.ArrayList;
-import nars.entity.Task;
-import nars.main.Memory;
+import nars.entity.*;
+import nars.language.*;
+import nars.main.*;
 
 /**
- * A class used in testing only.
+ * To activate a group of Terms
  */
-public class Open extends Operator {
-    public Open(String name) {
+public class Remind extends Operator {
+
+    public Remind(String name) {
         super(name);
     }
 
     public ArrayList<Task> execute(Task task) {
+        Inheritance content = (Inheritance) task.getContent();
+        ArrayList<Term> list = content.parseOperation("^remind");
+        Term t = list.get(1);
+        Concept c = Memory.getConcept(t);
+        BudgetValue v = new BudgetValue(Parameters.DEFAULT_QUESTION_PRIORITY, Parameters.DEFAULT_QUESTION_DURABILITY, 1);
+        Memory.activateConcept(c, v);
         Memory.executedTask(task);
         return null;
     }
 }
-
 

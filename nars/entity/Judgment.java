@@ -48,23 +48,30 @@ public class Judgment extends Sentence {
         punctuation = punc;
         truth = t;
         stamp = b;
-        if (premise1 instanceof Judgment) {
-            _premise1 = (Judgment) premise1;
-        }
-        if (premise2 instanceof Judgment) {
-            _premise2 = (Judgment) premise2;
-        }
+//        if (premise1 instanceof Judgment) {
+//            _premise1 = (Judgment) premise1;
+//        }
+//        if (premise2 instanceof Judgment) {
+//            _premise2 = (Judgment) premise2;
+//        }
     }
 
     /**
-     * Construct a Judgment to indicate an operation just executed
-     * @param g The goal that trigger the execution
+     * Construct a Judgment from a term
+     * @param t The content of the judgment
      */
-    public Judgment(Goal g) {
-        content = g.cloneContent();
+    public Judgment(Term t) {
+        content = t;
         punctuation = Symbols.JUDGMENT_MARK;
         truth = new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
         stamp = new Stamp(0, true);
+    }
+
+    public Judgment(Term t, TruthValue v, Stamp s) {
+        content = t;
+        punctuation = Symbols.JUDGMENT_MARK;
+        truth = v;
+        stamp = s;
     }
 
     /**

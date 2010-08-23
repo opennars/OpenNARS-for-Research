@@ -1,5 +1,5 @@
 /*
- * Open.java
+ * Wonder.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -21,23 +21,29 @@
 
 package nars.operation;
 
-import java.io.*;
 import java.util.ArrayList;
-import nars.entity.Task;
-import nars.main.Memory;
+import nars.entity.*;
+import nars.language.*;
+import nars.main.*;
+import nars.io.Symbols;
 
 /**
- * A class used in testing only.
+ * To activate a group of Terms
  */
-public class Open extends Operator {
-    public Open(String name) {
+public class Wonder extends Operator {
+    public Wonder(String name) {
         super(name);
     }
-
-    public ArrayList<Task> execute(Task task) {
+    
+    public ArrayList<Task> execute(Task t) {
+        Task task = (Task) t.clone();
+        Inheritance content = (Inheritance) task.getContent();
+        ArrayList<Term> list = content.parseOperation("^wonder");
+        Term query = list.get(1);
+        Concept c = Memory.termToConcept(query);
+        c.processQuestion(new Question((Goal) t.getSentence()), t);
         Memory.executedTask(task);
         return null;
     }
 }
-
 

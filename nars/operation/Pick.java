@@ -24,6 +24,7 @@ package nars.operation;
 import java.io.*;
 import java.util.ArrayList;
 import nars.entity.Task;
+import nars.main.Memory;
 
 /**
  * A class used in testing only.
@@ -34,7 +35,7 @@ public class Pick extends Operator {
     }
 
     public ArrayList<Task> execute(Task task) {
-//        System.out.println("EXECUTE in " + name + " " + task);
+        Memory.executedTask(task);
         return null;
     }
 }

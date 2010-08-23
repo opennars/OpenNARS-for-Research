@@ -22,7 +22,7 @@ package nars.entity;
 
 import nars.inference.*;
 import nars.io.Symbols;
-import nars.main.Parameters;
+import nars.main.*;
 
 /**
  * A triple of priority (current), durability (decay), and quality (long-term average).
@@ -198,7 +198,8 @@ public class BudgetValue implements Cloneable {
      * @return The decision on whether to process the Item
      */
     public boolean aboveThreshold() {
-        return (summary() >= Parameters.BUDGET_THRESHOLD);
+        return (summary() >= Memory.busyValue()*Parameters.BUDGET_THRESHOLD);
+//        return (summary() >= Parameters.BUDGET_THRESHOLD);
     }
 
     /**

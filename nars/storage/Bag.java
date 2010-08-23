@@ -157,6 +157,7 @@ public abstract class Bag<Type extends Item> {
      * <p>
      * The only place where the forgetting rate is applied
      * @param oldItem The Item to put back
+     * @return Whether the new Item is added into the Bag
      */
     public boolean putBack(Type oldItem) {
         BudgetFunctions.forget(oldItem.getBudget(), forgetRate(), RELATIVE_THRESHOLD);
@@ -210,7 +211,7 @@ public abstract class Bag<Type extends Item> {
      * @param n The level index
      * @return Whether that level is empty
      */
-    private boolean emptyLevel(int n) {
+    protected boolean emptyLevel(int n) {
         return ((itemTable[n] == null) || itemTable[n].isEmpty());
     }
 

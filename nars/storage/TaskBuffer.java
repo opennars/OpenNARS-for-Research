@@ -44,7 +44,7 @@ public class TaskBuffer extends Bag<Task> {
     protected int forgetRate() {
         return Parameters.NEW_TASK_FORGETTING_CYCLE;
     }
-    
+
     /**
      * Sepecial treatment: the display also include Tasks in the NewTask list
      * @return New Tasks in the buffer and list for display

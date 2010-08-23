@@ -1,5 +1,5 @@
 /*
- * Open.java
+ * Question.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -19,25 +19,23 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package nars.operation;
+package nars.entity;
 
-import java.io.*;
-import java.util.ArrayList;
-import nars.entity.Task;
-import nars.main.Memory;
+import nars.language.Term;
+import nars.io.Symbols;
 
 /**
- * A class used in testing only.
+ * A Quest is a question on the desire-value of a statement
  */
-public class Open extends Operator {
-    public Open(String name) {
-        super(name);
+public class Quest extends Question {
+
+    public Quest(Term term, char punc, Stamp s) {
+        super(term, punc, s);
     }
 
-    public ArrayList<Task> execute(Task task) {
-        Memory.executedTask(task);
-        return null;
+    public Quest(Goal g) {
+        content = g.cloneContent();
+        punctuation = Symbols.QUEST_MARK;
+        stamp = new Stamp(0, true);
     }
 }
-
-

@@ -31,6 +31,9 @@ import nars.main.*;
 public class Question extends Sentence {
     private boolean needFeedback = false;
 
+    public Question() {
+    }
+
     /**
      * Constructor
      * @param term The content
@@ -62,7 +65,8 @@ public class Question extends Sentence {
         punctuation = Symbols.QUESTION_MARK;
         stamp = Memory.newStamp;
         bestSolution = j;
-        needFeedback = (stamp.getEventTime() >= Center.getTime());
+        needFeedback = true;
+//        needFeedback = (stamp.getEventTime() >= Center.getTime());
     }
 
     public void checkFeedback() {

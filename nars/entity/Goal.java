@@ -22,6 +22,7 @@
 package nars.entity;
 
 import nars.language.Term;
+import nars.io.Symbols;
 
 /**
  * A Goal is an event to be realized, and may conain query variables
@@ -39,5 +40,8 @@ public class Goal extends Judgment {
     public Goal(Term term, char punc, TruthValue t, Stamp s) {
         super(term, punc, t, s, null, null);
     }
-}
 
+    public Goal(Term term, TruthValue t, Stamp s) {
+        super(term, Symbols.GOAL_MARK, t, s, null, null);
+    }
+}

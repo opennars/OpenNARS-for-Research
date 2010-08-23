@@ -81,7 +81,7 @@ public final class MatchingRules {
     }
 
     /**
-     * Check if a Judgment provide a better answer to a Question
+     * Check if a Judgment provide a better answer to a Question or Goal
      * @param problem The Goal or Question to be answered
      * @param belief The proposed answer
      * @param task The task to be processed
@@ -98,17 +98,22 @@ public final class MatchingRules {
             }
         }
         Judgment oldBest = problem.getBestSolution();
+        float newQ = solutionQuality(problem, belief);
         if (oldBest != null) {
             float oldQ = solutionQuality(problem, oldBest);
-            float newQ = solutionQuality(problem, belief);
             if (oldQ >= newQ) {
-                if (problem instanceof Question) {
-                    ((Question) problem).checkFeedback();
+                if (problem instanceof Goal) {
+                    Memory.adjustHappy(oldQ, task.getPriority());
                 }
                 return;
             }
         }
         problem.setBestSolution(belief);
+        if (problem instanceof Goal) {
+            Memory.adjustHappy(newQ, task.getPriority());
+        } else if (problem.isQuestion()) {
+            ((Question) problem).checkFeedback();
+        }
         BudgetValue budget = BudgetFunctions.solutionEval(problem, belief, task);
         if ((budget != null) && budget.aboveThreshold()) {
             Memory.activatedTask(budget, belief, problem.isInput());
@@ -122,13 +127,16 @@ public final class MatchingRules {
      * @return The quality of the judgment as the solution
      */
     public static float solutionQuality(Sentence problem, Judgment solution) {
+        if (problem == null) {
+            return solution.getTruth().getExpectation();
+        }
         long taskTime = problem.getEventTime();
         long beliefTime = solution.getEventTime();
         TruthValue truth = solution.getTruth();
-        if ((beliefTime != Stamp.ALWAYS) && (taskTime != beliefTime)) {
+        if ((taskTime != beliefTime) && (beliefTime != Stamp.ALWAYS)) {
             truth = TruthFunctions.temporalCasting(truth, beliefTime, taskTime, problem.getCreationTime());
         }
-        if (problem instanceof Goal) {
+        if ((problem instanceof Goal) || (problem instanceof Quest)) {
             return truth.getExpectation();
         } else if (problem.getContent().isConstant()) {   // "yes/no" question
             return truth.getConfidence();

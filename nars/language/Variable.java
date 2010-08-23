@@ -214,16 +214,20 @@ public class Variable extends Term {
         if (t1.isConstant() && t1.equals(t2)) {// to constant Terms are unified if equals
             return true;
         }
-        if (!(compound1 instanceof CompoundTerm) || !(compound2 instanceof CompoundTerm)) {
-            return false;
-        }
+//        if (!(compound1 instanceof CompoundTerm) || !(compound2 instanceof CompoundTerm)) {
+//            return false;
+//        }
         HashMap<String, Term> substitute = findSubstitute(type, t1, t2, new HashMap<String, Term>()); // find substitution
         if (substitute == null) { // not unifiable
             return false;
         }
         if (!substitute.isEmpty()) {
-            ((CompoundTerm) compound1).substituteComponent(substitute, true);   // apply the substitution to the first compound
-            ((CompoundTerm) compound2).substituteComponent(substitute, false);  // apply the substitution to the second compound
+            if (compound1 instanceof CompoundTerm) {
+                ((CompoundTerm) compound1).substituteComponent(substitute, true);   // apply the substitution to the first compound
+            }
+            if (compound2 instanceof CompoundTerm) {
+                ((CompoundTerm) compound2).substituteComponent(substitute, false);  // apply the substitution to the second compound
+            }
         }
         return true;
     }

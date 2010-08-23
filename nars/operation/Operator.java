@@ -52,7 +52,7 @@ public abstract class Operator extends Term {
     public void call(Task task) {
         ArrayList<Task> feedback = execute(task);
         reportExecution((Statement) task.getContent());
-        Memory.executedTask(task);
+//        Memory.executedTask(task);
         if (feedback != null) {
             for (Task t : feedback) {
                 Memory.inputTask(t);
@@ -70,8 +70,40 @@ public abstract class Operator extends Term {
     public static HashMap<String, Operator> setOperators() {
         HashMap<String, Operator> table = new HashMap<String, Operator>();
         
-        /* operators for internal operations */
-        table.put("^wait", new Wait("^wait"));
+        /* operators for tasks */
+        table.put("^believe", new Believe("^believe"));     // accept a statement with a default truth-value
+        table.put("^want", new Want("^want"));              // accept a statement with a default desire-value
+        table.put("^wonder", new Wonder("^wonder"));        // find the truth-value of a statement
+        table.put("^assess", new Assess("^assess"));        // find the desire-value of a statement
+        /* operators for internal perceptions */
+        table.put("^consider", new Consider("^consider"));  // find the most active concept
+        table.put("^remind", new Remind("^remind"));        // create/activate a concept
+        table.put("^wait", new Wait("^wait"));              // wait for a certain number of clock cycle
+        /*
+         * observe          // process a new task (Channel ID: optional?)
+         * think            // carry out a working cycle
+         * do               // turn a statement into a goal
+         *
+         * possibility      // return the possibility of a term
+         * doubt            // decrease the confidence of a belief
+         * hesitate         // decrease the confidence of a goal
+         *
+         * feel             // the overall happyness, average solution quality, and predictions
+         * busy             // the overall business
+         *
+         * tell             // output a judgment (Channel ID: optional?)
+         * ask              // output a question/quest (Channel ID: optional?)
+         * demand           // output a goal (Channel ID: optional?)
+         *
+         * count            // count the number of elements in a set
+         * arithmatic       // + - * /
+         * comparisons      // < = >
+         * inference        // binary inference
+         *
+         * assume           // local assumption ???
+         * name             // turn a compount term into an atomic term ???
+         * ???              // rememberAction the history of the system? excutions of operatons?
+         */
         
         /* operators for testing examples */
         table.put("^go-to", new GoTo("^go-to"));

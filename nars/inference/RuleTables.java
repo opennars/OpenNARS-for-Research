@@ -52,6 +52,7 @@ public final class RuleTables {
         }
         short tIndex = tLink.getIndex(0);
         short bIndex = bLink.getIndex(0);
+        short[] ind;
         switch (tLink.getType()) {          // dispatch first by TaskLink type
             case TermLink.SELF:
                 switch (bLink.getType()) {
@@ -71,13 +72,11 @@ public final class RuleTables {
                         if (belief != null) {
                             SyllogisticRules.detachment(task.getSentence(), belief, bIndex);
                         }
-
                         break;
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
                             SyllogisticRules.detachment(belief, task.getSentence(), bIndex);
                         }
-
                         break;
                     case TermLink.COMPONENT_CONDITION:
                         if (belief != null) {
@@ -108,7 +107,11 @@ public final class RuleTables {
 
                     case TermLink.COMPOUND_CONDITION:
                         if (belief != null) {
-                            SyllogisticRules.conditionalDedInd((Implication) beliefTerm, bIndex, taskTerm, -1);
+                            if (beliefTerm instanceof Implication) {
+                                SyllogisticRules.conditionalDedInd((Implication) beliefTerm, bIndex, taskTerm, -1);
+                            } else if (beliefTerm instanceof Equivalence) {
+                                SyllogisticRules.conditionalAna((Equivalence) beliefTerm, bIndex, taskTerm, -1);
+                            }
                         }
 
                         break;
@@ -573,12 +576,14 @@ public final class RuleTables {
         } else if (indices.length == 3) {   // <<(*, term, #) --> #> ==> #>
             inh = content.componentAt(indices[0]);
         } else if (indices.length == 4) {   // <(&&, <(*, term, #) --> #>, #) ==> #>
-            if ((indices[0] == 0) && (content instanceof Implication) && (content.componentAt(0) instanceof Conjunction)) {
-                inh = ((CompoundTerm) content.componentAt(0)).componentAt(indices[1]);
+            Term component = content.componentAt(indices[0]);
+            if ((component instanceof Conjunction) && (((content instanceof Implication) && (indices[0] == 0)) || (content instanceof Equivalence))) {
+//            if ((indices[0] == 0) && (content instanceof Implication) && (content.componentAt(0) instanceof Conjunction)) {
+//                inh = ((CompoundTerm) content.componentAt(0)).componentAt(indices[1]);
+                inh = ((CompoundTerm) component).componentAt(indices[1]);
             } else {
                 return;
             }
-
         }
         if (inh instanceof Inheritance) {
             StructuralRules.transformProductImage((Inheritance) inh, content, indices, task);

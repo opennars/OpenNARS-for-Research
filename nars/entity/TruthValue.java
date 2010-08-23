@@ -21,6 +21,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
+import nars.main.Parameters;
 
 /**
  * Frequency and confidence.
@@ -52,6 +53,16 @@ public class TruthValue { // implements Cloneable {
     public TruthValue(TruthValue v) {
         frequency = new ShortFloat(v.getFrequency());
         confidence = new ShortFloat(v.getConfidence());
+    }
+
+    public static TruthValue make(String str) {
+        if (str.equals("TRUE")) {
+            return new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
+        } else if (str.equals("FALSE")) {
+            return new TruthValue(0.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
+        } else {
+            return null;
+        }
     }
 
     /** 
@@ -107,6 +118,18 @@ public class TruthValue { // implements Cloneable {
     public int hashCode() {
         int hash = 5;
         return hash;
+    }
+
+    public String toWord() {
+        float e = getExpectation();
+        float t = Parameters.EXPECTATION_THRESHOLD;
+        if (e > t) {
+            return "TRUE";
+        }
+        if (e < 1 - t) {
+            return "FALSE";
+        }
+        return "UNSURE";
     }
 
     /**

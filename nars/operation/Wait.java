@@ -24,7 +24,6 @@ import java.util.ArrayList;
 
 import nars.entity.Task;
 import nars.language.*;
-import nars.main.*;
 
 /**
  * A class used in testing only.
@@ -45,15 +44,15 @@ public class Wait extends Operator {
     }
 
     public ArrayList<Task> execute(Task task) {
-        Statement content = (Statement) task.getContent();
-        String delta = ((CompoundTerm) content.getSubject()).componentAt(0).getName();
-        int targetTime = (int) task.getSentence().getCreationTime() + Integer.parseInt(delta);
-        if (Center.getTime() < targetTime) {
-            Memory.activatedTask(task.getBudget(), task.getSentence(), false);
-        } else {
-            reportExecution(content);
-            Memory.executedTask(task);
-        }
+//        Statement content = (Statement) task.getContent();
+//        String delta = ((CompoundTerm) content.getSubject()).componentAt(0).getName();
+//        int targetTime = (int) task.getSentence().getCreationTime() + Integer.parseInt(delta);
+//        if (Center.getTime() < targetTime) {
+//            Memory.activatedTask(task.getBudget(), task.getSentence(), false);
+//        } else {
+//            reportExecution(content);
+//            Memory.executedTask(task);
+//        }
         return null;
     }
 
@@ -66,7 +65,7 @@ public class Wait extends Operator {
     }
 
     public static int getWaitingTime(Term term) {
-        ArrayList<Term> list = term.isOperation("^wait");
+        ArrayList<Term> list = term.parseOperation("^wait");
         if (list != null) {
             return Integer.parseInt(list.get(1).toString());
         } else {

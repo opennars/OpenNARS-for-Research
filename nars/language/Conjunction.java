@@ -84,10 +84,10 @@ public class Conjunction extends CompoundTerm {
      * @return String representation of the order
      */
     public static String getConjunctionSymbol(int t) {
-        if (t == -1) {
+        if (t < 0) {
             return Symbols.CONJUNCTION_OPERATOR;
         }
-        if (t == 1) {
+        if (t > 0) {
             return Symbols.SEQUENCE_OPERATOR;
         }
         return Symbols.PARALLEL_OPERATOR;
@@ -141,7 +141,7 @@ public class Conjunction extends CompoundTerm {
      * @param order The temporal order of the components
      */
     public static Term make(ArrayList<Term> argList, int order) {
-        if (order == 1) {
+        if (order > 0) {
             String name;
             if (argList.size() == 1) {
                 return argList.get(0);
@@ -185,11 +185,15 @@ public class Conjunction extends CompoundTerm {
      */
     @SuppressWarnings("unchecked")
     public static Term make(Term term1, Term term2, int order) {
-        if (order == 1) {
+        if (order > 0) {
             ArrayList<Term> argument;
             if (isSequence(term2)) { // to be refined to check other cases
                 argument = ((CompoundTerm) term2).cloneComponents();
-                argument.add(0, term1);
+                if (isSequence(term1)) {
+                    argument.addAll(0, ((CompoundTerm) term1).cloneComponents());
+                } else {
+                    argument.add(0, term1);
+                }
             } else {
                 argument = new ArrayList<Term>();
                 argument.add(term1);

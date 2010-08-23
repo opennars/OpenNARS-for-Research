@@ -103,7 +103,7 @@ public class Stamp implements Cloneable {
      * For single-premise rules
      * @param old The stamp of the single premise
      */
-    public Stamp(Stamp old) {
+    private Stamp(Stamp old) {
         length = old.length();
         trail = old.getList();
         creationTime = Center.getTime();
@@ -163,6 +163,10 @@ public class Stamp implements Cloneable {
         } else {
             return new Stamp(second, first, first.getEventTime());
         }
+    }
+
+    public Object clone() {
+        return new Stamp(this);
     }
 
     /**

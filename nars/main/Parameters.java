@@ -50,12 +50,14 @@ public class Parameters {
     public static final float RELIANCE = (float) 0.9;    // the same as default confidence
     /** The desireability threthold for an operation to be executed. */
     public static final float DECISION_THRESHOLD = (float) 0.66;
+    /** The expectation threthold for "true". */
+    public static final float EXPECTATION_THRESHOLD = (float) 0.66;
     /** Range of temporal induction in input events. */
     public static final int MAXMUM_EVENTS_LENGTH = 10;
 
     /* ---------- budget thresholds ---------- */
-    /** The budget threthold for task to be accepted. */
-    public static final float BUDGET_THRESHOLD = (float) 0.001;
+    /** The budget threthold rate for task to be accepted. */
+    public static final float BUDGET_THRESHOLD = (float) 0.2;
     /** The priority threthold for operation to be executed. */
     public static final float PRIORITY_THRESHOLD = (float) 0.06;
 
@@ -99,7 +101,9 @@ public class Parameters {
     /** Remember recently used TermLink on a Task */
     public static final int TERM_LINK_RECORD_LENGTH = 10;
     /** Maximum number of beliefs kept in a Concept */
-    public static final int MAXMUM_BELIEF_LENGTH = 5;
+    public static final int MAXMUM_BELIEF_LENGTH = 7;
     /** Maximum number of goals kept in a Concept */
-    public static final int MAXMUM_GOALS_LENGTH = 5;
+    public static final int MAXMUM_GOALS_LENGTH = 7;
+    /** Maximum number of goals kept in a Concept */
+    public static final int MAXMUM_QUESTIONS_LENGTH = 5;
 }

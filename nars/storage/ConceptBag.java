@@ -24,6 +24,7 @@ package nars.storage;
 import nars.entity.Concept;
 import nars.main.Parameters;
 import nars.gui.MainWindow;
+import nars.language.Term;
 
 /**
  * Contains Concepts.
@@ -44,5 +45,14 @@ public class ConceptBag extends Bag<Concept> {
      */
     protected int forgetRate() {
         return MainWindow.forgetCW.value();
+    }
+
+    public Term mostActive() {
+        int i = TOTAL_LEVEL - 1;
+        while (emptyLevel(i)) {
+            i--;
+        }
+        Concept c = itemTable[i].get(0);
+        return c.getTerm();
     }
 }

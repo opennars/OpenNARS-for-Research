@@ -92,7 +92,7 @@ public class Inheritance extends Statement {
      * @return The list representation of the operation
      */
     @Override
-    public ArrayList<Term> isOperation(String opName) {
+    public ArrayList<Term> parseOperation(String opName) {
         ArrayList<Term> list = null;
         Term subj = getSubject();
         Term pred = getPredicate();
@@ -128,7 +128,7 @@ public class Inheritance extends Statement {
      */
     @Override
     public String toString() {
-        ArrayList<Term> list = isOperation(null);
+        ArrayList<Term> list = parseOperation(null);
         if (list == null) {
             return super.toString();
         } else {

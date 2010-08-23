@@ -175,7 +175,7 @@ public abstract class StringParser extends Symbols {
      * @return the input TruthValue
      */
     private static TruthValue parseTruth(String s, char type) {
-        if (type == QUESTION_MARK) {
+        if ((type == QUESTION_MARK) || (type == QUEST_MARK)) {
             return null;
         }
         float frequency = 1.0f;
@@ -213,6 +213,7 @@ public abstract class StringParser extends Symbols {
                 durability = Parameters.DEFAULT_GOAL_DURABILITY;
                 break;
             case QUESTION_MARK:
+            case QUEST_MARK:
                 priority = Parameters.DEFAULT_QUESTION_PRIORITY;
                 durability = Parameters.DEFAULT_QUESTION_DURABILITY;
                 break;
@@ -228,7 +229,7 @@ public abstract class StringParser extends Symbols {
                 durability = Float.parseFloat(s.substring(i + 1));
             }
         }
-        float quality = (punctuation == QUESTION_MARK) ? 1 : BudgetFunctions.truthToQuality(truth);
+        float quality = (truth == null) ? 1 : BudgetFunctions.truthToQuality(truth);
         return new BudgetValue(priority, durability, quality);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Open.java
+ * Believe.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -21,23 +21,36 @@
 
 package nars.operation;
 
-import java.io.*;
 import java.util.ArrayList;
-import nars.entity.Task;
-import nars.main.Memory;
+import nars.entity.*;
+import nars.language.*;
+import nars.main.*;
+import nars.io.Symbols;
 
 /**
- * A class used in testing only.
+ * To activate a group of Terms
  */
-public class Open extends Operator {
-    public Open(String name) {
+public class Believe extends Operator {
+    public Believe(String name) {
         super(name);
     }
-
+    
     public ArrayList<Task> execute(Task task) {
+        Sentence sentence = task.getSentence();
+        Inheritance operation = (Inheritance) sentence.getContent();
+        ArrayList<Term> list = operation.parseOperation("^believe");
+        Term content = list.get(1);
+        String str = list.get(2).getName();
+        TruthValue truth = TruthValue.make(str);
+        if (truth == null) {
+            return null;
+        }
+        Judgment j = new Judgment(content, truth, sentence.getStamp());
+        Task newTask = new Task(j, task.getBudget());
+        ArrayList<Task> feedback = new ArrayList<Task>();
+        feedback.add(newTask);
         Memory.executedTask(task);
-        return null;
+        return feedback;
     }
 }
-
 
