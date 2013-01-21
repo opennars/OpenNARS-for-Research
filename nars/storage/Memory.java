@@ -73,7 +73,7 @@ public class Memory {
      * Create a new memory
      * <p>
      * Called in Reasoner.reset only
-     * @param reasoner 
+     * @param reasoner
      */
     public Memory(Reasoner reasoner) {
         this.reasoner = reasoner;
