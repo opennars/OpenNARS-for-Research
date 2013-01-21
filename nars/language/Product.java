@@ -24,7 +24,7 @@ package nars.language;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * A Product is a sequence of terms.
@@ -36,8 +36,8 @@ public class Product extends CompoundTerm {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private Product(String n, ArrayList<Term> arg) {
-        super(n, arg);
+    private Product(ArrayList<Term> arg) {
+        super(arg);
     }
     
     /**
@@ -47,28 +47,28 @@ public class Product extends CompoundTerm {
      * @param open Open variable list
      * @param complexity Syntactic complexity of the compound
      */
-    private Product(String n, ArrayList<Term> cs, ArrayList<Variable> open, short complexity) {
-        super(n, cs, open, complexity);
+    private Product(String n, ArrayList<Term> cs, boolean con, short complexity) {
+        super(n, cs, con, complexity);
     }
     
     /**
      * Clone a Product
      * @return A new object, to be casted into an ImageExt
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Product(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new Product(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
      /**
      * Try to make a new compound. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argument The list of components
+     * @param memory Reference to the memeory
      */
-    public static Term make(ArrayList<Term> argument) {
+    public static Term make(ArrayList<Term> argument, Memory memory) {
         String name = makeCompoundName(Symbols.PRODUCT_OPERATOR, argument);
-        Term t = Memory.nameToListedTerm(name);
-        return (t != null) ? t : new Product(name, argument);
+        Term t = memory.nameToListedTerm(name);
+        return (t != null) ? t : new Product(argument);
     }
         
     /**
@@ -76,12 +76,13 @@ public class Product extends CompoundTerm {
      * @param image The existing Image
      * @param component The component to be added into the component list
      * @param index The index of the place-holder in the new Image -- optional parameter
+     * @param memory Reference to the memeory
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(CompoundTerm image, Term component, int index) {
+    public static Term make(CompoundTerm image, Term component, int index, Memory memory) {
         ArrayList<Term> argument = image.cloneComponents();
         argument.set(index, component);
-        return make(argument);
+        return make(argument, memory);
     }
     
     /**

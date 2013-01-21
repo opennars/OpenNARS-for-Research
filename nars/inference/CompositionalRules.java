@@ -23,8 +23,8 @@ package nars.inference;
 import java.util.*;
 
 import nars.entity.*;
-import nars.term.*;
-import nars.container.Memory;
+import nars.language.*;
+import nars.storage.Memory;
 
 /**
  * Compound term composition and decomposition rules, with two premises.

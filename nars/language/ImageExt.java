@@ -23,7 +23,7 @@ package nars.language;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * An extension image.
@@ -56,8 +56,8 @@ public class ImageExt extends CompoundTerm {
      * @param complexity Syntactic complexity of the compound
      * @param index The index of relation in the component list
      */
-    private ImageExt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short complexity, short index) {
-        super(n, cs, open, complexity);
+    private ImageExt(String n, ArrayList<Term> cs, boolean con, short complexity, short index) {
+        super(n, cs, con, complexity);
         relationIndex = index;
     }
 
@@ -67,7 +67,7 @@ public class ImageExt extends CompoundTerm {
      */
     @SuppressWarnings("unchecked")
     public Object clone() {
-        return new ImageExt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, relationIndex);
+        return new ImageExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity, relationIndex);
     }
 
     /**
@@ -75,7 +75,7 @@ public class ImageExt extends CompoundTerm {
      * @return the Term generated from the arguments
      * @param argList The list of components
      */
-    public static Term make(ArrayList<Term> argList) {
+    public static Term make(ArrayList<Term> argList, Memory memory) {
         if (argList.size() < 2) {
             return null;
         }
@@ -90,7 +90,7 @@ public class ImageExt extends CompoundTerm {
                 argument.add(argList.get(j));
             }
         }
-        return make(argument, (short) index);
+        return make(argument, (short) index, memory);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ImageExt extends CompoundTerm {
      * @param index The index of the place-holder
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(Product product, Term relation, short index) {
+    public static Term make(Product product, Term relation, short index, Memory memory) {
         if (relation instanceof Product) {
             Product p2 = (Product) relation;
             if ((product.size() == 2) && (p2.size() == 2)) {
@@ -114,7 +114,7 @@ public class ImageExt extends CompoundTerm {
         }
         ArrayList<Term> argument = product.cloneComponents();
         argument.set(index, relation);
-        return make(argument, index);
+        return make(argument, index, memory);
     }
 
     /**
@@ -124,13 +124,13 @@ public class ImageExt extends CompoundTerm {
      * @param index The index of the place-holder in the new Image
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(ImageExt oldImage, Term component, short index) {
+    public static Term make(ImageExt oldImage, Term component, short index, Memory memory) {
         ArrayList<Term> argList = oldImage.cloneComponents();
         int oldIndex = oldImage.getRelationIndex();
         Term relation = argList.get(oldIndex);
         argList.set(oldIndex, component);
         argList.set(index, relation);
-        return make(argList, index);
+        return make(argList, index, memory);
     }
 
     /**
@@ -139,9 +139,9 @@ public class ImageExt extends CompoundTerm {
      * @param index The index of the place-holder in the new Image
      * @return the Term generated from the arguments
      */
-    public static Term make(ArrayList<Term> argument, short index) {
+    public static Term make(ArrayList<Term> argument, short index, Memory memory) {
         String name = makeImageName(Symbols.IMAGE_EXT_OPERATOR, argument, index);
-        Term t = Memory.nameToListedTerm(name);
+        Term t = memory.nameToListedTerm(name);
         return (t != null) ? t : new ImageExt(name, argument, index);
     }
 
@@ -151,6 +151,25 @@ public class ImageExt extends CompoundTerm {
      */
     public short getRelationIndex() {
         return relationIndex;
+    }
+
+    /**
+     * Get the relation term in the Image
+     * @return The term representing a relation
+     */
+    public Term getRelation() {
+        return components.get(relationIndex);
+    }
+
+    /**
+     * Get the other term in the Image
+     * @return The term related
+     */
+    public Term getTheOtherComponent() {
+        if (components.size() != 2) {
+            return null;
+        }
+        return (relationIndex == 0) ? components.get(1) : components.get(0);
     }
 
     /**

@@ -23,7 +23,7 @@ package nars.language;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * An intension image.
@@ -56,8 +56,8 @@ public class ImageInt extends CompoundTerm {
      * @param complexity Syntactic complexity of the compound
      * @param index The index of relation in the component list
      */
-    private ImageInt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short complexity, short index) {
-        super(n, cs, open, complexity);
+    private ImageInt(String n, ArrayList<Term> cs, boolean con, short complexity, short index) {
+        super(n, cs, con, complexity);
         relationIndex = index;
     }
 
@@ -65,17 +65,17 @@ public class ImageInt extends CompoundTerm {
      * Clone an object
      * @return A new object, to be casted into an ImageInt
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new ImageInt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity, relationIndex);
+        return new ImageInt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity, relationIndex);
     }
 
     /**
      * Try to make a new ImageExt. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argList The list of components
+     * @param memory Reference to the memory
      */
-    public static Term make(ArrayList<Term> argList) {
+    public static Term make(ArrayList<Term> argList, Memory memory) {
         if (argList.size() < 2) {
             return null;
         }
@@ -90,7 +90,7 @@ public class ImageInt extends CompoundTerm {
                 argument.add(argList.get(j));
             }
         }
-        return make(argument, (short) index);
+        return make(argument, (short) index, memory);
     }
 
     /**
@@ -98,9 +98,10 @@ public class ImageInt extends CompoundTerm {
      * @param product The product
      * @param relation The relation
      * @param index The index of the place-holder
+     * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(Product product, Term relation, short index) {
+    public static Term make(Product product, Term relation, short index, Memory memory) {
         if (relation instanceof Product) {
             Product p2 = (Product) relation;
             if ((product.size() == 2) && (p2.size() == 2)) {
@@ -114,7 +115,7 @@ public class ImageInt extends CompoundTerm {
         }
         ArrayList<Term> argument = product.cloneComponents();
         argument.set(index, relation);
-        return make(argument, index);
+        return make(argument, index, memory);
     }
 
     /**
@@ -122,26 +123,28 @@ public class ImageInt extends CompoundTerm {
      * @param oldImage The existing Image
      * @param component The component to be added into the component list
      * @param index The index of the place-holder in the new Image
+     * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(ImageInt oldImage, Term component, short index) {
+    public static Term make(ImageInt oldImage, Term component, short index, Memory memory) {
         ArrayList<Term> argList = oldImage.cloneComponents();
         int oldIndex = oldImage.getRelationIndex();
         Term relation = argList.get(oldIndex);
         argList.set(oldIndex, component);
         argList.set(index, relation);
-        return make(argList, index);
+        return make(argList, index, memory);
     }
 
     /**
      * Try to make a new compound from a set of components. Called by the public make methods.
      * @param argument The argument list
      * @param index The index of the place-holder in the new Image
+     * @param memory Reference to the memory
      * @return the Term generated from the arguments
      */
-    public static Term make(ArrayList<Term> argument, short index) {
+    public static Term make(ArrayList<Term> argument, short index, Memory memory) {
         String name = makeImageName(Symbols.IMAGE_INT_OPERATOR, argument, index);
-        Term t = Memory.nameToListedTerm(name);
+        Term t = memory.nameToListedTerm(name);
         return (t != null) ? t : new ImageInt(name, argument, index);
     }
 
@@ -151,6 +154,25 @@ public class ImageInt extends CompoundTerm {
      */
     public short getRelationIndex() {
         return relationIndex;
+    }
+
+    /**
+     * Get the relation term in the Image
+     * @return The term representing a relation
+     */
+    public Term getRelation() {
+        return components.get(relationIndex);
+    }
+
+    /**
+     * Get the other term in the Image
+     * @return The term related
+     */
+    public Term getTheOtherComponent() {
+        if (components.size() != 2) {
+            return null;
+        }
+        return (relationIndex == 0) ? components.get(1) : components.get(0);
     }
 
     /**

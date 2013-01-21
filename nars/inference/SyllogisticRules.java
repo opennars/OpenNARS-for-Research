@@ -21,9 +21,9 @@
 package nars.inference;
 
 import nars.entity.*;
-import nars.term.*;
+import nars.language.*;
 import nars.io.Symbols;
-import nars.container.Memory;
+import nars.storage.Memory;
 
 /**
  * Syllogisms: Inference rules based on the transitivity of the relation.

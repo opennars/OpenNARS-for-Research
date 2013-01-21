@@ -21,7 +21,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.term.Term;
+import nars.language.Term;
 
 /**
  * A link between a compound term and a component term

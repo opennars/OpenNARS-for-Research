@@ -23,7 +23,7 @@ package nars.language;
 import java.util.ArrayList;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * A Statement about a Similarity relation.
@@ -35,8 +35,8 @@ public class Similarity extends Statement {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private Similarity(String n, ArrayList<Term> arg) {
-        super(n, arg);
+    private Similarity(ArrayList<Term> arg) {
+        super(arg);
     }
 
     /**
@@ -46,39 +46,39 @@ public class Similarity extends Statement {
      * @param open Open variable list
      * @param i Syntactic complexity of the compound
      */
-    private Similarity(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
-        super(n, cs, open, i);
+    private Similarity(String n, ArrayList<Term> cs, boolean con, short i) {
+        super(n, cs, con, i);
     }
 
     /**
      * Clone an object
      * @return A new object, to be casted into a Similarity
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new Similarity(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new Similarity(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param subject The first compoment
      * @param predicate The second compoment
+     * @param memory Reference to the memeory
      * @return A compound generated or null
      */
-    public static Similarity make(Term subject, Term predicate) {
+    public static Similarity make(Term subject, Term predicate, Memory memory) {
         if (invalidStatement(subject, predicate)) {
             return null;
         }
         if (subject.compareTo(predicate) > 0) {
-            return make(predicate, subject);
+            return make(predicate, subject, memory);
         }
         String name = makeStatementName(subject, Symbols.SIMILARITY_RELATION, predicate);
-        Term t = Memory.nameToListedTerm(name);
+        Term t = memory.nameToListedTerm(name);
         if (t != null) {
             return (Similarity) t;
         }
         ArrayList<Term> argument = argumentsToList(subject, predicate);
-        return new Similarity(name, argument);
+        return new Similarity(argument);
     }
 
     /**

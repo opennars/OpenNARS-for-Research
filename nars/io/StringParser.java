@@ -24,9 +24,9 @@ import java.util.*;
 
 import nars.entity.*;
 import nars.inference.*;
-import nars.term.*;
+import nars.language.*;
 import nars.main.*;
-import nars.container.Memory;
+import nars.storage.Memory;
 
 /**
  * Parse input String into Task or Term.

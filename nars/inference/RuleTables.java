@@ -21,8 +21,8 @@
 package nars.inference;
 
 import nars.entity.*;
-import nars.term.*;
-import nars.container.Memory;
+import nars.language.*;
+import nars.storage.Memory;
 import nars.io.Symbols;
 
 /**

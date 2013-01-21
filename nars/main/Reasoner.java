@@ -22,7 +22,7 @@ package nars.main;
 
 import java.util.ArrayList;
 
-import nars.container.*;
+import nars.storage.*;
 import nars.io.*;
 import nars.gui.*;
 import nars.entity.*;

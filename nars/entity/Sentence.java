@@ -21,7 +21,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.term.*;
+import nars.language.*;
 import nars.main.*;
 
 /**

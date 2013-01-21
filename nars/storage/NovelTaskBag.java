@@ -1,5 +1,5 @@
 /*
- * TaskBuffer.java
+ * NovelTaskBag.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -22,36 +22,33 @@
 package nars.storage;
 
 import nars.entity.Task;
-import nars.main.*;
+import nars.main.Parameters;
 
 /**
  * New tasks that contain new Term.
  */
-public class TaskBuffer extends Bag<Task> {
-    
+public class NovelTaskBag extends Bag<Task> {
+
+    /** Constructor
+     * @param memory The reference of memory
+     */
+    public NovelTaskBag(Memory memory) {
+        super(memory);
+    }
     /**
-     * Get the (constant) capacity of TaskBuffer
-     * @return The capacity of TaskBuffer
+     * Get the (constant) capacity of NovelTaskBag
+     * @return The capacity of NovelTaskBag
      */
     protected int capacity() {
         return Parameters.TASK_BUFFER_SIZE;
     }
     
     /**
-     * Get the (constant) forget rate in TaskBuffer
-     * @return The forget rate in TaskBuffer
+     * Get the (constant) forget rate in NovelTaskBag
+     * @return The forget rate in NovelTaskBag
      */
     protected int forgetRate() {
         return Parameters.NEW_TASK_FORGETTING_CYCLE;
-    }
-
-    /**
-     * Sepecial treatment: the display also include Tasks in the NewTask list
-     * @return New Tasks in the buffer and list for display
-     */
-    @Override
-    public String toString() {
-        return Memory.newTasksToString() + super.toString();
     }
 }
 

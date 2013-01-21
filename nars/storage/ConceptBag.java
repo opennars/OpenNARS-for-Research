@@ -23,15 +23,19 @@ package nars.storage;
 
 import nars.entity.Concept;
 import nars.main.Parameters;
-import nars.gui.MainWindow;
-import nars.language.Term;
 
 /**
  * Contains Concepts.
  */
 public class ConceptBag extends Bag<Concept> {
-    
+    /** Constructor
+     * @param memory The reference of memory
+     */
+    public ConceptBag (Memory memory) {
+        super(memory);
+    }
     /**
+     *
      * Get the (constant) capacity of ConceptBag
      * @return The capacity of ConceptBag
      */
@@ -44,15 +48,6 @@ public class ConceptBag extends Bag<Concept> {
      * @return The forget rate of ConceptBag
      */
     protected int forgetRate() {
-        return MainWindow.forgetCW.value();
-    }
-
-    public Term mostActive() {
-        int i = TOTAL_LEVEL - 1;
-        while (emptyLevel(i)) {
-            i--;
-        }
-        Concept c = itemTable[i].get(0);
-        return c.getTerm();
+        return memory.getMainWindow().forgetCW.value();
     }
 }

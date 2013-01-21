@@ -23,7 +23,7 @@ package nars.language;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * An extensionally defined set, which contains one or more instances.
@@ -35,8 +35,8 @@ public class SetExt extends CompoundTerm {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private SetExt(String n, ArrayList<Term> arg) {
-        super(n, arg);
+    private SetExt(ArrayList<Term> arg) {
+        super(arg);
     }
 
     /**
@@ -46,53 +46,55 @@ public class SetExt extends CompoundTerm {
      * @param open Open variable list
      * @param i Syntactic complexity of the compound
      */
-    private SetExt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
-        super(n, cs, open, i);
+    private SetExt(String n, ArrayList<Term> cs, boolean con, short i) {
+        super(n, cs, con, i);
     }
 
     /**
      * Clone a SetExt
      * @return A new object, to be casted into a SetExt
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new SetExt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new SetExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a new set from one component. Called by the inference rules.
      * @param t The compoment
+     * @param memory Reference to the memeory
      * @return A compound generated or a term it reduced to
      */
-    public static Term make(Term t) {
+    public static Term make(Term t, Memory memory) {
         TreeSet<Term> set = new TreeSet<Term>();
         set.add(t);
-        return make(set);
+        return make(set, memory);
     }
 
     /**
      * Try to make a new SetExt. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argList The list of components
+     * @param memory Reference to the memeory
      */
-    public static Term make(ArrayList<Term> argList) {
+    public static Term make(ArrayList<Term> argList, Memory memory) {
         TreeSet<Term> set = new TreeSet<Term>(argList); // sort/merge arguments
-        return make(set);
+        return make(set, memory);
     }
 
     /**
      * Try to make a new compound from a set of components. Called by the public make methods.
      * @param set a set of Term as compoments
+     * @param memory Reference to the memeory
      * @return the Term generated from the arguments
      */
-    public static Term make(TreeSet<Term> set) {
+    public static Term make(TreeSet<Term> set, Memory memory) {
         if (set.isEmpty()) {
             return null;
         }
         ArrayList<Term> argument = new ArrayList<Term>(set);
         String name = makeSetName(Symbols.SET_EXT_OPENER, argument, Symbols.SET_EXT_CLOSER);
-        Term t = Memory.nameToListedTerm(name);
-        return (t != null) ? t : new SetExt(name, argument);
+        Term t = memory.nameToListedTerm(name);
+        return (t != null) ? t : new SetExt(argument);
     }
 
     /**

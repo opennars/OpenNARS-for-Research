@@ -20,9 +20,9 @@
  */
 package nars.inference;
 
-import nars.container.Memory;
+import nars.storage.Memory;
 import nars.entity.*;
-import nars.term.*;
+import nars.language.*;
 import nars.io.Symbols;
 
 /**

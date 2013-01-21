@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import nars.gui.ConceptWindow;
 import nars.inference.*;
 import nars.io.Symbols;
-import nars.term.*;
+import nars.language.*;
 import nars.main.*;
-import nars.container.*;
+import nars.storage.*;
 
 /**
  * A concept contains information associated with a term, including directly 

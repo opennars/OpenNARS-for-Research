@@ -38,50 +38,62 @@ import nars.main.Parameters;
  * The bag space is divided by a threshold, above which is mainly time management,
  * and below, space mamagement.
  * Differences: (1) level selection vs. item selection, (2) decay rate
- * @param Type The type of the Item in the Bag
+ * @param <Type>  The type of the Item in the Bag
  */
 public abstract class Bag<Type extends Item> {
 
     /** priority levels */
-    protected static final int TOTAL_LEVEL = Parameters.BAG_LEVEL;
+    private static final int TOTAL_LEVEL = Parameters.BAG_LEVEL;
     /** firing threshold */
-    protected static final int THRESHOLD = Parameters.BAG_THRESHOLD;
+    private static final int THRESHOLD = Parameters.BAG_THRESHOLD;
     /** relative threshold, only calculate once */
-    protected static final float RELATIVE_THRESHOLD = (float) THRESHOLD / (float) TOTAL_LEVEL;
+    private static final float RELATIVE_THRESHOLD = (float) THRESHOLD / (float) TOTAL_LEVEL;
     /** hashtable load factor */
-    protected static final float LOAD_FACTOR = Parameters.LOAD_FACTOR;       // 
-    /** shared distributor that produce the probability distribution */
-    static final Distributor DISTRIBUTOR = new Distributor(TOTAL_LEVEL); // 
+    private static final float LOAD_FACTOR = Parameters.LOAD_FACTOR;       //
+    /** shared DISTRIBUTOR that produce the probability distribution */
+    private static final Distributor DISTRIBUTOR = new Distributor(TOTAL_LEVEL); //
     /** mapping from key to item */
-    protected HashMap<String, Type> nameTable;
+    private HashMap<String, Type> nameTable;
     /** array of lists of items, for items on different level */
-    protected ArrayList<Type> itemTable[];
+    private ArrayList<ArrayList<Type>> itemTable;
     /** defined in different bags */
-    protected int capacity;
+    private int capacity;
     /** current sum of occupied level */
-    protected int mass = 0;
+    private int mass;
     /** index to get next level, kept in individual objects */
-    protected int levelIndex;
+    private int levelIndex;
     /** current take out level */
-    protected int currentLevel;
+    private int currentLevel;
     /** maximum number of items to be taken out at current level */
-    protected int currentCounter;
+    private int currentCounter;
     /** whether this bag has an active window */
-    protected boolean showing;
+    private boolean showing;
     /** display window */
-    protected BagWindow window;
+    private BagWindow window;
+    /** reference to memory */
+    protected Memory memory;
 
     /**
      * constructor, called from subclasses
+     * @param memory The reference to memory
      */
-    @SuppressWarnings("unchecked")
-    protected Bag() {
-        capacity = capacity();
-        levelIndex = capacity % TOTAL_LEVEL; // so that different bags start at different point
-        currentLevel = TOTAL_LEVEL - 1;
-        itemTable = new ArrayList[TOTAL_LEVEL];
-        nameTable = new HashMap<String, Type>((int) (capacity / LOAD_FACTOR), LOAD_FACTOR);
+    protected Bag(Memory memory) {
+        this.memory = memory;
         showing = false;
+        capacity = capacity();
+        init();
+    }
+
+    public void init() {
+        itemTable = new ArrayList<ArrayList<Type>>(TOTAL_LEVEL);
+        for (int i = 0; i < TOTAL_LEVEL; i++) {
+            itemTable.add(new ArrayList<Type>());
+        }
+        nameTable = new HashMap<String, Type>((int) (capacity / LOAD_FACTOR), LOAD_FACTOR);
+        currentLevel = TOTAL_LEVEL - 1;
+        levelIndex = capacity % TOTAL_LEVEL; // so that different bags start at different point
+        mass = 0;
+        currentCounter = 0;
     }
 
     /**
@@ -169,7 +181,7 @@ public abstract class Bag<Type extends Item> {
      * @return The selected Item
      */
     public Type takeOut() {
-        if (mass == 0) { // empty bag
+        if (nameTable.isEmpty()) { // empty bag
             return null;
         }
         if (emptyLevel(currentLevel) || (currentCounter == 0)) { // done with the current level
@@ -182,7 +194,7 @@ public abstract class Bag<Type extends Item> {
             if (currentLevel < THRESHOLD) { // for dormant levels, take one item
                 currentCounter = 1;
             } else {                  // for active levels, take all current items
-                currentCounter = itemTable[currentLevel].size();
+                currentCounter = itemTable.get(currentLevel).size();
             }
         }
         Type selected = takeOutFirst(currentLevel); // take out the first item in the level
@@ -212,7 +224,7 @@ public abstract class Bag<Type extends Item> {
      * @return Whether that level is empty
      */
     protected boolean emptyLevel(int n) {
-        return ((itemTable[n] == null) || itemTable[n].isEmpty());
+        return ((itemTable.get(n) == null) || itemTable.get(n).isEmpty());
     }
 
     /**
@@ -231,7 +243,6 @@ public abstract class Bag<Type extends Item> {
      * @param newItem The Item to put in
      * @return The overflow Item
      */
-    @SuppressWarnings("unchecked")
     private Type intoBase(Type newItem) {
         Type oldItem = null;
         int inLevel = getLevel(newItem);
@@ -246,10 +257,7 @@ public abstract class Bag<Type extends Item> {
                 oldItem = takeOutFirst(outLevel);
             }
         }
-        if (itemTable[inLevel] == null) {       // first time insert
-            itemTable[inLevel] = new ArrayList();
-        }
-        itemTable[inLevel].add(newItem);        // FIFO
+        itemTable.get(inLevel).add(newItem);        // FIFO
         mass += (inLevel + 1);                  // increase total mass
         refresh();                              // refresh the wondow
         return oldItem;
@@ -261,8 +269,8 @@ public abstract class Bag<Type extends Item> {
      * @return The first Item
      */
     private Type takeOutFirst(int level) {
-        Type selected = itemTable[level].get(0);
-        itemTable[level].remove(0);
+        Type selected = itemTable.get(level).get(0);
+        itemTable.get(level).remove(0);
         mass -= (level + 1);
         refresh();
         return selected;
@@ -274,7 +282,7 @@ public abstract class Bag<Type extends Item> {
      */
     protected void outOfBase(Type oldItem) {
         int level = getLevel(oldItem);
-        itemTable[level].remove(oldItem);
+        itemTable.get(level).remove(oldItem);
         mass -= (level + 1);
         refresh();
     }
@@ -284,7 +292,7 @@ public abstract class Bag<Type extends Item> {
      * @param title The title of the window
      */
     public void startPlay(String title) {
-   		window = new BagWindow(this, title);
+        window = new BagWindow(this, title);
         showing = true;
         window.post(toString());
     }
@@ -321,9 +329,9 @@ public abstract class Bag<Type extends Item> {
         StringBuffer buf = new StringBuffer(" ");
         for (int i = TOTAL_LEVEL; i >= window.showLevel(); i--) {
             if (!emptyLevel(i - 1)) {
-                buf = buf.append("\n --- Level " + String.valueOf(i) + ":\n ");
-                for (int j = 0; j < itemTable[i - 1].size(); j++) {
-                    buf = buf.append(itemTable[i - 1].get(j) + "\n ");
+                buf = buf.append("\n --- Level " + i + ":\n ");
+                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
+                    buf = buf.append(itemTable.get(i - 1).get(j).toStringBrief() + "\n ");
                 }
             }
         }

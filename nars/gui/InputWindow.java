@@ -23,7 +23,7 @@ package nars.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-import nars.container.Memory;
+import nars.storage.Memory;
 import nars.main.*;
 import nars.io.*;
 

@@ -23,7 +23,7 @@ package nars.language;
 import java.util.*;
 
 import nars.io.Symbols;
-import nars.main.Memory;
+import nars.storage.Memory;
 
 /**
  * A compound term whose extension is the difference of the extensions of its components
@@ -35,8 +35,8 @@ public class DifferenceExt extends CompoundTerm {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private DifferenceExt(String n, ArrayList<Term> arg) {
-        super(n, arg);
+    private DifferenceExt(ArrayList<Term> arg) {
+        super(arg);
     }
 
     /**
@@ -46,25 +46,25 @@ public class DifferenceExt extends CompoundTerm {
      * @param open Open variable list
      * @param i Syntactic complexity of the compound
      */
-    private DifferenceExt(String n, ArrayList<Term> cs, ArrayList<Variable> open, short i) {
-        super(n, cs, open, i);
+    private DifferenceExt(String n, ArrayList<Term> cs, boolean con, short i) {
+        super(n, cs, con, i);
     }
 
     /**
      * Clone an object
      * @return A new object, to be casted into a DifferenceExt
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        return new DifferenceExt(name, (ArrayList<Term>) cloneList(components), (ArrayList<Variable>) cloneList(openVariables), complexity);
+        return new DifferenceExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a new DifferenceExt. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argList The list of components
+     * @param memory Reference to the memory
      */
-    public static Term make(ArrayList<Term> argList) {
+    public static Term make(ArrayList<Term> argList, Memory memory) {
         if (argList.size() == 1) { // special case from CompoundTerm.reduceComponent
             return argList.get(0);
         }
@@ -72,28 +72,28 @@ public class DifferenceExt extends CompoundTerm {
             return null;
         }
         String name = makeCompoundName(Symbols.DIFFERENCE_EXT_OPERATOR, argList);
-        Term t = Memory.nameToListedTerm(name);
-        return (t != null) ? t : new DifferenceExt(name, argList);
+        Term t = memory.nameToListedTerm(name);
+        return (t != null) ? t : new DifferenceExt(argList);
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
      * @param t1 The first compoment
      * @param t2 The second compoment
+     * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
      */
-    @SuppressWarnings("unchecked")
-    public static Term make(Term t1, Term t2) {
+    public static Term make(Term t1, Term t2, Memory memory) {
         if (t1.equals(t2)) {
             return null;
         }
         if ((t1 instanceof SetExt) && (t2 instanceof SetExt)) {
-            TreeSet set = new TreeSet(((CompoundTerm) t1).cloneComponents());
+            TreeSet<Term> set = new TreeSet<Term>(((CompoundTerm) t1).cloneComponents());
             set.removeAll(((CompoundTerm) t2).cloneComponents());           // set difference
-            return SetExt.make(set);
+            return SetExt.make(set, memory);
         }
         ArrayList<Term> list = argumentsToList(t1, t2);
-        return make(list);
+        return make(list, memory);
     }
 
     /**

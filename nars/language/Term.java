@@ -20,13 +20,12 @@
  */
 package nars.language;
 
-import java.util.ArrayList;
-
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
  * <p>
  * A Term may have an associated Concept containing relations with other Terms. It
- * is not linked in the Term, because a Concept may be forgot, while the Term exists.
+ * is not linked in the Term, because a Concept may be forgot while the Term exists.
+ * Multiple objects may represent the same Term.
  */
 public class Term implements Cloneable, Comparable<Term> {
 
@@ -37,7 +36,7 @@ public class Term implements Cloneable, Comparable<Term> {
     protected String name;
 
     /**
-     * Default constructor
+     * Default constructor that build an internal Term
      */
     protected Term() {
     }
@@ -51,27 +50,10 @@ public class Term implements Cloneable, Comparable<Term> {
     }
 
     /**
-     * The same as getName by default, used in display only.
-     * @return The name of the term as a String
-     */
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    /**
      * Reporting the name of the current Term.
      * @return The name of the term as a String
      */
     public String getName() {
-        return name;
-    }
-
-    /**
-     * Default, to be overrided in variable Terms.
-     * @return The name of the term as a String
-     */
-    public String getConstantName() {
         return name;
     }
 
@@ -91,7 +73,7 @@ public class Term implements Cloneable, Comparable<Term> {
      */
     @Override
     public boolean equals(Object that) {
-        return (that instanceof Term) && getName().equals(((Term) that).getName());
+        return (that instanceof Term) && name.equals(((Term) that).getName());
     }
 
     /**
@@ -100,28 +82,7 @@ public class Term implements Cloneable, Comparable<Term> {
      */
     @Override
     public int hashCode() {
-        int hash = 3;
-        return hash;
-    }
-
-    /**
-     * The syntactic complexity, for constant automic Term, is 1.
-     * @return The conplexity of the term, an integer
-     */
-    public int getComplexity() {
-        return 1;
-    }
-
-    /**
-     * Check the relative order of two Terms.
-     * <p>
-     * based on the constant part first
-     * @param that The Term to be compared with the current Term
-     * @return The same as compareTo as defined on Strings when the constant parts are compared
-     */
-    public final int compareTo(Term that) {
-        int i = this.getConstantName().compareTo(that.getConstantName());
-        return (i != 0) ? i : this.getName().compareTo(that.getName());
+        return (name != null ? name.hashCode() : 7);
     }
 
     /**
@@ -133,27 +94,42 @@ public class Term implements Cloneable, Comparable<Term> {
     }
 
     /**
-     * Whether there is a temporal order in the term, which is false by default
-     * @return The default value
+     * Blank method to be override in CompoundTerm
      */
-    public boolean isTemporal() {
-        return false;
+    public void renameVariables() {}
+
+    /**
+     * The syntactic complexity, for constant automic Term, is 1.
+     * @return The conplexity of the term, an integer
+     */
+    public int getComplexity() {
+        return 1;
     }
 
     /**
-     * Obtain the temporal order in the term
-     * @return The default value
+     * Check the relative order of two Terms.
+     * @param that The Term to be compared with the current Term
+     * @return The same as compareTo as defined on Strings
      */
-    public int getOrder() {
-        return 0;
+    public final int compareTo(Term that) { 
+        return name.compareTo(that.getName());
     }
 
     /**
-     * Get the operator of the term if it is an operation, with an optional opeartor.
-     * @param opName An optional operator name to be matched
-     * @return The list representation of the operation
+     * Recursively check if a compound contains a term
+     * @param target The term to be searched
+     * @return Whether the two have the same content
      */
-    public ArrayList<Term> parseOperation(String opName) {
-        return null;
+    public boolean containTerm(Term target) {
+        return equals(target);
+    }
+  
+    /**
+     * The same as getName by default, used in display only.
+     * @return The name of the term as a String
+     */
+    @Override
+    public final String toString() {
+        return name;
     }
 }

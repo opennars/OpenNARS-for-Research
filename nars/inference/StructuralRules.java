@@ -20,11 +20,11 @@
  */
 package nars.inference;
 
-import nars.container.Memory;
+import nars.storage.Memory;
 import java.util.ArrayList;
 
 import nars.entity.*;
-import nars.term.*;
+import nars.language.*;
 import nars.main.*;
 
 /**

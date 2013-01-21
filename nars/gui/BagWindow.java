@@ -24,7 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.main.Parameters;
-import nars.container.Bag;
+import nars.storage.Bag;
 
 /**
  * Window display the priority distribution of items within a given bag

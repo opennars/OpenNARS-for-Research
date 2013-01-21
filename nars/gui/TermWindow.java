@@ -25,7 +25,7 @@ import java.awt.event.*;
 
 import nars.entity.Concept;
 //import nars.io.StringParser;
-import nars.container.Memory;
+import nars.storage.Memory;
 
 /**
  * Window accept a Term, then display the content of the corresponding Concept

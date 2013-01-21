@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 import nars.io.*;
 import nars.main.*;
-import nars.container.Memory;
+import nars.storage.Memory;
 
 /**
  * Main window of NARS GUI

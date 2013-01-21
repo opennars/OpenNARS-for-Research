@@ -10,13 +10,8 @@ Open-NARS implements the following formal language, Narsese.
 <pre>
            &lt;sentence&gt; ::= &lt;judgment&gt;
                         | &lt;question&gt;
-                        | &lt;goal&gt;
-           &lt;judgment&gt; ::= &lt;statement&gt; &lt;tense&gt; &lt;truth-value&gt;
-           &lt;question&gt; ::= &lt;statement&gt; &lt;tense&gt; 
-               &lt;goal&gt; ::= &lt;statement&gt; &lt;desire-value&gt;
-              &lt;tense&gt; ::= :\:    // past
-                        | :|:    // present
-                        | :/:    // future
+           &lt;judgment&gt; ::= &lt;statement&gt; &lt;truth-value&gt;
+           &lt;question&gt; ::= &lt;statement&gt; 
           &lt;statement&gt; ::= &lt;&lt;term&gt; &lt;relation&gt; &lt;term&gt;&gt;
                         | &lt;compound-statement&gt;
                         | &lt;term&gt;
@@ -30,17 +25,10 @@ Open-NARS implements the following formal language, Narsese.
                         | --]    // Property
                         | {-]    // InstanceProperty
                         | ==>    // Implication
-                        | =/>    // Implication (After)
-                        | =|>    // Implication (When)
-                        | =\>    // Implication (Before)
                         | <=>    // Equivalence
-                        | &lt;/>    // Equivalence (After)
-                        | &lt;|>    // Equivalence (When)
  &lt;compound-statement&gt; ::= (-- &lt;statement&gt;)                 // Negation
                         | (|| &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Disjunction
                         | (&& &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction
-                        | (&/ &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction (Sequence)
-                        | (&| &lt;statement&gt; &lt;statement&gt;<sup>+</sup>)    // Conjunction (Parallel)
       &lt;compound-term&gt; ::= {&lt;term&gt;<sup>+</sup>}    // SetExt
                         | [&lt;term&gt;<sup>+</sup>]    // SetInt
                         | (& &lt;term&gt; &lt;term&gt;<sup>+</sup>)    // IntersectionExt
@@ -50,17 +38,14 @@ Open-NARS implements the following formal language, Narsese.
                         | (* &lt;term&gt; &lt;term&gt;<sup>+</sup>)    // Product
                         | (/ &lt;term&gt;<sup>+</sup> _ &lt;term&gt;<sup>*</sup>)    // ImageExt
                         | (\ &lt;term&gt;<sup>+</sup> _ &lt;term&gt;<sup>*</sup>)    // ImageInt
-           &lt;variable&gt; ::= &lt;dependent-var&gt;
-                        | &lt;independent-var&gt;
-                        | &lt;anonymous-var&gt;
+           &lt;variable&gt; ::= &lt;independent-var&gt;
+                        | &lt;dependent-var&gt;
                         | &lt;query-var&gt;
-      &lt;dependent-var&gt; ::= #&lt;word&gt;(&lt;independent-var&gt;<sup>*</sup>)
-    &lt;independent-var&gt; ::= #&lt;word&gt;
-      &lt;anonymous-var&gt; ::= #
-          &lt;query-var&gt; ::= ?&lt;word&gt;
+    &lt;independent-var&gt; ::= $[&lt;word&gt;]
+      &lt;dependent-var&gt; ::= #&lt;word&gt;
+          &lt;query-var&gt; ::= ?[&lt;word&gt;]
                &lt;word&gt; : string in an alphabet
         &lt;truth-value&gt; : a pair of real numbers in [0, 1] x (0, 1)
-       &lt;desire-value&gt; : a pair of real numbers in [0, 1] x (0, 1)
 </pre>
 
 Major methods in the Term classes:

@@ -20,7 +20,7 @@
  */
 package nars.entity;
 
-import nars.term.Term;
+import nars.language.Term;
 
 /**
  * A task to be processed, consists of a Sentence and a BudgetValue
