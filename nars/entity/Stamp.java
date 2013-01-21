@@ -28,86 +28,53 @@ import nars.main.*;
 /**
  * Each Sentence has a time stamp, consisting the following components:
  * (1) The creation time of the sentence, 
- * (2) The time when the truth-value is supported, 
- * (3) A trail of serial numbers of sentence, from which the sentence is derived.
- * Each input sentence gets a unique serial number.
- * The derived sentences inherits serial numbers from its parents, cut at the length limit.
+ * (2) A evidentialBase of serial numbers of sentence, from which the sentence is derived.
+ * Each input sentence gets a unique serial number, though the creation time may be not unique.
+ * The derived sentences inherits serial numbers from its parents, cut at the baseLength limit.
  */
 public class Stamp implements Cloneable {
 
     /** serial number, for the whole system */
-    private static long current = 0;
-    /** special value, for time-independent truth-values */
-    public static final long ALWAYS = Long.MIN_VALUE;
+    private static long currentSerial = 0;
     /** serial numbers */
-    private long[] trail;
-    /** trail length */
-    private int length;
+    private long[] evidentialBase;
+    /** evidentialBase baseLength */
+    private int baseLength;
     /** creation time of the stamp */
     private long creationTime;
-    /** creation time of the stamp */
-    private long eventTime;
 
     /**
-     * Generate a new stamp, with a new serial number, for new sentence without tense
+     * Generate a new stamp, with a new serial number, for a new Task
+     * @param time Creation time of the stamp
      */
-    public Stamp() {
-        current++;
-        length = 1;
-        trail = new long[length];
-        trail[0] = current;
-        creationTime = Center.getTime();
-        eventTime = ALWAYS;
+    public Stamp(long time) {
+        currentSerial++;
+        baseLength = 1;
+        evidentialBase = new long[baseLength];
+        evidentialBase[0] = currentSerial;
+        creationTime = time;
     }
 
     /**
-     * Generate a new stamp, with a new serial number, for new sentence with numeric tense
-     * @param time The time of the event
-     * @param relative Whether the time is absolute or relative
+     * Generate a new stamp identical with a given one
+     * @param old The stamp to be cloned
      */
-    public Stamp(long time, boolean relative) {
-        current++;
-        length = 1;
-        trail = new long[length];
-        trail[0] = current;
-        creationTime = Center.getTime();
-        if (relative) {
-            eventTime = creationTime + time;
-        } else {
-            eventTime = time;
-        }
+    private Stamp(Stamp old) {
+        baseLength = old.length();
+        evidentialBase = old.getBase();
+        creationTime = old.getCreationTime();
     }
 
     /**
-     * Generate a new stamp, with a new serial number, for input sentence with symbolic tense
-     * @param tense The String representing input tense
-     */
-    public Stamp(String tense) {
-        current++;
-        length = 1;
-        trail = new long[length];
-        trail[0] = current;
-        creationTime = Center.getTime();
-        if (tense.equals(Symbols.TENSE_PAST)) {
-            eventTime = creationTime - 1;
-        } else if (tense.equals(Symbols.TENSE_FUTURE)) {
-            eventTime = creationTime + 1;
-        } else {
-            eventTime = creationTime;
-        }
-    }
-
-    /**
-     * Generate a new stamp from an existing one, with the same trail but different creation time
+     * Generate a new stamp from an existing one, with the same evidentialBase but different creation time
      * <p>
      * For single-premise rules
      * @param old The stamp of the single premise
      */
-    private Stamp(Stamp old) {
-        length = old.length();
-        trail = old.getList();
-        creationTime = Center.getTime();
-        eventTime = old.getEventTime();
+    private Stamp(Stamp old, long time) {
+        baseLength = old.length();
+        evidentialBase = old.getBase();
+        creationTime = time;
     }
 
     /**
@@ -119,27 +86,22 @@ public class Stamp implements Cloneable {
     private Stamp(Stamp first, Stamp second, long time) {
         int i1, i2, j;
         i1 = i2 = j = 0;
-        length = Math.min(first.length() + second.length(), Parameters.MAXMUM_STAMP_LENGTH);
-        trail = new long[length];
-        while (i2 < second.length() && j < length) {
-            trail[j] = first.get(i1);
+        baseLength = Math.min(first.length() + second.length(), Parameters.MAXMUM_STAMP_LENGTH);
+        evidentialBase = new long[baseLength];
+        while (i2 < second.length() && j < baseLength) {
+            evidentialBase[j] = first.get(i1);
             i1++;
             j++;
-            trail[j] = second.get(i2);
+            evidentialBase[j] = second.get(i2);
             i2++;
             j++;
         }
-        while (i1 < first.length() && j < length) {
-            trail[j] = first.get(i1);
+        while (i1 < first.length() && j < baseLength) {
+            evidentialBase[j] = first.get(i1);
             i1++;
             j++;
         }
-        creationTime = Center.getTime();
-        if (Memory.currentTask.getSentence() instanceof Goal) {
-            eventTime = ALWAYS;
-        } else {
-            eventTime = time;
-        }
+        creationTime = time;
     }
 
     /**
@@ -150,7 +112,7 @@ public class Stamp implements Cloneable {
      * @param second The second Stamp
      * @return The merged Stamp, or null
      */
-    public static Stamp make(Stamp first, Stamp second) {
+    public static Stamp make(Stamp first, Stamp second, long time) {
         for (int i = 0; i < first.length(); i++) {
             for (int j = 0; j < second.length(); j++) {
                 if (first.get(i) == second.get(j)) {
@@ -159,55 +121,61 @@ public class Stamp implements Cloneable {
             }
         }
         if (first.length() > second.length()) {
-            return new Stamp(first, second, first.getEventTime());
+            return new Stamp(first, second, time);
         } else {
-            return new Stamp(second, first, first.getEventTime());
+            return new Stamp(second, first, time);
         }
     }
 
+    /**
+     * Clone a stamp
+     * @return The cloned stamp
+     */
+    @Override
     public Object clone() {
         return new Stamp(this);
     }
 
     /**
-     * Initialize the stamp machenism of the system, called in Center
+     * Initialize the stamp machenism of the system, called in Reasoner
      */
     public static void init() {
-        current = 0;
+        currentSerial = 0;
     }
 
     /**
-     * Return the length of the trail
+     * Return the baseLength of the evidentialBase
      * @return Length of the Stamp
      */
     public int length() {
-        return length;
+        return baseLength;
     }
 
     /**
-     * Get a number from the trail by index, called in this class only
+     * Get a number from the evidentialBase by index, called in this class only
      * @param i The index
      * @return The number at the index
      */
     long get(int i) {
-        return trail[i];
+        return evidentialBase[i];
     }
 
     /**
-     * Get the trail, called in this class only
-     * @return The trail of numbers
+     * Get the evidentialBase, called in this class only
+     * @return The evidentialBase of numbers
      */
-    long[] getList() {
-        return trail;
+    private long[] getBase() {
+        return evidentialBase;
     }
 
     /**
-     * Convert the trail into a set
+     * Convert the evidentialBase into a set
+     * @return The TreeSet representation of the evidential base
      */
-    TreeSet<Long> toSet() {
+    private TreeSet<Long> toSet() {
         TreeSet<Long> set = new TreeSet<Long>();
-        for (int i = 0; i < length; i++) {
-            set.add(trail[i]);
+        for (int i = 0; i < baseLength; i++) {
+            set.add(evidentialBase[i]);
         }
         return set;
     }
@@ -222,9 +190,6 @@ public class Stamp implements Cloneable {
         if (!(that instanceof Stamp)) {
             return false;
         }
-        if (eventTime != ((Stamp) that).getEventTime()) {
-            return false;       // creation time does not matter
-        }
         TreeSet<Long> set1 = toSet();
         TreeSet<Long> set2 = ((Stamp) that).toSet();
         return (set1.containsAll(set2) && set2.containsAll(set1));
@@ -236,8 +201,7 @@ public class Stamp implements Cloneable {
      */
     @Override
     public int hashCode() {
-        int hash = 7;
-        return hash;
+        return toString().hashCode();
     }
 
     /**
@@ -249,48 +213,17 @@ public class Stamp implements Cloneable {
     }
 
     /**
-     * Get the eventTime of the truth-value
-     * @return The event time
-     */
-    public long getEventTime() {
-        return eventTime;
-    }
-
-    /**
-     * Adjust the eventTime of the truth-value
-     * @param d The direction and extent of the change
-     */
-//    public void adjustEventTime(int d) {
-//        if (eventTime != ALWAYS) {
-//            eventTime += d;
-//        } else {
-//            eventTime = d + Center.getTime();
-//        }
-//    }
-
-    /**
-     * Set the eventTime of the truth-value
-     * @param t The new event time
-     */
-    public void setEventTime(long t) {
-        eventTime = t;
-    }
-
-    /**
      * Get a String form of the Stamp for display
-     * Format: {creationTime [: eventTime] : trail}
+     * Format: {creationTime [: eventTime] : evidentialBase}
      * @return The Stamp as a String
      */
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + creationTime);
-        if (eventTime != ALWAYS) {
-            buffer.append(" " + Symbols.STAMP_STARTER + " " + eventTime);
-        }
         buffer.append(" " + Symbols.STAMP_STARTER + " ");
-        for (int i = 0; i < length; i++) {
-            buffer.append(Long.toString(trail[i]));
-            if (i < (length - 1)) {
+        for (int i = 0; i < baseLength; i++) {
+            buffer.append(Long.toString(evidentialBase[i]));
+            if (i < (baseLength - 1)) {
                 buffer.append(Symbols.STAMP_SEPARATOR);
             } else {
                 buffer.append(Symbols.STAMP_CLOSER + " ");

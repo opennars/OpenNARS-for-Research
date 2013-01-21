@@ -20,10 +20,11 @@
  */
 package nars.inference;
 
+import java.util.*;
+
 import nars.entity.*;
-import nars.language.*;
-import nars.io.Symbols;
-import nars.main.Memory;
+import nars.term.*;
+import nars.container.Memory;
 
 /**
  * Compound term composition and decomposition rules, with two premises.
@@ -40,125 +41,128 @@ public final class CompositionalRules {
      * @param taskSentence The first premise
      * @param belief The second premise
      * @param index The location of the shared term
+     * @param memory Reference to the memory
      */
-    static void composeCompound(Sentence taskSentence, Judgment belief, int index) {
-        if (!taskSentence.isJudgment()) {
-            return;
-        }                             // forward only
-        Statement content1 = (Statement) taskSentence.getContent();
-        Statement content2 = (Statement) belief.getContent();
-        if (content1.getClass() != content2.getClass()) {
+    static void composeCompound(Statement taskContent, Statement beliefContent, int index, Memory memory) {
+        if ((!memory.currentTask.getSentence().isJudgment()) || (taskContent.getClass() != beliefContent.getClass())) {
             return;
         }
-        Term component1, component2;
-        component1 = content1.componentAt(1 - index);
-        component2 = content2.componentAt(1 - index);
-        Term component = content1.componentAt(index);
-        if ((component1 instanceof CompoundTerm) && ((CompoundTerm) component1).containAllComponents(component2)) {
-            decomposeCompound((CompoundTerm) component1, component2, component, index, true);
+        Term componentT = taskContent.componentAt(1 - index);
+        Term componentB = beliefContent.componentAt(1 - index);
+        Term componentCommon = taskContent.componentAt(index);
+        if ((componentT instanceof CompoundTerm) && ((CompoundTerm) componentT).containAllComponents(componentB)) {
+            decomposeCompound((CompoundTerm) componentT, componentB, componentCommon, index, true, memory);
             return;
-        } else if ((component2 instanceof CompoundTerm) && ((CompoundTerm) component2).containAllComponents(component1)) {
-            decomposeCompound((CompoundTerm) component2, component1, component, index, false);
+        } else if ((componentB instanceof CompoundTerm) && ((CompoundTerm) componentB).containAllComponents(componentT)) {
+            decomposeCompound((CompoundTerm) componentB, componentT, componentCommon, index, false, memory);
             return;
         }
-        Term t1 = null;
-        Term t2 = null;
-        Term t3 = null;
-        Term t4 = null;
-        TruthValue v1 = taskSentence.getTruth();
-        TruthValue v2 = belief.getTruth();
+        TruthValue truthT = memory.currentTask.getSentence().getTruth();
+        TruthValue truthB = memory.currentBelief.getTruth();
+        TruthValue truthOr = TruthFunctions.union(truthT, truthB);
+        TruthValue truthAnd = TruthFunctions.intersection(truthT, truthB);
+        Term termOr = null;
+        Term termAnd = null;
         if (index == 0) {
-            if (content1 instanceof Inheritance) {
-                t1 = IntersectionInt.make(component1, component2);
-                t2 = IntersectionExt.make(component1, component2);
-                t3 = DifferenceExt.make(component1, component2);
-                t4 = DifferenceExt.make(component2, component1);
-            } else if (content1 instanceof Implication) {
-                t1 = Disjunction.make(component1, component2);
-                t2 = Conjunction.make(component1, component2, -1);
-                t3 = Conjunction.make(component1, Negation.make(component2), -1);
-                t4 = Conjunction.make(component2, Negation.make(component1), -1);
+            if (taskContent instanceof Inheritance) {
+                termOr = IntersectionInt.make(componentT, componentB, memory);
+                if (truthB.isNegative()) {
+                    if (!truthT.isNegative()) {
+                        termAnd = DifferenceExt.make(componentT, componentB, memory);
+                        truthAnd = TruthFunctions.intersection(truthT, TruthFunctions.negation(truthB));
+                    }
+                } else if (truthT.isNegative()) {
+                    termAnd = DifferenceExt.make(componentB, componentT, memory);
+                    truthAnd = TruthFunctions.intersection(truthB, TruthFunctions.negation(truthT));
+                } else {
+                    termAnd = IntersectionExt.make(componentT, componentB, memory);
+                }
+            } else if (taskContent instanceof Implication) {
+                termOr = Disjunction.make(componentT, componentB, memory);
+                termAnd = Conjunction.make(componentT, componentB, memory);
             }
-            processComposed(content1, component, t1, TruthFunctions.union(v1, v2));
-            processComposed(content1, component, t2, TruthFunctions.intersection(v1, v2));
-            processComposed(content1, component, t3, TruthFunctions.difference(v1, v2));
-            processComposed(content1, component, t4, TruthFunctions.difference(v2, v1));
-        } else {
-            if (content1 instanceof Inheritance) {
-                t1 = IntersectionExt.make(component1, component2);
-                t2 = IntersectionInt.make(component1, component2);
-                t3 = DifferenceInt.make(component1, component2);
-                t4 = DifferenceInt.make(component2, component1);
-            } else if (content1 instanceof Implication) {
-                t1 = Conjunction.make(component1, component2, -1);
-                t2 = Disjunction.make(component1, component2);
-                t3 = Disjunction.make(component1, Negation.make(component2));
-                t4 = Disjunction.make(component2, Negation.make(component1));
+            processComposed(taskContent, componentCommon, termOr, truthOr, memory);
+            processComposed(taskContent, componentCommon, termAnd, truthAnd, memory);
+        } else {    // index == 1
+            if (taskContent instanceof Inheritance) {
+                termOr = IntersectionExt.make(componentT, componentB, memory);
+                if (truthB.isNegative()) {
+                    if (!truthT.isNegative()) {
+                        termAnd = DifferenceInt.make(componentT, componentB, memory);
+                        truthAnd = TruthFunctions.intersection(truthT, TruthFunctions.negation(truthB));
+                    }
+                } else if (truthT.isNegative()) {
+                    termAnd = DifferenceInt.make(componentB, componentT, memory);
+                    truthAnd = TruthFunctions.intersection(truthB, TruthFunctions.negation(truthT));
+                } else {
+                    termAnd = IntersectionInt.make(componentT, componentB, memory);
+                }
+            } else if (taskContent instanceof Implication) {
+                termOr = Conjunction.make(componentT, componentB, memory);
+                termAnd = Disjunction.make(componentT, componentB, memory);
             }
-            processComposed(content1, t1, component, TruthFunctions.union(v1, v2));
-            processComposed(content1, t2, component, TruthFunctions.intersection(v1, v2));
-            processComposed(content1, t3, component, TruthFunctions.difference(v1, v2));
-            processComposed(content1, t4, component, TruthFunctions.difference(v2, v1));
+            processComposed(taskContent, termOr, componentCommon, truthOr, memory);
+            processComposed(taskContent, termAnd, componentCommon, truthAnd, memory);
         }
-        if (content1.containNoVariable()) { // even closed veraibles are not allowed
-            introVarDepOuter(content1, content2, index);
+        if (taskContent instanceof Inheritance) {
+            introVarOuter(taskContent, beliefContent, index, memory);//            introVarImage(taskContent, beliefContent, index, memory);
         }
     }
 
     /**
-     * Finish composing compound term
-     * @param statement Type of the content
-     * @param subject Subject of content
-     * @param predicate Predicate of content
-     * @param truth TruthValue of the content
+     * Finish composing implication term
+     * @param premise1 Type of the contentInd
+     * @param subject Subject of contentInd
+     * @param predicate Predicate of contentInd
+     * @param truth TruthValue of the contentInd
+     * @param memory Reference to the memory
      */
-    private static void processComposed(Statement statement, Term subject, Term predicate, TruthValue truth) {
+    private static void processComposed(Statement statement, Term subject, Term predicate, TruthValue truth, Memory memory) {
         if ((subject == null) || (predicate == null)) {
             return;
         }
-        Term content = Statement.make(statement, subject, predicate);
-        if ((content == null) || content.equals(statement) || content.equals(Memory.currentBelief.getContent())) {
+        Term content = Statement.make(statement, subject, predicate, memory);
+        if ((content == null) || content.equals(statement) || content.equals(memory.currentBelief.getContent())) {
             return;
         }
-        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth, Memory.currentTask.getSentence(), Memory.currentBelief);
+        BudgetValue budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
     }
 
     /**
      * {<(S|P) ==> M>, <P ==> M>} |- <S ==> M>
-     * @param compound The compound term to be decomposed
-     * @param component The part of the compound to be removed
-     * @param term1 The other term in the content
+     * @param implication The implication term to be decomposed
+     * @param componentCommon The part of the implication to be removed
+     * @param term1 The other term in the contentInd
      * @param index The location of the shared term: 0 for subject, 1 for predicate
-     * @param compoundTask Whether the compound comes from the task
+     * @param compoundTask Whether the implication comes from the task
+     * @param memory Reference to the memory
      */
-    private static void decomposeCompound(CompoundTerm compound, Term component, Term term1, int index, boolean compoundTask) {
+    private static void decomposeCompound(CompoundTerm compound, Term component, Term term1, int index, boolean compoundTask, Memory memory) {
         if (compound instanceof Statement) {
             return;
         }
-        Term term2 = CompoundTerm.reduceComponents(compound, component);
+        Term term2 = CompoundTerm.reduceComponents(compound, component, memory);
         if (term2 == null) {
             return;
         }
-        Task task = Memory.currentTask;
+        Task task = memory.currentTask;
         Sentence sentence = task.getSentence();
-        Judgment belief = Memory.currentBelief;
+        Sentence belief = memory.currentBelief;
         Statement oldContent = (Statement) task.getContent();
         TruthValue v1,
                 v2;
         if (compoundTask) {
             v1 = sentence.getTruth();
-            v2 =
-                    belief.getTruth();
+            v2 = belief.getTruth();
         } else {
             v1 = belief.getTruth();
-            v2 =
-                    sentence.getTruth();
+            v2 = sentence.getTruth();
         }
         TruthValue truth = null;
         Term content;
         if (index == 0) {
-            content = Statement.make(oldContent, term1, term2);
+            content = Statement.make(oldContent, term1, term2, memory);
             if (content == null) {
                 return;
             }
@@ -186,7 +190,7 @@ public final class CompositionalRules {
                 }
             }
         } else {
-            content = Statement.make(oldContent, term2, term1);
+            content = Statement.make(oldContent, term2, term1, memory);
             if (content == null) {
                 return;
             }
@@ -215,26 +219,27 @@ public final class CompositionalRules {
             }
         }
         if (truth != null) {
-            BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-            Memory.doublePremiseTask(budget, content, truth, sentence, belief);
+            BudgetValue budget = BudgetFunctions.compoundForward(truth, content, memory);
+            memory.doublePremiseTask(content, truth, budget);
         }
     }
 
     /**
      * {(||, S, P), P} |- S
      * {(&&, S, P), P} |- S
-     * @param compound The compound term to be decomposed
-     * @param component The part of the compound to be removed
-     * @param compoundTask Whether the compound comes from the task
+     * @param implication The implication term to be decomposed
+     * @param componentCommon The part of the implication to be removed
+     * @param compoundTask Whether the implication comes from the task
+     * @param memory Reference to the memory
      */
-    static void decomposeStatement(CompoundTerm compound, Term component, boolean compoundTask) {
-        Task task = Memory.currentTask;
+    static void decomposeStatement(CompoundTerm compound, Term component, boolean compoundTask, Memory memory) {
+        Task task = memory.currentTask;
         Sentence sentence = task.getSentence();
-        if (sentence instanceof Question) {
+        if (sentence.isQuestion()) {
             return;
         }
-        Judgment belief = Memory.currentBelief;
-        Term content = CompoundTerm.reduceComponents(compound, component);
+        Sentence belief = memory.currentBelief;
+        Term content = CompoundTerm.reduceComponents(compound, component, memory);
         if (content == null) {
             return;
         }
@@ -248,160 +253,224 @@ public final class CompositionalRules {
         }
         TruthValue truth = null;
         if (compound instanceof Conjunction) {
-            if (sentence instanceof Goal) {
-                if (compoundTask) {
-                    truth = TruthFunctions.intersection(v1, v2);
-                } else {
-                    return;
-                }
-            } else if (sentence instanceof Judgment) {
+            if (sentence instanceof Sentence) {
                 truth = TruthFunctions.reduceConjunction(v1, v2);
             }
         } else if (compound instanceof Disjunction) {
-            if (sentence instanceof Goal) {
-                if (compoundTask) {
-                    truth = TruthFunctions.reduceConjunction(v2, v1);
-                } else {
-                    return;
-                }
-            } else if (sentence instanceof Judgment) {
+            if (sentence instanceof Sentence) {
                 truth = TruthFunctions.reduceDisjunction(v1, v2);
             }
         } else {
             return;
         }
-        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
+        BudgetValue budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
     }
 
-    /* ---------------- dependent variable and conjunction ---------------- */
-    /**
-     * {<M --> S>, <M --> P>} |- (&&, <#x() --> S>, <#x() --> P>>
-     * @param premise1 The first premise <M --> P>
-     * @param premise2 The second premise <M --> P>
-     * @param index The location of the shared term: 0 for subject, 1 for predicate
-     */
-    private static Conjunction introVarDep(Statement premise1, Statement premise2, int index) {
-        if (premise1.equals(premise2)) {
-            return null;
-        }
-        Statement state1, state2;
-        Variable var1 = new Variable(Symbols.VARIABLE_TAG + "0()");
-        Variable var2 = new Variable(Symbols.VARIABLE_TAG + "0()");
-        if (index == 0) {
-            state1 = Statement.make(premise1, var1, premise1.getPredicate());
-            state2 = Statement.make(premise2, var2, premise2.getPredicate());
-        } else {
-            state1 = Statement.make(premise1, premise1.getSubject(), var1);
-            state2 = Statement.make(premise2, premise2.getSubject(), var2);
-        }
-        long time1 = Memory.currentTask.getSentence().getEventTime();   // which is which???
-        long time2 = Memory.currentBelief.getEventTime();
-        Term c;
-        if ((time1 == Stamp.ALWAYS) || (time2 == Stamp.ALWAYS)) {
-            c = Conjunction.make(state1, state2, -1);
-        } else {
-            int dif = (int) (time2 - time1);
-            if (dif == 0) {
-                c = Conjunction.make(state1, state2, 0);
-            } else if (dif > 0) {
-                c = Conjunction.make(state1, state2, 1);
-            } else {
-                c = Conjunction.make(state2, state1, 1);
-            }
-        }
-        return (Conjunction) c;
-    }
-
+    /* --------------- rules used for variable introduction --------------- */
     /**
      * Introduce a dependent variable in an outer-layer conjunction
-     * @param premise1 The first premise <M --> S>
-     * @param premise2 The second premise <M --> P>
+     * @param taskContent The first premise <M --> S>
+     * @param beliefContent The second premise <M --> P>
      * @param index The location of the shared term: 0 for subject, 1 for predicate
+     * @param memory Reference to the memory
      */
-    private static void introVarDepOuter(Statement premise1, Statement premise2, int index) {
-        Term content = introVarDep(premise1, premise2, index);
-        if (content != null) {
-            TruthValue v1 = Memory.currentTask.getSentence().getTruth();
-            TruthValue v2 = Memory.currentBelief.getTruth();
-            TruthValue truth = TruthFunctions.intersection(v1, v2);
-            BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-            Memory.doublePremiseTask(budget, content, truth,
-                    Memory.currentTask.getSentence(), Memory.currentBelief);
-        }
-    }
-
-    /**
-     * Introduce a dependent variable in an inner-layer conjunction
-     * @param compound The compound containing the first premise
-     * @param component The first premise <M --> S>
-     * @param premise The second premise <M --> P>
-     */
-    static void introVarDepInner(CompoundTerm compound, Term component, Term premise) {
-        if (!(component instanceof Statement) || !(component.getClass() == premise.getClass())) {
-            return;
-        }
-        Statement premise1 = (Statement) premise;
-        Statement premise2 = (Statement) component;
-        int index;
-        if (premise1.getSubject().equals(premise2.getSubject())) {
-            index = 0;
-        } else if (premise1.getPredicate().equals(premise2.getPredicate())) {
-            index = 1;
-        } else {
-            return;
-        }
-        Term innerContent = introVarDep(premise1, premise2, index);
-        if (innerContent == null) {
-            return;
-        }
-        Task task = Memory.currentTask;
-        Sentence sentence = task.getSentence();
-        Judgment belief = Memory.currentBelief;
-        Term content = task.getContent();
-        if (compound instanceof Implication) {
-            content = Statement.make((Statement) content, compound.componentAt(0), innerContent);
-        } else if (compound instanceof Conjunction) {
-            content = CompoundTerm.replaceComponent(compound, component, innerContent);
-        }
-        TruthValue truth = null;
-        if (sentence instanceof Goal) {
-            truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth()); // [To be refined]
-        } else if (sentence instanceof Judgment) {
-            truth = TruthFunctions.intersection(belief.getTruth(), sentence.getTruth());
-        } else {
-            assert (sentence instanceof Question);
-            return;
-        }
-        BudgetValue budget = BudgetFunctions.compoundForward(truth, content);
-        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
-    }
-
-    /**
-     * {(&&, <#x() --> S>, <#x() --> P>>, <M --> P>} |- <M --> S>
-     * @param compound The compound term to be decomposed
-     * @param component The part of the compound to be removed
-     * @param compoundTask Whether the compound comes from the task
-     */
-    static void anaVarDepOuter(CompoundTerm compound, Term component, boolean compoundTask) {
-        Term content = CompoundTerm.reduceComponents(compound, component);
-        Task task = Memory.currentTask;
-        Sentence sentence = task.getSentence();
-        Judgment belief = Memory.currentBelief;
-        TruthValue v1 = sentence.getTruth();
-        TruthValue v2 = belief.getTruth();
-        TruthValue truth = null;
-        BudgetValue budget;
-        if (sentence instanceof Question) {
-            budget = (compoundTask ? BudgetFunctions.backward(v2) : BudgetFunctions.backwardWeak(v2));
-        } else {
-            if (sentence instanceof Goal) {
-                truth = (compoundTask ? TruthFunctions.desireStrong(v1, v2) : TruthFunctions.desireWeak(v1, v2));
-            } else {
-                truth = (compoundTask ? TruthFunctions.anonymousAnalogy(v1, v2) : TruthFunctions.anonymousAnalogy(v2, v1));
+    private static void introVarOuter(Statement taskContent, Statement beliefContent, int index, Memory memory) {
+        TruthValue truthT = memory.currentTask.getSentence().getTruth();
+        TruthValue truthB = memory.currentBelief.getTruth();
+        Variable varInd = new Variable("$varInd1");
+        Variable varInd2 = new Variable("$varInd2");
+        Term term11, term12, term21, term22, commonTerm;
+        HashMap<Term, Term> subs = new HashMap<Term, Term>();
+        if (index == 0) {
+            term11 = varInd;
+            term21 = varInd;
+            term12 = taskContent.getPredicate();
+            term22 = beliefContent.getPredicate();
+            if ((term12 instanceof ImageExt) && (term22 instanceof ImageExt)) {
+                commonTerm = ((ImageExt) term12).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageExt) term22).containTerm(commonTerm)) {
+                    commonTerm = ((ImageExt) term22).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term12).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+                if (commonTerm != null) {
+                    subs.put(commonTerm, varInd2);
+                    ((ImageExt) term12).applySubstitute(subs);
+                    ((ImageExt) term22).applySubstitute(subs);
+                }
             }
-            budget = BudgetFunctions.compoundForward(truth, content);
+        } else {
+            term11 = taskContent.getSubject();
+            term21 = beliefContent.getSubject();
+            term12 = varInd;
+            term22 = varInd;
+            if ((term11 instanceof ImageInt) && (term21 instanceof ImageInt)) {
+                commonTerm = ((ImageInt) term11).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageInt) term21).containTerm(commonTerm)) {
+                    commonTerm = ((ImageInt) term21).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term11).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+                if (commonTerm != null) {
+                    subs.put(commonTerm, varInd2);
+                    ((ImageInt) term11).applySubstitute(subs);
+                    ((ImageInt) term21).applySubstitute(subs);
+                }
+            }
         }
-        Memory.doublePremiseTask(budget, content, truth, sentence, belief);
+        Statement state1 = Inheritance.make(term11, term12, memory);
+        Statement state2 = Inheritance.make(term21, term22, memory);
+        Term content = Implication.make(state1, state2, memory);
+        TruthValue truth = TruthFunctions.induction(truthT, truthB);
+        BudgetValue budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
+        content = Implication.make(state2, state1, memory);
+        truth = TruthFunctions.induction(truthB, truthT);
+        budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
+        content = Equivalence.make(state1, state2, memory);
+        truth = TruthFunctions.comparison(truthT, truthB);
+        budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
+        Variable varDep = new Variable("#varDep");
+        if (index == 0) {
+            state1 = Inheritance.make(varDep, taskContent.getPredicate(), memory);
+            state2 = Inheritance.make(varDep, beliefContent.getPredicate(), memory);
+        } else {
+            state1 = Inheritance.make(taskContent.getSubject(), varDep, memory);
+            state2 = Inheritance.make(beliefContent.getSubject(), varDep, memory);
+        }
+        content = Conjunction.make(state1, state2, memory);
+        truth = TruthFunctions.intersection(truthT, truthB);
+        budget = BudgetFunctions.compoundForward(truth, content, memory);
+        memory.doublePremiseTask(content, truth, budget);
+    }
+
+    /**
+     * Introduce a second independent variable into two terms with a common component
+     * @param term1 The first term
+     * @param term2 The second term
+     * @param index The index of the terms in their statement
+     */
+    private static void introVarSecond(Term term1, Term term2, int index) {
+        Variable varInd2 = new Variable("$varIndSec");
+        Term commonTerm;
+        HashMap<Term, Term> subs = new HashMap<Term, Term>();
+        if (index == 0) {
+            if ((term1 instanceof ImageExt) && (term2 instanceof ImageExt)) {
+                commonTerm = ((ImageExt) term1).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageExt) term2).containTerm(commonTerm)) {
+                    commonTerm = ((ImageExt) term2).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+                if (commonTerm != null) {
+                    subs.put(commonTerm, varInd2);
+                    ((ImageExt) term1).applySubstitute(subs);
+                    ((ImageExt) term2).applySubstitute(subs);
+                }
+            }
+        } else {
+            if ((term1 instanceof ImageInt) && (term2 instanceof ImageInt)) {
+                commonTerm = ((ImageInt) term1).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageInt) term2).containTerm(commonTerm)) {
+                    commonTerm = ((ImageInt) term2).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+                if (commonTerm != null) {
+                    subs.put(commonTerm, varInd2);
+                    ((ImageInt) term1).applySubstitute(subs);
+                    ((ImageInt) term2).applySubstitute(subs);
+                }
+            }
+        }
+    }
+
+    /**
+     * {<M --> S>, <C ==> <M --> P>>} |- <(&&, <#x --> S>, C) ==> <#x --> P>>
+     * {<M --> S>, (&&, C, <M --> P>)} |- (&&, C, <<#x --> S> ==> <#x --> P>>)
+     * @param taskContent The first premise directly used in internal induction, <M --> S>
+     * @param beliefContent The componentCommon to be used as a premise in internal induction, <M --> P>
+     * @param oldCompound The whole contentInd of the first premise, Implication or Conjunction
+     * @param memory Reference to the memory
+     */
+    // also handle the intensional situation
+    static void introVarInner(Statement premise1, Statement premise2, CompoundTerm oldCompound, Memory memory) {
+        Task task = memory.currentTask;
+        Sentence taskSentence = task.getSentence();
+        if (!taskSentence.isJudgment() || (premise1.getClass() != premise2.getClass())) {
+            return;
+        }
+        Variable varInd = new Variable("$varInd2");
+        Variable varDep = new Variable("#varDep2");
+        Term subject1 = premise1.getSubject();
+        Term subject2 = premise2.getSubject();
+        Term predicate1 = premise1.getPredicate();
+        Term predicate2 = premise2.getPredicate();
+        Statement stateInd1, stateInd2, stateDep1, stateDep2;
+        if (subject1.equals(subject2)) {
+            stateDep1 = Statement.make(premise1, varDep, predicate1, memory);
+            stateDep2 = Statement.make(premise2, varDep, predicate2, memory);
+            Term predicate1C = (Term) predicate1.clone();
+            Term predicate2C = (Term) predicate2.clone();
+            introVarSecond(predicate1C, predicate2C, 0);
+            stateInd1 = Statement.make(premise1, varInd, predicate1C, memory);
+            stateInd2 = Statement.make(premise2, varInd, predicate2C, memory);
+        } else if (predicate1.equals(predicate2)) {
+            stateDep1 = Statement.make(premise1, subject1, varDep, memory);
+            stateDep2 = Statement.make(premise2, subject2, varDep, memory);
+            Term subject1C = (Term) subject1.clone();
+            Term subject2C = (Term) subject2.clone();
+            introVarSecond(subject1C, subject2C, 1);
+            stateInd1 = Statement.make(premise1, subject1C, varInd, memory);
+            stateInd2 = Statement.make(premise2, subject2C, varInd, memory);
+        } else {
+            return;
+        }
+        Sentence belief = memory.currentBelief;
+        Term implication, contentInd, contentDep = null;
+        if (oldCompound instanceof Implication) {
+            implication = Statement.make((Statement) oldCompound, oldCompound.componentAt(0), stateInd2, memory);
+            contentInd = Statement.make((Statement) oldCompound, stateInd1, implication, memory);
+            if (oldCompound.equals(premise1)) {
+                return;
+            }
+            contentDep = Conjunction.make(oldCompound, premise1, memory);
+            if (contentDep == null || !(contentDep instanceof CompoundTerm)) {
+                return;
+            }
+            HashMap<Term, Term> substitute = new HashMap<Term, Term>();
+            substitute.put(memory.currentTerm, new Variable("#varDep"));
+            ((CompoundTerm) contentDep).applySubstitute(substitute);
+        } else if (oldCompound instanceof Conjunction) {
+            implication = Implication.make(stateInd1, stateInd2, memory);
+            HashMap<Term, Term> subs = new HashMap<Term, Term>();
+            subs.put(premise2, implication);
+            contentInd = (Term) oldCompound.clone();
+            ((CompoundTerm) contentInd).applySubstitute(subs);
+            contentDep = Conjunction.make(stateDep1, oldCompound, memory);
+            subs.clear();
+            subs.put(premise2, stateDep2);
+            ((CompoundTerm) contentDep).applySubstitute(subs);
+        } else {
+            return;
+        }
+        TruthValue truth;
+        if (premise1.equals(taskSentence.getContent())) {
+            truth = TruthFunctions.induction(belief.getTruth(), taskSentence.getTruth());
+        } else {
+            truth = TruthFunctions.induction(taskSentence.getTruth(), belief.getTruth());
+        }
+        BudgetValue budget = BudgetFunctions.forward(truth, memory);
+        memory.doublePremiseTask(contentInd, truth, budget);
+        truth = TruthFunctions.intersection(taskSentence.getTruth(), belief.getTruth());
+        budget = BudgetFunctions.forward(truth, memory);
+        memory.doublePremiseTask(contentDep, truth, budget);
     }
 }

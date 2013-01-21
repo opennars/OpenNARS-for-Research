@@ -24,7 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.io.*;
-import nars.language.Term;
+//import nars.term.Term;
 
 /**
  * Window displying inference log
@@ -32,7 +32,7 @@ import nars.language.Term;
 public class InferenceWindow extends NarsFrame implements ActionListener, ItemListener {
 
     /** Control buttons */
-    private Button playButton,  stopButton,  hideButton;
+    private Button playButton, stopButton, hideButton;
     /** Display area */
     private TextArea text;
     /** String to be catched */
@@ -41,12 +41,17 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     private Choice watchType;
     /** Type of catched text */
     private String watched = "";
+    /** Inference recorder */
+    private InferenceRecorder recorder;
 
     /**
      * Constructor
+     * @param recorder The inference recorder
      */
-    public InferenceWindow() {
+    public InferenceWindow(InferenceRecorder recorder) {
         super("Inference log");
+        this.recorder = recorder;
+
         setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
@@ -112,7 +117,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     public void append(String str) {
         text.append(str);
         if (!watched.equals("") && (str.indexOf(watched) != -1)) {
-            Record.stop();
+            recorder.stop();
         }
     }
 
@@ -123,31 +128,24 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     public void actionPerformed(ActionEvent e) {
         Object s = e.getSource();
         if (s == playButton) {
-            Record.play();
+            recorder.play();
         } else if (s == stopButton) {
-            Record.stop();
+            recorder.stop();
         } else if (s == hideButton) {
             close();
         }
     }
 
+    // to rebuild the distinction between Term and String
     public void itemStateChanged(ItemEvent event) {
         String request = watchText.getText().trim();
         if (!request.equals("")) {
-            int i = watchType.getSelectedIndex();
-            if (i == 1) {
-                Term term = StringParser.parseTerm(request);
-                if (term != null) {
-                    watched = term.getName();
-                }
-            } else if (i == 2) {
-                watched = request;
-            }
+            watched = request;
         }
     }
 
     private void close() {
-        Record.stop();
+        recorder.stop();
         dispose();
     }
 

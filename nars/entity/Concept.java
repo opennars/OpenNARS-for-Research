@@ -24,11 +24,10 @@ import java.util.ArrayList;
 
 import nars.gui.ConceptWindow;
 import nars.inference.*;
-import nars.io.Record;
-import nars.language.*;
+import nars.io.Symbols;
+import nars.term.*;
 import nars.main.*;
-import nars.operation.Operator;
-import nars.storage.*;
+import nars.container.*;
 
 /**
  * A concept contains information associated with a term, including directly 
@@ -48,143 +47,56 @@ public final class Concept extends Item {
     /** Link templates of TermLink, only in concepts with CompoundTerm */
     private ArrayList<TermLink> termLinkTemplates;
     /** Question directly asked about the term */
-    private ArrayList<Question> questions;
-    /** Goals directly requested on the term */
-    private ArrayList<Judgment> goals;
-    /** Judgments directly made about the term, with non-future tense */
-    private ArrayList<Judgment> beliefs;
-    /** Most recent and confidence judgment */
-//    private Judgment perfectBelief = null;  // stored for demo and debugging purpose only
-    /** Whether truth value of judgments can be revised */
-    private boolean revisible = true;
+    private ArrayList<Task> questions;
+    /** Sentences directly made about the term, with non-future tense */
+    private ArrayList<Sentence> beliefs;
     /** Whether the content of the concept is being displayed */
     private boolean showing = false;
     /** The display window */
     private ConceptWindow window = null;
+    /** Reference to the memory */
+    Memory memory;
 
 
     /* ---------- constructor and intialization ---------- */
     /**
      * Constructor, called in Memory.getConcept only
      * @param tm A term corresponding to the concept
+     * @param memory A reference to the memory
      */
-    public Concept(Term tm) {
-        super();
-        key = tm.getName();
+    public Concept(Term tm, Memory memory) {
+        super(tm.getName());
         term = tm;
-        questions = new ArrayList<Question>();
-        goals = new ArrayList<Judgment>();
-        beliefs = new ArrayList<Judgment>();
-        taskLinks = new TaskLinkBag();
-        termLinks = new TermLinkBag();
+        this.memory = memory;
+        questions = new ArrayList<Task>();
+        beliefs = new ArrayList<Sentence>();
+        taskLinks = new TaskLinkBag(memory);
+        termLinks = new TermLinkBag(memory);
         if (tm instanceof CompoundTerm) {
             termLinkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
-            checkRevisibility();
         }
-    }
-
-    /**
-     * Judgments with dependent variable cannot be revised
-     */
-    private void checkRevisibility() {
-        revisible = ((key.indexOf("()") < 0) && (key.indexOf("(#")) < 0);
     }
 
     /* ---------- direct processing of tasks ---------- */
     /**
      * Directly process a new task. Called exactly once on each task.
      * Using local information and finishing in a constant time.
-     * Provide feedback in the budget value of the task.
+     * Provide feedback in the taskBudget value of the task.
      * <p>
      * called in Memory.immediateProcess only
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
-        Sentence problem = task.getSentence();
-        if (problem instanceof Quest) {
-            processQuestion((Quest) problem, task);
-        } else if (problem instanceof Question) {
-            processQuestion((Question) problem, task);
-        } else if (problem instanceof Goal) {
-            processGoal((Goal) problem, task);
+        if (task.getSentence().isJudgment()) {
+            processJudgment(task);
         } else {
-            processJudgment((Judgment) problem, task);
+            processQuestion(task);
         }
-        if (task.aboveThreshold()) {    // still need to be processed
-            Memory.linkToTask(task, problem.getContent(), this);
+        if (task.getBudget().aboveThreshold()) {    // still need to be processed
+            linkToTask(task);
         }
         if (showing) {
             window.post(displayContent());
-        }
-        Memory.rememberAction(task);
-    }
-
-    /**
-     * To answer a question by existing beliefs
-     * @param ques The question to be answered
-     * @param task The task to be processed
-     * @return Whether to continue the processing of the task
-     */
-    public float processQuestion(Question ques, Task task) {
-        boolean newQuestion = true;
-        if (questions != null) {
-            for (Question q : questions) {
-                if (q.getContent().equals(ques.getContent()) && (q.getEventTime() == ques.getEventTime())) {
-                    ques = q;
-                    newQuestion = false;
-                    break;
-                }
-            }
-        }
-        if (newQuestion) {
-            questions.add(ques);
-        }
-        if (questions.size() > Parameters.MAXMUM_QUESTIONS_LENGTH) {
-            questions.remove(0);    // FIFO
-        }
-        Judgment newAnswer = (ques instanceof Quest) ? evaluation(ques, goals) : evaluation(ques, beliefs);
-        if (newAnswer != null) {
-            MatchingRules.trySolution(ques, newAnswer, task);
-            return newAnswer.getTruth().getExpectation();
-        } else {
-            return 0.5f;
-        }
-    }
-
-    /**
-     * Direct processing a new goal
-     * @param goal The goal to be processed
-     * @param task The task to be processed
-     * @return Whether to continue the processing of the task
-     */
-    private void processGoal(Goal goal, Task task) {
-        if (revisible) {
-            Judgment oldGoal = evaluation(goal, goals);
-            if ((oldGoal != null) && (goal.noOverlapping(oldGoal))) {
-                MatchingRules.revision(goal, oldGoal, false);
-            }
-        }
-        addToTable(goal, goals, Parameters.MAXMUM_GOALS_LENGTH);
-        if (task.aboveThreshold()) {
-            Judgment fact = evaluation(goal, beliefs);
-            if (fact != null) {
-                MatchingRules.trySolution(goal, fact, task);
-            }
-        }
-        if (task.aboveThreshold()) {
-            Term content = goal.getContent();
-            ArrayList<Term> list = content.parseOperation(null);
-            if (list != null) {
-                Operator op = (Operator) list.get(0);
-                float netDesire = goal.getTruth().getExpectation();
-                if (netDesire > Parameters.DECISION_THRESHOLD) {
-                    op.call(task);
-                    task.setPriority(0);
-                }
-            } else {
-                Question ques = new Question(goal);
-                Memory.activatedTask(task.getBudget(), ques, false);
-            }
         }
     }
 
@@ -194,80 +106,111 @@ public final class Concept extends Item {
      * @param task The task to be processed
      * @return Whether to continue the processing of the task
      */
-    private void processJudgment(Judgment judg, Task task) {
-        if (revisible) {
-            Judgment oldBelief = evaluation(judg, beliefs);
-            if ((oldBelief != null) && (judg.noOverlapping(oldBelief))) {
-                MatchingRules.revision(judg, oldBelief, false);
+    private void processJudgment(Task task) {
+        Sentence judg = task.getSentence();
+        Sentence oldBelief = evaluation(judg, beliefs);
+        if (oldBelief != null) {
+            memory.newStamp = Stamp.make(judg.getStamp(), oldBelief.getStamp(), memory.getTime());
+            if ((memory.newStamp != null) && Variable.unify(Symbols.VAR_INDEPENDENT, judg.getContent(), oldBelief.getContent())) {
+                memory.currentBelief = oldBelief;
+                LocalRules.revision(judg, oldBelief, false, memory);
             }
         }
-        if (task.aboveThreshold()) {
-            for (Question ques : questions) {
-                MatchingRules.trySolution(ques, judg, task);
-            }
-            for (Judgment goal : goals) {
-                MatchingRules.trySolution((Goal) goal, judg, task);
+        if (task.getBudget().aboveThreshold()) {
+            for (Task ques : questions) {
+                LocalRules.trySolution(ques.getSentence(), judg, ques, memory);
             }
             addToTable(judg, beliefs, Parameters.MAXMUM_BELIEF_LENGTH);
-//            generateNegation(task);   // may be recovered in the future
-            if (judg.isEvent()) {
-                Memory.eventProcessing(task);
+        }
+    }
+
+    /**
+     * To answer a question by existing beliefs
+     * @param task The task to be processed
+     * @return Whether to continue the processing of the task
+     */
+    public float processQuestion(Task task) {
+        Sentence ques = task.getSentence();
+        boolean newQuestion = true;
+        if (questions != null) {
+            for (Task t : questions) {
+                Sentence q = t.getSentence();
+                if (q.getContent().equals(ques.getContent())) {
+                    ques = q;
+                    newQuestion = false;
+                    break;
+                }
+            }
+        }
+        if (newQuestion) {
+            questions.add(task);
+        }
+        if (questions.size() > Parameters.MAXMUM_QUESTIONS_LENGTH) {
+            questions.remove(0);    // FIFO
+        }
+        Sentence newAnswer = evaluation(ques, beliefs);
+        if (newAnswer != null) {
+            LocalRules.trySolution(ques, newAnswer, task, memory);
+            return newAnswer.getTruth().getExpectation();
+        } else {
+            return 0.5f;
+        }
+    }
+
+    /**
+     * Link to a new task from all relevant concepts for continued processing in
+     * the near future for unspecified time.
+     * <p>
+     * The only method that calls the TaskLink constructor.
+     * @param task The task to be linked
+     * @param content The content of the task
+     */
+    private void linkToTask(Task task) {
+        BudgetValue taskBudget = task.getBudget();
+        TaskLink taskLink = new TaskLink(task, null, taskBudget);   // link type: SELF
+        insertTaskLink(taskLink);
+        if (term instanceof CompoundTerm) {
+            if (termLinkTemplates.size() > 0) {
+                BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(taskBudget, termLinkTemplates.size());
+                if (subBudget.aboveThreshold()) {
+                    Term componentTerm;
+                    Concept componentConcept;
+                    for (TermLink termLink : termLinkTemplates) {
+                        if (!(task.isStructural() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
+                            taskLink = new TaskLink(task, termLink, subBudget);
+                            componentTerm = termLink.getTarget();
+                            componentConcept = memory.getConcept(componentTerm);
+                            if (componentConcept != null) {
+                                componentConcept.insertTaskLink(taskLink);
+                            }
+                        }
+                    }
+                    buildTermLinks(taskBudget);  // recursively insert TermLink
+                }
             }
         }
     }
 
     /**
-     * Directly express a negative judgment as a negation
-     * @param task The task to be processed
-     */
-//    private void generateNegation(Task task) {
-//        if (task.getSentence() instanceof Judgment) {
-//            Sentence s = task.getSentence();
-//            if (s.getTruth().getFrequency() < 0.5) {
-//                Term t = Negation.make(s.getContent());
-//                if (t != null) {
-//                    StructuralRules.transformNegation(t);
-//                }
-//            }
-//        }
-//    }
-    /**
-     * Revise existing beliefs or goals
-     * @param judg The judgment (isBelief or goal) to be processed
-     * @param table The table to be revised
-     * @return Whether the new isBelief triggered a revision
-     */
-//    private boolean reviseTable(Judgment judg, ArrayList table) {
-//        boolean revised = false;
-//        for (Object isBelief : table) {
-//            if (judg.noOverlapping((Judgment) isBelief)) {
-//                MatchingRules.revision(judg, (Judgment) isBelief, false);
-//                revised = true;
-//            }
-//        }
-//        return revised;
-//    }
-    /**
-     * Add a new isBelief or goal into the table
+     * Add a new belief (or goal) into the table
      * Sort the beliefs/goals by rank, and remove redundant or low rank one
-     * @param newJudgment The judgment to be processed
+     * @param newSentence The judgment to be processed
      * @param table The table to be revised
      * @param capacity The capacity of the table
      */
-    @SuppressWarnings("unchecked")
-    private void addToTable(Judgment newJudgment, ArrayList table, int capacity) {
-        float rank1 = BudgetFunctions.rankBelief(newJudgment);    // for the new isBelief
-        Judgment judgment2;
+    private void addToTable(Sentence newSentence, ArrayList<Sentence> table, int capacity) {
+        float rank1 = BudgetFunctions.rankBelief(newSentence);    // for the new isBelief
+        Sentence judgment2;
         float rank2;
         int i;
         for (i = 0; i < table.size(); i++) {
-            judgment2 = (Judgment) table.get(i);
+            judgment2 = (Sentence) table.get(i);
             rank2 = BudgetFunctions.rankBelief(judgment2);
             if (rank1 >= rank2) {
-                if (newJudgment.equivalentTo(judgment2)) {
+                if (newSentence.equivalentTo(judgment2)) {
                     return;
                 }
-                table.add(i, newJudgment);
+                table.add(i, newSentence);
                 break;
             }
         }
@@ -276,24 +219,25 @@ public final class Concept extends Item {
                 table.remove(table.size() - 1);
             }
         } else if (i == table.size()) {
-            table.add(newJudgment);
+            table.add(newSentence);
         }
     }
 
-//    public float evaluation(boolean isBelief) {
-//        Judgment j = isBelief ? evaluation(null, beliefs) : evaluation(null, goals);
-//        return j.getTruth().getExpectation();
-//    }
-
-    private Judgment evaluation(Sentence query, ArrayList<Judgment> list) {
+    /**
+     * Evaluate a query against beliefs (and desires in the future)
+     * @param query The question to be processed
+     * @param list The list of beliefs to be used
+     * @return The best candidate belief selected
+     */
+    private Sentence evaluation(Sentence query, ArrayList<Sentence> list) {
         if (list == null) {
             return null;
         }
         float currentBest = 0;
         float beliefQuality;
-        Judgment candidate = null;
-        for (Judgment judg : list) {
-            beliefQuality = MatchingRules.solutionQuality(query, judg);
+        Sentence candidate = null;
+        for (Sentence judg : list) {
+            beliefQuality = LocalRules.solutionQuality(query, judg);
             if (beliefQuality > currentBest) {
                 currentBest = beliefQuality;
                 candidate = judg;
@@ -310,29 +254,28 @@ public final class Concept extends Item {
      * @param taskLink The termLink to be inserted
      */
     public void insertTaskLink(TaskLink taskLink) {
-        BudgetValue budget = taskLink.getBudget();
+        BudgetValue taskBudget = taskLink.getBudget();
         taskLinks.putIn(taskLink);
-        Memory.activateConcept(this, budget);
+        memory.activateConcept(this, taskBudget);
     }
 
     /**
      * Recursively build TermLinks between a compound and its components
      * <p>
      * called only from Memory.continuedProcess
-     * @param budget The budget of the task
+     * @param taskBudget The BudgetValue of the task
      */
-    public void buildTermLinks(BudgetValue budget) {
+    public void buildTermLinks(BudgetValue taskBudget) {
         Term t;
         Concept concept;
-
         TermLink termLink1, termLink2;
         if (termLinkTemplates.size() > 0) {
-            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(budget, termLinkTemplates.size());
+            BudgetValue subBudget = BudgetFunctions.distributeAmongLinks(taskBudget, termLinkTemplates.size());
             if (subBudget.aboveThreshold()) {
                 for (TermLink template : termLinkTemplates) {
                     if (template.getType() != TermLink.TRANSFORM) {
                         t = template.getTarget();
-                        concept = Memory.getConcept(t);
+                        concept = memory.getConcept(t);
                         if (concept != null) {
                             termLink1 = new TermLink(t, template, subBudget);
                             insertTermLink(termLink1);   // this termLink to that
@@ -369,12 +312,12 @@ public final class Concept extends Item {
 
     /**
      * Return a string representation of the concept, called in ConceptBag only
-     * @return The concept name, with budget in the full version
+     * @return The concept name, with taskBudget in the full version
      */
     @Override
     public String toString() {  // called from concept bag
         if (NARS.isStandAlone()) {
-            return (super.toString2() + " " + key);
+            return (super.toStringBrief() + " " + key);
         } else {
             return key;
         }
@@ -408,21 +351,15 @@ public final class Concept extends Item {
      * @param task The selected task
      * @return The selected isBelief
      */
-    public Judgment getBelief(Task task) {
+    public Sentence getBelief(Task task) {
         Sentence taskSentence = task.getSentence();
-        Judgment belief;
+        Sentence belief;
         for (int i = 0; i < beliefs.size(); i++) {
             belief = beliefs.get(i);
-            Record.append(" * Selected Belief: " + belief + "\n");
-            if (taskSentence.noOverlapping(belief)) {
-                long taskTime = taskSentence.getEventTime();
-                long beliefTime = belief.getEventTime();
-                if ((taskTime == beliefTime) || (beliefTime == Stamp.ALWAYS) || (taskSentence instanceof Goal)) {
-                    return belief;
-                }
-                Judgment belief2 = (Judgment) belief.clone();   // will this mess up priority adjustment?
-                TruthValue v = TruthFunctions.temporalCasting(belief.getTruth(), beliefTime, taskTime, taskSentence.getCreationTime());
-                belief2.setTruth(v);
+            memory.getRecorder().append(" * Selected Belief: " + belief + "\n");
+            memory.newStamp = Stamp.make(taskSentence.getStamp(), belief.getStamp(), memory.getTime());
+            if (memory.newStamp != null) {
+                Sentence belief2 = (Sentence) belief.clone();   // will this mess up priority adjustment?
                 return belief2;
             }
         }
@@ -438,25 +375,21 @@ public final class Concept extends Item {
         if (tLink == null) {
             return;
         }
-        Memory.currentTaskLink = tLink;
-        Memory.currentBeliefLink = null;
-        Record.append(" * Selected TaskLink: " + tLink + "\n");
+        memory.currentTaskLink = tLink;
+        memory.currentBeliefLink = null;
+        memory.getRecorder().append(" * Selected TaskLink: " + tLink + "\n");
         Task task = tLink.getTargetTask();
-        Memory.currentTask = task;  // one of the two places where this variable is set
-        if (task.getSentence().isQuestion()) {
-            ((Question) task.getSentence()).checkFeedback();
-        }
+        memory.currentTask = task;  // one of the two places where this variable is set
         if (tLink.getType() == TermLink.TRANSFORM) {
-            RuleTables.transformTask(task, tLink);  // to turn this into structural inference as below?
-            return;
+            RuleTables.transformTask(tLink, memory);  // to turn this into structural inference as below?
         }
         int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
-        while (Memory.noResult() && (termLinkCount > 0)) {
-            TermLink termLink = termLinks.takeOut(tLink);
+        while (memory.noResult() && (termLinkCount > 0)) {
+            TermLink termLink = termLinks.takeOut(tLink, memory.getTime());
             if (termLink != null) {
-                Record.append(" * Selected TermLink: " + termLink + "\n");
-                Memory.currentBeliefLink = termLink;
-                RuleTables.reason(tLink, termLink);
+                memory.getRecorder().append(" * Selected TermLink: " + termLink + "\n");
+                memory.currentBeliefLink = termLink;
+                RuleTables.reason(tLink, termLink, memory);
                 termLinks.putBack(termLink);
                 termLinkCount--;
             } else {
@@ -505,30 +438,16 @@ public final class Concept extends Item {
      */
     public String displayContent() {
         StringBuffer buffer = new StringBuffer();
-//        if (perfectBelief != null && perfectBelief != presentBelief) {
-//            buffer.append("  Perfect Belief:\n");
-//            if (perfectBelief instanceof Judgment && window != null && window.getShowDerivation()) {
-//                buffer.append(((Judgment) perfectBelief).toStringWithPremises(""));
-//            } else {
-//                buffer.append(perfectBelief + "\n");
-//            }
-//        }
         if (beliefs.size() > 0) {
             buffer.append("\n  Beliefs:\n");
             for (Sentence s : beliefs) {
                 buffer.append(s + "\n");
             }
         }
-        if (goals.size() > 0) {
-            buffer.append("\n  Goals:\n");
-            for (Sentence s : goals) {
-                buffer.append(s + "\n");
-            }
-        }
         if (questions.size() > 0) {
             buffer.append("\n  Question:\n");
-            for (Sentence s : questions) {
-                buffer.append(s + "\n");
+            for (Task t : questions) {
+                buffer.append(t + "\n");
             }
         }
         return buffer.toString();

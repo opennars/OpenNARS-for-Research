@@ -31,11 +31,11 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     /** Display label */
     private Label valueLabel;
     /** Control buttons */
-    private Button hideButton,  undoButton,  defaultButton;
+    private Button hideButton, undoButton, defaultButton;
     /** Adjusting bar */
     private Scrollbar valueBar;
     /** parameter values */
-    private int defaultValue,  previousValue,  currentValue;
+    private int defaultValue, previousValue, currentValue;
 
     /**
      * Constructor
@@ -98,7 +98,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
             valueBar.setValue(currentValue);
             valueLabel.setText(String.valueOf(currentValue));
         } else if (s == hideButton) {
-        	close();
+            close();
         }
     }
 
@@ -106,11 +106,11 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         previousValue = currentValue;
         setVisible(false);
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
 
     /**
      * Handling scrollbar movement

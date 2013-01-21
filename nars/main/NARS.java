@@ -20,14 +20,14 @@
  */
 package nars.main;
 
-import java.applet.*;
+import java.applet.Applet;
 
 /**
  * The main class of the project.
  * <p>
  * Define an application with full funcationality and an applet with partial functionality.
  * <p>
- * Manage the internal working thread. Communicate with Center only.
+ * Manage the internal working thread. Communicate with Reasoner only.
  */
 public class NARS extends Applet implements Runnable {
 
@@ -35,7 +35,7 @@ public class NARS extends Applet implements Runnable {
      * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.4.0     August 2010  \n";
+            "     Open-NARS     Version 1.5.0     January 2013  \n";
     /**
      * The project websites.
      */
@@ -45,12 +45,17 @@ public class NARS extends Applet implements Runnable {
     /**
      * Flag to distinguish the two running modes of the project.
      */
-//    private static boolean standAlone = false;  // application or applet
+    private static boolean standAlone = false;
     /**
      * The internal working thread of the system.
      */
     Thread narsThread = null;
+    /**
+     * The reasoner
+     */
+    Reasoner reasoner;
 
+    /* Application-only code */
     /**
      * The entry point of the standalone application.
      * <p>
@@ -58,18 +63,20 @@ public class NARS extends Applet implements Runnable {
      * @param args no arguments are used
      */
     public static void main(String args[]) {
-//        standAlone = true;
+        standAlone = true;
         NARS nars = new NARS();
         nars.init();
         nars.start();
     }
 
+    /* Applet/Application code */
     /**
-     * Initialize the system at the control center.
+     * Initialize the system at the control center.<p>
+     * Can instantiate multiple reasoners
      */
     @Override
     public void init() {
-        Center.start();
+        reasoner = new Reasoner("NARS Reasoner");
     }
 
     /**
@@ -91,6 +98,7 @@ public class NARS extends Applet implements Runnable {
         narsThread = null;
     }
 
+    /* Implementing the Runnable Interface */
     /**
      * Repeatedly execute NARS working cycle. This method is called when the Runnable's thread is started.
      */
@@ -98,10 +106,10 @@ public class NARS extends Applet implements Runnable {
         Thread thisThread = Thread.currentThread();
         while (narsThread == thisThread) {
             try {
-                Thread.sleep(2);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
             }
-            Center.tick();
+            reasoner.tick();
         }
     }
 
@@ -110,8 +118,7 @@ public class NARS extends Applet implements Runnable {
      * @return true for application; false for applet.
      */
     public static boolean isStandAlone() {
-        return true;    // make the application and the applet identical, for now
-//        return standAlone;
+        return standAlone;
     }
 
     /**

@@ -23,25 +23,31 @@ package nars.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-import nars.io.StringParser;
+import nars.container.Memory;
+import nars.main.*;
+import nars.io.*;
 
 /**
  * Input window, accepting user tasks
  */
-public class InputWindow extends NarsFrame implements ActionListener {
-
+public class InputWindow extends NarsFrame implements ActionListener, InputChannel {
+    private Reasoner reasoner;
     /** Control buttons */
-    private Button okButton,  holdButton,  clearButton,  closeButton;
+    private Button okButton, holdButton, clearButton, closeButton;
     /** Input area */
     private TextArea inputText;
     /** Whether the window is ready to accept new input */
     private boolean ready;
+    /** number of cycles between experience lines */
+    private int timer;
 
     /**
      * Constructor
+     * @param reasoner The reseasoner
+     * @param title The title of the window
      */
-    public InputWindow() {
-        super("Input Window");
+    public InputWindow(Reasoner reasoner, String title) {
+        super(title + " - Input Window");
         setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
@@ -76,6 +82,8 @@ public class InputWindow extends NarsFrame implements ActionListener {
         add(closeButton);
         setBounds(0, 40, 400, 210);
         setVisible(true);
+
+        this.reasoner = reasoner;
     }
 
     /**
@@ -99,73 +107,55 @@ public class InputWindow extends NarsFrame implements ActionListener {
         } else if (b == clearButton) {
             inputText.setText("");
         } else if (b == closeButton) {
-        	close();
-        }        
+            close();
+        }
     }
 
     private void close() {
         setVisible(false);
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
 
-    /**
-     * Get one input lines
-     * @return The top line in the input window
-     */
-    public String getLine() {
-        if (ready) {
-            String input = inputText.getText().trim();
-            int cutPoint;
-            while (input.length() > 0) {
-                cutPoint = input.indexOf('\n');
-                if (cutPoint < 0) {
-                    inputText.setText("");
-                    return input;
-                } else if (cutPoint > 0) {
-                    inputText.setText(input.substring(cutPoint + 1));
-                    return input.substring(0, cutPoint).trim();
-                } else { // (cutPoint == 0)
-                    input = input.substring(1, cutPoint).trim();
-                }
-            }
-            ready = false;
-            inputText.setText("");
-        }
-        return null;
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
     }
 
     /**
-     * Get input lines, and send them to Memory
-     * @return Nember of running steps, if any
+     * Accept text input in a tick, which can be multiple lines
+     * @return Whether to check this channel again
      */
-    public long getInput() {
-        while (ready) {
-            String input = inputText.getText();
-            int EOL = input.indexOf('\n');
-            if (EOL < 0) {
-                EOL = input.length();
-            }
-            String line = input.substring(0, EOL).trim();
-            if (input.length() > EOL) {
-                inputText.setText(input.substring(EOL + 1));
+    public boolean nextInput() {
+        if (timer > 0) {  // wait until the timer
+            timer--;
+            return true;
+        }
+        if (!ready) {
+            return false;
+        }
+        String text = inputText.getText().trim();
+        String line;    // The next line of text
+        int endOfLine;
+        // The process steps at a number or no more text
+        while ((text.length() > 0) && (timer == 0)) {
+            endOfLine = text.indexOf('\n');
+            if (endOfLine < 0) {
+                line = text;
+                text = "";
             } else {
-                inputText.setText("");
+                line = text.substring(0, endOfLine).trim();
+                text = text.substring(endOfLine + 1);
             }
-            if (line.length() == 0) {
+            try {
+                timer = Integer.parseInt(line);
+                reasoner.walk(timer);
+            } catch (NumberFormatException e) {
+                reasoner.textInputLine(line);
+            }
+            inputText.setText(text);
+            if (text.isEmpty()) {
                 ready = false;
-            } else {
-                try {
-                    Long i = new Long(line);
-                    return i.longValue();
-                } catch (NumberFormatException e) {
-                    StringParser.parseTask(line);
-                }
             }
         }
-        return 0;
+        return ((text.length() > 0) || (timer > 0));
     }
 }

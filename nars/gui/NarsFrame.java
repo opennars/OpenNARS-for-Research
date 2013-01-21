@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
@@ -28,6 +27,7 @@ import java.awt.event.*;
  * Specify shared properties of NARS windows
  */
 public abstract class NarsFrame extends Frame implements WindowListener {
+
     /** Color for the background of the main window */
     static final Color MAIN_WINDOW_COLOR = new Color(120, 120, 255);
     /** Color for the background of the windows with unique instantiation */
@@ -42,48 +42,48 @@ public abstract class NarsFrame extends Frame implements WindowListener {
     static final Font NarsFont = new Font("Helvetica", Font.PLAIN, 11);
     /** Message for unimplemented functions */
     static final String UNAVAILABLE = "\n Not implemented in this demo applet.";
-    
+
     /** Default constructor */
     NarsFrame() {
         super();
         addWindowListener(this);
     }
-    
+
     /**
      * Constructor with title and font setting
      * @param title The title displayed by the window
-     */    
+     */
     NarsFrame(String title) {
         super(" " + title);
         setFont(NarsFont);
         addWindowListener(this);
     }
 
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-	}
+    @Override
+    public void windowActivated(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-	}
+    @Override
+    public void windowClosed(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-	}
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-	}
+    @Override
+    public void windowDeactivated(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-	}
+    @Override
+    public void windowDeiconified(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-	}
+    @Override
+    public void windowIconified(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-	}
+    @Override
+    public void windowOpened(WindowEvent arg0) {
+    }
 }

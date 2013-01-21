@@ -198,8 +198,7 @@ public class BudgetValue implements Cloneable {
      * @return The decision on whether to process the Item
      */
     public boolean aboveThreshold() {
-        return (summary() >= Memory.busyValue()*Parameters.BUDGET_THRESHOLD);
-//        return (summary() >= Parameters.BUDGET_THRESHOLD);
+        return (summary() >= Parameters.BUDGET_THRESHOLD);
     }
 
     /**
@@ -215,7 +214,7 @@ public class BudgetValue implements Cloneable {
      * Briefly display the BudgetValue
      * @return String representation of the value with 2-digit accuracy
      */
-    public String toString2() {
-        return MARK + priority.toString2() + SEPARATOR + durability.toString2() + SEPARATOR + quality.toString2() + MARK;
+    public String toStringBrief() {
+        return MARK + priority.toStringBrief() + SEPARATOR + durability.toStringBrief() + SEPARATOR + quality.toStringBrief() + MARK;
     }
 }

@@ -86,27 +86,6 @@ public final class TruthFunctions extends UtilityFunctions {
         return new TruthValue(f, c);
     }
 
-    /**
-     * Casting truth-value v1 from moment t1 to moment t2, with respect to time t
-     * @param v1 Truth value of the premise to be casted
-     * @param t1 Source time
-     * @param t2 Target time
-     * @param t Reference time
-     * @return Truth value after temporal discount
-     */
-    public static TruthValue temporalCasting(TruthValue v1, long t1, long t2, long t) {
-        float f1 = v1.getFrequency();
-        float c1 = v1.getConfidence();
-        float c = w2c(c1);      // minimum has nothing to do with distance
-        if (t2 != Stamp.ALWAYS) {
-            float c2 = c1 * (1 - Math.abs(t1 - t2) / (float) (Math.abs(t - t1) + Math.abs(t - t2)));
-            if (c2 > c) {
-                c = c2;
-            }
-        }
-        return new TruthValue(f1, c);
-    }
-
     /* ----- double argument functions, called in SyllogisticRules ----- */
     /**
      * {<S ==> M>, <M ==> P>} |- <S ==> P>
@@ -321,7 +300,8 @@ public final class TruthFunctions extends UtilityFunctions {
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = or(f1, f2);
-        float c = or(and(f1, c1), and(f2, c2)) + and(1 - f1, 1 - f2, c1, c2);
+//        float c = or(and(f1, c1), and(f2, c2)) + and(1 - f1, 1 - f2, c1, c2);
+        float c = and(c1, c2);
         return new TruthValue(f, c);
     }
 
@@ -337,19 +317,8 @@ public final class TruthFunctions extends UtilityFunctions {
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = and(f1, f2);
-        float c = or(and(1 - f1, c1), and(1 - f2, c2)) + and(f1, f2, c1, c2);
+        float c = and(c1, c2);
         return new TruthValue(f, c);
-    }
-
-    /**
-     * {<M --> S>, <M <-> P>} |- <M --> (S-P)>
-     * @param v1 Truth value of the first premise
-     * @param v2 Truth value of the second premise
-     * @return Truth value of the conclusion
-     */
-    static TruthValue difference(TruthValue v1, TruthValue v2) {
-        TruthValue v0 = negation(v2);
-        return intersection(v1, v0);
     }
 
     /**

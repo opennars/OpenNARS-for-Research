@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nars.gui;
 
 import java.awt.*;
@@ -28,14 +27,15 @@ import java.awt.event.*;
  * Pop-up message for the user to accept
  */
 public class MessageDialog extends Dialog implements ActionListener, WindowListener {
+
     protected Button button;
     protected TextArea text;
-    
+
     /**
      * Constructor
      * @param parent The parent Frame
      * @param message The text to be displayed
-     */    
+     */
     public MessageDialog(Frame parent, String message) {
         super(parent, "Message", false);
         setLayout(new BorderLayout(5, 5));
@@ -55,48 +55,48 @@ public class MessageDialog extends Dialog implements ActionListener, WindowListe
         addWindowListener(this);
         setVisible(true);
     }
-    
+
     /**
      * Handling button click
      * @param e The ActionEvent
-     */    
+     */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == button) {
-        	close();
+            close();
         }
     }
-    
+
     private void close() {
         this.setVisible(false);
         this.dispose();
     }
 
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-	}
+    @Override
+    public void windowActivated(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-	}
+    @Override
+    public void windowClosed(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
 
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-	}
+    @Override
+    public void windowDeactivated(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-	}
+    @Override
+    public void windowDeiconified(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-	}
+    @Override
+    public void windowIconified(WindowEvent arg0) {
+    }
 
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-	}
+    @Override
+    public void windowOpened(WindowEvent arg0) {
+    }
 }

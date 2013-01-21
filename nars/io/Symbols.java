@@ -27,15 +27,12 @@ public class Symbols {
 
     /* sentence type and delimitors */
     public static final char JUDGMENT_MARK = '.';
-    public static final char GOAL_MARK = '!';
     public static final char QUESTION_MARK = '?';
-    public static final char QUEST_MARK = '@';
 
-    /* Tense markers */
-    public static final String TENSE_MARK = ":";
-    public static final String TENSE_PAST = ":\\:";
-    public static final String TENSE_PRESENT = ":|:";
-    public static final String TENSE_FUTURE = ":/:";
+    /* variable type */
+    public static final char VAR_INDEPENDENT = '$';
+    public static final char VAR_DEPENDENT = '#';
+    public static final char VAR_QUERY = '?';
 
     /* numerical value delimitors, must be different from the Term delimitors */
     public static final char BUDGET_VALUE_MARK = '$';
@@ -69,8 +66,6 @@ public class Symbols {
     public static final String NEGATION_OPERATOR = "--";
     public static final String DISJUNCTION_OPERATOR = "||";
     public static final String CONJUNCTION_OPERATOR = "&&";
-    public static final String SEQUENCE_OPERATOR = "&/";
-    public static final String PARALLEL_OPERATOR = "&|";
 
     /* built-in relations, length = 3 */
     public static final String INHERITANCE_RELATION = "-->";
@@ -80,16 +75,6 @@ public class Symbols {
     public static final String INSTANCE_PROPERTY_RELATION = "{-]";
     public static final String IMPLICATION_RELATION = "==>";
     public static final String EQUIVALENCE_RELATION = "<=>";
-    public static final String IMPLICATION_AFTER_RELATION = "=/>";
-    public static final String IMPLICATION_BEFORE_RELATION = "=\\>";
-    public static final String IMPLICATION_WHEN_RELATION = "=|>";
-    public static final String EQUIVALENCE_AFTER_RELATION = "</>";
-    public static final String EQUIVALENCE_WHEN_RELATION = "<|>";
-
-    /* special Term name prefix, single charactor */
-    public static final char VARIABLE_TAG = '#';
-    public static final char QUERY_VARIABLE_TAG = '?';
-    public static final char OPERATOR_TAG = '^';
 
     /* experience line prefix */
     public static final String INPUT_LINE = "IN";

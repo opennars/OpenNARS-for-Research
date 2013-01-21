@@ -22,19 +22,31 @@ package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 import nars.io.*;
 import nars.main.*;
+import nars.container.Memory;
 
 /**
  * Main window of NARS GUI
  */
-public class MainWindow extends NarsFrame implements ActionListener {
+public class MainWindow extends NarsFrame implements ActionListener, OutputChannel {
 
+    /** Reference to the reasoner */
+    private Reasoner reasoner;
+    /** Reference to the memory */
+    private Memory memory;
+    /** Reference to the inference recorder */
+    private InferenceRecorder record;
+    /** Reference to the experience reader */
+    private ExperienceReader experienceReader;
+    /** Reference to the experience writer */
+    private ExperienceWriter experienceWriter;
     /** Experience display area */
     private TextArea ioText;
     /** Control buttons */
-    private Button stopButton,  walkButton,  runButton,  exitButton;
+    private Button stopButton, walkButton, runButton, exitButton;
     /** Clock display field */
     private TextField timerText;
     /** Label of the clock */
@@ -44,17 +56,30 @@ public class MainWindow extends NarsFrame implements ActionListener {
     /** Whether the experience is saving into a file */
     private boolean savingExp = false;
     /** Input experience window */
-    public static InputWindow inputWindow;
+    public InputWindow inputWindow;
     /** Window to accept a Term to be looked into */
-    public static TermWindow conceptWin;
+    public TermWindow conceptWin;
     /** Windows for run-time parameter adjustment */
-    public static ParameterWindow forgetTW,  forgetBW,  forgetCW,  silentW;
+    public ParameterWindow forgetTW, forgetBW, forgetCW, silentW;
 
     /**
      * Constructor
+     * @param reasoner
+     * @param title
      */
-    public MainWindow() {
-        super("NARS");
+    public MainWindow(Reasoner reasoner, String title) {
+        super(title);
+        this.reasoner = reasoner;
+        memory = reasoner.getMemory();
+        record = memory.getRecorder();
+        experienceWriter = new ExperienceWriter(reasoner);
+        inputWindow = reasoner.getInputWindow();
+        conceptWin = new TermWindow(memory);
+        forgetTW = new ParameterWindow("Task Forgetting Rate", Parameters.TASK_LINK_FORGETTING_CYCLE);
+        forgetBW = new ParameterWindow("Belief Forgetting Rate", Parameters.TERM_LINK_FORGETTING_CYCLE);
+        forgetCW = new ParameterWindow("Concept Forgetting Rate", Parameters.CONCEPT_FORGETTING_CYCLE);
+        silentW = new ParameterWindow("Report Silence Level", Parameters.SILENT_LEVEL);
+
         setBackground(MAIN_WINDOW_COLOR);
         MenuBar menuBar = new MenuBar();
 
@@ -68,17 +93,14 @@ public class MainWindow extends NarsFrame implements ActionListener {
 
         m = new Menu("Memory");
         m.add(new MenuItem("Initialize"));
-        m.addSeparator();
-        m.add(new MenuItem("Load Memory"));
-        m.add(new MenuItem("Save Memory"));
         m.addActionListener(this);
         menuBar.add(m);
 
         m = new Menu("View");
         m.add(new MenuItem("Concepts"));
-        m.add(new MenuItem("Task Buffer"));
-        m.add(new MenuItem("Inference Log"));
+        m.add(new MenuItem("Buffered Tasks"));
         m.add(new MenuItem("Concept Content"));
+        m.add(new MenuItem("Inference Log"));
         m.add(new MenuItem("Input Window"));
         m.addActionListener(this);
         menuBar.add(m);
@@ -153,13 +175,6 @@ public class MainWindow extends NarsFrame implements ActionListener {
         setBounds(0, 250, 400, 350);
         setVisible(true);
 
-        inputWindow = new InputWindow();
-        conceptWin = new TermWindow();
-        forgetTW = new ParameterWindow("Task Forgetting Rate", Parameters.TASK_LINK_FORGETTING_CYCLE);
-        forgetBW = new ParameterWindow("Belief Forgetting Rate", Parameters.TERM_LINK_FORGETTING_CYCLE);
-        forgetCW = new ParameterWindow("Concept Forgetting Rate", Parameters.CONCEPT_FORGETTING_CYCLE);
-        silentW = new ParameterWindow("Report Silence Level", Parameters.SILENT_LEVEL);
-
         initTimer();
     }
 
@@ -167,19 +182,16 @@ public class MainWindow extends NarsFrame implements ActionListener {
      * Initialize the system for a new run
      */
     public void init() {
-        if (timer != 0) {
-            Center.experienceIO.saveLine(timer + "");
-            initTimer();
-        }
+        initTimer();
         ioText.setText("");
     }
 
     /**
      * Reset timer and its display
      */
-    private void initTimer() {
+    public void initTimer() {
         timer = 0;
-        timerText.setText(timer + "");
+        timerText.setText(memory.getTime() + " :: " + timer);
     }
 
     /**
@@ -187,24 +199,7 @@ public class MainWindow extends NarsFrame implements ActionListener {
      */
     public void tickTimer() {
         timer++;
-        timerText.setText(timer + "");
-    }
-
-    /**
-     * Add new line to the display, plus the time interval
-     * @param line The text to be displayed
-     */
-    public void post(String line) {
-        if (timer > 0) {
-            String timeLine = new String(timer + "\n");
-            ioText.append(timeLine);
-            Center.experienceIO.saveLine(timeLine);
-        }
-        if (line != null) {
-            ioText.append(line);
-            Center.experienceIO.saveLine(line);
-        }
-        initTimer();
+        timerText.setText(memory.getTime() + " :: " + timer);
     }
 
     /**
@@ -215,45 +210,46 @@ public class MainWindow extends NarsFrame implements ActionListener {
         Object obj = e.getSource();
         if (obj instanceof Button) {
             if (obj == runButton) {
-                Center.setStoper(-1);
+                reasoner.run();
             } else if (obj == stopButton) {
-                Center.setStoper(0);
+                reasoner.stop();
             } else if (obj == walkButton) {
-                Center.setStoper(1);
+                reasoner.walk(1);
             } else if (obj == exitButton) {
-            	close();
+                close();
             }
         } else if (obj instanceof MenuItem) {
             String label = e.getActionCommand();
             if (label.equals("Load Experience")) {
-                Center.experienceIO.openLoadFile();
+                experienceReader = new ExperienceReader(reasoner);
+                experienceReader.openLoadFile();
             } else if (label.equals("Save Experience")) {
-                savingExp = !savingExp;
                 if (savingExp) {
-                    ioText.setBackground(SAVING_BACKGROUND_COLOR);
-                    Center.experienceIO.openSaveFile();
-                } else {
-                    post(null);
                     ioText.setBackground(DISPLAY_BACKGROUND_COLOR);
-                    Center.experienceIO.closeSaveFile();
-                }
-            } else if (label.equals("Record Inference")) {
-                if (Record.isLogging()) {
-                    Record.closeLogFile();
+                    experienceWriter.closeSaveFile();
                 } else {
-                    Record.openLogFile();
+                    ioText.setBackground(SAVING_BACKGROUND_COLOR);
+                    experienceWriter.openSaveFile();
+                }
+                savingExp = !savingExp;
+            } else if (label.equals("Record Inference")) {
+                if (record.isLogging()) {
+                    record.closeLogFile();
+                } else {
+                    record.openLogFile();
                 }
             } else if (label.equals("Initialize")) {
-                Center.reset();
+                reasoner.reset();
+                memory.getExportStrings().add("*****RESET*****");
             } else if (label.equals("Concepts")) {
-                Memory.conceptsStartPlay("Active Concepts");
-            } else if (label.equals("Task Buffer")) {
-                Memory.newTasksStartPlay("Task Buffer");
-            } else if (label.equals("Inference Log")) {
-                Record.show();
-                Record.play();
+                memory.conceptsStartPlay("Active Concepts");
+            } else if (label.equals("Buffered Tasks")) {
+                memory.taskBuffersStartPlay("Buffered Tasks");
             } else if (label.equals("Concept Content")) {
                 conceptWin.setVisible(true);
+            } else if (label.equals("Inference Log")) {
+                record.show();
+                record.play();
             } else if (label.equals("Input Window")) {
                 inputWindow.setVisible(true);
             } else if (label.equals("Task Forgetting Rate")) {
@@ -274,13 +270,40 @@ public class MainWindow extends NarsFrame implements ActionListener {
         }
     }
 
+    /**
+     * Close the whole system
+     */
     private void close() {
         setVisible(false);
         System.exit(0);
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
+
+    /**
+     * To process the next chunk of output data
+     * @param lines The text lines to be displayed
+     */
+    public void nextOutput(ArrayList lines) {
+        if (!lines.isEmpty()) {
+            String text = "";
+            for (Object line : lines) {
+                text += line + "\n";
+            }
+            ioText.append(text);
+        }
+    }
+
+    /**
+     * To get the timer value and then to reset it
+     * @return The previous timer value
+     */
+    public long updateTimer() {
+        long i = timer;
+        initTimer();
+        return i;
+    }
 }

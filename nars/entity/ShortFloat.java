@@ -29,9 +29,17 @@ public class ShortFloat implements Cloneable {
     but used as float */
     private short value;
 
-    /** 
+    /**
      * Constructor
      * @param v The initial value
+     */
+    public ShortFloat(short v) {
+        value = v;
+    }
+
+    /** 
+     * Constructor
+     * @param v The initial value in float
      */
     public ShortFloat(float v) {
         setValue(v);
@@ -42,14 +50,14 @@ public class ShortFloat implements Cloneable {
      * @return The current value in float
      */
     public float getValue() {
-        return (float) (value * 0.0001);
+        return value * 0.0001f;
     }
 
     /**
      * To access the value as short
      * @return The current value in short
      */
-    short getShortValue() {
+    private short getShortValue() {
         return value;
     }
 
@@ -59,7 +67,7 @@ public class ShortFloat implements Cloneable {
      */
     public void setValue(float v) {
         if ((v < 0) || (v > 1)) {
-            System.out.println("!!! Wrong value: " + v);
+            throw new ArithmeticException("Invalid value: " + v);
         } else {
             value = (short) (v * 10000.0 + 0.5);
         }
@@ -81,9 +89,16 @@ public class ShortFloat implements Cloneable {
      */
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 17 * hash + this.value;
-        return hash;
+        return this.value + 17;
+    }
+
+    /**
+     * To create an identifical copy of the ShortFloat
+     * @return A cloned ShortFloat
+     */
+    @Override
+    public Object clone() {
+        return new ShortFloat(value);
     }
 
     /**
@@ -107,7 +122,7 @@ public class ShortFloat implements Cloneable {
      * Round the value into a short String
      * @return The String representation, with 2 digits accuracy
      */
-    public String toString2() {
+    public String toStringBrief() {
         value += 50;
         String s = toString();
         value -= 50;

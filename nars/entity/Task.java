@@ -20,31 +20,57 @@
  */
 package nars.entity;
 
-import nars.language.Term;
-import nars.main.NARS;
+import nars.term.Term;
 
 /**
  * A task to be processed, consists of a Sentence and a BudgetValue
  */
-public class Task extends Item implements Cloneable {
+public class Task extends Item {
+
     /** The sentence of the Task */
     private Sentence sentence;
-    /** Whether it is derived by a structural rule */
-    protected boolean structural = false;        // 
+    /** Task from which the Task is derived, or null if input */
+    private Task parentTask;
+    /** Belief from which the Task is derived, or null if derived from a theorem */
+    private Sentence parentBelief;
+    /** For Question and Goal: best solution found so far */
+    private Sentence bestSolution;
 
     /**
-     * Constructor
+     * Constructor for input task
      * @param s The sentence
      * @param b The budget
      */
     public Task(Sentence s, BudgetValue b) {
-        super(b);
+        super(s.toStringBrief(), b); // change to toKey()
         sentence = s;
-        key = sentence.forTaskKey();
+        key = sentence.toStringBrief();
     }
 
-    public Object clone() {
-        return new Task(sentence, (BudgetValue) this);
+    /**
+     * Constructor for a derived task
+     * @param s The sentence
+     * @param b The budget
+     * @param parentTask The task from which this new task is derived
+     * @param parentBelief The belief from which this new task is derived
+     */
+    public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief) {
+        this(s, b);
+        this.parentTask = parentTask;
+        this.parentBelief = parentBelief;
+    }
+
+    /**
+     * Constructor for an activated task
+     * @param s The sentence
+     * @param b The budget
+     * @param parentTask The task from which this new task is derived
+     * @param parentBelief The belief from which this new task is derived
+     * @param solution The belief to be used in future inference
+     */
+     public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief, Sentence solution) {
+        this(s, b, parentTask, parentBelief); 
+        this.bestSolution = solution;
     }
 
     /**
@@ -64,27 +90,51 @@ public class Task extends Item implements Cloneable {
     }
 
     /**
+     * Check if a Task is a direct input
+     * @return Whether the Task is derived from another task
+     */
+    public boolean isInput() {
+        return parentTask == null;
+    }
+
+    /**
      * Check if a Task is derived by a StructuralRule
      * @return Whether the Task is derived by a StructuralRule
      */
     public boolean isStructural() {
-        return structural;
-    }
-
-    /**
-     * Record if a Task is derived by a StructuralRule
-     */
-    public void setStructural() {
-        structural = true;
+        return (parentBelief == null) && (parentTask != null);
     }
 
     /**
      * Merge one Task into another
      * @param that The other Task
      */
-    public void merge(Item that) {
+    public void merge(Task that) {
         super.merge(that);
-        structural = (structural || ((Task) that).isStructural());
+    }
+
+    /**
+     * Get the best-so-far solution for a Question or Goal
+     * @return The stored Sentence or null
+     */
+    public Sentence getBestSolution() {
+        return bestSolution;
+    }
+
+    /**
+     * Set the best-so-far solution for a Question or Goal, and report answer for input question
+     * @param judg The solution to be remembered
+     */
+    public void setBestSolution(Sentence judg) {
+        bestSolution = judg;
+    }
+
+    /**
+     * Get the parent belief of a task
+     * @return The belief from which the task is derived
+     */
+    public Sentence getParentBelief() {
+        return parentBelief;
     }
 
     /**
@@ -94,27 +144,15 @@ public class Task extends Item implements Cloneable {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        if (NARS.isStandAlone()) {
-            s.append(super.toString() + " ");
+        s.append(super.toString() + " ");
+        if (parentTask != null) {
+            s.append("  \n from task: " + parentTask.toStringBrief());
+            if (parentBelief != null) {
+                s.append("  \n from belief: " + parentBelief.toStringBrief());
+            }
         }
-        s.append(sentence);
-        return s.toString();
-    }
-
-    /**
-     * Get a String representation of the Task, with reduced accuracy
-     * @return The Task as a String, with 2-digit accuracy for the values
-     */
-    @Override
-    public String toString2() {
-        StringBuffer s = new StringBuffer();
-        if (NARS.isStandAlone()) {
-            s.append(super.toString2() + " ");
-        }
-        if (sentence instanceof Question) {
-            s.append(sentence);
-        } else {
-            s.append(((Judgment) sentence).toString2());
+        if (bestSolution != null) {
+            s.append("  \n solution: " + bestSolution.toStringBrief());
         }
         return s.toString();
     }

@@ -1,5 +1,5 @@
 /*
- * Record.java
+ * InferenceRecorder.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -28,43 +28,40 @@ import nars.gui.InferenceWindow;
 /**
  * Inference log, which record input/output of each inference step
  */
-public class Record {
+public class InferenceRecorder {
 
     /** the display window */
-    private static InferenceWindow window = new InferenceWindow();
+    private InferenceWindow window = new InferenceWindow(this);
     /** whether to display */
-    private static boolean isReporting = false;
+    private boolean isReporting = false;
     /** the log file */
-    private static PrintWriter logFile = null;
+    private PrintWriter logFile = null;
 
     /** 
      * Initialize the window and the file
      */
-    public static void init() {
+    public void init() {
         window.clear();
-        if (logFile != null) {
-            closeLogFile();
-        }
     }
 
     /** 
      * Show the window
      */
-    public static void show() {
+    public void show() {
         window.setVisible(true);
     }
 
     /** 
      * Begin the display
      */
-    public static void play() {
+    public void play() {
         isReporting = true;
     }
 
     /**
      * Stop the display
      */
-    public static void stop() {
+    public void stop() {
         isReporting = false;
     }
 
@@ -72,7 +69,7 @@ public class Record {
      * Add new text to display
      * @param s The line to be displayed
      */
-    public static void append(String s) {
+    public void append(String s) {
         if (isReporting) {
             window.append(s);
         }
@@ -81,10 +78,10 @@ public class Record {
         }
     }
 
-    /** 
+    /**
      * Open the log file
      */
-    public static void openLogFile() {
+    public void openLogFile() {
         FileDialog dialog = new FileDialog((FileDialog) null, "Inference Log", FileDialog.SAVE);
         dialog.setVisible(true);
         String directoryName = dialog.getDirectory();
@@ -98,20 +95,20 @@ public class Record {
         window.setVisible(true);
     }
 
-    /** 
+    /**
      * Close the log file
      */
-    public static void closeLogFile() {
+    public void closeLogFile() {
         logFile.close();
         logFile = null;
         window.resetBackground();
     }
 
-    /** 
+    /**
      * Check file logging
      * @return If the file logging is going on
      */
-    public static boolean isLogging() {
+    public boolean isLogging() {
         return (logFile != null);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * ExperienceIO.java
+ * ExperienceReader.java
  *
  * Copyright (C) 2008  Pei Wang
  *
@@ -23,31 +23,29 @@ package nars.io;
 import java.awt.FileDialog;
 import java.io.*;
 
-import nars.gui.*;
 import nars.main.*;
 
 /**
  * To read and write experience as Task streams
  */
-public class ExperienceIO {
-
-    /** Input experience from a window */
-    private InputWindow inputWindow;
+public class ExperienceReader implements InputChannel {
+    /** Reference to the reasoner */
+    private Reasoner reasoner;
     /** Input experience from a file */
     private BufferedReader inExp;
-    /** Output experience into a file */
-    private PrintWriter outExp;
+    /** Remaining working cycles before reading the next line */
+    private int timer;
 
-    /** 
+    /**
      * Default constructor
+     * @param reasoner Backward link to the reasoner
      */
-    public ExperienceIO() {
-        inputWindow = MainWindow.inputWindow;
+    public ExperienceReader(Reasoner reasoner) {
+        this.reasoner = reasoner;
         inExp = null;
-        outExp = null;
     }
 
-    /** 
+    /**
      * Open an input experience file
      */
     public void openLoadFile() {
@@ -60,74 +58,10 @@ public class ExperienceIO {
         } catch (IOException ex) {
             System.out.println("i/o error: " + ex.getMessage());
         }
-    }
-
-    /** 
-     * Open an output experience file
-     */
-    public void openSaveFile() {
-        FileDialog dialog = new FileDialog((FileDialog) null, "Save experience", FileDialog.SAVE);
-        dialog.setVisible(true);
-        String directoryName = dialog.getDirectory();
-        String fileName = dialog.getFile();
-        try {
-            outExp = new PrintWriter(new FileWriter(directoryName + fileName));
-        } catch (IOException ex) {
-            System.out.println("i/o error: " + ex.getMessage());
-        }
+        reasoner.addInputChannel(this);
     }
 
     /**
-     * Read a line from input, and send running instruction to Memory
-     * @return Nember of running steps, if any
-     */
-    public long loadLine() {
-        String line = null;
-        long cycle = 0;
-        if (inExp != null) {
-            try {
-                line = inExp.readLine();
-                if (line == null) {
-                    inExp.close();
-                    inExp = null;
-                }
-            } catch (IOException ex) {
-                System.out.println("i/o error: " + ex.getMessage());
-            }
-        } else {
-            line = inputWindow.getLine();
-        }
-        if (line != null) {
-            line = line.trim();
-            if (line.length() > 0) {
-                try {
-                    cycle = new Long(line);
-                } catch (NumberFormatException e) {
-                    if (line.charAt(0) == Symbols.RESET_MARK) {
-                        Center.reset();
-                        saveLine(line);
-                    } else if (line.charAt(0) == Symbols.COMMENT_MARK) {
-                        saveLine(line);
-                    } else {
-                        StringParser.parseExperience(new StringBuffer(line));
-                    }
-                }
-            }
-        }
-        return cycle;
-    }
-
-    /** 
-     * Write a line into the output experience file
-     * @param line The output line
-     */
-    public void saveLine(String line) {
-        if (outExp != null) {
-            outExp.println(line);
-        }
-    }
-
-    /** 
      * Close an input experience file
      */
     public void closeLoadFile() {
@@ -136,12 +70,43 @@ public class ExperienceIO {
         } catch (IOException ex) {
             System.out.println("i/o error: " + ex.getMessage());
         }
+        reasoner.removeInputChannel(this);
     }
 
-    /** 
-     * Close an output experience file
+    /**
+     * Process the next chunk of input data
+     * @return Whether the input channel should be chacked again
      */
-    public void closeSaveFile() {
-        outExp.close();
+    public boolean nextInput() {
+        if (timer > 0) {
+            timer--;
+            return true;
+        }
+        if (inExp == null) {
+            return false;
+        }
+        String line = null;
+        while (timer == 0) {
+            try {
+                line = inExp.readLine();
+                if (line == null) {
+                    inExp.close();
+                    inExp = null;
+                    return false;
+                }
+            } catch (IOException ex) {
+                System.out.println("i/o error: " + ex.getMessage());
+            }
+            line = line.trim();
+            if (line.length() > 0) {
+                try {
+                    timer = Integer.parseInt(line);
+                    reasoner.walk(timer);
+                } catch (NumberFormatException e) {
+                    reasoner.textInputLine(line);
+                }
+            }
+        }
+        return true;
     }
 }

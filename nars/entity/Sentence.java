@@ -20,10 +20,8 @@
  */
 package nars.entity;
 
-import java.util.*;
-
 import nars.io.Symbols;
-import nars.language.*;
+import nars.term.*;
 import nars.main.*;
 
 /**
@@ -31,81 +29,70 @@ import nars.main.*;
  *<p>
  * It is used as the premises and conclusions of all inference rules.
  */
-public abstract class Sentence implements Cloneable {
+public class Sentence implements Cloneable {
 
     /** The content of a Sentence is a Term */
-    protected Term content;
+    private Term content;
     /** The punctuation also indicates the type of the Sentence: Judgment, Question, or Goal */
-    protected char punctuation;
-    /** The truth value of Judgment or desire value of Goal */
-    protected TruthValue truth = null;
+    private char punctuation;
+    /** The truth value of Judgment */
+    private TruthValue truth;
     /** Partial record of the derivation path */
-    protected Stamp stamp = null;
-    /** Whether it is an input sentence */
-    protected boolean input = false;
-    /** For Question and Goal: best solution found so far */
-    protected Judgment bestSolution = null;
+    private Stamp stamp;
 
     /**
-     * Make a Sentence from an input String. Called by StringParser.
-     * @param term The content of the sentence
-     * @param punc The puncuation (and therefore, type) of the sentence
-     * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
-     * @param stamp The stamp of the truth value (for Judgment or Goal)
-     * @param premise1 The first premise to record in the new Judgment. May be null.
-     * @param premise2 The second premise to record in the new Judgment. May be null.
-     * @return the Sentence generated from the arguments
+     * Create a Sentence with the given fields
+     * @param content The Term that forms the content of the sentence
+     * @param punctuation The punctuation indicating the type of the sentence
+     * @param truth The truth value of the sentence, null for question
+     * @param stamp The stamp of the sentence indicating its derivation time and base
      */
-    public static Sentence make(Term term, char punc, TruthValue truth, Stamp stamp, Sentence premise1, Sentence premise2) {
-        if (term instanceof CompoundTerm) {
-            ((CompoundTerm) term).renameVariables();
-        }
-        Sentence s = null;
-        switch (punc) {
-            case Symbols.JUDGMENT_MARK:
-                s = new Judgment(term, punc, truth, stamp, premise1, premise2);
-                break;
-            case Symbols.GOAL_MARK:
-                s = new Goal(term, punc, truth, stamp);
-                break;
-            case Symbols.QUESTION_MARK:
-                s = new Question(term, punc, stamp);
-                break;
-            case Symbols.QUEST_MARK:
-                s = new Quest(term, punc, stamp);
-                break;
-            default:
-                return null;
-        }
-        return s;
+    public Sentence(Term content, char punctuation, TruthValue truth, Stamp stamp) {
+        this.content = content;
+        this.content.renameVariables();
+        this.punctuation = punctuation;
+        this.truth = truth;
+        this.stamp = stamp;
     }
 
     /**
-     * Make a derived Sentence from a template and some initial values. Called by Memory.
-     * @param oldS A sample sentence providing the type of the new sentence
-     * @param term The content of the sentence
-     * @param truth The truth value of the sentence, if it is a Judgment (or Goal)
-     * @param stamp The stamp of the truth value (for Judgment or Goal)
-     * @param premise1 The first premise to record in the new Judgment. May be null.
-     * @param premise2 The second premise to record in the new Judgment. May be null.
-     * @return the Sentence generated from the arguments
+     * To check whether two sentences are equal
+     * @param that The other sentence
+     * @return Whether the two sentences have the same content
      */
-    public static Sentence make(Sentence oldS, Term term, TruthValue truth, Stamp stamp,
-            Sentence premise1, Sentence premise2) {
-        if (term instanceof CompoundTerm) {
-            ((CompoundTerm) term).renameVariables();
+    @Override
+    public boolean equals(Object that) {
+        if (that instanceof Sentence) {
+            Sentence t = (Sentence) that;
+            return content.equals(t.getContent()) && punctuation == t.getPunctuation() && truth.equals(t.getTruth()) && stamp.equals(t.getStamp());
         }
-        Sentence s = null;
-        if (oldS instanceof Quest) {
-            s = new Quest(term, Symbols.QUEST_MARK, stamp);
-        } else if (oldS instanceof Question) {
-            s = new Question(term, Symbols.QUESTION_MARK, stamp);
-        } else if (oldS instanceof Goal) {
-            s = new Goal(term, Symbols.GOAL_MARK, truth, stamp);
-        } else {
-            s = new Judgment(term, Symbols.JUDGMENT_MARK, truth, stamp, premise1, premise2);
-        }
-        return s;
+        return false;
+    }
+
+    /**
+     * To produce the hashcode of a sentence
+     * @return A hashcode
+     */
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 67 * hash + (this.content != null ? this.content.hashCode() : 0);
+        hash = 67 * hash + this.punctuation;
+        hash = 67 * hash + (this.truth != null ? this.truth.hashCode() : 0);
+        hash = 67 * hash + (this.stamp != null ? this.stamp.hashCode() : 0);
+        return hash;
+    }
+
+    /**
+     * Check whether the judgment is equivalent to another one
+     * <p>
+     * The two may have different keys
+     * @param that The other judgment
+     * @return Whether the two are equivalent
+     */
+    public boolean equivalentTo(Sentence that) {
+        assert content.equals(that.getContent()) && punctuation == that.getPunctuation();
+        return (truth.equals(that.getTruth()) && stamp.equals(that.getStamp()));
     }
 
     /**
@@ -114,12 +101,10 @@ public abstract class Sentence implements Cloneable {
      */
     @Override
     public Object clone() {
-        if (this instanceof Judgment) {
-            return make((Term) content.clone(), punctuation, truth, (Stamp) stamp.clone(),
-                    ((Judgment) this)._premise1, ((Judgment) this)._premise2);
-        } else {
-            return make((Term) content.clone(), punctuation, truth, (Stamp) stamp.clone(), null, null);
+        if (truth == null) {
+            return new Sentence((Term) content.clone(), punctuation, null, (Stamp) stamp.clone());
         }
+        return new Sentence((Term) content.clone(), punctuation, new TruthValue(truth), (Stamp) stamp.clone());
     }
 
     /**
@@ -128,6 +113,14 @@ public abstract class Sentence implements Cloneable {
      */
     public Term getContent() {
         return content;
+    }
+
+    /**
+     * Get the punctuation of the sentence
+     * @return The character '.' or '?'
+     */
+    public char getPunctuation() {
+        return punctuation;
     }
 
     /**
@@ -179,98 +172,6 @@ public abstract class Sentence implements Cloneable {
     }
 
     /**
-     * Check input sentence
-     * @return Whether the
-     */
-    public boolean isInput() {
-        return input;
-    }
-
-    /**
-     * The only place to change the default, called in StringParser
-     */
-    public void setInput() {
-        input = true;
-    }
-
-    /**
-     * Get the best-so-far solution for a Question or Goal
-     * @return The stored Judgment or null
-     */
-    public Judgment getBestSolution() {
-        return bestSolution;
-    }
-
-    /**
-     * Set the best-so-far solution for a Question or Goal, and report answer for input question
-     * @param judg The solution to be remembered
-     */
-    public void setBestSolution(Judgment judg) {
-        bestSolution = judg;
-        if (input) {
-            Memory.report(judg, false);
-        }
-    }
-
-    /**
-     * Check whether one sentence has stamp overlapping with another one, and change the system cash
-     * <p>
-     * Normally 'this' is a task, and 'that' is a belief
-     * @param that The sentence to be checked against
-     * @return Whether the two have overlapping stamps
-     */
-    public boolean noOverlapping(Sentence that) {
-        Memory.newStamp = Stamp.make(stamp, that.getStamp());
-        return (Memory.newStamp != null);
-    }
-
-    /**
-     * Get a stable String representation for a Sentece, called from Task only
-     * Different from toString: tense symbol is replaced by the actual value
-     * @return String representation for a Sentece
-     */
-    public String forTaskKey() {
-        StringBuffer s = new StringBuffer();
-        s.append(content.getName());
-        s.append(punctuation + " ");
-        if (truth != null) {
-            s.append(truth.toString());
-        }
-        s.append(stamp.toString());
-        return s.toString();
-    }
-
-    public Term toTerm() {
-        String opName;
-        switch (punctuation) {
-            case Symbols.JUDGMENT_MARK:
-                opName = "^believe";
-                break;
-            case Symbols.GOAL_MARK:
-                opName = "^want";
-                break;
-            case Symbols.QUESTION_MARK:
-                opName = "^wonder";
-                break;
-            case Symbols.QUEST_MARK:
-                opName = "^assess";
-                break;
-            default:
-                return null;
-        }
-        Term opTerm = Memory.nameToOperator(opName);
-        ArrayList<Term> arg = new ArrayList<Term>();
-        arg.add(content);
-        if (truth != null) {
-            String word = truth.toWord();
-            arg.add(new Term(word));
-        }
-        Term argTerm = Product.make(arg);
-        Term operation = Inheritance.make(argTerm, opTerm);
-        return operation;
-    }
-
-    /**
      * Get a String representation of the sentence
      * @return The String
      */
@@ -279,16 +180,10 @@ public abstract class Sentence implements Cloneable {
         StringBuffer s = new StringBuffer();
         s.append(content.toString());
         s.append(punctuation + " ");
-        s.append(tenseToString());
         if (truth != null) {
             s.append(truth.toString());
         }
-        if (NARS.isStandAlone()) {
-            s.append(stamp.toString());
-            if (bestSolution != null) {
-                s.append("BestSolution: " + bestSolution);
-            }
-        }
+        s.append(stamp.toString());
         return s.toString();
     }
 
@@ -296,62 +191,14 @@ public abstract class Sentence implements Cloneable {
      * Get a String representation of the sentence, with 2-digit accuracy
      * @return The String
      */
-    public String toString2() {
+    public String toStringBrief() {
         StringBuffer s = new StringBuffer();
         s.append(content.toString());
         s.append(punctuation + " ");
-        s.append(tenseToString());
         if (truth != null) {
-            s.append(truth.toString2());
+            s.append(truth.toStringBrief());
         }
-        if (NARS.isStandAlone()) {
-            s.append(stamp.toString());
-            if (bestSolution != null) {
-                s.append("BestSolution: " + bestSolution);
-            }
-        }
+        s.append(stamp.toString());
         return s.toString();
-    }
-
-    /**
-     * Get a String representation of the tense of the sentence
-     * @return The String
-     */
-    private String tenseToString() {
-        if (!isEvent()) {
-            return "";
-        }
-        long delta = getEventTime() - Center.getTime();
-        if (delta > 0) {
-            return Symbols.TENSE_FUTURE + " ";
-        }
-        if (delta < 0) {
-            return Symbols.TENSE_PAST + " ";
-        }
-        return Symbols.TENSE_PRESENT + " ";
-    }
-
-    /**
-     * Get the creation time of the truth-value from the Stamp
-     * @return The creation time of the truth-value
-     */
-    public long getCreationTime() {
-        return getStamp().getCreationTime();
-    }
-
-    /**
-     * Get the occurrence time of the event
-     * @return The occurrence time of the event
-     */
-    public long getEventTime() {
-        return getStamp().getEventTime();
-    }
-
-    /**
-     * Check if the truth-value of the Sentence is about a certain time
-     * @return Whether the sentence is about an event
-     */
-    public boolean isEvent() {
-        return (getEventTime() != Stamp.ALWAYS);
     }
 }

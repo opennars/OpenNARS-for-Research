@@ -21,12 +21,11 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.main.Parameters;
 
 /**
  * Frequency and confidence.
  */
-public class TruthValue { // implements Cloneable {
+public class TruthValue implements Cloneable { // implements Cloneable {
     /** The charactor that marks the two ends of a truth value */
     private static final char DELIMITER = Symbols.TRUTH_VALUE_MARK;
     /** The charactor that separates the factors in a truth value */
@@ -53,16 +52,6 @@ public class TruthValue { // implements Cloneable {
     public TruthValue(TruthValue v) {
         frequency = new ShortFloat(v.getFrequency());
         confidence = new ShortFloat(v.getConfidence());
-    }
-
-    public static TruthValue make(String str) {
-        if (str.equals("TRUE")) {
-            return new TruthValue(1.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
-        } else if (str.equals("FALSE")) {
-            return new TruthValue(0.0f, Parameters.DEFAULT_JUDGMENT_CONFIDENCE);
-        } else {
-            return null;
-        }
     }
 
     /** 
@@ -99,6 +88,14 @@ public class TruthValue { // implements Cloneable {
     }
 
     /**
+     * Check if the truth value is negative
+     * @return True if the frequence is less than 1/2
+     */
+    public boolean isNegative() {
+        return getFrequency() < 0.5;
+    }
+
+    /**
      * Compare two truth values
      * @param that The other TruthValue
      * @return Whether the two are equivalent
@@ -116,22 +113,14 @@ public class TruthValue { // implements Cloneable {
      */
     @Override
     public int hashCode() {
-        int hash = 5;
-        return hash;
+        return (int) (getExpectation() * 37);
     }
 
-    public String toWord() {
-        float e = getExpectation();
-        float t = Parameters.EXPECTATION_THRESHOLD;
-        if (e > t) {
-            return "TRUE";
-        }
-        if (e < 1 - t) {
-            return "FALSE";
-        }
-        return "UNSURE";
+    @Override
+    public Object clone() {
+        return new TruthValue(getFrequency(), getConfidence());
     }
-
+    
     /**
      * The String representation of a TruthValue
      * @return The String
@@ -145,9 +134,9 @@ public class TruthValue { // implements Cloneable {
      * A simplified String representation of a TruthValue, where each factor is accruate to 1%
      * @return The String
      */
-    public String toString2() {
-        String s1 = DELIMITER + frequency.toString2() + SEPARATOR;
-        String s2 = confidence.toString2();
+    public String toStringBrief() {
+        String s1 = DELIMITER + frequency.toStringBrief() + SEPARATOR;
+        String s2 = confidence.toStringBrief();
         if (s2.equals("1.00")) {
             return s1 + "0.99" + DELIMITER;
         } else {

@@ -27,9 +27,9 @@ public class Parameters {
 
     /* ---------- initial values of run-time adjustable parameters ---------- */
     /** Concept decay rate in ConceptBag, in [1, 99]. */
-    public static final int CONCEPT_FORGETTING_CYCLE = 3;
+    public static final int CONCEPT_FORGETTING_CYCLE = 15;
     /** TaskLink decay rate in TaskLinkBag, in [1, 99]. */
-    public static final int TASK_LINK_FORGETTING_CYCLE = 10;
+    public static final int TASK_LINK_FORGETTING_CYCLE = 20;
     /** TermLink decay rate in TermLinkBag, in [1, 99]. */
     public static final int TERM_LINK_FORGETTING_CYCLE = 50;
     /** Silent threshold for task reporting, in [0, 100]. */
@@ -48,32 +48,22 @@ public class Parameters {
     public static final int HORIZON = 1;    // or 2, can be float
     /** Reliance factor, the empirical confidence of analytical truth. */
     public static final float RELIANCE = (float) 0.9;    // the same as default confidence
-    /** The desireability threthold for an operation to be executed. */
-    public static final float DECISION_THRESHOLD = (float) 0.66;
-    /** The expectation threthold for "true". */
-    public static final float EXPECTATION_THRESHOLD = (float) 0.66;
-    /** Range of temporal induction in input events. */
-    public static final int MAXMUM_EVENTS_LENGTH = 10;
 
     /* ---------- budget thresholds ---------- */
     /** The budget threthold rate for task to be accepted. */
-    public static final float BUDGET_THRESHOLD = (float) 0.2;
-    /** The priority threthold for operation to be executed. */
-    public static final float PRIORITY_THRESHOLD = (float) 0.06;
+    public static final float BUDGET_THRESHOLD = (float) 0.1;
 
     /* ---------- default input values ---------- */
     /** Default expectation for conformation. */
     public static final float DEFAULT_CONFIRMATION_EXPECTATION = (float) 0.8;
+    /** Default expectation for conformation. */
+    public static final float DEFAULT_CREATION_EXPECTATION = (float) 0.66;
     /** Default confidence of input judgment. */
     public static final float DEFAULT_JUDGMENT_CONFIDENCE = (float) 0.9;
     /** Default priority of input judgment */
     public static final float DEFAULT_JUDGMENT_PRIORITY = (float) 0.8;
     /** Default durability of input judgment */
     public static final float DEFAULT_JUDGMENT_DURABILITY = (float) 0.8;
-    /** Default priority of input goal */
-    public static final float DEFAULT_GOAL_PRIORITY = (float) 0.9;
-    /** Default durability of input goal */
-    public static final float DEFAULT_GOAL_DURABILITY = (float) 0.7;
     /** Default priority of input question */
     public static final float DEFAULT_QUESTION_PRIORITY = (float) 0.9;
     /** Default durability of input question */
@@ -102,8 +92,6 @@ public class Parameters {
     public static final int TERM_LINK_RECORD_LENGTH = 10;
     /** Maximum number of beliefs kept in a Concept */
     public static final int MAXMUM_BELIEF_LENGTH = 7;
-    /** Maximum number of goals kept in a Concept */
-    public static final int MAXMUM_GOALS_LENGTH = 7;
     /** Maximum number of goals kept in a Concept */
     public static final int MAXMUM_QUESTIONS_LENGTH = 5;
 }

@@ -30,11 +30,10 @@ import nars.entity.Concept;
 /**
  * Window displaying the content of a Concept, such as beliefs, goals, and questions
  */
-public class ConceptWindow extends NarsFrame implements ActionListener, ItemListener {
+public class ConceptWindow extends NarsFrame implements ActionListener {
 
     /** Control buttons */
     private Button playButton, stopButton, playInNewWindowButton, closeButton;
-    private Checkbox showDerivationCheckbox;
     /** Display area */
     private TextArea text;
     /** The concept to be displayed */
@@ -79,11 +78,6 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
         stopButton.addActionListener(this);
         add(stopButton);
 
-        showDerivationCheckbox = new Checkbox("Derivation", true);
-        gridbag.setConstraints(showDerivationCheckbox, c);
-        showDerivationCheckbox.addItemListener(this);
-        add(showDerivationCheckbox);
-
         playInNewWindowButton = new Button("Play in New Window");
         gridbag.setConstraints(playInNewWindowButton, c);
         playInNewWindowButton.addActionListener(this);
@@ -115,7 +109,6 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
         // The Play and Stop buttons and Derivation checkbox no longer do anything, so disable.
         playButton.setEnabled(false);
         stopButton.setEnabled(false);
-        showDerivationCheckbox.setEnabled(false);
     }
 
     /**
@@ -144,17 +137,5 @@ public class ConceptWindow extends NarsFrame implements ActionListener, ItemList
     @Override
     public void windowClosing(WindowEvent e) {
         close();
-    }
-
-    public boolean getShowDerivation() {
-        return showDerivationCheckbox.getState();
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        if (e.getSource() == showDerivationCheckbox) {
-            // Redisplay.  displayContent will check getShowDerivation().
-            post(concept.displayContent());
-        }
     }
 }

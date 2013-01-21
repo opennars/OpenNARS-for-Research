@@ -24,7 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.main.Parameters;
-import nars.storage.Bag;
+import nars.container.Bag;
 
 /**
  * Window display the priority distribution of items within a given bag
@@ -36,7 +36,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     /** The lowest level displayed */
     private int showLevel;
     /** Control buttons */
-    private Button playButton,  stopButton,  closeButton;
+    private Button playButton, stopButton, closeButton;
     /** Display area */
     private TextArea text;
     /** Display label */
@@ -131,20 +131,23 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         } else if (source == stopButton) {
             bag.stop();
         } else if (source == closeButton) {
-        	close();
+            close();
         }
     }
 
+    /**
+     * Close the window
+     */
     private void close() {
         bag.stop();
         dispose();
         counter--;
     }
-    
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		close();
-	}
+
+    @Override
+    public void windowClosing(WindowEvent arg0) {
+        close();
+    }
 
     /**
      * Handling scrollbar movement

@@ -21,7 +21,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.language.Term;
+import nars.term.Term;
 
 /**
  * A link between a compound term and a component term
@@ -60,12 +60,6 @@ public class TermLink extends Item {
     protected short[] index;
 
     /**
-     * Default constructor
-     */
-    public TermLink() {
-    }
-
-    /**
      * Constructor for TermLink template
      * <p>
      * called in CompoundTerm.prepareComponentLinks only
@@ -91,12 +85,12 @@ public class TermLink extends Item {
         }
     }
 
-    /**
-     * Default Constructor need in TaskLink
-     * @param v Budget value of the link
+    /** called from TaskLink
+     * @param s The key of the TaskLink
+     * @param v The budget value of the TaskLink
      */
-    protected TermLink(BudgetValue v) {
-        super(v);
+    protected TermLink(String s, BudgetValue v) {
+        super(s, v);
     }
 
     /**
@@ -108,7 +102,7 @@ public class TermLink extends Item {
      * @param v Budget value of the link
      */
     public TermLink(Term t, TermLink template, BudgetValue v) {
-        super(v);
+        super(t.getName(), v);
         target = t;
         type = template.getType();
         if (template.getTarget().equals(t)) {
@@ -177,23 +171,5 @@ public class TermLink extends Item {
         } else {
             return -1;
         }
-    }
-
-    /**
-     * Get a String representation of the link, with full accuracy
-     * @return The String
-     */
-    @Override
-    public String toString() {
-        return (super.toString() + " " + key);
-    }
-
-    /**
-     * Get a String representation of the link, with 2-digit accuracy
-     * @return The String
-     */
-    @Override
-    public String toString2() {
-        return (super.toString2() + " " + key);
     }
 }

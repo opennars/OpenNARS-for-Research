@@ -24,8 +24,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.entity.Concept;
-import nars.io.StringParser;
-import nars.main.Memory;
+//import nars.io.StringParser;
+import nars.container.Memory;
 
 /**
  * Window accept a Term, then display the content of the corresponding Concept
@@ -37,13 +37,17 @@ public class TermWindow extends NarsFrame implements ActionListener {
     /** Input field for term name */
     private TextField termField;
     /** Control buttons */
-    private Button playButton,  hideButton;
+    private Button playButton, hideButton;
+    /** Reference to the memory */
+    private Memory memory;
 
     /**
      * Constructor
      */
-    TermWindow() {
+    TermWindow(Memory memory) {
         super("Term Window");
+        this.memory = memory;
+
         setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
@@ -87,7 +91,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Button b = (Button) e.getSource();
         if (b == playButton) {
-            Concept concept = Memory.nameToConcept(StringParser.parseTerm(termField.getText()).getName());
+            Concept concept = memory.nameToConcept(termField.getText().trim());
             if (concept != null) {
                 concept.startPlay(true);
             }
