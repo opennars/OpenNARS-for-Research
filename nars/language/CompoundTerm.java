@@ -40,7 +40,7 @@ public abstract class CompoundTerm extends Term {
     /** syntactic complexity of the compound, the sum of those of its components plus 1 */
     protected short complexity;
     /** Whether the term names a concept */
-    private boolean isConstant = true;
+    protected boolean isConstant = true;
 
     /* ----- abstract methods to be implemented in subclasses ----- */
 
@@ -501,9 +501,9 @@ public abstract class CompoundTerm extends Term {
     public void renameVariables() {
         if (containVar()) {
             renameVariables(new HashMap<Variable, Variable>());
-            setConstant(true);
-        } else {
             setConstant(false);
+        } else {
+            setConstant(true);
         }
         setName(makeName());
     }
