@@ -22,6 +22,8 @@ package nars.main;
 
 import java.applet.Applet;
 
+import nars.io.ExperienceReader;
+
 /**
  * The main class of the project.
  * <p>
@@ -60,15 +62,23 @@ public class NARS extends Applet implements Runnable {
      * The entry point of the standalone application.
      * <p>
      * Create an instance of the class, then run the init and start methods.
-     * @param args no arguments are used
+     * @param args optional argument used : one input file
      */
     public static void main(String args[]) {
         standAlone = true;
         NARS nars = new NARS();
-        nars.init();
+        nars.init(args);
         nars.start();
     }
 
+    public void init(String[] args) {
+    	init();
+    	if( args.length > 0 ) {
+    		ExperienceReader experienceReader = new ExperienceReader(reasoner);
+    		experienceReader.openLoadFile( args[0] );
+    	}
+    }
+    
     /* Applet/Application code */
     /**
      * Initialize the system at the control center.<p>
@@ -78,7 +88,7 @@ public class NARS extends Applet implements Runnable {
     public void init() {
         reasoner = new Reasoner("NARS Reasoner");
     }
-
+    
     /**
      * Start the thread if necessary, called when the page containing the applet first appears on the screen.
      */

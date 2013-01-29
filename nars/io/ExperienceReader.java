@@ -45,21 +45,25 @@ public class ExperienceReader implements InputChannel {
         inExp = null;
     }
 
-    /**
-     * Open an input experience file
-     */
+    /** Open an input experience file with a FileDialog */
     public void openLoadFile() {
         FileDialog dialog = new FileDialog((FileDialog) null, "Load experience", FileDialog.LOAD);
         dialog.setVisible(true);
         String directoryName = dialog.getDirectory();
         String fileName = dialog.getFile();
-        try {
-            inExp = new BufferedReader(new FileReader(directoryName + fileName));
+        String filePath = directoryName + fileName;
+        openLoadFile(filePath);
+    }
+
+    /** Open an input experience file from given file Path */
+	public void openLoadFile(String filePath) {
+		try {
+			inExp = new BufferedReader(new FileReader(filePath));
         } catch (IOException ex) {
             System.out.println("i/o error: " + ex.getMessage());
         }
         reasoner.addInputChannel(this);
-    }
+	}
 
     /**
      * Close an input experience file
@@ -75,7 +79,7 @@ public class ExperienceReader implements InputChannel {
 
     /**
      * Process the next chunk of input data
-     * @return Whether the input channel should be chacked again
+     * @return Whether the input channel should be checked again
      */
     public boolean nextInput() {
         if (timer > 0) {
