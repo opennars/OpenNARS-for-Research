@@ -176,7 +176,7 @@ public class Memory {
      * Adjust the activation level of a Concept
      * <p>
      * called in Concept.insertTaskLink only
-     * @param c the concept to be adusted
+     * @param c the concept to be adjusted
      * @param b the new BudgetValue
      */
     public void activateConcept(Concept c, BudgetValue b) {
@@ -217,9 +217,8 @@ public class Memory {
         recorder.append("!!! Activated: " + task.toString() + "\n");
         if (sentence.isQuestion()) {
             float s = task.getBudget().summary();
-            @SuppressWarnings("static-access")
             float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
-            if (s > minSilent) {  // only report significient derived Tasks
+            if (s > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
         }
@@ -375,7 +374,7 @@ public class Memory {
     }
 
     /**
-     * Display newd tasks, called from MainWindow.
+     * Display new tasks, called from MainWindow.
      * @param s the window title
      */
     public void taskBuffersStartPlay(String s) {

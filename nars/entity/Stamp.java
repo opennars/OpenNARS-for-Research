@@ -71,11 +71,12 @@ public class Stamp implements Cloneable {
      * For single-premise rules
      * @param old The stamp of the single premise
      */
-    private Stamp(Stamp old, long time) {
-        baseLength = old.length();
-        evidentialBase = old.getBase();
-        creationTime = time;
-    }
+    // jmv: This constructor is never used locally
+//    private Stamp(Stamp old, long time) {
+//        baseLength = old.length();
+//        evidentialBase = old.getBase();
+//        creationTime = time;
+//    }
 
     /**
      * Generate a new stamp for derived sentence by merging the two from parents

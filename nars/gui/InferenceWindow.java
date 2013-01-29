@@ -27,7 +27,7 @@ import nars.io.*;
 //import nars.term.Term;
 
 /**
- * Window displying inference log
+ * Window displaying inference log
  */
 public class InferenceWindow extends NarsFrame implements ActionListener, ItemListener {
 
@@ -35,11 +35,11 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     private Button playButton, stopButton, hideButton;
     /** Display area */
     private TextArea text;
-    /** String to be catched */
+    /** String to be caught */
     private TextField watchText;
-    /** Type of catched text */
+    /** Type of caught text */
     private Choice watchType;
-    /** Type of catched text */
+    /** Type of caught text */
     private String watched = "";
     /** Inference recorder */
     private InferenceRecorder recorder;

@@ -65,7 +65,6 @@ public class ImageExt extends CompoundTerm {
      * Clone an object
      * @return A new object, to be casted into an ImageExt
      */
-    @SuppressWarnings("unchecked")
     public Object clone() {
         return new ImageExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity, relationIndex);
     }

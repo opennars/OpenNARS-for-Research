@@ -34,7 +34,8 @@ import nars.entity.*;
  */
 public class Reasoner {
     /** The name of the reasoner */
-    private String name;
+    @SuppressWarnings("unused")
+	private String name;
     /** The memory of the reasoner */
     private Memory memory;
     /** The input channels of the reasoner */
@@ -45,9 +46,9 @@ public class Reasoner {
     private MainWindow mainWindow;
     /** Input experience from a window */
     private InputWindow inputWindow;
-    /** System clock, relatively defined to guaranttee the repeatability of behaviors */
+    /** System clock, relatively defined to guarantee the repeatability of behaviors */
     private long clock;
-    /** Flag for running continously */
+    /** Flag for running continuously */
     private boolean running;
     /** The number of steps to be carried out */
     private int walkingSteps;
@@ -146,7 +147,7 @@ public class Reasoner {
                 channelIn.nextInput();
             }
         }
-        ArrayList output = memory.getExportStrings();
+        ArrayList<String> output = memory.getExportStrings();
         if (!output.isEmpty()) {
             for (OutputChannel channelOut : outputChannels) {
                 channelOut.nextOutput(output);

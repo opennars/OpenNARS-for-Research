@@ -21,8 +21,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.language.*;
-import nars.main.*;
+import nars.language.Term;
 
 /**
  * A Sentence is an abstract class, mainly containing a Term, a TruthValue, and a Stamp.

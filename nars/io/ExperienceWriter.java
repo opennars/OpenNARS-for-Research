@@ -72,7 +72,7 @@ public class ExperienceWriter implements OutputChannel {
      * Process the next chunk of output data
      * @param lines The text to be displayed
      */
-    public void nextOutput(ArrayList lines) {
+    public void nextOutput(ArrayList<String> lines) {
         if (outExp != null) {
             for (Object line : lines) {
                 outExp.println(line.toString());

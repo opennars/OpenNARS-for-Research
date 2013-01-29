@@ -36,7 +36,7 @@ import nars.main.Parameters;
  * A name table is used to merge duplicate items that have the same key.
  * <p>
  * The bag space is divided by a threshold, above which is mainly time management,
- * and below, space mamagement.
+ * and below, space management.
  * Differences: (1) level selection vs. item selection, (2) decay rate
  * @param <Type>  The type of the Item in the Bag
  */

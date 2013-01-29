@@ -10,5 +10,5 @@ import java.util.ArrayList;
  * An interface to be implemented in all output channel
  */
 public interface OutputChannel {
-    public void nextOutput(ArrayList output);
+    public void nextOutput(ArrayList<String> output);
 }

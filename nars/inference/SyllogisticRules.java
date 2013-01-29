@@ -151,7 +151,7 @@ public final class SyllogisticRules {
             return;
         }
         Statement st1 = (Statement) belief.getContent();
-        Statement st2 = (Statement) sentence.getContent();
+//        Statement st2 = (Statement) sentence.getContent();
         TruthValue truth = null;
         BudgetValue budget;
         if (sentence.isQuestion()) {

@@ -287,7 +287,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      * To process the next chunk of output data
      * @param lines The text lines to be displayed
      */
-    public void nextOutput(ArrayList lines) {
+    public void nextOutput(ArrayList<String> lines) {
         if (!lines.isEmpty()) {
             String text = "";
             for (Object line : lines) {

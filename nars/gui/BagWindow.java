@@ -32,7 +32,7 @@ import nars.storage.Bag;
 public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener {
 
     /** The bag to be displayed */
-    private Bag bag;
+    private Bag<?> bag;
     /** The lowest level displayed */
     private int showLevel;
     /** Control buttons */
@@ -51,7 +51,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
      * @param b The bag to be displayed
      * @param title The title of the window
      */
-    public BagWindow(Bag b, String title) {
+    public BagWindow(Bag<?> b, String title) {
         super(title);
         bag = b;
         showLevel = Parameters.BAG_THRESHOLD;
