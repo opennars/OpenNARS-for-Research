@@ -27,6 +27,7 @@ import nars.gui.InferenceWindow;
 
 /**
  * Inference log, which record input/output of each inference step
+ * jmv: make it an interface, with 2 implementations: GUI or batch, or apply MVC design pattern : append() is the event
  */
 public class InferenceRecorder {
 

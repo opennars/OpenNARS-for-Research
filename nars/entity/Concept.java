@@ -399,9 +399,11 @@ public final class Concept extends Item {
         taskLinks.putBack(tLink);
     }
 
-    /* ---------- display ---------- */
+    /* ---------- display ---------- : jmv : this part should go elsewhere */
     /**
-     * Start displaying contents and links, called from ConceptWindow or Memory.processTask only
+     * Start displaying contents and links, called from ConceptWindow,
+     * TermWindow
+     * or Memory.processTask only
      * @param showLinks Whether to display the task links
      */
     public void startPlay(boolean showLinks) {
