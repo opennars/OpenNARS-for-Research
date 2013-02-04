@@ -10,14 +10,12 @@
  OUT: <bird --> swimmer>. %0.90;0.45% {1 : 2;1} 
  OUT: <swimmer --> bird>. %1.00;0.42% {1 : 2;1} 
  OUT: <bird <-> swimmer>. %0.90;0.45% {1 : 2;1} 
- OUT: <<#V1 --> bird> ==> <#V1 --> swimmer>>. %0.90;0.45% {1 : 2;1} 
- OUT: <<#V2 --> swimmer> ==> <#V2 --> bird>>. %1.00;0.42% {1 : 2;1} 
- OUT: <<#V3 --> bird> <=> <#V3 --> swimmer>>. %0.90;0.45% {1 : 2;1} 
- OUT: <swan --> (|,bird,swimmer)>. %1.00;0.98% {1 : 2;1} 
- OUT: <swan --> (&,bird,swimmer)>. %0.90;0.82% {1 : 2;1} 
- OUT: <swan --> (-,swimmer,bird)>. %0.00;0.91% {1 : 2;1} 
- OUT: <swan --> (-,bird,swimmer)>. %0.10;0.89% {1 : 2;1} 
- OUT: (&&,<swan --> bird>,<swan --> swimmer>). %0.90;0.82% {1 : 2;1} 
+ OUT: <swan --> (|,bird,swimmer)>. %1.00;0.81% {1 : 2;1} 
+ OUT: <swan --> (&,bird,swimmer)>. %0.90;0.81% {1 : 2;1} 
+ OUT: <<$1 --> swimmer> ==> <$1 --> bird>>. %1.00;0.42% {1 : 2;1} 
+ OUT: <<$1 --> bird> ==> <$1 --> swimmer>>. %0.90;0.45% {1 : 2;1} 
+ OUT: <<$1 --> bird> <=> <$1 --> swimmer>>. %0.90;0.45% {1 : 2;1} 
+ OUT: (&&,<#1 --> bird>,<#1 --> swimmer>). %0.90;0.81% {1 : 2;1} 
 ********** comparison
   IN: <sport --> competition>. %1.00;0.90% {0 : 1} 
   IN: <chess --> competition>. %0.90;0.90% {0 : 2} 
@@ -25,14 +23,12 @@
  OUT: <sport --> chess>. %1.00;0.42% {1 : 2;1} 
  OUT: <chess --> sport>. %0.90;0.45% {1 : 2;1} 
  OUT: <chess <-> sport>. %0.90;0.45% {1 : 2;1} 
- OUT: <<chess --> #V1> ==> <sport --> #V1>>. %1.00;0.42% {1 : 2;1} 
- OUT: <<sport --> #V2> ==> <chess --> #V2>>. %0.90;0.45% {1 : 2;1} 
- OUT: <<chess --> #V3> <=> <sport --> #V3>>. %0.90;0.45% {1 : 2;1} 
- OUT: <(&,chess,sport) --> competition>. %1.00;0.98% {1 : 2;1} 
- OUT: <(|,chess,sport) --> competition>. %0.90;0.82% {1 : 2;1} 
- OUT: <(~,sport,chess) --> competition>. %0.10;0.89% {1 : 2;1} 
- OUT: <(~,chess,sport) --> competition>. %0.00;0.91% {1 : 2;1} 
- OUT: (&&,<chess --> competition>,<sport --> competition>). %0.90;0.82% {1 : 2;1} 
+ OUT: <(&,chess,sport) --> competition>. %1.00;0.81% {1 : 2;1} 
+ OUT: <(|,chess,sport) --> competition>. %0.90;0.81% {1 : 2;1} 
+ OUT: <<sport --> $1> ==> <chess --> $1>>. %0.90;0.45% {1 : 2;1} 
+ OUT: <<chess --> $1> ==> <sport --> $1>>. %1.00;0.42% {1 : 2;1} 
+ OUT: <<chess --> $1> <=> <sport --> $1>>. %0.90;0.45% {1 : 2;1} 
+ OUT: (&&,<chess --> #1>,<sport --> #1>). %0.90;0.81% {1 : 2;1} 
 ********** analogy
   IN: <swan --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <gull <-> swan>. %1.00;0.90% {0 : 2} 
@@ -52,64 +48,52 @@
   IN: <swan --> bird>. %1.00;0.90% {0 : 1} 
   IN: <bird --> swan>. %0.10;0.90% {0 : 2} 
 1
- OUT: <bird <-> swan>. %0.10;0.89% {1 : 2;1} 
+ OUT: <bird <-> swan>. %0.10;0.81% {1 : 2;1} 
 ********** conversions between inheritance and similarity
   IN: <swan --> bird>. %1.00;0.90% {0 : 1} 
   IN: <bird <-> swan>. %0.10;0.90% {0 : 2} 
 1
- OUT: <bird --> swan>. %0.10;0.74% {1 : 2;1} 
+ OUT: <bird --> swan>. %0.10;0.73% {1 : 2;1} 
 ********** conversions between inheritance and similarity
   IN: <swan --> bird>. %0.90;0.90% {0 : 1} 
   IN: <bird <-> swan>?  {0 : 2} 
 2
- OUT: <bird <-> swan>. %0.90;0.47% {0 : 1} 
+ OUT: <bird <-> swan>. %0.90;0.47% {2 : 2} 
 ********** conversions between inheritance and similarity
   IN: <bird <-> swan>. %0.90;0.90% {0 : 1} 
   IN: <swan --> bird>?  {0 : 2} 
-1
- OUT: <swan --> bird>. %0.90;0.81% {0 : 1} 
+2
+ OUT: <swan --> bird>. %0.90;0.81% {2 : 2} 
 ********** set definition
   IN: <{Tweety} --> {Birdie}>. %1.00;0.90% {0 : 1} 
-6
- OUT: <{Birdie} <-> {Tweety}>. %1.00;0.90% {0 : 1} 
+4
+ OUT: <{Birdie} <-> {Tweety}>. %1.00;0.90% {4 : 1} 
 ********** set definition
   IN: <[smart] --> [bright]>. %1.00;0.90% {0 : 1} 
-5
- OUT: <[bright] <-> [smart]>. %1.00;0.90% {0 : 1} 
+2
+ OUT: <[bright] <-> [smart]>. %1.00;0.90% {2 : 1} 
 ********** set definition
   IN: <{Birdie} <-> {Tweety}>. %1.00;0.90% {0 : 1} 
-1
- OUT: <Birdie <-> Tweety>. %1.00;0.90% {0 : 1} 
- OUT: <{Tweety} --> {Birdie}>. %1.00;0.90% {0 : 1} 
-1
- OUT: <Birdie <-> Tweety>. %1.00;0.90% {0 : 1} 
- OUT: <{Birdie} --> {Tweety}>. %1.00;0.90% {0 : 1} 
+2
+ OUT: <Birdie <-> Tweety>. %1.00;0.90% {2 : 1} 
+ OUT: <{Tweety} --> {Birdie}>. %1.00;0.90% {2 : 1} 
 ********** set definition
   IN: <[bright] <-> [smart]>. %1.00;0.90% {0 : 1} 
-5
- OUT: <bright <-> smart>. %1.00;0.90% {0 : 1} 
- OUT: <[bright] --> [smart]>. %1.00;0.90% {0 : 1} 
 2
- OUT: <bright <-> smart>. %1.00;0.90% {0 : 1} 
- OUT: <[smart] --> [bright]>. %1.00;0.90% {0 : 1} 
+ OUT: <bright <-> smart>. %1.00;0.90% {2 : 1} 
+ OUT: <[bright] --> [smart]>. %1.00;0.90% {2 : 1} 
 ********** structure transformation
   IN: <Birdie <-> Tweety>. %0.90;0.90% {0 : 1} 
   IN: <{Birdie} <-> {Tweety}>?  {0 : 2} 
-2
- OUT: <Birdie <-> Tweety>?  {0 : 2} 
- OUT: <{Tweety} --> {Birdie}>?  {0 : 2} 
-2
- OUT: <Birdie <-> Tweety>?  {0 : 2} 
- OUT: <{Birdie} --> {Tweety}>?  {0 : 2} 
-3
- OUT: <{Birdie} <-> {Tweety}>. %0.90;0.90% {0 : 1} 
+1
+ OUT: <{Birdie} <-> {Tweety}>. %0.90;0.90% {1 : 1} 
 ********** structure transformation
   IN: <bright <-> smart>. %0.90;0.90% {0 : 1} 
   IN: <[bright] --> [smart]>?  {0 : 2} 
-2
- OUT: <[bright] <-> [smart]>?  {0 : 2} 
-4
- OUT: <[bright] <-> [smart]>. %0.90;0.90% {0 : 1} 
+1
+ OUT: <[bright] <-> [smart]>. %0.90;0.90% {1 : 1} 
+3
+ OUT: <[bright] --> [smart]>. %0.90;0.81% {4 : 2} 
 ********** question derivation
   IN: <bird --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <{?1} --> swimmer>?  {0 : 2} 
@@ -117,3 +101,8 @@
  OUT: <{?1} --> bird>?  {1 : 1;2} 
  OUT: <bird --> {?1}>?  {1 : 1;2} 
  OUT: <bird <-> {?1}>?  {1 : 1;2} 
+********** question answering
+  IN: <{Tweety} --> bird>. %1.00;0.90% {0 : 1} 
+  IN: <{?1} --> bird>?  {0 : 2} 
+2
+ OUT: <{Tweety} --> bird>. %1.00;0.90% {0 : 1} 

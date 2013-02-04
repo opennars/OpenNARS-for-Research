@@ -29,7 +29,7 @@
   IN: <bird --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <swimmer --> bird>?  {0 : 2} 
 2
- OUT: <swimmer --> bird>. %1.00;0.47% {0 : 1} 
+ OUT: <swimmer --> bird>. %1.00;0.47% {0 : 2} 
 ********** "y/n" question
   IN: <bird --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <bird --> swimmer>?  {0 : 2} 
@@ -40,5 +40,3 @@
   IN: <?1 --> swimmer>?  {0 : 2} 
 1
  OUT: <bird --> swimmer>. %1.00;0.80% {0 : 1} 
- OUT: <?2 --> bird>?  {1 : 1;2} 
- OUT: <bird --> ?3>?  {1 : 1;2} 

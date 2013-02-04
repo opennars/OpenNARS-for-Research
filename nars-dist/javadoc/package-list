@@ -1,7 +1,7 @@
-nars.container
 nars.entity
 nars.gui
 nars.inference
 nars.io
+nars.language
 nars.main
-nars.term
+nars.storage
