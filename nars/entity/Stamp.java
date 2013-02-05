@@ -70,13 +70,13 @@ public class Stamp implements Cloneable {
      * <p>
      * For single-premise rules
      * @param old The stamp of the single premise
+     * @param time The current time
      */
-    // jmv: This constructor is never used locally
-//    private Stamp(Stamp old, long time) {
-//        baseLength = old.length();
-//        evidentialBase = old.getBase();
-//        creationTime = time;
-//    }
+    public Stamp(Stamp old, long time) {
+        baseLength = old.length();
+        evidentialBase = old.getBase();
+        creationTime = time;
+    }
 
     /**
      * Generate a new stamp for derived sentence by merging the two from parents
@@ -111,6 +111,7 @@ public class Stamp implements Cloneable {
      * By default, the event time of the first stamp is used in the result
      * @param first The first Stamp
      * @param second The second Stamp
+     * @param time The new creation time
      * @return The merged Stamp, or null
      */
     public static Stamp make(Stamp first, Stamp second, long time) {

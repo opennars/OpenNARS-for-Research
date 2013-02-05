@@ -109,5 +109,18 @@ public class TaskLink extends TermLink {
         }
         return true;
     }
+
+    /**
+     * Merge one TaskLink into another
+     * @param that The other TaskLink
+     */
+    @Override
+    public void merge(Item that) {
+        if (targetTask.getCreationTime() > ((TaskLink) that).getTargetTask().getCreationTime()) {
+            super.merge(that);
+        } else {
+            that.merge(this);
+        }
+    }
 }
 

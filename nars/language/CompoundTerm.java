@@ -43,7 +43,6 @@ public abstract class CompoundTerm extends Term {
     protected boolean isConstant = true;
 
     /* ----- abstract methods to be implemented in subclasses ----- */
-
     /**
      * Abstract method to get the operator of the compound
      * @return The operator in a String
@@ -89,10 +88,10 @@ public abstract class CompoundTerm extends Term {
         isConstant = !Variable.containVar(name);
     }
 
-        /**
+    /**
      * Constructor called from subclasses constructors to initialize the fields
-         * @param name Name of the compound
-         * @param components Component list
+     * @param name Name of the compound
+     * @param components Component list
      */
     protected CompoundTerm(String name, ArrayList<Term> components) {
         super(name);
@@ -120,7 +119,6 @@ public abstract class CompoundTerm extends Term {
     }
 
     /* static methods making new compounds, which may return null */
-
     /**
      * Try to make a compound term from a template and a list of components
      * @param compound The template
@@ -129,7 +127,13 @@ public abstract class CompoundTerm extends Term {
      * @return A compound term or null
      */
     public static Term make(CompoundTerm compound, ArrayList<Term> components, Memory memory) {
-        return make(compound.operator(), components, memory);
+        if (compound instanceof ImageExt) {
+            return ImageExt.make(components, ((ImageExt) compound).getRelationIndex(), memory);
+        } else if (compound instanceof ImageInt) {
+            return ImageInt.make(components, ((ImageInt) compound).getRelationIndex(), memory);
+        } else {
+            return make(compound.operator(), components, memory);
+        }
     }
 
     /**
@@ -298,7 +302,7 @@ public abstract class CompoundTerm extends Term {
     /* ----- utilities for other fields ----- */
     /**
      * report the term's syntactic complexity
-     * @return the complexity value
+     * @return the comlexity value
      */
     @Override
     public int getComplexity() {
@@ -326,8 +330,8 @@ public abstract class CompoundTerm extends Term {
      * Check if the order of the components matters
      * <p>
      * commutative CompoundTerms: Sets, Intersections
-     * commutative Statements: Similarity, Equivalence (except the one with a temporal order)
-     * commutative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
+     * communative Statements: Similarity, Equivalence (except the one with a temporal order)
+     * communative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
      * @return The default value is false
      */
     public boolean isCommutative() {
@@ -396,7 +400,7 @@ public abstract class CompoundTerm extends Term {
     /**
      * Recursively check if a compound contains a term
      * @param target The term to be searched
-     * @return Whether the target is in the current term
+     * @return Whether the terget is in the current term
      */
     @Override
     public boolean containTerm(Term target) {
@@ -425,7 +429,7 @@ public abstract class CompoundTerm extends Term {
      * Try to add a component into a compound
      * @param t1 The compound
      * @param t2 The component
-     * @param memory Reference to the memory
+     * @param memory Reference to the memeory
      * @return The new compound
      */
     public static Term addComponents(CompoundTerm t1, Term t2, Memory memory) {
@@ -446,7 +450,7 @@ public abstract class CompoundTerm extends Term {
      * Try to remove a component from a compound
      * @param t1 The compound
      * @param t2 The component
-     * @param memory Reference to the memory
+     * @param memory Reference to the memeory
      * @return The new compound
      */
     public static Term reduceComponents(CompoundTerm t1, Term t2, Memory memory) {
@@ -485,7 +489,6 @@ public abstract class CompoundTerm extends Term {
     }
 
     /* ----- variable-related utilities ----- */
-
     /**
      * Whether this compound term contains any variable term
      * @return Whether the name contains a variable
@@ -501,10 +504,8 @@ public abstract class CompoundTerm extends Term {
     public void renameVariables() {
         if (containVar()) {
             renameVariables(new HashMap<Variable, Variable>());
-            setConstant(false);
-        } else {
-            setConstant(true);
         }
+        setConstant(true);
         setName(makeName());
     }
 
@@ -547,9 +548,9 @@ public abstract class CompoundTerm extends Term {
         for (int i = 0; i < size(); i++) {
             t1 = componentAt(i);
 //            if (t1 instanceof Variable) {
-                t2 = subs.get(t1);
-                if (t2 != null) {
-                    components.set(i, (Term) t2.clone());
+            t2 = subs.get(t1);
+            if (t2 != null) {
+                components.set(i, (Term) t2.clone());
 //                }
             } else if (t1 instanceof CompoundTerm) {
                 ((CompoundTerm) t1).applySubstitute(subs);

@@ -68,6 +68,9 @@ public class Implication extends Statement {
         if ((subject == null) || (predicate == null)) {
             return null;
         }
+        if ((subject == null) || (predicate == null)) {
+            return null;
+        }
         if ((subject instanceof Implication) || (subject instanceof Equivalence) || (predicate instanceof Equivalence)) {
             return null;
         }

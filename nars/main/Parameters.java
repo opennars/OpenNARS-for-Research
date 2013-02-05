@@ -47,7 +47,7 @@ public class Parameters {
     /** Evidential Horizon, the amount of future evidence to be considered. */
     public static final int HORIZON = 1;    // or 2, can be float
     /** Reliance factor, the empirical confidence of analytical truth. */
-    public static final float RELIANCE = (float) 0.9;    // the same as default confidence
+    public static final float RELIANCE = (float) 1.0;    // the same as default confidence?
 
     /* ---------- budget thresholds ---------- */
     /** The budget threthold rate for task to be accepted. */

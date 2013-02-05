@@ -259,6 +259,22 @@ public class Memory {
     }
 
     /**
+     * Shared final operations by all double-premise rules, called from the rules except StructuralRules
+     * @param newContent The content of the sentence in task
+     * @param newTruth The truth value of the sentence in task
+     * @param newBudget The budget value in task
+     * @param revisible Whether the sentence is revisible
+     */
+    public void doublePremiseTask(Term newContent, TruthValue newTruth, BudgetValue newBudget, boolean revisible) {
+        if (newContent != null) {
+            Sentence taskSentence = currentTask.getSentence();
+            Sentence newSentence = new Sentence(newContent, taskSentence.getPunctuation(), newTruth, newStamp, revisible);
+            Task newTask = new Task(newSentence, newBudget, currentTask, currentBelief);
+            derivedTask(newTask);
+        }
+    }
+
+    /**
      * Shared final operations by all single-premise rules, called in StructuralRules
      * @param newContent The content of the sentence in task
      * @param newTruth The truth value of the sentence in task
@@ -276,7 +292,10 @@ public class Memory {
      * @param newBudget The budget value in task
      */
     public void singlePremiseTask(Term newContent, char punctuation, TruthValue newTruth, BudgetValue newBudget) {
-        Sentence newSentence = new Sentence(newContent, punctuation, newTruth, (Stamp) currentTask.getSentence().getStamp().clone());
+        Sentence taskSentence = currentTask.getSentence();
+        newStamp = new Stamp(taskSentence.getStamp(), reasoner.getTime());
+//        newStamp = (Stamp) taskSentence.getStamp().clone();
+        Sentence newSentence = new Sentence(newContent, punctuation, newTruth, newStamp, taskSentence.getRevisible());
         Task newTask = new Task(newSentence, newBudget, currentTask, null);
         derivedTask(newTask);
     }

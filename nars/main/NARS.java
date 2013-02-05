@@ -37,7 +37,7 @@ public class NARS extends Applet implements Runnable {
      * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.5.0     January 2013  \n";
+            "     Open-NARS     Version 1.5.1     February 2013  \n";
     /**
      * The project websites.
      */
@@ -72,13 +72,13 @@ public class NARS extends Applet implements Runnable {
     }
 
     public void init(String[] args) {
-    	init();
-    	if( args.length > 0 ) {
-    		ExperienceReader experienceReader = new ExperienceReader(reasoner);
-    		experienceReader.openLoadFile( args[0] );
-    	}
+        init();
+        if (args.length > 0) {
+            ExperienceReader experienceReader = new ExperienceReader(reasoner);
+            experienceReader.openLoadFile(args[0]);
+        }
     }
-    
+
     /* Applet/Application code */
     /**
      * Initialize the system at the control center.<p>
@@ -88,7 +88,7 @@ public class NARS extends Applet implements Runnable {
     public void init() {
         reasoner = new Reasoner("NARS Reasoner");
     }
-    
+
     /**
      * Start the thread if necessary, called when the page containing the applet first appears on the screen.
      */

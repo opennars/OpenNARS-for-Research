@@ -109,11 +109,13 @@ public final class Concept extends Item {
     private void processJudgment(Task task) {
         Sentence judg = task.getSentence();
         Sentence oldBelief = evaluation(judg, beliefs);
-        if (oldBelief != null) {
+        if ((oldBelief != null) && LocalRules.revisible(judg, oldBelief)) {
             memory.newStamp = Stamp.make(judg.getStamp(), oldBelief.getStamp(), memory.getTime());
-            if ((memory.newStamp != null) && Variable.unify(Symbols.VAR_INDEPENDENT, judg.getContent(), oldBelief.getContent())) {
+            if (memory.newStamp != null) {
                 memory.currentBelief = oldBelief;
                 LocalRules.revision(judg, oldBelief, false, memory);
+            } else {
+                task.getBudget().decPriority(0);    // duplicated task
             }
         }
         if (task.getBudget().aboveThreshold()) {
@@ -176,14 +178,14 @@ public final class Concept extends Item {
                     Term componentTerm;
                     Concept componentConcept;
                     for (TermLink termLink : termLinkTemplates) {
-                        if (!(task.isStructural() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
+//                        if (!(task.isStructural() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
                             taskLink = new TaskLink(task, termLink, subBudget);
                             componentTerm = termLink.getTarget();
                             componentConcept = memory.getConcept(componentTerm);
                             if (componentConcept != null) {
                                 componentConcept.insertTaskLink(taskLink);
                             }
-                        }
+//                        }
                     }
                     buildTermLinks(taskBudget);  // recursively insert TermLink
                 }

@@ -38,6 +38,8 @@ public class Sentence implements Cloneable {
     private TruthValue truth;
     /** Partial record of the derivation path */
     private Stamp stamp;
+    /** Whether the sentence can be revised */
+    private boolean revisible;
 
     /**
      * Create a Sentence with the given fields
@@ -52,6 +54,24 @@ public class Sentence implements Cloneable {
         this.punctuation = punctuation;
         this.truth = truth;
         this.stamp = stamp;
+        this.revisible = true;
+    }
+
+    /**
+     * Create a Sentence with the given fields
+     * @param content The Term that forms the content of the sentence
+     * @param punctuation The punctuation indicating the type of the sentence
+     * @param truth The truth value of the sentence, null for question
+     * @param stamp The stamp of the sentence indicating its derivation time and base
+     * @param revisible Whether the sentence can be revised
+     */
+    public Sentence(Term content, char punctuation, TruthValue truth, Stamp stamp, boolean revisible) {
+        this.content = content;
+        this.content.renameVariables();
+        this.punctuation = punctuation;
+        this.truth = truth;
+        this.stamp = stamp;
+        this.revisible = revisible;
     }
 
     /**
@@ -103,7 +123,7 @@ public class Sentence implements Cloneable {
         if (truth == null) {
             return new Sentence((Term) content.clone(), punctuation, null, (Stamp) stamp.clone());
         }
-        return new Sentence((Term) content.clone(), punctuation, new TruthValue(truth), (Stamp) stamp.clone());
+        return new Sentence((Term) content.clone(), punctuation, new TruthValue(truth), (Stamp) stamp.clone(), revisible);
     }
 
     /**
@@ -170,6 +190,14 @@ public class Sentence implements Cloneable {
         return (punctuation == Symbols.QUESTION_MARK);
     }
 
+    public boolean getRevisible() {
+        return revisible;
+    }
+
+    public void setRevisible(boolean b) {
+        revisible = b;
+    }
+
     /**
      * Get a String representation of the sentence
      * @return The String
@@ -191,13 +219,20 @@ public class Sentence implements Cloneable {
      * @return The String
      */
     public String toStringBrief() {
+        return toKey() + stamp.toString();
+    }
+
+    /**
+     * Get a String representation of the sentence for key of Task and TaskLink
+     * @return The String
+     */
+    public String toKey() {
         StringBuffer s = new StringBuffer();
         s.append(content.toString());
         s.append(punctuation + " ");
         if (truth != null) {
             s.append(truth.toStringBrief());
         }
-        s.append(stamp.toString());
         return s.toString();
     }
 }

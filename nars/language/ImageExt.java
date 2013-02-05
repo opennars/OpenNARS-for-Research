@@ -73,6 +73,7 @@ public class ImageExt extends CompoundTerm {
      * Try to make a new ImageExt. Called by StringParser.
      * @return the Term generated from the arguments
      * @param argList The list of components
+     * @param memory Reference to the memory
      */
     public static Term make(ArrayList<Term> argList, Memory memory) {
         if (argList.size() < 2) {

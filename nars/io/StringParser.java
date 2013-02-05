@@ -53,6 +53,9 @@ public abstract class StringParser extends Symbols {
      * <p>
      * called from ExperienceIO.loadLine
      * @param buffer The line to be parsed
+     * @param memory Reference to the memory
+     * @param time The current time
+     * @return An experienced task
      */
     public static Task parseExperience(StringBuffer buffer, Memory memory, long time) {
         int i = buffer.indexOf(PREFIX_MARK + "");
@@ -75,6 +78,9 @@ public abstract class StringParser extends Symbols {
     /**
      * Enter a new Task in String into the memory, called from InputWindow or locally.
      * @param s the single-line input String
+     * @param memory Reference to the memory
+     * @param time The current time
+     * @return An experienced task
      */
     public static Task parseTask(String s, Memory memory, long time) {
         StringBuffer buffer = new StringBuffer(s);
@@ -93,6 +99,9 @@ public abstract class StringParser extends Symbols {
 //            }
 //            Sentence sentence = Sentence.make(content, punc, truth, stamp);
             Sentence sentence = new Sentence(content, punc, truth, stamp);
+            if ((content instanceof Conjunction) && Variable.containVarDep(content.getName())) {
+                sentence.setRevisible(false);
+            }
 //            if (sentence == null) {
 //                throw new InvalidInputException("invalid sentence");
 //            }

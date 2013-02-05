@@ -29,6 +29,7 @@ import nars.main.*;
  * To read and write experience as Task streams
  */
 public class ExperienceReader implements InputChannel {
+
     /** Reference to the reasoner */
     private Reasoner reasoner;
     /** Input experience from a file */
@@ -55,15 +56,17 @@ public class ExperienceReader implements InputChannel {
         openLoadFile(filePath);
     }
 
-    /** Open an input experience file from given file Path */
-	public void openLoadFile(String filePath) {
-		try {
-			inExp = new BufferedReader(new FileReader(filePath));
+    /** Open an input experience file from given file Path
+     * @param filePath File to be readed as experience
+     */
+    public void openLoadFile(String filePath) {
+        try {
+            inExp = new BufferedReader(new FileReader(filePath));
         } catch (IOException ex) {
             System.out.println("i/o error: " + ex.getMessage());
         }
         reasoner.addInputChannel(this);
-	}
+    }
 
     /**
      * Close an input experience file

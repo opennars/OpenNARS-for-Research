@@ -346,51 +346,51 @@ public final class CompositionalRules {
         content = Conjunction.make(state1, state2, memory);
         truth = TruthFunctions.intersection(truthT, truthB);
         budget = BudgetFunctions.compoundForward(truth, content, memory);
-        memory.doublePremiseTask(content, truth, budget);
+        memory.doublePremiseTask(content, truth, budget, false);
     }
 
-    /**
-     * Introduce a second independent variable into two terms with a common component
-     * @param term1 The first term
-     * @param term2 The second term
-     * @param index The index of the terms in their statement
-     */
-    private static void introVarSecond(Term term1, Term term2, int index) {
-        Variable varInd2 = new Variable("$varIndSec");
-        Term commonTerm;
-        HashMap<Term, Term> subs = new HashMap<Term, Term>();
-        if (index == 0) {
-            if ((term1 instanceof ImageExt) && (term2 instanceof ImageExt)) {
-                commonTerm = ((ImageExt) term1).getTheOtherComponent();
-                if ((commonTerm == null) || !((ImageExt) term2).containTerm(commonTerm)) {
-                    commonTerm = ((ImageExt) term2).getTheOtherComponent();
-                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
-                        commonTerm = null;
-                    }
-                }
-                if (commonTerm != null) {
-                    subs.put(commonTerm, varInd2);
-                    ((ImageExt) term1).applySubstitute(subs);
-                    ((ImageExt) term2).applySubstitute(subs);
-                }
-            }
-        } else {
-            if ((term1 instanceof ImageInt) && (term2 instanceof ImageInt)) {
-                commonTerm = ((ImageInt) term1).getTheOtherComponent();
-                if ((commonTerm == null) || !((ImageInt) term2).containTerm(commonTerm)) {
-                    commonTerm = ((ImageInt) term2).getTheOtherComponent();
-                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
-                        commonTerm = null;
-                    }
-                }
-                if (commonTerm != null) {
-                    subs.put(commonTerm, varInd2);
-                    ((ImageInt) term1).applySubstitute(subs);
-                    ((ImageInt) term2).applySubstitute(subs);
-                }
-            }
-        }
-    }
+//    /**
+//     * Introduce a second independent variable into two terms with a common component
+//     * @param term1 The first term
+//     * @param term2 The second term
+//     * @param index The index of the terms in their statement
+//     */
+//    private static void introVarSecond(Term term1, Term term2, int index) {
+//        Variable varInd2 = new Variable("$varIndSec");
+//        Term commonTerm;
+//        HashMap<Term, Term> subs = new HashMap<Term, Term>();
+//        if (index == 0) {
+//            if ((term1 instanceof ImageExt) && (term2 instanceof ImageExt)) {
+//                commonTerm = ((ImageExt) term1).getTheOtherComponent();
+//                if ((commonTerm == null) || !((ImageExt) term2).containTerm(commonTerm)) {
+//                    commonTerm = ((ImageExt) term2).getTheOtherComponent();
+//                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+//                        commonTerm = null;
+//                    }
+//                }
+//                if (commonTerm != null) {
+//                    subs.put(commonTerm, varInd2);
+//                    ((ImageExt) term1).applySubstitute(subs);
+//                    ((ImageExt) term2).applySubstitute(subs);
+//                }
+//            }
+//        } else {
+//            if ((term1 instanceof ImageInt) && (term2 instanceof ImageInt)) {
+//                commonTerm = ((ImageInt) term1).getTheOtherComponent();
+//                if ((commonTerm == null) || !((ImageInt) term2).containTerm(commonTerm)) {
+//                    commonTerm = ((ImageInt) term2).getTheOtherComponent();
+//                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+//                        commonTerm = null;
+//                    }
+//                }
+//                if (commonTerm != null) {
+//                    subs.put(commonTerm, varInd2);
+//                    ((ImageInt) term1).applySubstitute(subs);
+//                    ((ImageInt) term2).applySubstitute(subs);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * {<M --> S>, <C ==> <M --> P>>} |- <(&&, <#x --> S>, C) ==> <#x --> P>>
@@ -407,70 +407,115 @@ public final class CompositionalRules {
         if (!taskSentence.isJudgment() || (premise1.getClass() != premise2.getClass())) {
             return;
         }
-        Variable varInd = new Variable("$varInd2");
-        Variable varDep = new Variable("#varDep2");
         Term subject1 = premise1.getSubject();
         Term subject2 = premise2.getSubject();
         Term predicate1 = premise1.getPredicate();
         Term predicate2 = premise2.getPredicate();
-        Statement stateInd1, stateInd2, stateDep1, stateDep2;
+//        Statement stateInd1, stateInd2, stateDep1, stateDep2;
+        Term commonTerm1, commonTerm2;
         if (subject1.equals(subject2)) {
-            stateDep1 = Statement.make(premise1, varDep, predicate1, memory);
-            stateDep2 = Statement.make(premise2, varDep, predicate2, memory);
-            Term predicate1C = (Term) predicate1.clone();
-            Term predicate2C = (Term) predicate2.clone();
-            introVarSecond(predicate1C, predicate2C, 0);
-            stateInd1 = Statement.make(premise1, varInd, predicate1C, memory);
-            stateInd2 = Statement.make(premise2, varInd, predicate2C, memory);
+            commonTerm1 = subject1;
+            commonTerm2 = secondCommonTerm(predicate1, predicate2, 0);
+//            stateDep1 = Statement.make(premise1, varDep, predicate1, memory);
+//            stateDep2 = Statement.make(premise2, varDep, predicate2, memory);
+//            Term predicate1C = (Term) predicate1.clone();
+//            Term predicate2C = (Term) predicate2.clone();
+//            introVarSecond(predicate1C, predicate2C, 0);
+//            stateInd1 = Statement.make(premise1, varInd, predicate1C, memory);
+//            stateInd2 = Statement.make(premise2, varInd, predicate2C, memory);
         } else if (predicate1.equals(predicate2)) {
-            stateDep1 = Statement.make(premise1, subject1, varDep, memory);
-            stateDep2 = Statement.make(premise2, subject2, varDep, memory);
-            Term subject1C = (Term) subject1.clone();
-            Term subject2C = (Term) subject2.clone();
-            introVarSecond(subject1C, subject2C, 1);
-            stateInd1 = Statement.make(premise1, subject1C, varInd, memory);
-            stateInd2 = Statement.make(premise2, subject2C, varInd, memory);
+            commonTerm1 = predicate1;
+            commonTerm2 = secondCommonTerm(subject1, subject2, 0);
+//            stateDep1 = Statement.make(premise1, subject1, varDep, memory);
+//            stateDep2 = Statement.make(premise2, subject2, varDep, memory);
+//            Term subject1C = (Term) subject1.clone();
+//            Term subject2C = (Term) subject2.clone();
+//            introVarSecond(subject1C, subject2C, 1);
+//            stateInd1 = Statement.make(premise1, subject1C, varInd, memory);
+//            stateInd2 = Statement.make(premise2, subject2C, varInd, memory);
         } else {
             return;
         }
+//        Term implication, contentInd, contentDep = null;
+//        if (oldCompound instanceof Implication) {
+//            implication = Statement.make((Statement) oldCompound, oldCompound.componentAt(0), stateInd2, memory);
+//            contentInd = Statement.make((Statement) oldCompound, stateInd1, implication, memory);
+//            if (oldCompound.equals(premise1)) {
+//                return;
+//            }
+//            contentDep = Conjunction.make(oldCompound, premise1, memory);
+//            if (contentDep == null || !(contentDep instanceof CompoundTerm)) {
+//                return;
+//            }
+//            HashMap<Term, Term> substitute = new HashMap<Term, Term>();
+//            substitute.put(memory.currentTerm, new Variable("#varDep"));
+//            ((CompoundTerm) contentDep).applySubstitute(substitute);
+//        } else if (oldCompound instanceof Conjunction) {
+//            implication = Implication.make(stateInd1, stateInd2, memory);
+//            HashMap<Term, Term> subs = new HashMap<Term, Term>();
+//            subs.put(premise2, implication);
+//            contentInd = (Term) oldCompound.clone();
+//            ((CompoundTerm) contentInd).applySubstitute(subs);
+//            contentDep = Conjunction.make(stateDep1, oldCompound, memory);
+//            subs.clear();
+//            subs.put(premise2, stateDep2);
+//            ((CompoundTerm) contentDep).applySubstitute(subs);
+//        } else {
+//            return;
+//        }
         Sentence belief = memory.currentBelief;
-        Term implication, contentInd, contentDep = null;
-        if (oldCompound instanceof Implication) {
-            implication = Statement.make((Statement) oldCompound, oldCompound.componentAt(0), stateInd2, memory);
-            contentInd = Statement.make((Statement) oldCompound, stateInd1, implication, memory);
-            if (oldCompound.equals(premise1)) {
-                return;
-            }
-            contentDep = Conjunction.make(oldCompound, premise1, memory);
-            if (contentDep == null || !(contentDep instanceof CompoundTerm)) {
-                return;
-            }
-            HashMap<Term, Term> substitute = new HashMap<Term, Term>();
-            substitute.put(memory.currentTerm, new Variable("#varDep"));
-            ((CompoundTerm) contentDep).applySubstitute(substitute);
-        } else if (oldCompound instanceof Conjunction) {
-            implication = Implication.make(stateInd1, stateInd2, memory);
-            HashMap<Term, Term> subs = new HashMap<Term, Term>();
-            subs.put(premise2, implication);
-            contentInd = (Term) oldCompound.clone();
-            ((CompoundTerm) contentInd).applySubstitute(subs);
-            contentDep = Conjunction.make(stateDep1, oldCompound, memory);
-            subs.clear();
-            subs.put(premise2, stateDep2);
-            ((CompoundTerm) contentDep).applySubstitute(subs);
-        } else {
-            return;
+        HashMap<Term, Term> substitute = new HashMap<Term, Term>();
+        substitute.put(commonTerm1, new Variable("#varDep2"));
+        CompoundTerm content = (CompoundTerm) Conjunction.make(premise1, oldCompound, memory);
+        content.applySubstitute(substitute);
+        TruthValue truth = TruthFunctions.intersection(taskSentence.getTruth(), belief.getTruth());
+        BudgetValue budget = BudgetFunctions.forward(truth, memory);
+        memory.doublePremiseTask(content, truth, budget, false);
+        substitute.clear();
+        substitute.put(commonTerm1, new Variable("$varInd1"));
+        if (commonTerm2 != null) {
+            substitute.put(commonTerm2, new Variable("$varInd2"));
         }
-        TruthValue truth;
+        content = Implication.make(premise1, oldCompound, memory);
+        content.applySubstitute(substitute);
         if (premise1.equals(taskSentence.getContent())) {
             truth = TruthFunctions.induction(belief.getTruth(), taskSentence.getTruth());
         } else {
             truth = TruthFunctions.induction(taskSentence.getTruth(), belief.getTruth());
         }
-        BudgetValue budget = BudgetFunctions.forward(truth, memory);
-        memory.doublePremiseTask(contentInd, truth, budget);
-        truth = TruthFunctions.intersection(taskSentence.getTruth(), belief.getTruth());
         budget = BudgetFunctions.forward(truth, memory);
-        memory.doublePremiseTask(contentDep, truth, budget);
+        memory.doublePremiseTask(content, truth, budget);
+    }
+
+    /**
+     * Introduce a second independent variable into two terms with a common component
+     * @param term1 The first term
+     * @param term2 The second term
+     * @param index The index of the terms in their statement
+     */
+    private static Term secondCommonTerm(Term term1, Term term2, int index) {
+        Term commonTerm = null;
+        if (index == 0) {
+            if ((term1 instanceof ImageExt) && (term2 instanceof ImageExt)) {
+                commonTerm = ((ImageExt) term1).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageExt) term2).containTerm(commonTerm)) {
+                    commonTerm = ((ImageExt) term2).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+            }
+        } else {
+            if ((term1 instanceof ImageInt) && (term2 instanceof ImageInt)) {
+                commonTerm = ((ImageInt) term1).getTheOtherComponent();
+                if ((commonTerm == null) || !((ImageInt) term2).containTerm(commonTerm)) {
+                    commonTerm = ((ImageInt) term2).getTheOtherComponent();
+                    if ((commonTerm == null) || !((ImageExt) term1).containTerm(commonTerm)) {
+                        commonTerm = null;
+                    }
+                }
+            }
+        }
+        return commonTerm;
     }
 }

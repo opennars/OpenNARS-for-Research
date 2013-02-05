@@ -42,9 +42,9 @@ public class Task extends Item {
      * @param b The budget
      */
     public Task(Sentence s, BudgetValue b) {
-        super(s.toStringBrief(), b); // change to toKey()
+        super(s.toKey(), b); // change to toKey()
         sentence = s;
-        key = sentence.toStringBrief();
+        key = sentence.toKey();
     }
 
     /**
@@ -90,6 +90,14 @@ public class Task extends Item {
     }
 
     /**
+     * Directly get the creation time of the sentence
+     * @return The creation time of the sentence
+     */
+    public long getCreationTime() {
+        return sentence.getStamp().getCreationTime();
+    }
+
+    /**
      * Check if a Task is a direct input
      * @return Whether the Task is derived from another task
      */
@@ -109,8 +117,13 @@ public class Task extends Item {
      * Merge one Task into another
      * @param that The other Task
      */
-    public void merge(Task that) {
-        super.merge(that);
+    @Override
+    public void merge(Item that) {
+        if (getCreationTime() > ((Task) that).getCreationTime()) {
+            super.merge(that);
+        } else {
+            that.merge(this);
+        }
     }
 
     /**
