@@ -87,11 +87,11 @@ public class Parameters {
     
     /* ---------- avoiding repeated reasoning ---------- */
     /** Maximum length of Stamp, a power of 2 */
-    public static final int MAXMUM_STAMP_LENGTH = 8;
+    public static final int MAXIMUM_STAMP_LENGTH = 8;
     /** Remember recently used TermLink on a Task */
     public static final int TERM_LINK_RECORD_LENGTH = 10;
     /** Maximum number of beliefs kept in a Concept */
-    public static final int MAXMUM_BELIEF_LENGTH = 7;
+    public static final int MAXIMUM_BELIEF_LENGTH = 7;
     /** Maximum number of goals kept in a Concept */
-    public static final int MAXMUM_QUESTIONS_LENGTH = 5;
+    public static final int MAXIMUM_QUESTIONS_LENGTH = 5;
 }

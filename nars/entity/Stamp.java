@@ -87,7 +87,7 @@ public class Stamp implements Cloneable {
     private Stamp(Stamp first, Stamp second, long time) {
         int i1, i2, j;
         i1 = i2 = j = 0;
-        baseLength = Math.min(first.length() + second.length(), Parameters.MAXMUM_STAMP_LENGTH);
+        baseLength = Math.min(first.length() + second.length(), Parameters.MAXIMUM_STAMP_LENGTH);
         evidentialBase = new long[baseLength];
         while (i2 < second.length() && j < baseLength) {
             evidentialBase[j] = first.get(i1);

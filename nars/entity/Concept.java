@@ -122,7 +122,7 @@ public final class Concept extends Item {
             for (Task ques : questions) {
                 LocalRules.trySolution(ques.getSentence(), judg, ques, memory);
             }
-            addToTable(judg, beliefs, Parameters.MAXMUM_BELIEF_LENGTH);
+            addToTable(judg, beliefs, Parameters.MAXIMUM_BELIEF_LENGTH);
         }
     }
 
@@ -147,7 +147,7 @@ public final class Concept extends Item {
         if (newQuestion) {
             questions.add(task);
         }
-        if (questions.size() > Parameters.MAXMUM_QUESTIONS_LENGTH) {
+        if (questions.size() > Parameters.MAXIMUM_QUESTIONS_LENGTH) {
             questions.remove(0);    // FIFO
         }
         Sentence newAnswer = evaluation(ques, beliefs);
