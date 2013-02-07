@@ -293,8 +293,11 @@ public class Memory {
      */
     public void singlePremiseTask(Term newContent, char punctuation, TruthValue newTruth, BudgetValue newBudget) {
         Sentence taskSentence = currentTask.getSentence();
-        newStamp = new Stamp(taskSentence.getStamp(), reasoner.getTime());
-//        newStamp = (Stamp) taskSentence.getStamp().clone();
+        if (taskSentence.isJudgment() || currentBelief == null) {
+            newStamp = new Stamp(taskSentence.getStamp(), getTime());
+        } else {
+            newStamp = new Stamp(currentBelief.getStamp(), getTime());
+        }
         Sentence newSentence = new Sentence(newContent, punctuation, newTruth, newStamp, taskSentence.getRevisible());
         Task newTask = new Task(newSentence, newBudget, currentTask, null);
         derivedTask(newTask);

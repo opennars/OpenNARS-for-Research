@@ -242,18 +242,18 @@ public class LocalRules {
     private static void convertedJudgment(TruthValue newTruth, BudgetValue newBudget, Memory memory) {
         Statement content = (Statement) memory.currentTask.getContent();
         Statement beliefContent = (Statement) memory.currentBelief.getContent();
-        Term subj = content.getSubject();
-        Term pred = content.getPredicate();
+        Term subjT = content.getSubject();
+        Term predT = content.getPredicate();
         Term subjB = beliefContent.getSubject();
         Term predB = beliefContent.getPredicate();
         Term otherTerm;
-        if (Variable.containVarQuery(subj.getName())) {
-            otherTerm = (pred.equals(subjB)) ? predB : subjB;
-            content = Statement.make(content, otherTerm, pred, memory);
+        if (Variable.containVarQuery(subjT.getName())) {
+            otherTerm = (predT.equals(subjB)) ? predB : subjB;
+            content = Statement.make(content, otherTerm, predT, memory);
         }
-        if (Variable.containVarQuery(pred.getName())) {
-            otherTerm = (subj.equals(subjB)) ? predB : subjB;
-            content = Statement.make(content, subj, otherTerm, memory);
+        if (Variable.containVarQuery(predT.getName())) {
+            otherTerm = (subjT.equals(subjB)) ? predB : subjB;
+            content = Statement.make(content, subjT, otherTerm, memory);
         }
         memory.singlePremiseTask(content, Symbols.JUDGMENT_MARK, newTruth, newBudget);
     }

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 
 import nars.gui.ConceptWindow;
 import nars.inference.*;
-import nars.io.Symbols;
 import nars.language.*;
 import nars.main.*;
 import nars.storage.*;
@@ -109,13 +108,17 @@ public final class Concept extends Item {
     private void processJudgment(Task task) {
         Sentence judg = task.getSentence();
         Sentence oldBelief = evaluation(judg, beliefs);
-        if ((oldBelief != null) && LocalRules.revisible(judg, oldBelief)) {
-            memory.newStamp = Stamp.make(judg.getStamp(), oldBelief.getStamp(), memory.getTime());
-            if (memory.newStamp != null) {
-                memory.currentBelief = oldBelief;
-                LocalRules.revision(judg, oldBelief, false, memory);
-            } else {
+        if (oldBelief != null) {
+            Stamp newStamp = judg.getStamp(), oldStamp = oldBelief.getStamp();
+            if (newStamp.equals(oldStamp)) {
                 task.getBudget().decPriority(0);    // duplicated task
+                return;
+            } else if (LocalRules.revisible(judg, oldBelief)) {
+                memory.newStamp = Stamp.make(newStamp, oldStamp, memory.getTime());
+                if (memory.newStamp != null) {
+                    memory.currentBelief = oldBelief;
+                    LocalRules.revision(judg, oldBelief, false, memory);
+                }
             }
         }
         if (task.getBudget().aboveThreshold()) {
@@ -179,12 +182,12 @@ public final class Concept extends Item {
                     Concept componentConcept;
                     for (TermLink termLink : termLinkTemplates) {
 //                        if (!(task.isStructural() && (termLink.getType() == TermLink.TRANSFORM))) { // avoid circular transform
-                            taskLink = new TaskLink(task, termLink, subBudget);
-                            componentTerm = termLink.getTarget();
-                            componentConcept = memory.getConcept(componentTerm);
-                            if (componentConcept != null) {
-                                componentConcept.insertTaskLink(taskLink);
-                            }
+                        taskLink = new TaskLink(task, termLink, subBudget);
+                        componentTerm = termLink.getTarget();
+                        componentConcept = memory.getConcept(componentTerm);
+                        if (componentConcept != null) {
+                            componentConcept.insertTaskLink(taskLink);
+                        }
 //                        }
                     }
                     buildTermLinks(taskBudget);  // recursively insert TermLink
