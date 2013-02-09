@@ -112,6 +112,7 @@ public class NARS extends Applet implements Runnable {
     /**
      * Repeatedly execute NARS working cycle. This method is called when the Runnable's thread is started.
      */
+    @Override
     public void run() {
         Thread thisThread = Thread.currentThread();
         while (narsThread == thisThread) {
@@ -119,7 +120,12 @@ public class NARS extends Applet implements Runnable {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
             }
-            reasoner.tick();
+            try {
+            	// NOTE: try/catch not necessary for input errors , but may be useful for other troubles
+				reasoner.tick();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
         }
     }
 

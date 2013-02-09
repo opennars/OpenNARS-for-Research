@@ -179,6 +179,7 @@ public class Reasoner {
         } else if (c == Symbols.COMMENT_MARK) {
             return;
         } else {
+            // read NARS language or an integer : TODO duplicated code
             try {
                 int i = Integer.parseInt(text);
                 walk(i);

@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 
+import nars.io.ExperienceReader;
 import nars.io.InputChannel;
 import nars.main.Reasoner;
 
@@ -41,7 +42,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
     private Button okButton, holdButton, clearButton, closeButton;
     /** Input area */
     private TextArea inputText;
-    /** Whether the window is ready to accept new input */
+    /** Whether the window is ready to accept new input (in fact whether the Reasoner will read the content of {@link #inputText} ) */
     private boolean ready;
     /** number of cycles between experience lines */
     private int timer;
@@ -127,6 +128,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
 
     /**
      * Accept text input in a tick, which can be multiple lines
+     * TODO duplicated code with {@link ExperienceReader}
      * @return Whether to check this channel again
      */
     public boolean nextInput() {
@@ -142,24 +144,33 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         int endOfLine;
         // The process steps at a number or no more text
         while ((text.length() > 0) && (timer == 0)) {
-            endOfLine = text.indexOf('\n');
-            if (endOfLine < 0) {
-                line = text;
-                text = "";
-            } else {
-                line = text.substring(0, endOfLine).trim();
-                text = text.substring(endOfLine + 1);
-            }
-            try {
-                timer = Integer.parseInt(line);
-                reasoner.walk(timer);
-            } catch (NumberFormatException e) {
-                reasoner.textInputLine(line);
-            }
-            inputText.setText(text);
-            if (text.isEmpty()) {
-                ready = false;
-            }
+        	endOfLine = text.indexOf('\n');
+        	if (endOfLine < 0) {
+        		line = text;
+        		text = "";
+        	} else {
+        		// TODO : when is this code reached ?
+        		line = text.substring(0, endOfLine).trim();
+        		text = text.substring(endOfLine + 1);
+        	}
+
+        	// read NARS language or an integer
+        	try {
+        		timer = Integer.parseInt(line);
+        		reasoner.walk(timer);
+        	} catch (NumberFormatException e) {
+        		try {
+					reasoner.textInputLine(line);
+				} catch (NullPointerException e1) {
+					System.out.println("InputWindow.nextInput() - NullPointerException: please correct the input" );
+					ready = false;
+					return false;
+				}
+        	}
+        	inputText.setText(text);
+        	if (text.isEmpty()) {
+        		ready = false;
+        	}
         }
         return ((text.length() > 0) || (timer > 0));
     }

@@ -23,6 +23,7 @@ package nars.io;
 import java.awt.FileDialog;
 import java.io.*;
 
+import nars.gui.InputWindow;
 import nars.main.*;
 
 /**
@@ -57,7 +58,7 @@ public class ExperienceReader implements InputChannel {
     }
 
     /** Open an input experience file from given file Path
-     * @param filePath File to be readed as experience
+     * @param filePath File to be read as experience
      */
     public void openLoadFile(String filePath) {
         try {
@@ -82,6 +83,7 @@ public class ExperienceReader implements InputChannel {
 
     /**
      * Process the next chunk of input data
+     * TODO duplicated code with {@link InputWindow}
      * @return Whether the input channel should be checked again
      */
     public boolean nextInput() {
@@ -105,6 +107,7 @@ public class ExperienceReader implements InputChannel {
                 System.out.println("i/o error: " + ex.getMessage());
             }
             line = line.trim();
+            // read NARS language or an integer
             if (line.length() > 0) {
                 try {
                     timer = Integer.parseInt(line);
