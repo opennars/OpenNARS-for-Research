@@ -57,7 +57,7 @@ public final class Concept extends Item {
     Memory memory;
 
 
-    /* ---------- constructor and intialization ---------- */
+    /* ---------- constructor and initialization ---------- */
     /**
      * Constructor, called in Memory.getConcept only
      * @param tm A term corresponding to the concept

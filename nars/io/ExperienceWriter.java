@@ -36,15 +36,19 @@ public class ExperienceWriter implements OutputChannel {
     /** Input experience from a file */
     private PrintWriter outExp;
 
-    /**
-     * Default constructor
+    /** Default constructor
      * @param reasoner
      */
     public ExperienceWriter(Reasoner reasoner) {
         this.reasoner = reasoner;
     }
 
-    /**
+    public ExperienceWriter(Reasoner reasoner, PrintWriter outExp) {
+		this(reasoner);
+		this.outExp = outExp;
+	}
+
+	/**
      * Open an output experience file
      */
     public void openSaveFile() {

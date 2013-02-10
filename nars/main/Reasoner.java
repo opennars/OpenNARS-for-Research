@@ -52,6 +52,7 @@ public class Reasoner {
     private boolean running;
     /** The number of steps to be carried out */
     private int walkingSteps;
+	private boolean finishedInputs;
 
     /**
      * Start the initial windows and memory. Called from NARS only.
@@ -143,9 +144,12 @@ public class Reasoner {
      */
     public void tick() {
         if (walkingSteps == 0) {
+        	boolean reasonerShouldRun = false;
             for (InputChannel channelIn : inputChannels) {
-                channelIn.nextInput();
+            	reasonerShouldRun = reasonerShouldRun ||
+            			channelIn.nextInput();
             }
+            finishedInputs = ! reasonerShouldRun;
         }
         ArrayList<String> output = memory.getExportStrings();
         if (!output.isEmpty()) {
@@ -164,7 +168,11 @@ public class Reasoner {
         }
     }
 
-    /**
+    public boolean isFinishedInputs() {
+		return finishedInputs;
+	}
+
+	/**
      * To process a line of input text
      * @param text
      */

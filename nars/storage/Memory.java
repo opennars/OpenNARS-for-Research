@@ -191,7 +191,7 @@ public class Memory {
     newTasks list, to be processed in the next workCycle.
     Some of them are reported and/or logged. */
     /**
-     * Input task processing. Invoked by the outside or inside enviornment.
+     * Input task processing. Invoked by the outside or inside environment.
      * Outside: StringParser (input); Inside: Operator (feedback).
      * Input tasks with low priority are ignored, and the others are put into task buffer.
      * @param task The input task
