@@ -20,6 +20,7 @@
  */
 package nars.main_nogui;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import nars.io.ExperienceReader;
@@ -35,12 +36,11 @@ import nars.main.Reasoner;
  * <p>
  * Manage the internal working thread. Communicate with Reasoner only.
  */
-public class NARSBatch implements Runnable {
-    /** The internal working thread of the system. */
-    Thread narsThread = null;
+public class NARSBatch {
     /** The reasoner */
     Reasoner reasoner;
 	private boolean logging;
+	private PrintStream out = System.out;
 
     /** The entry point of the standalone application.
      * <p>
@@ -49,18 +49,23 @@ public class NARSBatch implements Runnable {
      */
     public static void main(String args[]) {
         NARSBatch nars = new NARSBatch();
-        nars.init(args);
-        nars.start();
+        nars.runInference(args);
     }
 
-    public void init(String[] args) {
+    /** non-static equivalent to {@link #main(String[])} */
+    public void runInference(String args[]) {
+        init(args);
+        run();
+	}
+
+	public void init(String[] args) {
         init();
         if (args.length > 0) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
         }
         reasoner.addOutputChannel( new ExperienceWriter(reasoner,
-        		new PrintWriter( System.out, true ) ) );
+        		new PrintWriter( out , true ) ) );
     }
 
     /**Initialize the system at the control center.<p>
@@ -74,24 +79,10 @@ public class NARSBatch implements Runnable {
         reasoner.removeInputChannel( reasoner.getInputWindow() );
     }
 
-    /** Start the thread if necessary */
-    void start() {
-        if (narsThread == null) {
-            narsThread = new Thread(this);
-            narsThread.start();
-        }
-    }
-
-    public void stop() {
-        narsThread = null;
-    }
-
     /** Repeatedly execute NARS working cycle, until Inputs are Finished, or 1000 steps.
      * This method is called when the Runnable's thread is started. */
-     @Override
     public void run() {
-        Thread thisThread = Thread.currentThread();
-        while (narsThread == thisThread	) {
+        while ( true ) {
         	log("NARSBatch.run():" +
         			" step " + reasoner.getTime()
         			+ " " + reasoner.isFinishedInputs() );
@@ -106,6 +97,10 @@ public class NARSBatch implements Runnable {
         reasoner.getMainWindow().dispose();
         reasoner.getInputWindow().dispose();
     }
+     
+     public void setPrintStream(PrintStream out) {
+    	 this.out = out;
+     }
      
      private void log(String mess) {
     	if(logging) System.out.println( "/ " + mess);
