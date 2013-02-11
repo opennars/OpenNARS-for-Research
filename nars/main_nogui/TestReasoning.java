@@ -17,6 +17,10 @@ public class TestReasoning {
 	private static final String IN_TXT = "-in.txt";
 	private static final String OUT_TXT = "-out.txt";
 
+       public static void main(String args[]) {
+           new TestReasoning(). testExamples();
+       }
+       
 	@Test
 	public void testExamples() {
 		String testDir_ = "nars-dist/Examples";
