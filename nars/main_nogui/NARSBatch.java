@@ -1,6 +1,4 @@
 /*
- * NARS.java
- *
  * Copyright (C) 2008  Pei Wang
  *
  * This file is part of Open-NARS.
