@@ -21,7 +21,6 @@
 package nars.entity;
 
 import java.util.ArrayList;
-
 import nars.gui.ConceptWindow;
 import nars.inference.*;
 import nars.language.*;
@@ -444,17 +443,17 @@ public final class Concept extends Item {
      * @return String representation of direct content
      */
     public String displayContent() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         if (beliefs.size() > 0) {
             buffer.append("\n  Beliefs:\n");
             for (Sentence s : beliefs) {
-                buffer.append(s + "\n");
+                buffer.append(s).append("\n");
             }
         }
         if (questions.size() > 0) {
             buffer.append("\n  Question:\n");
             for (Task t : questions) {
-                buffer.append(t + "\n");
+                buffer.append(t).append("\n");
             }
         }
         return buffer.toString();

@@ -119,7 +119,7 @@ public class Task extends Item {
      */
     @Override
     public void merge(Item that) {
-        if (getCreationTime() > ((Task) that).getCreationTime()) {
+        if (getCreationTime() >= ((Task) that).getCreationTime()) {
             super.merge(that);
         } else {
             that.merge(this);

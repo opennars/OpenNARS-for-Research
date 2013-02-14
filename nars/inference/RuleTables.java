@@ -486,8 +486,9 @@ public class RuleTables {
             if (!task.isStructural() && task.getSentence().isJudgment()) {
                 if (statement instanceof Inheritance) {
                     StructuralRules.structuralCompose1(compound, index, statement, memory);
-                    if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
-                        StructuralRules.structuralCompose2(compound, index, statement, side, memory);
+//                    if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
+             if (!(compound instanceof SetExt || compound instanceof SetInt || compound instanceof Negation)) {
+                               StructuralRules.structuralCompose2(compound, index, statement, side, memory);
                     }    // {A --> B, A @ (A&C)} |- (A&C) --> (B&C)
                 } else if ((statement instanceof Similarity) && !(compound instanceof Conjunction)) {
                     StructuralRules.structuralCompose2(compound, index, statement, side, memory);
