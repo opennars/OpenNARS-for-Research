@@ -16,11 +16,19 @@ public class TestReasoning {
 
 	private static final String IN_TXT = "-in.txt";
 	private static final String OUT_TXT = "-out.txt";
+	private File tmpDir;
 
-       public static void main(String args[]) {
-           new TestReasoning(). testExamples();
-       }
+	public static void main(String args[]) {
+		new TestReasoning(). testExamples();
+	}
        
+	public TestReasoning() {
+		String tmpDir_ = System.getProperty("java.io.tmpdir");
+		tmpDir = new File( tmpDir_, "nars_test" );
+		tmpDir.mkdir();	
+		System.out.println("TestReasoning: tests results are in " + tmpDir );
+	}
+
 	@Test
 	public void testExamples() {
 		String testDir_ = "nars-dist/Examples";
@@ -41,7 +49,7 @@ public class TestReasoning {
 	private boolean checkReasoning(File file) {
 		try {
 			NARSBatch nars = new NARSBatch();
-			File resultFile = File.createTempFile(file.getName(), ".nars" );
+			File resultFile = new File( tmpDir, file.getName().replace( IN_TXT, OUT_TXT ) );
 			nars.setPrintStream(new PrintStream(resultFile));
 			nars.runInference( new String[]{ file.getAbsolutePath() } );
 			return compareResult( file, resultFile );

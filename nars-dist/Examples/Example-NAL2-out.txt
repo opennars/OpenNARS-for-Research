@@ -58,12 +58,12 @@
   IN: <swan --> bird>. %0.90;0.90% {0 : 1} 
   IN: <bird <-> swan>?  {0 : 2} 
 2
- OUT: <bird <-> swan>. %0.90;0.47% {2 : 2} 
+ OUT: <bird <-> swan>. %0.90;0.47% {2 : 1} 
 ********** conversions between inheritance and similarity
   IN: <bird <-> swan>. %0.90;0.90% {0 : 1} 
   IN: <swan --> bird>?  {0 : 2} 
 2
- OUT: <swan --> bird>. %0.90;0.81% {2 : 2} 
+ OUT: <swan --> bird>. %0.90;0.81% {2 : 1} 
 ********** set definition
   IN: <{Tweety} --> {Birdie}>. %1.00;0.90% {0 : 1} 
 4
@@ -93,7 +93,7 @@
 1
  OUT: <[bright] <-> [smart]>. %0.90;0.90% {1 : 1} 
 3
- OUT: <[bright] --> [smart]>. %0.90;0.81% {4 : 2} 
+ OUT: <[bright] --> [smart]>. %0.90;0.81% {4 : 1} 
 ********** question derivation
   IN: <bird --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <{?1} --> swimmer>?  {0 : 2} 
