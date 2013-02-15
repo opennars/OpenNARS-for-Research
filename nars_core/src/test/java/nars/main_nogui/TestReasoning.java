@@ -11,7 +11,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-/** Unit Test Reasoning, using input and output files from nars-dist/Examples */
+/** Unit Test Reasoning, using input and output files from nars-dist/Examples ;
+ * <pre>
+ * To create a new test input, add the NARS input as XX-in.txt in nars-dist/Examples ,
+ *  run the test suite, and move resulting file in temporary directory
+ * /tmp/nars_test/XX-out.txt
+ * into nars-dist/Example 
+ * </pre>
+ * */
 public class TestReasoning {
 
 	private static final String IN_TXT = "-in.txt";
@@ -79,7 +86,6 @@ public class TestReasoning {
 								+(i+1)+	"):");
 						System.out.println(referenceLine);
 						comparison = false;
-//						break;
 					}
 				} else {
 					System.out.println("Actual result is not long enough: line " + i
