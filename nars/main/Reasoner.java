@@ -199,4 +199,9 @@ public class Reasoner {
             }
         }
     }
+
+	@Override
+	public String toString() {
+		return memory.toString();
+	}
 }

@@ -426,4 +426,14 @@ public class Memory {
         }
         exportStrings.add(s);
     }
+    
+	@Override
+	public String toString() {
+		return "concepts:\n" + concepts.toString()
+				+ "\n novelTasks:\n" + novelTasks.toString()
+				+ "\n newTasks:\n" + newTasks.toString()
+				+ "\n currentTask:\n" + currentTask.toString()
+				+ "\n currentBeliefLink:\n" + currentBeliefLink.toString()
+			    + "\n currentBelief:\n" + currentBelief;
+	}
 }

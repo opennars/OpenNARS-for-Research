@@ -327,7 +327,8 @@ public abstract class Bag<Type extends Item> {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer(" ");
-        for (int i = TOTAL_LEVEL; i >= window.showLevel(); i--) {
+        int showLevel = window == null ? 1 : window.showLevel();
+		for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
             if (!emptyLevel(i - 1)) {
                 buf = buf.append("\n --- Level " + i + ":\n ");
                 for (int j = 0; j < itemTable.get(i - 1).size(); j++) {

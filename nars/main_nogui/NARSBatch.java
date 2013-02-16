@@ -39,10 +39,11 @@ public class NARSBatch {
     Reasoner reasoner;
 	private boolean logging;
 	private PrintStream out = System.out;
+	private boolean dumpLastState = true;
 
     /** The entry point of the standalone application.
      * <p>
-     * Create an instance of the class, then run the init and start methods.
+     * Create an instance of the class, then run the {@link #init(String[])} and {@link #run()} methods.
      * @param args optional argument used : one input file
      */
     public static void main(String args[]) {
@@ -54,6 +55,7 @@ public class NARSBatch {
     public void runInference(String args[]) {
         init(args);
         run();
+        if(dumpLastState) System.out.println( "==== Dump Last State ====\n" + reasoner.toString() );
 	}
 
 	public void init(String[] args) {
