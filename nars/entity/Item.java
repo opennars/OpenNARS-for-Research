@@ -185,4 +185,9 @@ public abstract class Item {
     public String toStringBrief() {
         return budget.toStringBrief() + " " + key ;
     }
+    
+    public String toStringLong() {
+    	return toString();
+    }
+
 }

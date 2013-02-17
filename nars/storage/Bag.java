@@ -68,7 +68,7 @@ public abstract class Bag<Type extends Item> {
     private int currentCounter;
     /** whether this bag has an active window */
     private boolean showing;
-    /** display window */
+    /** display window TODO : remove GUI dependency */
     private BagWindow window;
     /** reference to memory */
     protected Memory memory;
@@ -259,8 +259,8 @@ public abstract class Bag<Type extends Item> {
         }
         itemTable.get(inLevel).add(newItem);        // FIFO
         mass += (inLevel + 1);                  // increase total mass
-        refresh();                              // refresh the wondow
-        return oldItem;
+        refresh();                              // refresh the window
+        return oldItem;		// TODO return null is a bad smell
     }
 
     /**
@@ -289,6 +289,7 @@ public abstract class Bag<Type extends Item> {
 
     /**
      * To start displaying the Bag in a BagWindow
+     * TODO these 4 GUI methods should be moved in class {@link BagWindow}
      * @param title The title of the window
      */
     public void startPlay(String title) {
@@ -337,5 +338,34 @@ public abstract class Bag<Type extends Item> {
             }
         }
         return buf.toString();
+    }
+    
+    /** TODO bad paste from preceding */
+    public String toStringLong() {
+        StringBuffer buf = new StringBuffer(" BAG " + getClass().getSimpleName() );
+        buf.append(" ").append( showSizes() );
+        int showLevel = window == null ? 1 : window.showLevel();
+		for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
+            if (!emptyLevel(i - 1)) {
+                buf = buf.append("\n --- LEVEL " + i + ":\n ");
+                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
+                    buf = buf.append(itemTable.get(i - 1).get(j).toStringLong() + "\n ");
+                }
+            }
+        }
+		buf.append(">>>> end of Bag").append( getClass().getSimpleName() );
+        return buf.toString();
+    }
+    
+    String showSizes() {
+        StringBuilder buf = new StringBuilder(" ");
+    	int levels = 0;
+    	for ( ArrayList<Type> items : itemTable) {
+            if ((items != null) && ! items.isEmpty()) {
+				levels++;
+				buf.append( items.size() ).append( " " );
+            }
+		}
+    	return "Levels: " + Integer.toString( levels ) + ", sizes: " + buf;
     }
 }

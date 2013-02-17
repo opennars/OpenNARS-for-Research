@@ -64,7 +64,8 @@ public class Memory {
     public Sentence currentBelief;
     /** The new Stamp */
     public Stamp newStamp;
-    /** The substitution that unify the common term in the Task and the Belief */
+    /** The substitution that unify the common term in the Task and the Belief
+     * TODO unused */
     protected HashMap<Term, Term> substitute;
 
 
@@ -234,7 +235,7 @@ public class Memory {
             recorder.append("!!! Derived: " + task + "\n");
             float budget = task.getBudget().summary();
             float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
-            if (budget > minSilent) {  // only report significient derived Tasks
+            if (budget > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
             newTasks.add(task);
@@ -429,11 +430,28 @@ public class Memory {
     
 	@Override
 	public String toString() {
-		return "concepts:\n" + concepts.toString()
-				+ "\n novelTasks:\n" + novelTasks.toString()
-				+ "\n newTasks:\n" + newTasks.toString()
-				+ "\n currentTask:\n" + currentTask.toString()
-				+ "\n currentBeliefLink:\n" + currentBeliefLink.toString()
-			    + "\n currentBelief:\n" + currentBelief;
+		return
+				 toStringLongIfNotNull(concepts, "concepts")
+				+ toStringLongIfNotNull(novelTasks, "novelTasks")
+				+ toStringIfNotNull(newTasks, "newTasks")
+				+ toStringLongIfNotNull(currentTask, "currentTask")
+				+ toStringLongIfNotNull(currentBeliefLink, "currentBeliefLink")
+				+ toStringIfNotNull(currentBelief, "currentBelief")
+		;
+	}
+
+	private String toStringLongIfNotNull(Bag<?> item, String title) {
+		return item == null ? "" : "\n " + title + ":\n" + 
+				item.toStringLong();
+	}
+	
+	private String toStringLongIfNotNull(Item item, String title) {
+		return item == null ? "" : "\n " + title + ":\n" + 
+				item.toStringLong();
+	}
+	
+	private String toStringIfNotNull(Object item, String title) {
+		return item == null ? "" : "\n " + title + ":\n" + 
+				item.toString();
 	}
 }

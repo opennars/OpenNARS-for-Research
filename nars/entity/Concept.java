@@ -21,11 +21,20 @@
 package nars.entity;
 
 import java.util.ArrayList;
+
 import nars.gui.ConceptWindow;
-import nars.inference.*;
-import nars.language.*;
-import nars.main.*;
-import nars.storage.*;
+import nars.inference.BudgetFunctions;
+import nars.inference.LocalRules;
+import nars.inference.RuleTables;
+import nars.inference.UtilityFunctions;
+import nars.language.CompoundTerm;
+import nars.language.Term;
+import nars.main.NARS;
+import nars.main.Parameters;
+import nars.main_nogui.NARSBatch;
+import nars.storage.Memory;
+import nars.storage.TaskLinkBag;
+import nars.storage.TermLinkBag;
 
 /**
  * A concept contains information associated with a term, including directly 
@@ -42,7 +51,8 @@ public final class Concept extends Item {
     private TaskLinkBag taskLinks;
     /** Term links between the term and its components and compounds */
     private TermLinkBag termLinks;
-    /** Link templates of TermLink, only in concepts with CompoundTerm */
+    /** Link templates of TermLink, only in concepts with CompoundTerm
+     * jmv TODO explain more */
     private ArrayList<TermLink> termLinkTemplates;
     /** Question directly asked about the term */
     private ArrayList<Task> questions;
@@ -307,8 +317,8 @@ public final class Concept extends Item {
 
     /* ---------- access local information ---------- */
     /**
-     * Return the assocated term, called from Memory only
-     * @return The assocated term
+     * Return the associated term, called from Memory only
+     * @return The associated term
      */
     public Term getTerm() {
         return term;
@@ -327,6 +337,24 @@ public final class Concept extends Item {
         }
     }
 
+	/** called from {@link NARSBatch} */
+    public String toStringLong() {
+    	String res = toStringBrief() + " " + key
+    			+ toStringIfNotNull(termLinks, "termLinks")
+    			+ toStringIfNotNull(taskLinks, "taskLinks")
+    	;
+    	res += toStringIfNotNull( null, "questions" );
+    	for (Task t : questions) {
+    		res += t.toString();
+		}
+    	// TODO other details?
+		return res;
+    }
+
+	private String toStringIfNotNull(Object item, String title) {
+		return item == null ? "" : "\n " + title + ":" + item.toString();
+	}
+	
     /**
      * Recalculate the quality of the concept [to be refined to show extension/intension balance]
      * @return The quality value

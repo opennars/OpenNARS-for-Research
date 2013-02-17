@@ -167,6 +167,8 @@ public class Task extends Item {
         if (bestSolution != null) {
             s.append("  \n solution: " + bestSolution.toStringBrief());
         }
+        s.append("\n>>>> end of Task");
+
         return s.toString();
     }
 }
