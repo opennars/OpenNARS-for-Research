@@ -49,13 +49,14 @@ public class NARSBatch {
     public static void main(String args[]) {
         NARSBatch nars = new NARSBatch();
         nars.runInference(args);
+        if(nars.dumpLastState) System.out.println( "==== Dump Last State ====\n"
+        		+ nars.reasoner.toString() );
     }
 
     /** non-static equivalent to {@link #main(String[])} */
     public void runInference(String args[]) {
         init(args);
         run();
-        if(dumpLastState) System.out.println( "==== Dump Last State ====\n" + reasoner.toString() );
 	}
 
 	public void init(String[] args) {

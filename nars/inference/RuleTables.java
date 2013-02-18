@@ -138,7 +138,10 @@ public class RuleTables {
                 switch (bLink.getType()) {
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
-                            conditionalDedIndWithVar((Implication) taskTerm, tIndex, (Statement) beliefTerm, bIndex, memory);
+//                            if (beliefTerm instanceof Implication)
+                        		// TODO adding instanceof test changes results of Example-NAL6-in.txt
+                        		// TODO maybe put instanceof test within conditionalDedIndWithVar()
+                            	conditionalDedIndWithVar((Implication) taskTerm, tIndex, (Statement) beliefTerm, bIndex, memory);
                         }
                         break;
                 }
