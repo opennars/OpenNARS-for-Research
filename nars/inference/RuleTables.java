@@ -26,14 +26,15 @@ import nars.storage.Memory;
 import nars.io.Symbols;
 
 /**
- * Table of inference rules, indexed by the TermLinks for the task and the belief.
- * Used in indirective processing of a task, to dispatch inference cases to the
- * relevant inference rules.
+ * Table of inference rules, indexed by the TermLinks for the task and the
+ * belief. Used in indirective processing of a task, to dispatch inference cases
+ * to the relevant inference rules.
  */
 public class RuleTables {
 
     /**
      * Entry point of the inference engine
+     *
      * @param tLink The selected TaskLink, which will provide a task
      * @param bLink The selected TermLink, which may provide a belief
      * @param memory Reference to the memory
@@ -119,14 +120,16 @@ public class RuleTables {
                         break;
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
-                            bIndex = bLink.getIndex(1);
+//                            bIndex = bLink.getIndex(1);
                             syllogisms(tLink, bLink, taskTerm, beliefTerm, memory);
                         }
                         break;
                     case TermLink.COMPOUND_CONDITION:
                         if (belief != null) {
                             bIndex = bLink.getIndex(1);
-                            conditionalDedIndWithVar((Implication) beliefTerm, bIndex, (Statement) taskTerm, tIndex, memory);
+                            if (beliefTerm instanceof Implication) {
+                                conditionalDedIndWithVar((Implication) beliefTerm, bIndex, (Statement) taskTerm, tIndex, memory);
+                            }
                         }
                         break;
                 }
@@ -145,8 +148,9 @@ public class RuleTables {
 
     /* ----- syllogistic inferences ----- */
     /**
-     * Meta-table of syllogistic rules, indexed by the content classes of the 
+     * Meta-table of syllogistic rules, indexed by the content classes of the
      * taskSentence and the belief
+     *
      * @param tLink The link to task
      * @param bLink The link to belief
      * @param taskTerm The content of task
@@ -199,8 +203,9 @@ public class RuleTables {
     }
 
     /**
-     * Decide the figure of syllogism according to the locations of the common 
+     * Decide the figure of syllogism according to the locations of the common
      * term in the premises
+     *
      * @param link1 The link to the first premise
      * @param link2 The link to the second premise
      * @return The figure of the syllogism, one of the four: 11, 12, 21, or 22
@@ -211,6 +216,7 @@ public class RuleTables {
 
     /**
      * Syllogistic rules whose both premises are on the same asymmetric relation
+     *
      * @param sentence The taskSentence in the task
      * @param belief The judgment in the belief
      * @param figure The location of the shared term
@@ -279,8 +285,9 @@ public class RuleTables {
     }
 
     /**
-     * Syllogistic rules whose first premise is on an asymmetric relation, and the 
-     * second on a symmetric relation
+     * Syllogistic rules whose first premise is on an asymmetric relation, and
+     * the second on a symmetric relation
+     *
      * @param asym The asymmetric premise
      * @param sym The symmetric premise
      * @param figure The location of the shared term
@@ -340,6 +347,7 @@ public class RuleTables {
 
     /**
      * Syllogistic rules whose both premises are on the same symmetric relation
+     *
      * @param belief The premise that comes from a belief
      * @param taskSentence The premise that comes from a task
      * @param figure The location of the shared term
@@ -375,8 +383,11 @@ public class RuleTables {
     /* ----- conditional inferences ----- */
     /**
      * The detachment rule, with variable unification
-     * @param originalMainSentence The premise that is an Implication or Equivalence
-     * @param subSentence The premise that is the subject or predicate of the first one
+     *
+     * @param originalMainSentence The premise that is an Implication or
+     * Equivalence
+     * @param subSentence The premise that is the subject or predicate of the
+     * first one
      * @param index The location of the second premise in the first
      * @param memory Reference to the memory
      */
@@ -401,7 +412,9 @@ public class RuleTables {
 
     /**
      * Conditional deduction or induction, with variable unification
-     * @param conditional The premise that is an Implication with a Conjunction as condition
+     *
+     * @param conditional The premise that is an Implication with a Conjunction
+     * as condition
      * @param index The location of the shared term in the condition
      * @param statement The second premise that is a statement
      * @param side The location of the shared term in the statement
@@ -425,6 +438,7 @@ public class RuleTables {
     /* ----- structural inferences ----- */
     /**
      * Inference between a compound term and a component of it
+     *
      * @param compound The compound term
      * @param component The component term
      * @param compoundTask Whether the compound comes from the task
@@ -448,6 +462,7 @@ public class RuleTables {
 
     /**
      * Inference between two compound terms
+     *
      * @param taskTerm The compound from the task
      * @param beliefTerm The compound from the belief
      * @param memory Reference to the memory
@@ -464,6 +479,7 @@ public class RuleTables {
 
     /**
      * Inference between a compound term and a statement
+     *
      * @param compound The compound term
      * @param index The location of the current term in the compound
      * @param statement The statement
@@ -487,8 +503,8 @@ public class RuleTables {
                 if (statement instanceof Inheritance) {
                     StructuralRules.structuralCompose1(compound, index, statement, memory);
 //                    if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
-             if (!(compound instanceof SetExt || compound instanceof SetInt || compound instanceof Negation)) {
-                               StructuralRules.structuralCompose2(compound, index, statement, side, memory);
+                    if (!(compound instanceof SetExt || compound instanceof SetInt || compound instanceof Negation)) {
+                        StructuralRules.structuralCompose2(compound, index, statement, side, memory);
                     }    // {A --> B, A @ (A&C)} |- (A&C) --> (B&C)
                 } else if ((statement instanceof Similarity) && !(compound instanceof Conjunction)) {
                     StructuralRules.structuralCompose2(compound, index, statement, side, memory);
@@ -499,6 +515,7 @@ public class RuleTables {
 
     /**
      * Inference between a component term (of the current term) and a statement
+     *
      * @param compound The compound term
      * @param index The location of the current term in the compound
      * @param statement The statement
@@ -527,7 +544,9 @@ public class RuleTables {
 
     /* ----- inference with one TaskLink only ----- */
     /**
-     * The TaskLink is of type TRANSFORM, and the conclusion is an equivalent transformation
+     * The TaskLink is of type TRANSFORM, and the conclusion is an equivalent
+     * transformation
+     *
      * @param tLink The task link
      * @param memory Reference to the memory
      */
