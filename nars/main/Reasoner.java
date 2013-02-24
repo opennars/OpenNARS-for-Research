@@ -22,6 +22,8 @@ package nars.main;
 
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
+
 import nars.storage.*;
 import nars.io.*;
 import nars.gui.*;
@@ -143,29 +145,33 @@ public class Reasoner {
      * A clock tick. Run one working workCycle or read input. Called from NARS only.
      */
     public void tick() {
-        if (walkingSteps == 0) {
-        	boolean reasonerShouldRun = false;
-            for (InputChannel channelIn : inputChannels) {
-            	reasonerShouldRun = reasonerShouldRun ||
-            			channelIn.nextInput();
-            }
-            finishedInputs = ! reasonerShouldRun;
-        }
-        ArrayList<String> output = memory.getExportStrings();
-        if (!output.isEmpty()) {
-            for (OutputChannel channelOut : outputChannels) {
-                channelOut.nextOutput(output);
-            }
-            output.clear();
-        }
-        if (running || walkingSteps > 0) {
-            clock++;
-            mainWindow.tickTimer();
-            memory.workCycle(clock);
-            if (walkingSteps > 0) {
-                walkingSteps--;
-            }
-        }
+    	SwingUtilities.invokeLater( new Runnable() {
+    		@Override
+    		public void run() {
+    			if (walkingSteps == 0) {
+    				boolean reasonerShouldRun = false;
+    				for (InputChannel channelIn : inputChannels) {
+    					reasonerShouldRun = reasonerShouldRun ||
+    							channelIn.nextInput();
+    				}
+    				finishedInputs = ! reasonerShouldRun;
+    			}
+    			ArrayList<String> output = memory.getExportStrings();
+    			if (!output.isEmpty()) {
+    				for (OutputChannel channelOut : outputChannels) {
+    					channelOut.nextOutput(output);
+    				}
+    				output.clear();
+    			}
+    			if (running || walkingSteps > 0) {
+    				clock++;
+    				mainWindow.tickTimer();
+    				memory.workCycle(clock);
+    				if (walkingSteps > 0) {
+    					walkingSteps--;
+    				}
+    			}		
+    		} } );
     }
 
     public boolean isFinishedInputs() {

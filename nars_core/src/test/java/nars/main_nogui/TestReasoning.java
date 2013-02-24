@@ -26,7 +26,12 @@ public class TestReasoning {
 	private File tmpDir;
 
 	public static void main(String args[]) {
-		new TestReasoning(). testExamples();
+		TestReasoning testReasoning = new TestReasoning();
+		if( args.length == 1) {
+			testReasoning.checkReasoning(new File(args[0]));
+		} else {
+			testReasoning.testExamples();
+		}
 	}
        
 	public TestReasoning() {
