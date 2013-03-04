@@ -111,13 +111,15 @@ class ImageExt private (n: String, arg: ArrayList[Term], @BeanProperty var relat
    * @param complexity Syntactic complexity of the compound
    * @param index The index of relation in the component list
    */
-  private def this(n: String, 
-      cs: ArrayList[Term], 
-      con: Boolean, 
+  private def this( name: String, 
+      components : ArrayList[Term], 
+      isConstant : Boolean, 
       complexity: Short, 
       index: Short) {
-    super(n, cs, con, complexity)
-    relationIndex = index
+    this(name, components, index)
+    this.complexity = complexity
+    this.isConstant = isConstant
+//    super(n, cs, con, complexity)
   }
 
   /**

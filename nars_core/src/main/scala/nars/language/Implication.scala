@@ -66,7 +66,11 @@ class Implication protected (arg: ArrayList[Term]) extends Statement(arg) {
       cs: ArrayList[Term], 
       con: Boolean, 
       i: Short) {
-    super(n, cs, con, i)
+//    super(n, cs, con, i)
+    this(cs)
+    setName(n)
+    this.isConstant = con
+    this.complexity = i
   }
 
   /**

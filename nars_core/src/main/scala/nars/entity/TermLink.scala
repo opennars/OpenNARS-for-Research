@@ -91,7 +91,12 @@ class TermLink(@BeanProperty var target: Term, protected var `type`: Short, indi
    * @param v The budget value of the TaskLink
    */
   protected def this(s: String, v: BudgetValue) {
-    super(s, v)
+//    super(s, v)
+    // jmv : have to write this, as this is what the Java code really does :(
+    // cf http://stackoverflow.com/questions/1438762/how-can-scala-receive-multiple-parameters-in-a-method-definition
+    this( null.asInstanceOf[Term] , 0.asInstanceOf[Short], List[Int]():_* )
+    this.key = s;
+    this.budget = new BudgetValue(v);  // clone, not assignment
   }
 
   /**
@@ -103,11 +108,14 @@ class TermLink(@BeanProperty var target: Term, protected var `type`: Short, indi
    * @param v Budget value of the link
    */
   def this(t: Term, template: TermLink, v: BudgetValue) {
-    super(t.getName, v)
-    target = t
-    `type` = template.getType
+    this(t, template.getType)
+//    super(t.getName, v)
+//    target = t
+//    `type` = template.getType
+    this.budget = new BudgetValue(v);  // clone, not assignment
     if (template.getTarget == t) {
-      `type` -= 1
+//      `type` -= 1
+      `type` = ( `type` - 1 ).asInstanceOf[Short] 
     }
     index = template.getIndices
     setKey()
@@ -117,8 +125,8 @@ class TermLink(@BeanProperty var target: Term, protected var `type`: Short, indi
    * Set the key of the link
    */
   protected def setKey() {
-    var at1: String = _
-    var at2: String = _
+    var at1: String = ""
+    var at2: String = ""
     if ((`type` % 2) == 1) {
       at1 = Symbols.TO_COMPONENT_1
       at2 = Symbols.TO_COMPONENT_2

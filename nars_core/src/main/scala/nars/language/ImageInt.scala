@@ -119,8 +119,10 @@ class ImageInt private (n: String, arg: ArrayList[Term], @BeanProperty var relat
       con: Boolean, 
       complexity: Short, 
       index: Short) {
-    super(n, cs, con, complexity)
-    relationIndex = index
+//    super(n, cs, con, complexity)
+    this(n, cs, index)
+    this.complexity = complexity
+    this.isConstant = con
   }
 
   /**

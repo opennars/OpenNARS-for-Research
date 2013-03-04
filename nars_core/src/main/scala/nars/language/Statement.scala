@@ -8,13 +8,21 @@ import Statement._
 import scala.collection.JavaConversions._
 
 object Statement {
+//
+//    protected def Statement( name: String, 
+//      components: ArrayList[Term], 
+//      isConstant: Boolean, 
+//      complexity: Short ) :Statement = {
+//      new Statement()
+////    new CompoundTerm(n, cs, con, i)
+//  }
 
   /**
    * Make a Statement from String, called by StringParser
    * @param relation The relation String
    * @param subject The first component
    * @param predicate The second component
-   * @param memory Reference to the memeory
+   * @param memory Reference to the memory
    * @return The Statement built
    */
   def make(relation: String, 
@@ -176,9 +184,9 @@ abstract class Statement protected () extends CompoundTerm {
    * Constructor with partial values, called by make
    * @param arg The component list of the term
    */
-  protected def this(arg: ArrayList[Term]) {
-//    super(arg)
-  }
+//  protected def this(arg: ArrayList[Term]) {
+////    super(arg)
+//  }
 
   /**
    * Constructor with full values, called by clone
@@ -187,12 +195,12 @@ abstract class Statement protected () extends CompoundTerm {
    * @param con Constant indicator
    * @param i Syntactic complexity of the compound
    */
-  protected def this(n: String, 
-      cs: ArrayList[Term], 
-      con: Boolean, 
-      i: Short) {
-    super(n, cs, con, i)
-  }
+//  protected def this(n: String, 
+//      cs: ArrayList[Term], 
+//      con: Boolean, 
+//      i: Short) {
+//    super(n, cs, con, i)
+//  }
 
   /**
    * Override the default in making the nameStr of the current term from existing fields

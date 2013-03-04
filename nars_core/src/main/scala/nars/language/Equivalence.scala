@@ -53,11 +53,15 @@ class Equivalence protected (components: ArrayList[Term]) extends Statement(comp
    * @param constant Whether the statement contains open variable
    * @param complexity Syntactic complexity of the compound
    */
-  protected def this(n: String, 
+  protected def this( name: String, 
       components: ArrayList[Term], 
-      constant: Boolean, 
-      complexity: Short) {
-    super(n, components, constant, complexity)
+      isConstant: Boolean, 
+      complexity: Short ) {
+    this(components)
+    setName(name)
+    this.complexity = complexity
+    this.isConstant = isConstant
+//    super(n, components, constant, complexity)
   }
 
   /**

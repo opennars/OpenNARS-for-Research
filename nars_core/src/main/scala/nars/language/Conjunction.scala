@@ -79,11 +79,15 @@ class Conjunction protected (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * @param con Whether the term is a constant
    * @param i Syntactic complexity of the compound
    */
-  private def this(n: String, 
-      cs: ArrayList[Term], 
-      con: Boolean, 
-      i: Short) {
-    super(n, cs, con, i)
+  private def this( name: String, 
+      components: ArrayList[Term], 
+      isConstant: Boolean, 
+      complexity: Short ) {
+//    super(n, cs, con, i)
+    this(components)
+    setName(name)
+    this.complexity = complexity
+    this.isConstant = isConstant
   }
 
   /**

@@ -76,11 +76,15 @@ class Disjunction private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * @param open Open variable list
    * @param i Syntactic complexity of the compound
    */
-  private def this(n: String, 
-      cs: ArrayList[Term], 
-      con: Boolean, 
-      i: Short) {
-    super(n, cs, con, i)
+  private def this( name: String, 
+      components: ArrayList[Term], 
+      isConstant: Boolean, 
+      complexity: Short ) {
+//    super(n, cs, con, i)
+    this(components)
+    setName(name)
+    this.complexity = complexity
+    this.isConstant = isConstant
   }
 
   /**

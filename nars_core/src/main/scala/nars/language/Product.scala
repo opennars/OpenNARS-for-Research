@@ -55,7 +55,11 @@ class Product private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
       cs: ArrayList[Term], 
       con: Boolean, 
       complexity: Short) {
-    super(n, cs, con, complexity)
+//    super(n, cs, con, complexity)
+    this(cs)
+    setName(n)
+    this.isConstant = con
+    this.complexity = complexity
   }
 
   /**
