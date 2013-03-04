@@ -86,7 +86,7 @@ class Term protected () extends Cloneable with Comparable[Term] {
    * @param target The term to be searched
    * @return Whether the two have the same content
    */
-  def containTerm(target: Term): Boolean = == target
+  def containTerm(target: Term): Boolean = this == target
 
   /**
    * The same as getName by default, used in display only.

@@ -6,6 +6,7 @@ import nars.storage.Memory
 import SetExt._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object SetExt {
 
@@ -68,7 +69,7 @@ class SetExt private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
 //    super(n, cs, con, i)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = i
   }
 
@@ -76,8 +77,8 @@ class SetExt private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * Clone a SetExt
    * @return A new object, to be casted into a SetExt
    */
-  def clone(): AnyRef = {
-    new SetExt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new SetExt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

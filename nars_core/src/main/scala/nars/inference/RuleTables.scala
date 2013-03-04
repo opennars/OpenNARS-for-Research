@@ -115,7 +115,7 @@ object RuleTables {
       memory: Memory) {
     val taskSentence = memory.currentTask.getSentence
     val belief = memory.currentBelief
-    var figure: Int = _
+    var figure: Int = 0
     if (taskTerm.isInstanceOf[Inheritance]) {
       if (beliefTerm.isInstanceOf[Inheritance]) {
         figure = indexToFigure(tLink, bLink)
@@ -249,8 +249,8 @@ object RuleTables {
       memory: Memory) {
     val asymSt = asym.cloneContent().asInstanceOf[Statement]
     val symSt = sym.cloneContent().asInstanceOf[Statement]
-    var t1: Term = _
-    var t2: Term = _
+    var t1: Term = null
+    var t2: Term = null
     figure match {
       case 11 => if (Variable.unify(Symbols.VAR_INDEPENDENT, asymSt.getSubject, symSt.getSubject, asymSt, 
         symSt)) {
@@ -377,15 +377,16 @@ object RuleTables {
     val condition = conditional.getSubject.asInstanceOf[CompoundTerm]
     val component = condition.componentAt(index)
     var component2: Term = null
+    var side2 = side
     if (statement.isInstanceOf[Inheritance]) {
       component2 = statement
-      side = -1
+      side2 = -1
     } else if (statement.isInstanceOf[Implication]) {
       component2 = statement.componentAt(side)
     }
     if ((component2 != null) && 
       Variable.unify(Symbols.VAR_INDEPENDENT, component, component2, conditional, statement)) {
-      SyllogisticRules.conditionalDedInd(conditional, index, statement, side, memory)
+      SyllogisticRules.conditionalDedInd(conditional, index, statement, side2, memory)
     }
   }
 

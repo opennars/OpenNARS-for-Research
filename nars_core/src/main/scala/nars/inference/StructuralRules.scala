@@ -57,7 +57,7 @@ object StructuralRules {
     if ((sub == null) || (pred == null)) {
       return
     }
-    var content: Term = _
+    var content: Term = null
     content = if (switchOrder(compound, index)) Statement.make(statement, pred, sub, memory) else Statement.make(statement, 
       sub, pred, memory)
     if (content == null) {
@@ -66,7 +66,7 @@ object StructuralRules {
     val task = memory.currentTask
     val sentence = task.getSentence
     var truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = BudgetFunctions.compoundBackwardWeak(content, memory)
     } else {
@@ -99,8 +99,8 @@ object StructuralRules {
       return
     }
     var index = -1
-    var t1: Term = _
-    var t2: Term = _
+    var t1: Term = null
+    var t2: Term = null
     for (i <- 0 until sub.size) {
       t1 = sub.componentAt(i)
       t2 = pre.componentAt(i)
@@ -114,7 +114,7 @@ object StructuralRules {
     }
     t1 = sub.componentAt(index)
     t2 = pre.componentAt(index)
-    var content: Term = _
+    var content: Term = null
     content = if (switchOrder(sub, index.toShort)) Statement.make(statement, t2, t1, memory) else Statement.make(statement, 
       t1, t2, memory)
     if (content == null) {
@@ -123,7 +123,7 @@ object StructuralRules {
     val task = memory.currentTask
     val sentence = task.getSentence
     val truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = BudgetFunctions.compoundBackward(content, memory)
     } else {
@@ -299,13 +299,13 @@ object StructuralRules {
     }
     val sub = statement.getSubject
     val pre = statement.getPredicate
-    var content: Term = _
+    var content: Term = null
     content = if (statement.isInstanceOf[Inheritance]) Similarity.make(sub, pre, memory) else if (((compound.isInstanceOf[SetExt]) && (side == 0)) || ((compound.isInstanceOf[SetInt]) && (side == 1))) Inheritance.make(pre, 
       sub, memory) else Inheritance.make(sub, pre, memory)
     val task = memory.currentTask
     val sentence = task.getSentence
     val truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     budget = if (sentence.isQuestion) BudgetFunctions.compoundBackward(content, memory) else BudgetFunctions.compoundForward(truth, 
       content, memory)
     memory.singlePremiseTask(content, truth, budget)
@@ -375,7 +375,7 @@ object StructuralRules {
       content = Statement.make(oldContent.asInstanceOf[Statement], oldContent.componentAt(0), newInh, 
         memory)
     } else {
-      var componentList: ArrayList[Term] = _
+      var componentList: ArrayList[Term] = null
       val condition = oldContent.componentAt(0)
       if (((oldContent.isInstanceOf[Implication]) || (oldContent.isInstanceOf[Equivalence])) && 
         (condition.isInstanceOf[Conjunction])) {
@@ -400,7 +400,7 @@ object StructuralRules {
     }
     val sentence = memory.currentTask.getSentence
     val truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     budget = if (sentence.isQuestion) BudgetFunctions.compoundBackward(content, memory) else BudgetFunctions.compoundForward(truth, 
       content, memory)
     memory.singlePremiseTask(content, truth, budget)
@@ -417,15 +417,15 @@ object StructuralRules {
    */
   private def transformSubjectPI(subject: CompoundTerm, predicate: Term, memory: Memory) {
     val truth = memory.currentTask.getSentence.getTruth
-    var budget: BudgetValue = _
-    var inheritance: Inheritance = _
-    var newSubj: Term = _
-    var newPred: Term = _
+    var budget: BudgetValue = null
+    var inheritance: Inheritance = null
+    var newSubj: Term = null
+    var newPred: Term = null
     if (subject.isInstanceOf[Product]) {
       val product = subject.asInstanceOf[Product]
       for (i <- 0 until product.size) {
         newSubj = product.componentAt(i)
-        newPred = ImageExt.make(product, predicate, i, memory)
+        newPred = ImageExt.make(product, predicate, i.asInstanceOf[Short], memory)
         inheritance = Inheritance.make(newSubj, newPred, memory)
         budget = if (truth == null) BudgetFunctions.compoundBackward(inheritance, memory) else BudgetFunctions.compoundForward(truth, 
           inheritance, memory)
@@ -439,7 +439,7 @@ object StructuralRules {
           newSubj = image.componentAt(relationIndex)
           newPred = Product.make(image, predicate, relationIndex, memory)
         } else {
-          newSubj = ImageInt.make(image.asInstanceOf[ImageInt], predicate, i, memory)
+          newSubj = ImageInt.make(image.asInstanceOf[ImageInt], predicate, i.asInstanceOf[Short], memory)
           newPred = image.componentAt(i)
         }
         inheritance = Inheritance.make(newSubj, newPred, memory)
@@ -461,14 +461,14 @@ object StructuralRules {
    */
   private def transformPredicatePI(subject: Term, predicate: CompoundTerm, memory: Memory) {
     val truth = memory.currentTask.getSentence.getTruth
-    var budget: BudgetValue = _
-    var inheritance: Inheritance = _
-    var newSubj: Term = _
-    var newPred: Term = _
+    var budget: BudgetValue = null
+    var inheritance: Inheritance = null
+    var newSubj: Term = null
+    var newPred: Term = null
     if (predicate.isInstanceOf[Product]) {
       val product = predicate.asInstanceOf[Product]
       for (i <- 0 until product.size) {
-        newSubj = ImageInt.make(product, subject, i, memory)
+        newSubj = ImageInt.make(product, subject, i.asInstanceOf[Short], memory)
         newPred = product.componentAt(i)
         inheritance = Inheritance.make(newSubj, newPred, memory)
         budget = if (truth == null) BudgetFunctions.compoundBackward(inheritance, memory) else BudgetFunctions.compoundForward(truth, 
@@ -484,7 +484,7 @@ object StructuralRules {
           newPred = image.componentAt(relationIndex)
         } else {
           newSubj = image.componentAt(i)
-          newPred = ImageExt.make(image.asInstanceOf[ImageExt], subject, i, memory)
+          newPred = ImageExt.make(image.asInstanceOf[ImageExt], subject, i.asInstanceOf[Short], memory)
         }
         inheritance = Inheritance.make(newSubj, newPred, memory)
         budget = if (truth == null) BudgetFunctions.compoundBackward(inheritance, memory) else BudgetFunctions.compoundForward(truth, 
@@ -516,7 +516,7 @@ object StructuralRules {
     }
     val sentence = task.getSentence
     var truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = BudgetFunctions.compoundBackward(content, memory)
     } else {
@@ -543,7 +543,7 @@ object StructuralRules {
     if (sentence.isJudgment) {
       truth = TruthFunctions.negation(truth)
     }
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     budget = if (sentence.isQuestion) BudgetFunctions.compoundBackward(content, memory) else BudgetFunctions.compoundForward(truth, 
       content, memory)
     memory.singlePremiseTask(content, truth, budget)
@@ -562,7 +562,7 @@ object StructuralRules {
     val content = Statement.make(statement, Negation.make(pred, memory), Negation.make(subj, memory), 
       memory)
     var truth = sentence.getTruth
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = if (content.isInstanceOf[Implication]) BudgetFunctions.compoundBackwardWeak(content, memory) else BudgetFunctions.compoundBackward(content, 
         memory)

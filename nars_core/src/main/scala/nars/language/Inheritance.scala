@@ -6,6 +6,8 @@ import nars.storage.Memory
 import Inheritance._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
+import Statement._
 
 object Inheritance {
 
@@ -49,7 +51,7 @@ class Inheritance private (arg: ArrayList[Term]) extends Statement(arg) {
 //    super(n, cs, con, i)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = i
   }
 
@@ -57,8 +59,8 @@ class Inheritance private (arg: ArrayList[Term]) extends Statement(arg) {
    * Clone an object
    * @return A new object, to be casted into a SetExt
    */
-  def clone(): AnyRef = {
-    new Inheritance(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Inheritance(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

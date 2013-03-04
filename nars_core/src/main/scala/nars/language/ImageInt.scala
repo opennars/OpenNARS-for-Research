@@ -7,6 +7,7 @@ import ImageInt._
 import scala.reflect.{BeanProperty, BooleanBeanProperty}
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object ImageInt {
 
@@ -122,15 +123,15 @@ class ImageInt private (n: String, arg: ArrayList[Term], @BeanProperty var relat
 //    super(n, cs, con, complexity)
     this(n, cs, index)
     this.complexity = complexity
-    this.isConstant = con
+    this.isConstant_ = con
   }
 
   /**
    * Clone an object
    * @return A new object, to be casted into an ImageInt
    */
-  def clone(): AnyRef = {
-    new ImageInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity, relationIndex)
+  override def clone(): AnyRef = {
+    new ImageInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity, relationIndex)
   }
 
   /**

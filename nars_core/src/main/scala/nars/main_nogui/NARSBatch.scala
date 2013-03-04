@@ -17,7 +17,7 @@ object NARSBatch {
    * Create an instance of the class, then run the {@link #init(String[])} and {@link #run()} methods.
    * @param args optional argument used : one input file
    */
-  def main(args: String) {
+  def main(args: Array[String]) {
     val nars = new NARSBatch()
     nars.runInference(args)
     if (nars.dumpLastState) println("==== Dump Last State ====\n" + nars.reasoner.toString)
@@ -49,7 +49,7 @@ class NARSBatch {
   /**
    non-static equivalent to {@link #main(String[])}
    */
-  def runInference(args: String) {
+  def runInference(args: Array[String]) {
     init(args)
     run()
   }

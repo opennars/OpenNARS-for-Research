@@ -152,8 +152,8 @@ class InputWindow(var reasoner: Reasoner, title: String) extends NarsFrame(title
       return false
     }
     var text = inputText.getText.trim()
-    var line: String = _
-    var endOfLine: Int = _
+    var line: String = ""
+    var endOfLine: Int = 0
     while ((text.length > 0) && (timer == 0)) {
       endOfLine = text.indexOf('\n')
       if (endOfLine < 0) {

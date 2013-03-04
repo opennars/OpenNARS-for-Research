@@ -6,6 +6,7 @@ import nars.storage.Memory
 import Conjunction._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object Conjunction {
 
@@ -47,7 +48,7 @@ object Conjunction {
    * @return A compound generated or a term it reduced to
    */
   def make(term1: Term, term2: Term, memory: Memory): Term = {
-    var set: TreeSet[Term] = _
+    var set: TreeSet[Term] = null
     if (term1.isInstanceOf[Conjunction]) {
       set = new TreeSet[Term](term1.asInstanceOf[CompoundTerm].cloneComponents())
       if (term2.isInstanceOf[Conjunction]) {
@@ -87,15 +88,15 @@ class Conjunction protected (arg: ArrayList[Term]) extends CompoundTerm(arg) {
     this(components)
     setName(name)
     this.complexity = complexity
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
   }
 
   /**
    * Clone an object
    * @return A new object
    */
-  def clone(): AnyRef = {
-    new Conjunction(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Conjunction(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

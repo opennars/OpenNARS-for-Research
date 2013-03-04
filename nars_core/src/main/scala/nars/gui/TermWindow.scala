@@ -53,7 +53,7 @@ class TermWindow(var memory: Memory) extends NarsFrame("Term Window") with Actio
 
   c.weighty = 0.0
 
-  termLabel.setBackground(SINGLE_WINDOW_COLOR)
+  termLabel.setBackground(NarsFrame.SINGLE_WINDOW_COLOR)
 
   gridbag.setConstraints(termLabel, c)
 

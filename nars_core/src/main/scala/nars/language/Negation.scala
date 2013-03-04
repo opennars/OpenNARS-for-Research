@@ -6,6 +6,7 @@ import nars.storage.Memory
 import Negation._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object Negation {
 
@@ -59,7 +60,7 @@ class Negation private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
 //    super(n, cs, con, i)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = i
   }
 
@@ -67,8 +68,8 @@ class Negation private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * Clone an object
    * @return A new object
    */
-  def clone(): AnyRef = {
-    new Negation(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Negation(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

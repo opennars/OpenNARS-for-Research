@@ -5,6 +5,7 @@ import java.awt.event._
 import nars.io._
 //remove if not needed
 import scala.collection.JavaConversions._
+import NarsFrame._
 
 /**
  * Window displaying inference log

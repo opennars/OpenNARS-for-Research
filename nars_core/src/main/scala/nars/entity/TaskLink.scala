@@ -18,12 +18,12 @@ class TaskLink(@BeanProperty var targetTask: Task, template: TermLink, v: Budget
   /**
    Remember the TermLinks that has been used recently with this TaskLink
    */
-  private var recordedLinks: String = new String(Parameters.TERM_LINK_RECORD_LENGTH)
+  private var recordedLinks = new Array[String](Parameters.TERM_LINK_RECORD_LENGTH)
 
   /**
    Remember the time when each TermLink is used with this TaskLink
    */
-  private var recordingTime: Long = new Long(Parameters.TERM_LINK_RECORD_LENGTH)
+  private var recordingTime = new Array[Long](Parameters.TERM_LINK_RECORD_LENGTH)
 
   /**
    The number of TermLinks remembered
@@ -60,8 +60,7 @@ class TaskLink(@BeanProperty var targetTask: Task, template: TermLink, v: Budget
     }
     val linkKey = termLink.getKey
     var next = 0
-    var i: Int = _
-    i = 0
+    var i: Int = 0
     while (i < counter) {
       next = i % Parameters.TERM_LINK_RECORD_LENGTH
       if (linkKey == recordedLinks(next)) {

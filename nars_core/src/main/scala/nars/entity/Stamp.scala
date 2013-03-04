@@ -52,18 +52,13 @@ object Stamp {
  */
 class Stamp(@BeanProperty var creationTime: Long) extends Cloneable {
 
-  /**
-   serial numbers
-   */
+    /** evidentialBase baseLength */
+  private var baseLength: Int = 1
+  
+  /** serial numbers */
   private var evidentialBase: Array[Long] = new Array[Long](baseLength)
 
-  /**
-   evidentialBase baseLength
-   */
-  private var baseLength: Int = 1
-
   currentSerial += 1
-
   evidentialBase(0) = currentSerial
 
   /**
@@ -71,7 +66,7 @@ class Stamp(@BeanProperty var creationTime: Long) extends Cloneable {
    * @param old The stamp to be cloned
    */
   private def this(old: Stamp) {
-    this()
+    this(old.getCreationTime)
     baseLength = old.length
     evidentialBase = old.getBase
     creationTime = old.getCreationTime
@@ -85,10 +80,9 @@ class Stamp(@BeanProperty var creationTime: Long) extends Cloneable {
    * @param time The current time
    */
   def this(old: Stamp, time: Long) {
-    this()
+    this(time)
     baseLength = old.length
     evidentialBase = old.getBase
-    creationTime = time
   }
 
   /**
@@ -98,11 +92,10 @@ class Stamp(@BeanProperty var creationTime: Long) extends Cloneable {
    * @param second The second Stamp
    */
   private def this(first: Stamp, second: Stamp, time: Long) {
-    this()
-    var i1: Int = _
-    var i2: Int = _
-    var j: Int = _
-    i1 = i2 = j = 0
+    this(time)
+    var i1: Int = 0
+    var i2: Int = 0
+    var j: Int = 0
     baseLength = Math.min(first.length + second.length, Parameters.MAXIMUM_STAMP_LENGTH)
     evidentialBase = new Array[Long](baseLength)
     while (i2 < second.length && j < baseLength) {
@@ -187,7 +180,7 @@ class Stamp(@BeanProperty var creationTime: Long) extends Cloneable {
     val buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + creationTime)
     buffer.append(" " + Symbols.STAMP_STARTER + " ")
     for (i <- 0 until baseLength) {
-      buffer.append(Long toString evidentialBase(i))
+      buffer.append(java.lang.Long toString evidentialBase(i))
       if (i < (baseLength - 1)) {
         buffer.append(Symbols.STAMP_SEPARATOR)
       } else {

@@ -6,6 +6,7 @@ import nars.storage.Memory
 import IntersectionInt._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object IntersectionInt {
 
@@ -17,7 +18,7 @@ object IntersectionInt {
    * @return A compound generated or a term it reduced to
    */
   def make(term1: Term, term2: Term, memory: Memory): Term = {
-    var set: TreeSet[Term] = _
+    var set: TreeSet[Term] = null
     if ((term1.isInstanceOf[SetExt]) && (term2.isInstanceOf[SetExt])) {
       set = new TreeSet[Term](term1.asInstanceOf[CompoundTerm].cloneComponents())
       set.addAll(term2.asInstanceOf[CompoundTerm].cloneComponents())
@@ -93,7 +94,7 @@ class IntersectionInt private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
 //    super(n, cs, con, i)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = i
   }
 
@@ -101,8 +102,8 @@ class IntersectionInt private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * Clone an object
    * @return A new object, to be casted into a Conjunction
    */
-  def clone(): AnyRef = {
-    new IntersectionInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new IntersectionInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

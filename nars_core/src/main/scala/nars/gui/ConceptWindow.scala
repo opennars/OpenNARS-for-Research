@@ -60,7 +60,7 @@ class ConceptWindow(var concept: Concept) extends NarsFrame(concept.getKey) with
 
   c.weighty = 1.0
 
-  text.setBackground(DISPLAY_BACKGROUND_COLOR)
+  text.setBackground(NarsFrame.DISPLAY_BACKGROUND_COLOR)
 
   text.setEditable(false)
 

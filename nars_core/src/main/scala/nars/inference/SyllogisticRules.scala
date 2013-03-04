@@ -29,8 +29,8 @@ object SyllogisticRules {
     val value2 = belief.getTruth
     var truth1: TruthValue = null
     var truth2: TruthValue = null
-    var budget1: BudgetValue = _
-    var budget2: BudgetValue = _
+    var budget1: BudgetValue = null
+    var budget2: BudgetValue = null
     if (sentence.isQuestion) {
       budget1 = BudgetFunctions.backwardWeak(value2, memory)
       budget2 = BudgetFunctions.backwardWeak(value2, memory)
@@ -69,9 +69,9 @@ object SyllogisticRules {
     var truth1: TruthValue = null
     var truth2: TruthValue = null
     var truth3: TruthValue = null
-    var budget1: BudgetValue = _
-    var budget2: BudgetValue = _
-    var budget3: BudgetValue = _
+    var budget1: BudgetValue = null
+    var budget2: BudgetValue = null
+    var budget3: BudgetValue = null
     val value1 = taskSentence.getTruth
     val value2 = belief.getTruth
     if (taskSentence.isQuestion) {
@@ -114,7 +114,7 @@ object SyllogisticRules {
     }
     val asymSt = asym.getContent.asInstanceOf[Statement]
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     val sentence = memory.currentTask.getSentence
     val taskTerm = sentence.getContent.asInstanceOf[CompoundTerm]
     if (sentence.isQuestion) {
@@ -148,7 +148,7 @@ object SyllogisticRules {
     }
     val st1 = belief.getContent.asInstanceOf[Statement]
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = BudgetFunctions.backward(belief.getTruth, memory)
     } else {
@@ -179,7 +179,7 @@ object SyllogisticRules {
     }
     val subject = statement.getSubject
     val predicate = statement.getPredicate
-    var content: Term = _
+    var content: Term = null
     if (side == 0) {
       content = predicate
     } else if (side == 1) {
@@ -196,7 +196,7 @@ object SyllogisticRules {
     val truth1 = mainSentence.getTruth
     val truth2 = subSentence.getTruth
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = new BudgetValue() // jmv _
     if (taskSentence.isQuestion) {
       budget = if (statement.isInstanceOf[Equivalence]) BudgetFunctions.backward(beliefTruth, memory) else if (side == 0) BudgetFunctions.backwardWeak(beliefTruth, 
         memory) else BudgetFunctions.backward(beliefTruth, memory)
@@ -228,7 +228,7 @@ object SyllogisticRules {
     val belief = memory.currentBelief
     val deduction = (side != 0)
     val conditionalTask = Variable.hasSubstitute(Symbols.VAR_INDEPENDENT, premise2, belief.getContent)
-    var commonComponent: Term = _
+    var commonComponent: Term = null
     var newComponent: Term = null
     if (side == 0) {
       commonComponent = premise2.asInstanceOf[Statement].getSubject
@@ -241,8 +241,9 @@ object SyllogisticRules {
     }
     val oldCondition = premise1.getSubject.asInstanceOf[Conjunction]
     val index2 = oldCondition.getComponents.indexOf(commonComponent)
+    var newIndex = index
     if (index2 >= 0) {
-      index = index2.toShort
+      newIndex = index2.toShort
     } else {
       var `match` = Variable.unify(Symbols.VAR_INDEPENDENT, oldCondition.componentAt(index), commonComponent, 
         premise1, premise2)
@@ -255,10 +256,10 @@ object SyllogisticRules {
         return
       }
     }
-    var newCondition: Term = _
+    var newCondition: Term = null
     newCondition = if (oldCondition == commonComponent) null else CompoundTerm.setComponent(oldCondition, 
-      index, newComponent, memory)
-    var content: Term = _
+      newIndex, newComponent, memory)
+    var content: Term = null
     content = if (newCondition != null) Statement.make(premise1, newCondition, premise1.getPredicate, 
       memory) else premise1.getPredicate
     if (content == null) {
@@ -267,7 +268,7 @@ object SyllogisticRules {
     val truth1 = taskSentence.getTruth
     val truth2 = belief.getTruth
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (taskSentence.isQuestion) {
       budget = BudgetFunctions.backwardWeak(truth2, memory)
     } else {
@@ -295,7 +296,7 @@ object SyllogisticRules {
     val taskSentence = task.getSentence
     val belief = memory.currentBelief
     val conditionalTask = Variable.hasSubstitute(Symbols.VAR_INDEPENDENT, premise2, belief.getContent)
-    var commonComponent: Term = _
+    var commonComponent: Term = null
     var newComponent: Term = null
     if (side == 0) {
       commonComponent = premise2.asInstanceOf[Statement].getSubject
@@ -317,10 +318,10 @@ object SyllogisticRules {
     if (!`match`) {
       return
     }
-    var newCondition: Term = _
+    var newCondition: Term = null
     newCondition = if (oldCondition == commonComponent) null else CompoundTerm.setComponent(oldCondition, 
       index, newComponent, memory)
-    var content: Term = _
+    var content: Term = null
     content = if (newCondition != null) Statement.make(premise1, newCondition, premise1.getPredicate, 
       memory) else premise1.getPredicate
     if (content == null) {
@@ -329,7 +330,7 @@ object SyllogisticRules {
     val truth1 = taskSentence.getTruth
     val truth2 = belief.getTruth
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (taskSentence.isQuestion) {
       budget = BudgetFunctions.backwardWeak(truth2, memory)
     } else {
@@ -376,9 +377,9 @@ object SyllogisticRules {
     val belief = memory.currentBelief
     val value1 = sentence.getTruth
     val value2 = belief.getTruth
-    var content: Term = _
+    var content: Term = null
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (term1 != null) {
       content = if (term2 != null) Statement.make(st2, term2, term1, memory) else term1
       if (sentence.isQuestion) {
@@ -420,7 +421,7 @@ object SyllogisticRules {
     val v1 = sentence.getTruth
     val v2 = belief.getTruth
     var truth: TruthValue = null
-    var budget: BudgetValue = _
+    var budget: BudgetValue = null
     if (sentence.isQuestion) {
       budget = (if (compoundTask) BudgetFunctions.backward(v2, memory) else BudgetFunctions.backwardWeak(v2, 
         memory))

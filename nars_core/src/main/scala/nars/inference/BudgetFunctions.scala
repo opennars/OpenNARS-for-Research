@@ -5,6 +5,7 @@ import nars.language._
 import nars.storage.Memory
 //remove if not needed
 import scala.collection.JavaConversions._
+import UtilityFunctions._
 
 object BudgetFunctions {
 
@@ -37,7 +38,7 @@ object BudgetFunctions {
    * the belief and de-prioritize the problem
    * @param problem The problem (question or goal) to be solved
    * @param solution The belief as solution
-   * @param task The task to be immediatedly processed, or null for continued process
+   * @param task The task to be immediately processed, or null for continued process
    * @return The budget for the new task which is the belief activated, if necessary
    */
   def solutionEval(problem: Sentence, 
@@ -46,17 +47,19 @@ object BudgetFunctions {
       memory: Memory): BudgetValue = {
     var budget: BudgetValue = null
     var feedbackToLinks = false
+    var task2 = task
+
     if (task == null) {
-      task = memory.currentTask
+      task2 = memory.currentTask
       feedbackToLinks = true
     }
     val judgmentTask = task.getSentence.isJudgment
     val quality = LocalRules.solutionQuality(problem, solution)
     if (judgmentTask) {
-      task.incPriority(quality)
+      task2.incPriority(quality)
     } else {
-      task.setPriority(Math.min(1 - quality, task.getPriority))
-      budget = new BudgetValue(quality, task.getDurability, truthToQuality(solution.getTruth))
+      task2.setPriority(Math.min(1 - quality, task2.getPriority))
+      budget = new BudgetValue(quality, task2.getDurability, truthToQuality(solution.getTruth))
     }
     if (feedbackToLinks) {
       val tLink = memory.currentTaskLink
@@ -158,7 +161,7 @@ object BudgetFunctions {
     val p = budget.getPriority - quality
     if (p > 0) {
       quality += p * 
-        Math.pow(budget.getDurability, 1.0 / (forgetRate * p))
+        Math.pow(budget.getDurability, 1.0 / (forgetRate * p)).asInstanceOf[Float]
     }
     budget.setPriority(quality.toFloat)
   }
@@ -242,7 +245,7 @@ object BudgetFunctions {
    * @return Budget of the conclusion task
    */
   private def budgetInference(qual: Float, complexity: Int, memory: Memory): BudgetValue = {
-    var t = memory.currentTaskLink
+    var t:Item = memory.currentTaskLink
     if (t == null) t = memory.currentTask
     var priority = t.getPriority
     var durability = t.getDurability

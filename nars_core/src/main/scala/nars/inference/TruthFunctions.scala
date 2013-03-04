@@ -3,6 +3,7 @@ package nars.inference
 import nars.entity._
 //remove if not needed
 import scala.collection.JavaConversions._
+import UtilityFunctions._
 
 object TruthFunctions {
 

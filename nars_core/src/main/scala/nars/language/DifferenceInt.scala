@@ -6,6 +6,7 @@ import nars.storage.Memory
 import DifferenceInt._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object DifferenceInt {
 
@@ -68,15 +69,15 @@ class DifferenceInt private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
     this(components)
     setName(name)
     this.complexity = complexity
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
   }
 
   /**
    * Clone an object
    * @return A new object, to be casted into a DifferenceInt
    */
-  def clone(): AnyRef = {
-    new DifferenceInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new DifferenceInt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

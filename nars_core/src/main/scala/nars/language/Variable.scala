@@ -88,7 +88,7 @@ object Variable {
       term2: Term, 
       map1: HashMap[Term, Term], 
       map2: HashMap[Term, Term]): Boolean = {
-    var t: Term = _
+    var t: Term = null
     if ((term1.isInstanceOf[Variable]) && term1.asInstanceOf[Variable].getType == `type`) {
       t = map1.get(term1.asInstanceOf[Variable])
       if (t != null) {

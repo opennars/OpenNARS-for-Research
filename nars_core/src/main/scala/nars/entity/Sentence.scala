@@ -37,12 +37,7 @@ class Sentence(@BeanProperty var content: Term,
       truth: TruthValue, 
       stamp: Stamp, 
       revisible: Boolean) {
-    this()
-    this.content = content
-    this.content.renameVariables()
-    this.punctuation = punctuation
-    this.truth = truth
-    this.stamp = stamp
+    this( content, punctuation, truth, stamp )
     this.revisible = revisible
   }
 
@@ -85,7 +80,7 @@ class Sentence(@BeanProperty var content: Term,
    * @return Whether the two are equivalent
    */
   def equivalentTo(that: Sentence): Boolean = {
-    // assert content == that.getContent && punctuation == that.getPunctuation
+    assert ( content == that.getContent && punctuation == that.getPunctuation )
     (truth == that.getTruth && stamp == that.getStamp)
   }
 

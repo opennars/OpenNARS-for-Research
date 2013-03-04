@@ -38,9 +38,7 @@ class TruthValue(f: Float, c: Float) extends Cloneable {
    * @param v The truth value to be cloned
    */
   def this(v: TruthValue) {
-    this()
-    frequency = new ShortFloat(v.getFrequency)
-    confidence = new ShortFloat(v.getConfidence)
+    this( (v.getFrequency), v.getConfidence )
   }
 
   /**

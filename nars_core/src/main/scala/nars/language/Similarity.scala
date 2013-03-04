@@ -6,14 +6,16 @@ import nars.storage.Memory
 import Similarity._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
+import Statement._
 
 object Similarity {
 
   /**
    * Try to make a new compound from two components. Called by the inference rules.
-   * @param subject The first compoment
-   * @param predicate The second compoment
-   * @param memory Reference to the memeory
+   * @param subject The first component
+   * @param predicate The second component
+   * @param memory Reference to the memory
    * @return A compound generated or null
    */
   def make(subject: Term, predicate: Term, memory: Memory): Similarity = {
@@ -52,7 +54,7 @@ class Similarity private (arg: ArrayList[Term]) extends Statement(arg) {
 //    super(n, cs, con, i)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = i
   }
 
@@ -60,8 +62,8 @@ class Similarity private (arg: ArrayList[Term]) extends Statement(arg) {
    * Clone an object
    * @return A new object, to be casted into a Similarity
    */
-  def clone(): AnyRef = {
-    new Similarity(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Similarity(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

@@ -150,7 +150,7 @@ object LocalRules {
     val s1 = judgment1.getContent.asInstanceOf[Statement]
     val t1 = s1.getSubject
     val t2 = s1.getPredicate
-    var content: Term = _
+    var content: Term = null
     content = if (s1.isInstanceOf[Inheritance]) Similarity.make(t1, t2, memory) else Equivalence.make(t1, 
       t2, memory)
     val value1 = judgment1.getTruth
@@ -217,7 +217,7 @@ object LocalRules {
     val predT = content.getPredicate
     val subjB = beliefContent.getSubject
     val predB = beliefContent.getPredicate
-    var otherTerm: Term = _
+    var otherTerm: Term = null
     if (Variable.containVarQuery(subjT.getName)) {
       otherTerm = if ((predT == subjB)) predB else subjB
       content = Statement.make(content, otherTerm, predT, memory)

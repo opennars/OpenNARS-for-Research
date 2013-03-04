@@ -1,7 +1,16 @@
 package nars.entity
 
-//remove if not needed
-import scala.collection.JavaConversions._
+object ShortFloat {
+  def computeValue(v: Float): Short = {
+    if ((v < 0) || (v > 1)) {
+      throw new ArithmeticException("ShortFloat: Invalid value: " + v)
+    } else {
+      (v * 10000.0 + 0.5).toShort
+    }
+  }
+}
+
+import ShortFloat._
 
 /**
  * A float value in [0, 1], with 4 digits accuracy.
@@ -13,8 +22,7 @@ class ShortFloat(var value: Short) extends Cloneable {
    * @param v The initial value in float
    */
   def this(v: Float) {
-    this()
-    setValue(v)
+    this( computeValue(v) )
   }
 
   /**
@@ -33,12 +41,8 @@ class ShortFloat(var value: Short) extends Cloneable {
    * Set new value, rounded, with validity checking
    * @param v The new value
    */
-  def setValue(v: Float) {
-    if ((v < 0) || (v > 1)) {
-      throw new ArithmeticException("Invalid value: " + v)
-    } else {
-      value = (v * 10000.0 + 0.5).toShort
-    }
+  def setValue(v: Float):Unit = {
+    value = computeValue(v)
   }
 
   /**
@@ -58,7 +62,7 @@ class ShortFloat(var value: Short) extends Cloneable {
   override def hashCode(): Int = this.value + 17
 
   /**
-   * To create an identifical copy of the ShortFloat
+   * To create an identical copy of the ShortFloat
    * @return A cloned ShortFloat
    */
   override def clone(): AnyRef = new ShortFloat(value)
@@ -84,9 +88,9 @@ class ShortFloat(var value: Short) extends Cloneable {
    * @return The String representation, with 2 digits accuracy
    */
   def toStringBrief(): String = {
-    value += 50
+    value = ( value+50 ).asInstanceOf[Short]
     val s = toString
-    value -= 50
+    value = ( value-50 ).asInstanceOf[Short]
     if (s.length > 4) {
       s.substring(0, 4)
     } else {

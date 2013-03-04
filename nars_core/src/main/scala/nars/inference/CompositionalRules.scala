@@ -140,8 +140,8 @@ object CompositionalRules {
     val sentence = task.getSentence
     val belief = memory.currentBelief
     val oldContent = task.getContent.asInstanceOf[Statement]
-    var v1: TruthValue = _
-    var v2: TruthValue = _
+    var v1: TruthValue = null
+    var v2: TruthValue = null
     if (compoundTask) {
       v1 = sentence.getTruth
       v2 = belief.getTruth
@@ -150,7 +150,7 @@ object CompositionalRules {
       v2 = sentence.getTruth
     }
     var truth: TruthValue = null
-    var content: Term = _
+    var content: Term = null
     if (index == 0) {
       content = Statement.make(oldContent, term1, term2, memory)
       if (content == null) {
@@ -230,8 +230,8 @@ object CompositionalRules {
     if (content == null) {
       return
     }
-    var v1: TruthValue = _
-    var v2: TruthValue = _
+    var v1: TruthValue = null
+    var v2: TruthValue = null
     if (compoundTask) {
       v1 = sentence.getTruth
       v2 = belief.getTruth
@@ -270,11 +270,11 @@ object CompositionalRules {
     val truthB = memory.currentBelief.getTruth
     val varInd = new Variable("$varInd1")
     val varInd2 = new Variable("$varInd2")
-    var term11: Term = _
-    var term12: Term = _
-    var term21: Term = _
-    var term22: Term = _
-    var commonTerm: Term = _
+    var term11: Term = null
+    var term12: Term = null
+    var term21: Term = null
+    var term22: Term = null
+    var commonTerm: Term = null
     val subs = new HashMap[Term, Term]()
     if (index == 0) {
       term11 = varInd
@@ -321,7 +321,7 @@ object CompositionalRules {
     }
     var state1 = Inheritance.make(term11, term12, memory)
     var state2 = Inheritance.make(term21, term22, memory)
-    var content = Implication.make(state1, state2, memory)
+    var content:Term = Implication.make(state1, state2, memory)
     var truth = TruthFunctions.induction(truthT, truthB)
     var budget = BudgetFunctions.compoundForward(truth, content, memory)
     memory.doublePremiseTask(content, truth, budget)
@@ -360,8 +360,8 @@ object CompositionalRules {
     val subject2 = premise2.getSubject
     val predicate1 = premise1.getPredicate
     val predicate2 = premise2.getPredicate
-    var commonTerm1: Term = _
-    var commonTerm2: Term = _
+    var commonTerm1: Term = null
+    var commonTerm2: Term = null
     if (subject1 == subject2) {
       commonTerm1 = subject1
       commonTerm2 = secondCommonTerm(predicate1, predicate2, 0)

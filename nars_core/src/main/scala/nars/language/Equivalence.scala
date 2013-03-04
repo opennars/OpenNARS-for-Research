@@ -6,6 +6,8 @@ import nars.storage.Memory
 import Equivalence._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
+import Statement._
 
 object Equivalence {
 
@@ -16,7 +18,9 @@ object Equivalence {
    * @param memory Reference to the memory
    * @return A compound generated or null
    */
-  def make(subject: Term, predicate: Term, memory: Memory): Equivalence = {
+  def make(subject0: Term, predicate0: Term, memory: Memory): Equivalence = {
+    var subject = subject0
+    var predicate = predicate0
     if ((subject.isInstanceOf[Implication]) || (subject.isInstanceOf[Equivalence])) {
       return null
     }
@@ -60,7 +64,7 @@ class Equivalence protected (components: ArrayList[Term]) extends Statement(comp
     this(components)
     setName(name)
     this.complexity = complexity
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
 //    super(n, components, constant, complexity)
   }
 
@@ -68,8 +72,8 @@ class Equivalence protected (components: ArrayList[Term]) extends Statement(comp
    * Clone an object
    * @return A new object
    */
-  def clone(): AnyRef = {
-    new Equivalence(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Equivalence(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

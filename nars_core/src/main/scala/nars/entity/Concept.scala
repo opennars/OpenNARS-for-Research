@@ -66,8 +66,8 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
 
 //  super(tm.getName)
 
-  if (tm.isInstanceOf[CompoundTerm]) {
-    termLinkTemplates = tm.asInstanceOf[CompoundTerm].prepareComponentLinks()
+  if (term.isInstanceOf[CompoundTerm]) {
+    termLinkTemplates = term.asInstanceOf[CompoundTerm].prepareComponentLinks()
   }
 
   /**
@@ -172,8 +172,8 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
       if (termLinkTemplates.size > 0) {
         val subBudget = BudgetFunctions.distributeAmongLinks(taskBudget, termLinkTemplates.size)
         if (subBudget.aboveThreshold()) {
-          var componentTerm: Term = _
-          var componentConcept: Concept = _
+          var componentTerm: Term = null
+          var componentConcept: Concept = null
           for (termLink <- termLinkTemplates) {
             taskLink = new TaskLink(task, termLink, subBudget)
             componentTerm = termLink.getTarget
@@ -197,10 +197,9 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
    */
   private def addToTable(newSentence: Sentence, table: ArrayList[Sentence], capacity: Int) {
     val rank1 = BudgetFunctions.rankBelief(newSentence)
-    var judgment2: Sentence = _
-    var rank2: Float = _
-    var i: Int = _
-    i = 0
+    var judgment2: Sentence = null
+    var rank2: Float = 0
+    var i: Int = 0
     while (i < table.size) {
       judgment2 = table.get(i).asInstanceOf[Sentence]
       rank2 = BudgetFunctions.rankBelief(judgment2)
@@ -232,8 +231,8 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
     if (list == null) {
       return null
     }
-    var currentBest = 0
-    var beliefQuality: Float = _
+    var currentBest: Float = 0
+    var beliefQuality: Float = 0
     var candidate: Sentence = null
     for (judg <- list) {
       beliefQuality = LocalRules.solutionQuality(query, judg)
@@ -264,10 +263,10 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
    * @param taskBudget The BudgetValue of the task
    */
   def buildTermLinks(taskBudget: BudgetValue) {
-    var t: Term = _
-    var concept: Concept = _
-    var termLink1: TermLink = _
-    var termLink2: TermLink = _
+    var t: Term = null
+    var concept: Concept = null
+    var termLink1: TermLink = null
+    var termLink2: TermLink = null
     if (termLinkTemplates.size > 0) {
       val subBudget = BudgetFunctions.distributeAmongLinks(taskBudget, termLinkTemplates.size)
       if (subBudget.aboveThreshold()) {
@@ -313,7 +312,7 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
   /**
    called from {@link NARSBatch}
    */
-  def toStringLong(): String = {
+  override def toStringLong(): String = {
     var res = toStringBrief() + " " + key + toStringIfNotNull(termLinks, "termLinks") + 
       toStringIfNotNull(taskLinks, "taskLinks")
     res += toStringIfNotNull(null, "questions")
@@ -348,7 +347,7 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
    */
   def getBelief(task: Task): Sentence = {
     val taskSentence = task.getSentence
-    var belief: Sentence = _
+    var belief: Sentence = null
     for (i <- 0 until beliefs.size) {
       belief = beliefs.get(i)
       memory.getRecorder.append(" * Selected Belief: " + belief + "\n")

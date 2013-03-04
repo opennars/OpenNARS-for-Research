@@ -107,7 +107,8 @@ object CompoundTerm {
    * @param t2 the second component
    * @return the component list
    */
-  protected def argumentsToList(t1: Term, t2: Term): ArrayList[Term] = {
+//  protected jmv
+  def argumentsToList(t1: Term, t2: Term): ArrayList[Term] = {
     val list = new ArrayList[Term](2)
     list.add(t1)
     list.add(t2)
@@ -120,7 +121,8 @@ object CompoundTerm {
    * @param arg the list of components
    * @return the oldName of the term
    */
-  protected def makeCompoundName(op: String, arg: ArrayList[Term]): String = {
+//  protected jmv
+  def makeCompoundName(op: String, arg: ArrayList[Term]): String = {
     val name = new StringBuffer()
     name.append(Symbols.COMPOUND_TERM_OPENER)
     name.append(op)
@@ -142,7 +144,8 @@ object CompoundTerm {
    * @param arg the list of components
    * @return the oldName of the term
    */
-  protected def makeSetName(opener: Char, arg: ArrayList[Term], closer: Char): String = {
+//  protected jmv 
+  def makeSetName(opener: Char, arg: ArrayList[Term], closer: Char): String = {
     val name = new StringBuffer()
     name.append(opener)
     name.append(arg.get(0).getName)
@@ -161,7 +164,8 @@ object CompoundTerm {
    * @param relationIndex the location of the place holder
    * @return the oldName of the term
    */
-  protected def makeImageName(op: String, arg: ArrayList[Term], relationIndex: Int): String = {
+  // protected jmv
+  def makeImageName(op: String, arg: ArrayList[Term], relationIndex: Int): String = {
     val name = new StringBuffer()
     name.append(Symbols.COMPOUND_TERM_OPENER)
     name.append(op)
@@ -199,16 +203,16 @@ object CompoundTerm {
    * Try to add a component into a compound
    * @param t1 The compound
    * @param t2 The component
-   * @param memory Reference to the memeory
+   * @param memory Reference to the memory
    * @return The new compound
    */
   def addComponents(t1: CompoundTerm, t2: Term, memory: Memory): Term = {
     if (t2 == null) {
       return t1
     }
-    var success: Boolean = _
     val list = t1.cloneComponents()
-    success = if (t1.getClass == t2.getClass) list.addAll(t2.asInstanceOf[CompoundTerm].getComponents) else list.add(t2)
+    var success =
+    	if (t1.getClass == t2.getClass) list.addAll(t2.asInstanceOf[CompoundTerm].getComponents) else list.add(t2)
     (if (success) make(t1, list, memory) else null)
   }
 
@@ -216,13 +220,13 @@ object CompoundTerm {
    * Try to remove a component from a compound
    * @param t1 The compound
    * @param t2 The component
-   * @param memory Reference to the memeory
+   * @param memory Reference to the memory 
    * @return The new compound
    */
   def reduceComponents(t1: CompoundTerm, t2: Term, memory: Memory): Term = {
-    var success: Boolean = _
     val list = t1.cloneComponents()
-    success = if (t1.getClass == t2.getClass) list.removeAll(t2.asInstanceOf[CompoundTerm].getComponents) else list.remove(t2)
+    var success =
+    	if (t1.getClass == t2.getClass) list.removeAll(t2.asInstanceOf[CompoundTerm].getComponents) else list.remove(t2)
     (if (success) make(t1, list, memory) else null)
   }
 
@@ -231,7 +235,7 @@ object CompoundTerm {
    * @param compound The compound
    * @param index The location of replacement
    * @param t The new component
-   * @param memory Reference to the memeory
+   * @param memory Reference to the memory 
    * @return The new compound
    */
   def setComponent(compound: CompoundTerm, 
@@ -276,7 +280,7 @@ abstract class CompoundTerm protected () extends Term {
   /**
    Whether the term names a concept
    */
-  protected var isConstant: Boolean = true
+  protected var isConstant_ : Boolean = true
 
   /**
    * Abstract method to get the operator of the compound
@@ -305,7 +309,7 @@ abstract class CompoundTerm protected () extends Term {
     this()
     setName(name);
     this.components = components
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
     this.complexity = complexity
   }
 
@@ -318,7 +322,7 @@ abstract class CompoundTerm protected () extends Term {
     this.components = components
     calcComplexity()
     name = makeName()
-    isConstant = !Variable.containVar(name)
+    isConstant_ = !Variable.containVar(name)
   }
 
   /**
@@ -330,7 +334,7 @@ abstract class CompoundTerm protected () extends Term {
 //    super(name)
     this()
     setName(name);
-    isConstant = !Variable.containVar(name)
+    isConstant_ = !Variable.containVar(name)
     this.components = components
     calcComplexity()
   }
@@ -349,7 +353,7 @@ abstract class CompoundTerm protected () extends Term {
   private def calcComplexity() {
     complexity = 1
     for (t <- components) {
-      complexity += t.getComplexity
+      complexity = ( complexity + t.getComplexity ) . asInstanceOf[Short]
     }
   }
 
@@ -357,13 +361,14 @@ abstract class CompoundTerm protected () extends Term {
    * default method to make the oldName of the current term from existing fields
    * @return the oldName of the term
    */
-  protected def makeName(): String = {
+//  protected jmv 
+  def makeName(): String = {
     makeCompoundName(operator(), components)
   }
 
   /**
    * report the term's syntactic complexity
-   * @return the comlexity value
+   * @return the complexity value
    */
   override def getComplexity(): Int = complexity
 
@@ -371,22 +376,22 @@ abstract class CompoundTerm protected () extends Term {
    * check if the term contains free variable
    * @return if the term is a constant
    */
-  override def isConstant(): Boolean = isConstant
+  override def isConstant(): Boolean = isConstant_
 
   /**
    * Set the constant status
    * @param isConstant
    */
   def setConstant(isConstant: Boolean) {
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
   }
 
   /**
    * Check if the order of the components matters
    * <p>
    * commutative CompoundTerms: Sets, Intersections
-   * communative Statements: Similarity, Equivalence (except the one with a temporal order)
-   * communative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
+   * commutative Statements: Similarity, Equivalence (except the one with a temporal order)
+   * commutative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
    * @return The default value is false
    */
   def isCommutative(): Boolean = false
@@ -429,7 +434,8 @@ abstract class CompoundTerm protected () extends Term {
    * @return Whether the terget is in the current term
    */
   override def containTerm(target: Term): Boolean = {
-    components.find(_.containTerm(target)).map(true).getOrElse(false)
+    components.exists(_.containTerm(target))
+//    components.find(_.containTerm(target)).map(true).getOrElse(false)
   }
 
   /**
@@ -471,14 +477,15 @@ abstract class CompoundTerm protected () extends Term {
       for (i <- 0 until components.size) {
         val term = componentAt(i)
         if (term.isInstanceOf[Variable]) {
-          var `var`: Variable = _
+          var `var` =
           if (term.getName.length == 1) {
-            `var` = new Variable(term.getName.charAt(0) + "" + (map.size + 1))
+            new Variable(term.getName.charAt(0) + "" + (map.size + 1))
           } else {
-            `var` = map.get(term.asInstanceOf[Variable]).asInstanceOf[Variable]
-            if (`var` == null) {
-              `var` = new Variable(term.getName.charAt(0) + "" + (map.size + 1))
+            var var1 = map.get(term.asInstanceOf[Variable]).asInstanceOf[Variable]
+            if (var1 == null) {
+              var1 = new Variable(term.getName.charAt(0) + "" + (map.size + 1))
             }
+            var1
           }
           if (term != `var`) {
             components.set(i, `var`)
@@ -497,8 +504,8 @@ abstract class CompoundTerm protected () extends Term {
    * @param subs
    */
   def applySubstitute(subs: HashMap[Term, Term]) {
-    var t1: Term = _
-    var t2: Term = _
+    var t1: Term = null
+    var t2: Term = null
     for (i <- 0 until size) {
       t1 = componentAt(i)
       t2 = subs.get(t1)
@@ -524,7 +531,7 @@ abstract class CompoundTerm protected () extends Term {
   def prepareComponentLinks(): ArrayList[TermLink] = {
     val componentLinks = new ArrayList[TermLink]()
     val `type` = if ((this.isInstanceOf[Statement])) TermLink.COMPOUND_STATEMENT else TermLink.COMPOUND
-    prepareComponentLinks(componentLinks, `type`, this)
+    prepareComponentLinks(componentLinks, `type`.asInstanceOf[Short], this)
     componentLinks
   }
 
@@ -536,9 +543,9 @@ abstract class CompoundTerm protected () extends Term {
    * @param term The CompoundTerm for which the links are built
    */
   private def prepareComponentLinks(componentLinks: ArrayList[TermLink], `type`: Short, term: CompoundTerm) {
-    var t1: Term = _
-    var t2: Term = _
-    var t3: Term = _
+    var t1: Term = null
+    var t2: Term = null
+    var t3: Term = null
     for (i <- 0 until term.size) {
       t1 = term.componentAt(i)
       if (t1.isConstant) {
@@ -546,7 +553,7 @@ abstract class CompoundTerm protected () extends Term {
       }
       if ((t1.isInstanceOf[Conjunction]) && 
         ((this.isInstanceOf[Equivalence]) || ((this.isInstanceOf[Implication]) && (i == 0)))) {
-        t1.asInstanceOf[CompoundTerm].prepareComponentLinks(componentLinks, TermLink.COMPOUND_CONDITION, 
+        t1.asInstanceOf[CompoundTerm].prepareComponentLinks(componentLinks, TermLink.COMPOUND_CONDITION.asInstanceOf[Short], 
           t1.asInstanceOf[CompoundTerm])
       } else if (t1.isInstanceOf[CompoundTerm]) {
         for (j <- 0 until t1.asInstanceOf[CompoundTerm].size) {
@@ -555,9 +562,9 @@ abstract class CompoundTerm protected () extends Term {
             if ((t1.isInstanceOf[Product]) || (t1.isInstanceOf[ImageExt]) || 
               (t1.isInstanceOf[ImageInt])) {
               if (`type` == TermLink.COMPOUND_CONDITION) {
-                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, 0, i, j))
+                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM.asInstanceOf[Short], 0, i, j))
               } else {
-                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM, i, j))
+                componentLinks.add(new TermLink(t2, TermLink.TRANSFORM.asInstanceOf[Short], i, j))
               }
             } else {
               componentLinks.add(new TermLink(t2, `type`, i, j))
@@ -569,9 +576,9 @@ abstract class CompoundTerm protected () extends Term {
               t3 = t2.asInstanceOf[CompoundTerm].componentAt(k)
               if (t3.isConstant) {
                 if (`type` == TermLink.COMPOUND_CONDITION) {
-                  componentLinks.add(new TermLink(t3, TermLink.TRANSFORM, 0, i, j, k))
+                  componentLinks.add(new TermLink(t3, TermLink.TRANSFORM.asInstanceOf[Short], 0, i, j, k))
                 } else {
-                  componentLinks.add(new TermLink(t3, TermLink.TRANSFORM, i, j, k))
+                  componentLinks.add(new TermLink(t3, TermLink.TRANSFORM.asInstanceOf[Short], i, j, k))
                 }
               }
             }

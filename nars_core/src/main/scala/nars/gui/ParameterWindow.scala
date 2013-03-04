@@ -4,6 +4,7 @@ import java.awt._
 import java.awt.event._
 //remove if not needed
 import scala.collection.JavaConversions._
+import NarsFrame._
 
 /**
  * Window displaying a system parameter that can be adjusted in run time

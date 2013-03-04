@@ -129,7 +129,8 @@ object Statement {
    * @param relation The relation operator
    * @return The nameStr of the term
    */
-  protected def makeStatementName(subject: Term, relation: String, predicate: Term): String = {
+//  protected jmv
+  def makeStatementName(subject: Term, relation: String, predicate: Term): String = {
     val nameStr = new StringBuffer()
     nameStr.append(Symbols.STATEMENT_OPENER)
     nameStr.append(subject.getName)
@@ -184,9 +185,11 @@ abstract class Statement protected () extends CompoundTerm {
    * Constructor with partial values, called by make
    * @param arg The component list of the term
    */
-//  protected def this(arg: ArrayList[Term]) {
-////    super(arg)
-//  }
+  protected def this(arg: ArrayList[Term]) {
+//    super(arg) 
+    this()
+    this.components = arg
+  }
 
   /**
    * Constructor with full values, called by clone
@@ -206,7 +209,7 @@ abstract class Statement protected () extends CompoundTerm {
    * Override the default in making the nameStr of the current term from existing fields
    * @return the nameStr of the term
    */
-  protected override def makeName(): String = {
+  override def makeName(): String = {
     makeStatementName(getSubject, operator(), getPredicate)
   }
 

@@ -8,6 +8,8 @@ import nars.main._
 import nars.storage.Memory
 //remove if not needed
 import scala.collection.JavaConversions._
+import Symbols._
+import java.lang.Float
 
 object StringParser {
 
@@ -154,8 +156,8 @@ object StringParser {
    * @throws nars.io.StringParser.InvalidInputException If the String cannot be parsed into a BudgetValue
    */
   private def parseBudget(s: String, punctuation: Char, truth: TruthValue): BudgetValue = {
-    var priority: Float = _
-    var durability: Float = _
+    var priority: Float = 0
+    var durability: Float = 0
     punctuation match {
       case JUDGMENT_MARK => 
         priority = Parameters.DEFAULT_JUDGMENT_PRIORITY
@@ -312,10 +314,9 @@ object StringParser {
     val list = new ArrayList[Term]()
     var start = 0
     var end = 0
-    var t: Term = _
     while (end < s.length - 1) {
       end = nextSeparator(s, start)
-      t = parseTerm(s.substring(start, end), memory)
+      val t = parseTerm(s.substring(start, end), memory)
       list.add(t)
       start = end + 1
     }

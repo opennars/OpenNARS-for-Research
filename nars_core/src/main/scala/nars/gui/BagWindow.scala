@@ -7,6 +7,7 @@ import nars.storage.Bag
 import BagWindow._
 //remove if not needed
 import scala.collection.JavaConversions._
+import NarsFrame._
 
 object BagWindow {
 

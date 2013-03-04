@@ -32,7 +32,7 @@ object NARS {
    * Create an instance of the class, then run the init and start methods.
    * @param args optional argument used : one input file
    */
-  def main(args: String) {
+  def main(args : Array[String] ) {
     standAlone = true
     val nars = new NARS()
     nars.init(args)

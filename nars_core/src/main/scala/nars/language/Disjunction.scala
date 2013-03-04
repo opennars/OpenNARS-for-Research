@@ -6,18 +6,19 @@ import nars.storage.Memory
 import Disjunction._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object Disjunction {
 
   /**
    * Try to make a new Disjunction from two components. Called by the inference rules.
-   * @param term1 The first compoment
-   * @param term2 The first compoment
+   * @param term1 The first component
+   * @param term2 The first component
    * @param memory Reference to the memory
    * @return A Disjunction generated or a Term it reduced to
    */
   def make(term1: Term, term2: Term, memory: Memory): Term = {
-    var set: TreeSet[Term] = _
+    var set: TreeSet[Term] = null
     if (term1.isInstanceOf[Disjunction]) {
       set = new TreeSet[Term](term1.asInstanceOf[CompoundTerm].cloneComponents())
       if (term2.isInstanceOf[Disjunction]) {
@@ -49,7 +50,7 @@ object Disjunction {
 
   /**
    * Try to make a new Disjunction from a set of components. Called by the public make methods.
-   * @param set a set of Term as compoments
+   * @param set a set of Term as components
    * @param memory Reference to the memory
    * @return the Term generated from the arguments
    */
@@ -84,15 +85,15 @@ class Disjunction private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
     this(components)
     setName(name)
     this.complexity = complexity
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
   }
 
   /**
    * Clone an object
    * @return A new object
    */
-  def clone(): AnyRef = {
-    new Disjunction(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Disjunction(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**
@@ -102,8 +103,8 @@ class Disjunction private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
   def operator(): String = Symbols.DISJUNCTION_OPERATOR
 
   /**
-   * Disjunction is communitative.
-   * @return true for communitative
+   * Disjunction is commutative.
+   * @return true for commutative
    */
   override def isCommutative(): Boolean = true
 }

@@ -6,6 +6,7 @@ import nars.storage.Memory
 import Product._
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object Product {
 
@@ -58,7 +59,7 @@ class Product private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
 //    super(n, cs, con, complexity)
     this(cs)
     setName(n)
-    this.isConstant = con
+    this.isConstant_ = con
     this.complexity = complexity
   }
 
@@ -66,8 +67,8 @@ class Product private (arg: ArrayList[Term]) extends CompoundTerm(arg) {
    * Clone a Product
    * @return A new object, to be casted into an ImageExt
    */
-  def clone(): AnyRef = {
-    new Product(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity)
+  override def clone(): AnyRef = {
+    new Product(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity)
   }
 
   /**

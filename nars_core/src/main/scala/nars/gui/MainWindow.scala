@@ -8,6 +8,7 @@ import nars.main._
 import nars.storage.Memory
 //remove if not needed
 import scala.collection.JavaConversions._
+import NarsFrame._
 
 /**
  * Main window of NARS GUI
@@ -95,6 +96,7 @@ class MainWindow(var reasoner: Reasoner, title: String) extends NarsFrame(title)
 
   setBackground(NarsFrame.MAIN_WINDOW_COLOR)
 
+  {
   val menuBar = new MenuBar()
 
   var m = new Menu("File")
@@ -162,6 +164,7 @@ class MainWindow(var reasoner: Reasoner, title: String) extends NarsFrame(title)
   menuBar.add(m)
 
   setMenuBar(menuBar)
+  }
 
   val gridbag = new GridBagLayout()
 

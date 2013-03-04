@@ -302,9 +302,12 @@ class Memory(var reasoner: Reasoner) {
    * and those that corresponding to existing concepts, plus one from the buffer.
    */
   private def processNewTask() {
-    var task: Task = _
+    var task: Task = null
     var counter = newTasks.size
-    while (counter -= 1 > 0) {
+    //    while (counter-- > 0) { // Java
+//    while (counter -= 1 > 0) {
+    while (counter > 1) {
+      counter -= 1
       task = newTasks.remove(0)
       if (task.isInput || (termToConcept(task.getContent) != null)) {
         immediateProcess(task)
@@ -384,7 +387,7 @@ class Memory(var reasoner: Reasoner) {
    * @param input whether the task is input
    */
   def report(sentence: Sentence, input: Boolean) {
-    var s: String = _
+    var s: String = ""
     s = if (input) "  IN: " else " OUT: "
     s += sentence.toStringBrief()
     if (exportStrings.isEmpty) {

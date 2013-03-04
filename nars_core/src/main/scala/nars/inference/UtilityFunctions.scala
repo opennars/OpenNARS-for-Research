@@ -12,7 +12,7 @@ object UtilityFunctions {
    * @return The output that is no larger than each input
    */
   def and(arr: Float*): Float = {
-    var product = 1
+    var product: Float = 1
     for (f <- arr) {
       product *= f
     }
@@ -25,7 +25,7 @@ object UtilityFunctions {
    * @return The output that is no smaller than each input
    */
   def or(arr: Float*): Float = {
-    var product = 1
+    var product: Float = 1
     for (f <- arr) {
       product *= (1 - f)
     }
@@ -38,7 +38,7 @@ object UtilityFunctions {
    * @return The arithmetic average the inputs
    */
   def aveAri(arr: Float*): Float = {
-    var sum = 0
+    var sum: Float = 0
     for (f <- arr) {
       sum += f
     }
@@ -51,7 +51,7 @@ object UtilityFunctions {
    * @return The geometric average the inputs
    */
   def aveGeo(arr: Float*): Float = {
-    var product = 1
+    var product: Float = 1
     for (f <- arr) {
       product *= f
     }

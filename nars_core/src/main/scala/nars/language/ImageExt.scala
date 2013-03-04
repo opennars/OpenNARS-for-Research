@@ -7,6 +7,7 @@ import ImageExt._
 import scala.reflect.{BeanProperty, BooleanBeanProperty}
 //remove if not needed
 import scala.collection.JavaConversions._
+import CompoundTerm._
 
 object ImageExt {
 
@@ -118,7 +119,7 @@ class ImageExt private (n: String, arg: ArrayList[Term], @BeanProperty var relat
       index: Short) {
     this(name, components, index)
     this.complexity = complexity
-    this.isConstant = isConstant
+    this.isConstant_ = isConstant
 //    super(n, cs, con, complexity)
   }
 
@@ -126,8 +127,8 @@ class ImageExt private (n: String, arg: ArrayList[Term], @BeanProperty var relat
    * Clone an object
    * @return A new object, to be casted into an ImageExt
    */
-  def clone(): AnyRef = {
-    new ImageExt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant, complexity, relationIndex)
+  override def clone(): AnyRef = {
+    new ImageExt(name, cloneList(components).asInstanceOf[ArrayList[Term]], isConstant_, complexity, relationIndex)
   }
 
   /**
