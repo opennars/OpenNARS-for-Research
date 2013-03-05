@@ -260,6 +260,7 @@ class Concept(@BeanProperty var term: Term, var memory: Memory) extends Item(ter
    * Recursively build TermLinks between a compound and its components
    * <p>
    * called only from Memory.continuedProcess
+   * and #linkToTask
    * @param taskBudget The BudgetValue of the task
    */
   def buildTermLinks(taskBudget: BudgetValue) {

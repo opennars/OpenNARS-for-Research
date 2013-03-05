@@ -43,7 +43,7 @@ public class TestReasoning {
 
 	@Test
 	public void testExamples() {
-		String testDir_ = "nars-dist/Examples";
+		String testDir_ = "../nars-dist/Examples";
 		File testDir = new File(testDir_);
 		File[] allFiles = testDir.listFiles();
 		boolean testPassed = true;
