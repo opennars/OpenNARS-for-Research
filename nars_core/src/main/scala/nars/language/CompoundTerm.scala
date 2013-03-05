@@ -265,13 +265,13 @@ object CompoundTerm {
  * <p>
  * This abstract class contains default methods for all CompoundTerms.
  */
-abstract class CompoundTerm protected () extends Term {
+abstract class CompoundTerm protected (protected val components: ArrayList[Term]) extends Term {
 
   /**
    list of (direct) components
    */
-  protected var components: ArrayList[Term] = _
-
+//  protected var components: ArrayList[Term] = _
+	
   /**
    syntactic complexity of the compound, the sum of those of its components plus 1
    */
@@ -295,6 +295,18 @@ abstract class CompoundTerm protected () extends Term {
   override def clone(): AnyRef
 
   /**
+   * Constructor called from subclasses constructors to initialize the fields
+   * @param components Component list
+   */
+//  protected def this(components: ArrayList[Term]) {
+//    this()
+//    this.components = components
+    calcComplexity()
+    name = makeName()
+    isConstant_ = !Variable.containVar(name)
+//  }
+  
+  /**
    * Constructor called from subclasses constructors to clone the fields
    * @param name Name
    * @param components Component list
@@ -306,23 +318,11 @@ abstract class CompoundTerm protected () extends Term {
       isConstant: Boolean, 
       complexity: Short) {
 //    super(name)
-    this()
+    this(components)
     setName(name);
-    this.components = components
+//    this.components = components
     this.isConstant_ = isConstant
     this.complexity = complexity
-  }
-
-  /**
-   * Constructor called from subclasses constructors to initialize the fields
-   * @param components Component list
-   */
-  protected def this(components: ArrayList[Term]) {
-    this()
-    this.components = components
-    calcComplexity()
-    name = makeName()
-    isConstant_ = !Variable.containVar(name)
   }
 
   /**
@@ -332,10 +332,10 @@ abstract class CompoundTerm protected () extends Term {
    */
   protected def this(name: String, components: ArrayList[Term]) {
 //    super(name)
-    this()
+    this(components)
     setName(name);
     isConstant_ = !Variable.containVar(name)
-    this.components = components
+//    this.components = components
     calcComplexity()
   }
 
@@ -461,11 +461,12 @@ abstract class CompoundTerm protected () extends Term {
    * Rename the variables in the compound
    */
   override def renameVariables() {
+    setName(makeName())	// jmv
     if (containVar()) {
       renameVariables(new HashMap[Variable, Variable]())
     }
     setConstant(true)
-    setName(makeName())
+//    setName(makeName())	// jmv
   }
 
   /**
@@ -500,7 +501,7 @@ abstract class CompoundTerm protected () extends Term {
   }
 
   /**
-   * Recersively apply a substitute to the current CompoundTerm
+   * Recursively apply a substitute to the current CompoundTerm
    * @param subs
    */
   def applySubstitute(subs: HashMap[Term, Term]) {
@@ -517,7 +518,9 @@ abstract class CompoundTerm protected () extends Term {
     }
     if (this.isCommutative) {
       val s = new TreeSet[Term](components)
-      components = new ArrayList[Term](s)
+//      components = new ArrayList[Term](s)
+      components.clear()
+      components.addAll(s)	// TODO jmv TreeSet type is lost here
     }
     name = makeName()
   }

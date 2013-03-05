@@ -179,17 +179,17 @@ object Statement {
  * A statement is a compound term, consisting of a subject, a predicate,
  * and a relation symbol in between. It can be of either first-order or higher-order.
  */
-abstract class Statement protected () extends CompoundTerm {
+abstract class Statement protected (components: ArrayList[Term]) extends CompoundTerm(components) {
 
   /**
    * Constructor with partial values, called by make
    * @param arg The component list of the term
    */
-  protected def this(arg: ArrayList[Term]) {
-//    super(arg) 
-    this()
-    this.components = arg
-  }
+//  protected def this(arg: ArrayList[Term]) {
+////    super(arg) 
+//    this()
+//    this.components = arg
+//  }
 
   /**
    * Constructor with full values, called by clone

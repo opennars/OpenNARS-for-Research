@@ -13,8 +13,8 @@ object Inheritance {
 
   /**
    * Try to make a new compound from two components. Called by the inference rules.
-   * @param subject The first compoment
-   * @param predicate The second compoment
+   * @param subject The first component
+   * @param predicate The second component
    * @param memory Reference to the memory
    * @return A compound generated or null
    */
@@ -36,7 +36,7 @@ object Inheritance {
  * A Statement about an Inheritance relation.
  */
 class Inheritance private (arg: ArrayList[Term]) extends Statement(arg) {
-
+  
   /**
    * Constructor with full values, called by clone
    * @param n The name of the term
@@ -54,7 +54,7 @@ class Inheritance private (arg: ArrayList[Term]) extends Statement(arg) {
     this.isConstant_ = con
     this.complexity = i
   }
-
+    
   /**
    * Clone an object
    * @return A new object, to be casted into a SetExt
