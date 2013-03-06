@@ -23,6 +23,7 @@ package nars.main;
 import java.applet.Applet;
 
 import nars.io.ExperienceReader;
+import nars.main_nogui.ReasonerBatch;
 
 /**
  * The main class of the project.

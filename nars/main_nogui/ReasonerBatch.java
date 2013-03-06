@@ -1,4 +1,4 @@
-package nars.main;
+package nars.main_nogui;
 
 import java.util.ArrayList;
 

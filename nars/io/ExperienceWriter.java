@@ -25,7 +25,7 @@ import java.awt.FileDialog;
 import java.io.*;
 import java.util.*;
 
-import nars.main.*;
+import nars.main_nogui.ReasonerBatch;
 
 /**
  * To read and write experience as Task streams

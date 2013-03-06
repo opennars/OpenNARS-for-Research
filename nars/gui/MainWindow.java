@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import nars.io.*;
 import nars.main.*;
+import nars.main_nogui.ReasonerBatch;
 import nars.storage.Memory;
 
 /**

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import nars.storage.*;
 import nars.io.*;
+import nars.main_nogui.ReasonerBatch;
 import nars.gui.*;
 
 /**

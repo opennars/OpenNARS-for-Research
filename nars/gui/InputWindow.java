@@ -31,7 +31,7 @@ import java.awt.event.WindowEvent;
 
 import nars.io.ExperienceReader;
 import nars.io.InputChannel;
-import nars.main.ReasonerBatch;
+import nars.main_nogui.ReasonerBatch;
 
 /**
  * Input window, accepting user tasks
