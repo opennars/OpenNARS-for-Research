@@ -21,7 +21,7 @@
 package nars.entity;
 
 import nars.language.Term;
-import nars.main.*;
+import nars.main_nogui.Parameters;
 
 /**
  * Reference to a Task.

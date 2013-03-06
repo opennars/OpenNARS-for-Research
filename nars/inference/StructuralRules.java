@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 import nars.entity.*;
 import nars.language.*;
-import nars.main.*;
+import nars.main_nogui.Parameters;
 
 /**
  * Single-premise inference rules involving compound terms.

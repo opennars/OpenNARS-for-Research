@@ -23,7 +23,7 @@ package nars.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-import nars.main.Parameters;
+import nars.main_nogui.Parameters;
 import nars.storage.Bag;
 
 /**

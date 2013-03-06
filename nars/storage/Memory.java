@@ -20,7 +20,6 @@
  */
 package nars.storage;
 
-import nars.main.*;
 import java.util.*;
 
 import nars.entity.*;
@@ -28,6 +27,9 @@ import nars.inference.*;
 import nars.io.*;
 import nars.gui.*;
 import nars.language.*;
+import nars.main.Reasoner;
+import nars.main_nogui.Parameters;
+import nars.main_nogui.ReasonerBatch;
 
 /**
  * The memory of the system.
@@ -35,7 +37,7 @@ import nars.language.*;
 public class Memory {
 
     /** Backward pointer to the reasoner */
-    private Reasoner reasoner;
+    private Reasoner reasoner;	// TODO ReasonerBatch
 
     /* ---------- Long-term storage for multiple cycles ---------- */
     /** Concept bag. Containing all Concepts of the system */
@@ -76,7 +78,7 @@ public class Memory {
      * Called in Reasoner.reset only
      * @param reasoner
      */
-    public Memory(Reasoner reasoner) {
+    public Memory(Reasoner reasoner) {	// TODO ReasonerBatch
         this.reasoner = reasoner;
         recorder = new InferenceRecorder();
         concepts = new ConceptBag(this);

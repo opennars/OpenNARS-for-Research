@@ -25,7 +25,7 @@ import java.util.*;
 import nars.entity.Item;
 import nars.gui.BagWindow;
 import nars.inference.BudgetFunctions;
-import nars.main.Parameters;
+import nars.main_nogui.Parameters;
 
 /**
  * A Bag is a storage with a constant capacity and maintains an internal priority

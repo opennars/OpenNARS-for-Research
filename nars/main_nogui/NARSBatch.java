@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 
 import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
-import nars.main.Reasoner;
+import nars.main_nogui.ReasonerBatch;;
 
 /**
  * The main class of the project.
@@ -36,7 +36,7 @@ import nars.main.Reasoner;
  */
 public class NARSBatch {
     /** The reasoner */
-    Reasoner reasoner;
+    ReasonerBatch reasoner;
 	private boolean logging;
 	private PrintStream out = System.out;
 	private boolean dumpLastState = true;
@@ -73,11 +73,7 @@ public class NARSBatch {
      * Can instantiate multiple reasoners
      */
     public void init() {
-        reasoner = new Reasoner("NARS Batch Reasoner");
-        // TODO remove the GUI stuff by doing a batch reasoner
-        reasoner.getMainWindow().setVisible(false);
-        reasoner.getInputWindow().setVisible(false);
-        reasoner.removeInputChannel( reasoner.getInputWindow() );
+        reasoner = new ReasonerBatch();
     }
 
     /** Repeatedly execute NARS working cycle, until Inputs are Finished, or 1000 steps.
@@ -95,8 +91,6 @@ public class NARSBatch {
 			if( reasoner.isFinishedInputs() ||
 					reasoner.getTime() == 1000 ) break;
         }
-        reasoner.getMainWindow().dispose();
-        reasoner.getInputWindow().dispose();
     }
      
      public void setPrintStream(PrintStream out) {

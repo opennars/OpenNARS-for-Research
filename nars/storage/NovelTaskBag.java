@@ -22,7 +22,7 @@
 package nars.storage;
 
 import nars.entity.Task;
-import nars.main.Parameters;
+import nars.main_nogui.Parameters;
 
 /**
  * New tasks that contain new Term.

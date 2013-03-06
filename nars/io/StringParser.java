@@ -25,7 +25,7 @@ import java.util.*;
 import nars.entity.*;
 import nars.inference.*;
 import nars.language.*;
-import nars.main.*;
+import nars.main_nogui.Parameters;
 import nars.storage.Memory;
 
 /**
