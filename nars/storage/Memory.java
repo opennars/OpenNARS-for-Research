@@ -111,6 +111,7 @@ public class Memory {
         return reasoner.getMainWindow();
     }
 
+    /** Actually means that there are no new Tasks */
     public boolean noResult() {
         return newTasks.isEmpty();
     }

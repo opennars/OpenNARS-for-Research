@@ -130,10 +130,11 @@ What makes this system different from conventional reasoning systems is its abil
     </dependency>
     <dependency>
       <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_${scala.version}</artifactId>
-      <version>1.6.5</version>
-      <scope>test</scope>
-    </dependency>
+      <!--artifactId>specs_${scala.version}</artifactId-->
+      <artifactId>specs_2.10</artifactId>
+    <version>1.6.9</version>
+</dependency>
+
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest</artifactId>

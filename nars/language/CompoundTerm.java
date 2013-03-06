@@ -57,11 +57,6 @@ public abstract class CompoundTerm extends Term {
     public abstract Object clone();
 
     /* ----- object builders, called from subclasses ----- */
-    /**
-     * Default constructor
-     */
-    protected CompoundTerm() {
-    }
 
     /**
      * Constructor called from subclasses constructors to clone the fields
@@ -75,6 +70,12 @@ public abstract class CompoundTerm extends Term {
         this.components = components;
         this.isConstant = isConstant;
         this.complexity = complexity;
+    }
+
+    /**
+     * Default constructor
+     */
+    protected CompoundTerm() {
     }
 
     /**
@@ -302,7 +303,7 @@ public abstract class CompoundTerm extends Term {
     /* ----- utilities for other fields ----- */
     /**
      * report the term's syntactic complexity
-     * @return the comlexity value
+     * @return the complexity value
      */
     @Override
     public int getComplexity() {
@@ -330,8 +331,8 @@ public abstract class CompoundTerm extends Term {
      * Check if the order of the components matters
      * <p>
      * commutative CompoundTerms: Sets, Intersections
-     * communative Statements: Similarity, Equivalence (except the one with a temporal order)
-     * communative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
+     * Commutative Statements: Similarity, Equivalence (except the one with a temporal order)
+     * Commutative CompoundStatements: Disjunction, Conjunction (except the one with a temporal order)
      * @return The default value is false
      */
     public boolean isCommutative() {
@@ -400,7 +401,7 @@ public abstract class CompoundTerm extends Term {
     /**
      * Recursively check if a compound contains a term
      * @param target The term to be searched
-     * @return Whether the terget is in the current term
+     * @return Whether the target is in the current term
      */
     @Override
     public boolean containTerm(Term target) {
@@ -429,7 +430,7 @@ public abstract class CompoundTerm extends Term {
      * Try to add a component into a compound
      * @param t1 The compound
      * @param t2 The component
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      * @return The new compound
      */
     public static Term addComponents(CompoundTerm t1, Term t2, Memory memory) {
@@ -450,7 +451,7 @@ public abstract class CompoundTerm extends Term {
      * Try to remove a component from a compound
      * @param t1 The compound
      * @param t2 The component
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      * @return The new compound
      */
     public static Term reduceComponents(CompoundTerm t1, Term t2, Memory memory) {
@@ -469,7 +470,7 @@ public abstract class CompoundTerm extends Term {
      * @param compound The compound
      * @param index The location of replacement
      * @param t The new component
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      * @return The new compound
      */
     public static Term setComponent(CompoundTerm compound, int index, Term t, Memory memory) {
@@ -540,7 +541,7 @@ public abstract class CompoundTerm extends Term {
     }
 
     /**
-     * Recersively apply a substitute to the current CompoundTerm
+     * Recursively apply a substitute to the current CompoundTerm
      * @param subs
      */
     public void applySubstitute(HashMap<Term, Term> subs) {

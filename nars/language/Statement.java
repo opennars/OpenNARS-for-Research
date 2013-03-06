@@ -32,17 +32,17 @@ import nars.storage.Memory;
 public abstract class Statement extends CompoundTerm {
 
     /**
-     * Default constructor
-     */
-    protected Statement() {
-    }
-
-    /**
      * Constructor with partial values, called by make
      * @param arg The component list of the term
      */
     protected Statement(ArrayList<Term> arg) {
         super(arg);
+    }
+
+    /**
+     * Default constructor
+     */
+    protected Statement() {
     }
 
     /**

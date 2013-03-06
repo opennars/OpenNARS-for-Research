@@ -45,7 +45,7 @@ public class Conjunction extends CompoundTerm {
      * @param con Whether the term is a constant
      * @param i Syntactic complexity of the compound
      */
-    protected Conjunction(String n, ArrayList<Term> cs, boolean con, short i) {
+    private Conjunction(String n, ArrayList<Term> cs, boolean con, short i) {
         super(n, cs, con, i);
     }
 
