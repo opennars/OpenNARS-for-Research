@@ -31,13 +31,13 @@ import java.awt.event.WindowEvent;
 
 import nars.io.ExperienceReader;
 import nars.io.InputChannel;
-import nars.main.Reasoner;
+import nars.main.ReasonerBatch;
 
 /**
  * Input window, accepting user tasks
  */
 public class InputWindow extends NarsFrame implements ActionListener, InputChannel {
-    private Reasoner reasoner;
+    private ReasonerBatch reasoner;
     /** Control buttons */
     private Button okButton, holdButton, clearButton, closeButton;
     /** Input area */
@@ -52,7 +52,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
      * @param reasoner The reseasoner
      * @param title The title of the window
      */
-    public InputWindow(Reasoner reasoner, String title) {
+    public InputWindow(ReasonerBatch reasoner, String title) {
         super(title + " - Input Window");
         setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();

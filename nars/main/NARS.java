@@ -55,7 +55,7 @@ public class NARS extends Applet implements Runnable {
     /**
      * The reasoner
      */
-    Reasoner reasoner;
+    ReasonerBatch reasoner;
 
     /* Application-only code */
     /**

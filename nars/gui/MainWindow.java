@@ -34,7 +34,7 @@ import nars.storage.Memory;
 public class MainWindow extends NarsFrame implements ActionListener, OutputChannel {
 
     /** Reference to the reasoner */
-    private Reasoner reasoner;
+    private ReasonerBatch reasoner;
     /** Reference to the memory */
     private Memory memory;
     /** Reference to the inference recorder */
@@ -197,6 +197,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
     /**
      * Update timer and its display
      */
+    @Override
     public void tickTimer() {
         timer++;
         timerText.setText(memory.getTime() + " :: " + timer);
@@ -287,6 +288,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      * To process the next chunk of output data
      * @param lines The text lines to be displayed
      */
+    @Override
     public void nextOutput(ArrayList<String> lines) {
         if (!lines.isEmpty()) {
             String text = "";

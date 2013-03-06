@@ -32,18 +32,18 @@ import nars.main.*;
  */
 public class ExperienceWriter implements OutputChannel {
 
-    private Reasoner reasoner;
+    private ReasonerBatch reasoner;
     /** Input experience from a file */
     private PrintWriter outExp;
 
     /** Default constructor
      * @param reasoner
      */
-    public ExperienceWriter(Reasoner reasoner) {
+    public ExperienceWriter(ReasonerBatch reasoner) {
         this.reasoner = reasoner;
     }
 
-    public ExperienceWriter(Reasoner reasoner, PrintWriter outExp) {
+    public ExperienceWriter(ReasonerBatch reasoner, PrintWriter outExp) {
 		this(reasoner);
 		this.outExp = outExp;
 	}
@@ -83,4 +83,8 @@ public class ExperienceWriter implements OutputChannel {
             }
         }
     }
+
+	@Override
+	public void tickTimer() {		
+	}
 }

@@ -32,7 +32,7 @@ import nars.main.*;
 public class ExperienceReader implements InputChannel {
 
     /** Reference to the reasoner */
-    private Reasoner reasoner;
+    private ReasonerBatch reasoner;
     /** Input experience from a file */
     private BufferedReader inExp;
     /** Remaining working cycles before reading the next line */
@@ -42,7 +42,7 @@ public class ExperienceReader implements InputChannel {
      * Default constructor
      * @param reasoner Backward link to the reasoner
      */
-    public ExperienceReader(Reasoner reasoner) {
+    public ExperienceReader(ReasonerBatch reasoner) {
         this.reasoner = reasoner;
         inExp = null;
     }
