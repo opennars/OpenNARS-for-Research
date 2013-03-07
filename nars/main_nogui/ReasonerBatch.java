@@ -31,7 +31,9 @@ public class ReasonerBatch {
 	private boolean finishedInputs;
 
 	public ReasonerBatch() {
-		super();
+//        memory = new Memory(this);
+        inputChannels = new ArrayList<InputChannel>();
+        outputChannels = new ArrayList<OutputChannel>();
 	}
 
 	/**

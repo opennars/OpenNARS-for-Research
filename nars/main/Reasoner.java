@@ -43,13 +43,12 @@ public class Reasoner extends ReasonerBatch {
      * @param name The name of the reasoner
      */
     public Reasoner(String name) {
+    	super();
         this.name = name;
         memory = new Memory(this);
         mainWindow = new MainWindow(this, name);
         inputWindow = new InputWindow(this, name);
-        inputChannels = new ArrayList<InputChannel>();
         inputChannels.add(inputWindow);
-        outputChannels = new ArrayList<OutputChannel>();
         outputChannels.add(mainWindow);
     }
 
