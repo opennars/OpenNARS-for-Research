@@ -49,7 +49,8 @@ public class TaskLinkBag extends Bag<TaskLink> {
      * @return The forget rate of TaskLinkBag
      */
     protected int forgetRate() {
-        return memory.getMainWindow().forgetTW.value();
+//        return memory.getMainWindow().forgetTW.value();
+        return memory.getTaskForgettingRate();
     }
 }
 

@@ -21,6 +21,7 @@
 package nars.storage;
 
 import nars.entity.*;
+import nars.gui.ParameterWindow;
 import nars.main_nogui.Parameters;
 
 /**
@@ -48,7 +49,8 @@ public class TermLinkBag extends Bag<TermLink> {
      * @return The forget rate of TermLinkBag
      */
     protected int forgetRate() {
-        return memory.getMainWindow().forgetBW.value();
+//        return memory.getMainWindow().forgetBW.value();
+        return memory.getBeliefForgettingRate();  
     }
 
     /**

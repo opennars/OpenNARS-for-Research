@@ -20,14 +20,21 @@
  */
 package nars.storage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import nars.entity.*;
-import nars.inference.*;
-import nars.io.*;
-import nars.gui.*;
-import nars.language.*;
-import nars.main.Reasoner;
+import nars.entity.BudgetValue;
+import nars.entity.Concept;
+import nars.entity.Item;
+import nars.entity.Sentence;
+import nars.entity.Stamp;
+import nars.entity.Task;
+import nars.entity.TaskLink;
+import nars.entity.TermLink;
+import nars.entity.TruthValue;
+import nars.inference.BudgetFunctions;
+import nars.io.InferenceRecorder;
+import nars.language.Term;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.ReasonerBatch;
 
@@ -37,7 +44,7 @@ import nars.main_nogui.ReasonerBatch;
 public class Memory {
 
     /** Backward pointer to the reasoner */
-    private Reasoner reasoner;	// TODO ReasonerBatch
+    private ReasonerBatch reasoner;
 
     /* ---------- Long-term storage for multiple cycles ---------- */
     /** Concept bag. Containing all Concepts of the system */
@@ -78,7 +85,7 @@ public class Memory {
      * Called in Reasoner.reset only
      * @param reasoner
      */
-    public Memory(Reasoner reasoner) {	// TODO ReasonerBatch
+    public Memory(ReasonerBatch reasoner) {
         this.reasoner = reasoner;
         recorder = new InferenceRecorder();
         concepts = new ConceptBag(this);
@@ -92,7 +99,8 @@ public class Memory {
         novelTasks.init();
         newTasks.clear();
         exportStrings.clear();
-        reasoner.getMainWindow().initTimer();
+//      reasoner.getMainWindow().initTimer();
+        reasoner.initTimer();
         recorder.append("\n-----RESET-----\n");
     }
 
@@ -109,9 +117,9 @@ public class Memory {
         return reasoner.getTime();
     }
 
-    public MainWindow getMainWindow() {
-        return reasoner.getMainWindow();
-    }
+//    public MainWindow getMainWindow() {
+//        return reasoner.getMainWindow();
+//    }
 
     /** Actually means that there are no new Tasks */
     public boolean noResult() {
@@ -221,7 +229,8 @@ public class Memory {
         recorder.append("!!! Activated: " + task.toString() + "\n");
         if (sentence.isQuestion()) {
             float s = task.getBudget().summary();
-            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
+//            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
+            float minSilent = reasoner.getSilenceValue() / 100.0f;
             if (s > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
@@ -237,7 +246,8 @@ public class Memory {
         if (task.getBudget().aboveThreshold()) {
             recorder.append("!!! Derived: " + task + "\n");
             float budget = task.getBudget().summary();
-            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
+//            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
+            float minSilent = reasoner.getSilenceValue() / 100.0f;
             if (budget > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
@@ -411,6 +421,7 @@ public class Memory {
      * Display input/output sentence in the output channels.
      * The only place to add Objects into exportStrings. Currently only Strings
      * are added, though in the future there can be outgoing Tasks
+     * TODO have a listener do this
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
      */
@@ -423,7 +434,8 @@ public class Memory {
         }
         s += sentence.toStringBrief();
         if (exportStrings.isEmpty()) {
-            long timer = reasoner.getMainWindow().updateTimer();
+//            long timer = reasoner.getMainWindow().updateTimer();
+            long timer = reasoner.updateTimer();
             if (timer > 0) {
                 exportStrings.add(String.valueOf(timer));
             }
@@ -456,5 +468,15 @@ public class Memory {
 	private String toStringIfNotNull(Object item, String title) {
 		return item == null ? "" : "\n " + title + ":\n" + 
 				item.toString();
+	}
+
+	public int getTaskForgettingRate() {
+		// TODO
+		return Parameters.TASK_LINK_FORGETTING_CYCLE;
+	}
+
+	public int getBeliefForgettingRate() {
+		// TODO
+		return Parameters.TERM_LINK_FORGETTING_CYCLE;
 	}
 }

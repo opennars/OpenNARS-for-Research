@@ -2,10 +2,9 @@ package nars.main_nogui;
 
 import java.util.ArrayList;
 
-import javax.swing.SwingUtilities;
-
 import nars.entity.Stamp;
 import nars.entity.Task;
+import nars.gui.MainWindow;
 import nars.io.InputChannel;
 import nars.io.OutputChannel;
 import nars.io.StringParser;
@@ -29,9 +28,10 @@ public class ReasonerBatch {
 	/** The number of steps to be carried out */
 	private int walkingSteps;
 	private boolean finishedInputs;
+	private long timer;
 
-	public ReasonerBatch() {
-//        memory = new Memory(this);
+	public ReasonerBatch() {      
+		memory = new Memory(this);
         inputChannels = new ArrayList<InputChannel>();
         outputChannels = new ArrayList<OutputChannel>();
 	}
@@ -102,35 +102,36 @@ public class ReasonerBatch {
 	 * A clock tick. Run one working workCycle or read input. Called from NARS only.
 	 */
 	public void tick() {
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				if (walkingSteps == 0) {
-					boolean reasonerShouldRun = false;
-					for (InputChannel channelIn : inputChannels) {
-						reasonerShouldRun = reasonerShouldRun ||
-								channelIn.nextInput();
-					}
-					finishedInputs = ! reasonerShouldRun;
-				}
-				ArrayList<String> output = memory.getExportStrings();
-				if (!output.isEmpty()) {
-					for (OutputChannel channelOut : outputChannels) {
-						channelOut.nextOutput(output);
-					}
-					output.clear();
-				}
-				if (running || walkingSteps > 0) {
-					clock++;
-					for (OutputChannel channelOut : outputChannels) {
-						channelOut.tickTimer();
-					}
-					memory.workCycle(clock);
-					if (walkingSteps > 0) {
-						walkingSteps--;
-					}
-				}		
-			} } );
+		doTick();
+	}
+
+	public void doTick() {
+		if (walkingSteps == 0) {
+			boolean reasonerShouldRun = false;
+			for (InputChannel channelIn : inputChannels) {
+				reasonerShouldRun = reasonerShouldRun ||
+						channelIn.nextInput();
+			}
+			finishedInputs = ! reasonerShouldRun;
+		}
+		ArrayList<String> output = memory.getExportStrings();
+		if (!output.isEmpty()) {
+			for (OutputChannel channelOut : outputChannels) {
+				channelOut.nextOutput(output);
+			}
+			output.clear();
+		}
+		if (running || walkingSteps > 0) {
+			clock++;
+			//					for (OutputChannel channelOut : outputChannels) {
+			//						channelOut.tickTimer();
+			//					}
+			tickTimer();
+			memory.workCycle(clock);
+			if (walkingSteps > 0) {
+				walkingSteps--;
+			}
+		}		
 	}
 
 	public boolean isFinishedInputs() {
@@ -168,6 +169,31 @@ public class ReasonerBatch {
 	@Override
 	public String toString() {
 		return memory.toString();
+	}
+
+	/** Report Silence Level */ 
+	public float getSilenceValue() {
+		// TODO
+		return Parameters.SILENT_LEVEL;
+
+	}
+
+    /** TODO cf {@link MainWindow#updateTimer()}
+     * To get the timer value and then to reset it
+     * @return The previous timer value
+     */
+	public long updateTimer() {
+        long i = timer; // clock;
+        initTimer();
+        return i;
+	}
+
+	public void initTimer() {
+		timer = 0;		
+	}
+	
+	public void tickTimer() {
+		timer++;
 	}
 
 }

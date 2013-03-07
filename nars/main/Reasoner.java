@@ -20,13 +20,11 @@
  */
 package nars.main;
 
-import java.util.ArrayList;
+import javax.swing.SwingUtilities;
 
-
-import nars.storage.*;
-import nars.io.*;
+import nars.gui.InputWindow;
+import nars.gui.MainWindow;
 import nars.main_nogui.ReasonerBatch;
-import nars.gui.*;
 
 /**
  * A NARS Reasoner has its memory, I/O channels, and internal clock.
@@ -34,7 +32,8 @@ import nars.gui.*;
  * Create static main window and input channel, reset memory, and manage system clock.
  */
 public class Reasoner extends ReasonerBatch {
-    /** The unique main window */
+
+	/** The unique main window */
     MainWindow mainWindow;
     /** Input experience from a window */
     private InputWindow inputWindow;
@@ -45,12 +44,23 @@ public class Reasoner extends ReasonerBatch {
     public Reasoner(String name) {
     	super();
         this.name = name;
-        memory = new Memory(this);
+//        memory = new Memory(this);
         mainWindow = new MainWindow(this, name);
         inputWindow = new InputWindow(this, name);
         inputChannels.add(inputWindow);
         outputChannels.add(mainWindow);
+        mainWindow.setVisible(true);
     }
+
+	@Override
+	public void tick() {
+		final ReasonerBatch reasoner = this;
+		SwingUtilities.invokeLater( new Runnable() {
+			@Override
+			public void run() {
+				reasoner.doTick();
+		} } );
+	}
 
     public MainWindow getMainWindow() {
         return mainWindow;
@@ -59,4 +69,19 @@ public class Reasoner extends ReasonerBatch {
     public InputWindow getInputWindow() {
         return inputWindow;
     }
+    
+	@Override
+	public long updateTimer() {
+		return mainWindow.updateTimer();
+	}
+
+	@Override
+	public void initTimer() {
+		mainWindow.initTimer();
+	}
+
+	@Override
+	public void tickTimer() {
+		mainWindow.tickTimer();
+	}
 }
