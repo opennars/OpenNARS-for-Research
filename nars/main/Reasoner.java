@@ -41,10 +41,9 @@ public class Reasoner extends ReasonerBatch {
      * Start the initial windows and memory. Called from NARS only.
      * @param name The name of the reasoner
      */
-    public Reasoner(String name) {
+    Reasoner(String name) {
     	super();
         this.name = name;
-//        memory = new Memory(this);
         mainWindow = new MainWindow(this, name);
         inputWindow = new InputWindow(this, name);
         inputChannels.add(inputWindow);

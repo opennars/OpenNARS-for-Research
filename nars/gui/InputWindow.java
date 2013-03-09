@@ -49,7 +49,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
 
     /**
      * Constructor
-     * @param reasoner The reseasoner
+     * @param reasoner The reasoner
      * @param title The title of the window
      */
     public InputWindow(ReasonerBatch reasoner, String title) {
@@ -128,7 +128,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
 
     /**
      * Accept text input in a tick, which can be multiple lines
-     * TODO duplicated code with {@link ExperienceReader}
+     * TODO duplicated code with {@link ExperienceReader#nextInput()}
      * @return Whether to check this channel again
      */
     public boolean nextInput() {
@@ -145,17 +145,15 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         // The process steps at a number or no more text
         while ((text.length() > 0) && (timer == 0)) {
         	endOfLine = text.indexOf('\n');
-        	if (endOfLine < 0) {
+        	if (endOfLine < 0) {	// this code is reached at end of text
         		line = text;
         		text = "";
-        	} else {
-        		// TODO : when is this code reached ?
+        	} else {	// this code is reached for ordinary lines
         		line = text.substring(0, endOfLine).trim();
-        		text = text.substring(endOfLine + 1);
+        		text = text.substring(endOfLine + 1);	// text becomes rest of text
         	}
 
-        	// read NARS language or an integer
-        	try {
+        	try { 	// read NARS language or an integer
         		timer = Integer.parseInt(line);
         		reasoner.walk(timer);
         	} catch (NumberFormatException e) {
@@ -167,7 +165,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
 					return false;
 				}
         	}
-        	inputText.setText(text);
+        	inputText.setText(text);	// update input Text widget to rest of text
         	if (text.isEmpty()) {
         		ready = false;
         	}

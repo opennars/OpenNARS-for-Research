@@ -53,7 +53,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
     private TextField timerText;
     /** Label of the clock */
     private Label timerLabel;
-    /** System clock */
+    /** System clock - number of cycles since last output */
     private long timer;
     /** Whether the experience is saving into a file */
     private boolean savingExp = false;

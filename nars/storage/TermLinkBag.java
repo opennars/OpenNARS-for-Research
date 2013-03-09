@@ -21,7 +21,6 @@
 package nars.storage;
 
 import nars.entity.*;
-import nars.gui.ParameterWindow;
 import nars.main_nogui.Parameters;
 
 /**
@@ -54,7 +53,7 @@ public class TermLinkBag extends Bag<TermLink> {
     }
 
     /**
-     * Replace defualt to prevent repeated inference, by checking TaskLink
+     * Replace default to prevent repeated inference, by checking TaskLink
      * @param taskLink The selected TaskLink
      * @param time The current time
      * @return The selected TermLink

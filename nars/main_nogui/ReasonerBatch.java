@@ -25,9 +25,12 @@ public class ReasonerBatch {
 	private long clock;
 	/** Flag for running continuously */
 	private boolean running;
-	/** The number of steps to be carried out */
+	/** The remaining number of steps to be carried out (walk mode) */
 	private int walkingSteps;
+	/** determines the end of {@link NARSBatch} program
+	 * (set but not accessed in this class) */
 	private boolean finishedInputs;
+    /** System clock - number of cycles since last output */
 	private long timer;
 
 	public ReasonerBatch() {      
@@ -84,7 +87,7 @@ public class ReasonerBatch {
 	}
 
 	/**
-	 * Carry the inference process for a certain number of steps
+	 * Will carry the inference process for a certain number of steps
 	 * @param n The number of inference steps to be carried
 	 */
 	public void walk(int n) {
@@ -114,18 +117,16 @@ public class ReasonerBatch {
 			}
 			finishedInputs = ! reasonerShouldRun;
 		}
+		// forward output to output Channels
 		ArrayList<String> output = memory.getExportStrings();
 		if (!output.isEmpty()) {
 			for (OutputChannel channelOut : outputChannels) {
 				channelOut.nextOutput(output);
 			}
-			output.clear();
+			output.clear();	// this will trigger display the current value of timer in Memory.report()
 		}
 		if (running || walkingSteps > 0) {
 			clock++;
-			//					for (OutputChannel channelOut : outputChannels) {
-			//						channelOut.tickTimer();
-			//					}
 			tickTimer();
 			memory.workCycle(clock);
 			if (walkingSteps > 0) {
@@ -134,6 +135,7 @@ public class ReasonerBatch {
 		}		
 	}
 
+	/** determines the end of {@link NARSBatch} program */
 	public boolean isFinishedInputs() {
 		return finishedInputs;
 	}
@@ -178,12 +180,12 @@ public class ReasonerBatch {
 
 	}
 
-    /** TODO cf {@link MainWindow#updateTimer()}
+    /** cf {@link MainWindow#updateTimer()}
      * To get the timer value and then to reset it
      * @return The previous timer value
      */
 	public long updateTimer() {
-        long i = timer; // clock;
+        long i = timer;
         initTimer();
         return i;
 	}
@@ -192,7 +194,8 @@ public class ReasonerBatch {
 		timer = 0;		
 	}
 	
-	public void tickTimer() {
+    /** Update timer */
+    public void tickTimer() {
 		timer++;
 	}
 

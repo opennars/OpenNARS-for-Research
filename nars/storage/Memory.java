@@ -420,12 +420,20 @@ public class Memory {
     /**
      * Display input/output sentence in the output channels.
      * The only place to add Objects into exportStrings. Currently only Strings
-     * are added, though in the future there can be outgoing Tasks
-     * TODO have a listener do this
+     * are added, though in the future there can be outgoing Tasks;
+     * also if exportStrings is empty display the current value of timer
+     * ( exportStrings is emptied in {@link ReasonerBatch#doTick()} - TODO fragile mechanism) 
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
      */
     public void report(Sentence sentence, boolean input) {
+        if (exportStrings.isEmpty()) {
+//          long timer = reasoner.getMainWindow().updateTimer();
+            long timer = reasoner.updateTimer();
+            if (timer > 0) {
+                exportStrings.add(String.valueOf(timer));
+            }
+        }
         String s;
         if (input) {
             s = "  IN: ";
@@ -433,13 +441,6 @@ public class Memory {
             s = " OUT: ";
         }
         s += sentence.toStringBrief();
-        if (exportStrings.isEmpty()) {
-//            long timer = reasoner.getMainWindow().updateTimer();
-            long timer = reasoner.updateTimer();
-            if (timer > 0) {
-                exportStrings.add(String.valueOf(timer));
-            }
-        }
         exportStrings.add(s);
     }
     

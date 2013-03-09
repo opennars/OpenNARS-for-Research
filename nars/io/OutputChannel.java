@@ -12,5 +12,6 @@ import java.util.ArrayList;
 public interface OutputChannel {
     public void nextOutput(ArrayList<String> output);
 
-	public void tickTimer();
+    /** Update timer and its display */
+    public void tickTimer();
 }

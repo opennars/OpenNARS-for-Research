@@ -83,7 +83,7 @@ public class ExperienceReader implements InputChannel {
 
     /**
      * Process the next chunk of input data
-     * TODO duplicated code with {@link InputWindow}
+     * TODO duplicated code with {@link InputWindow#nextInput()}
      * @return Whether the input channel should be checked again
      */
     public boolean nextInput() {
