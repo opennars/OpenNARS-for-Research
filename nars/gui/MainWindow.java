@@ -40,7 +40,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
     /** Reference to the memory */
     private Memory memory;
     /** Reference to the inference recorder */
-    private InferenceRecorder record;
+    private IInferenceRecorder record;
     /** Reference to the experience reader */
     private ExperienceReader experienceReader;
     /** Reference to the experience writer */

@@ -431,7 +431,7 @@ public final class Concept extends Item {
         taskLinks.putBack(tLink);
     }
 
-    /* ---------- display ---------- : jmv : this part should go elsewhere */
+    /* ---------- display ---------- : jmv : TODO this part should go elsewhere : ConceptWindow */
     /**
      * Start displaying contents and links, called from ConceptWindow,
      * TermWindow

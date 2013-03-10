@@ -33,8 +33,9 @@ import nars.entity.Task;
 import nars.entity.TaskLink;
 import nars.entity.TermLink;
 import nars.entity.TruthValue;
+import nars.gui.InferenceRecorder;
 import nars.inference.BudgetFunctions;
-import nars.io.InferenceRecorder;
+import nars.io.IInferenceRecorder;
 import nars.language.Term;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.ReasonerBatch;
@@ -53,7 +54,7 @@ public class Memory {
     /** New tasks with novel composed terms, for delayed and selective processing */
     private NovelTaskBag novelTasks;
     /** Inference record text to be written into a log file */
-    private InferenceRecorder recorder;
+    private IInferenceRecorder recorder;
 
 	private AtomicInteger beliefForgettingRate = new AtomicInteger( Parameters.TERM_LINK_FORGETTING_CYCLE );
 	private AtomicInteger taskForgettingRate = new AtomicInteger( Parameters.TASK_LINK_FORGETTING_CYCLE );
@@ -114,7 +115,7 @@ public class Memory {
         return exportStrings;
     }
 
-    public InferenceRecorder getRecorder() {
+    public IInferenceRecorder getRecorder() {
         return recorder;
     }
 

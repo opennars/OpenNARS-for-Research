@@ -18,59 +18,48 @@
  * You should have received a copy of the GNU General Public License
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nars.io;
+package nars.gui;
 
 import java.awt.FileDialog;
 import java.io.*;
 
-import nars.gui.InferenceWindow;
+import nars.io.IInferenceRecorder;
 
 /**
  * Inference log, which record input/output of each inference step
  * jmv: make it an interface, with 2 implementations: GUI or batch, or apply MVC design pattern : append() is the event
  */
-public class InferenceRecorder {
+public class InferenceRecorder implements IInferenceRecorder {
 
-    /** the display window */
+    /** the display window TODO jmv: elsewhere ! */
     private InferenceWindow window = new InferenceWindow(this);
     /** whether to display */
     private boolean isReporting = false;
     /** the log file */
     private PrintWriter logFile = null;
 
-    /** 
-     * Initialize the window and the file
-     */
-    public void init() {
+    @Override
+	public void init() {
         window.clear();
     }
 
-    /** 
-     * Show the window
-     */
-    public void show() {
+    @Override
+	public void show() {
         window.setVisible(true);
     }
 
-    /** 
-     * Begin the display
-     */
-    public void play() {
+    @Override
+	public void play() {
         isReporting = true;
     }
 
-    /**
-     * Stop the display
-     */
-    public void stop() {
+    @Override
+	public void stop() {
         isReporting = false;
     }
 
-    /** 
-     * Add new text to display
-     * @param s The line to be displayed
-     */
-    public void append(String s) {
+    @Override
+	public void append(String s) {
         if (isReporting) {
             window.append(s);
         }
@@ -79,10 +68,8 @@ public class InferenceRecorder {
         }
     }
 
-    /**
-     * Open the log file
-     */
-    public void openLogFile() {
+    @Override
+	public void openLogFile() {
         FileDialog dialog = new FileDialog((FileDialog) null, "Inference Log", FileDialog.SAVE);
         dialog.setVisible(true);
         String directoryName = dialog.getDirectory();
@@ -96,20 +83,15 @@ public class InferenceRecorder {
         window.setVisible(true);
     }
 
-    /**
-     * Close the log file
-     */
-    public void closeLogFile() {
+    @Override
+	public void closeLogFile() {
         logFile.close();
         logFile = null;
         window.resetBackground();
     }
 
-    /**
-     * Check file logging
-     * @return If the file logging is going on
-     */
-    public boolean isLogging() {
+    @Override
+	public boolean isLogging() {
         return (logFile != null);
     }
 }

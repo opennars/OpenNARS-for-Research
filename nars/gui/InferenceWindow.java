@@ -42,13 +42,13 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     /** Type of caught text */
     private String watched = "";
     /** Inference recorder */
-    private InferenceRecorder recorder;
+    private IInferenceRecorder recorder;
 
     /**
      * Constructor
      * @param recorder The inference recorder
      */
-    public InferenceWindow(InferenceRecorder recorder) {
+    public InferenceWindow(IInferenceRecorder recorder) {
         super("Inference log");
         this.recorder = recorder;
 

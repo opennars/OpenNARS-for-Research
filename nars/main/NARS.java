@@ -28,7 +28,7 @@ import nars.main_nogui.ReasonerBatch;
 /**
  * The main class of the project.
  * <p>
- * Define an application with full funcationality and an applet with partial functionality.
+ * Define an application with full functionality and an applet with partial functionality.
  * <p>
  * Manage the internal working thread. Communicate with Reasoner only.
  */
@@ -38,7 +38,7 @@ public class NARS extends Applet implements Runnable {
      * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.5.1     February 2013  \n";
+            "     Open-NARS     Version 1.5.2     March 2013  \n";
     /**
      * The project websites.
      */
@@ -96,7 +96,7 @@ public class NARS extends Applet implements Runnable {
     @Override
     public void start() {
         if (narsThread == null) {
-            narsThread = new Thread(this);
+            narsThread = new Thread(this, "Inference" );
             narsThread.start();
         }
     }
