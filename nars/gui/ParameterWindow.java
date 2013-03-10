@@ -22,6 +22,7 @@ package nars.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Window displaying a system parameter that can be adjusted in run time
@@ -35,18 +36,22 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     /** Adjusting bar */
     private Scrollbar valueBar;
     /** parameter values */
-    private int defaultValue, previousValue, currentValue;
-
+    private int defaultValue, previousValue; // , currentValue;
+    AtomicInteger currentValue;
+    
     /**
      * Constructor
      * @param title Parameter name
      * @param dft The default value of the parameter
+     * @param value  
      */
-    ParameterWindow(String title, int dft) {
+    ParameterWindow(String title, int dft, AtomicInteger currentValue ) {
         super(title);
         defaultValue = dft;
+        this.currentValue = currentValue;
+        
         previousValue = dft;
-        currentValue = dft;
+        currentValue.set( dft );
         setLayout(new GridLayout(3, 3, 8, 4));
         setBackground(SINGLE_WINDOW_COLOR);
         Label sp1 = new Label("");
@@ -80,7 +85,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
      * @return The current value
      */
     public int value() {
-        return currentValue;
+        return currentValue.get();
     }
 
     /**
@@ -90,12 +95,12 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     public void actionPerformed(ActionEvent e) {
         Object s = e.getSource();
         if (s == defaultButton) {
-            currentValue = defaultValue;
-            valueBar.setValue(currentValue);
+            currentValue.set( defaultValue );
+            valueBar.setValue(currentValue.get() );
             valueLabel.setText(String.valueOf(currentValue));
         } else if (s == undoButton) {
-            currentValue = previousValue;
-            valueBar.setValue(currentValue);
+            currentValue.set( previousValue );
+            valueBar.setValue(currentValue.get() );
             valueLabel.setText(String.valueOf(currentValue));
         } else if (s == hideButton) {
             close();
@@ -103,7 +108,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     }
 
     private void close() {
-        previousValue = currentValue;
+        previousValue = currentValue.get();
         setVisible(false);
     }
 
@@ -121,7 +126,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
             int v = valueBar.getValue();
             valueLabel.setText(String.valueOf(v));
             valueBar.setValue(v);
-            currentValue = v;
+            currentValue.set( v );
         }
     }
 }

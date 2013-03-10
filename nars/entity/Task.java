@@ -158,6 +158,7 @@ public class Task extends Item {
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append(super.toString() + " ");
+        s.append( getSentence().getStamp() );
         if (parentTask != null) {
             s.append("  \n from task: " + parentTask.toStringBrief());
             if (parentBelief != null) {
@@ -167,7 +168,7 @@ public class Task extends Item {
         if (bestSolution != null) {
             s.append("  \n solution: " + bestSolution.toStringBrief());
         }
-        s.append("\n>>>> end of Task");
+//        s.append("\n>>>> end of Task");
 
         return s.toString();
     }

@@ -49,7 +49,7 @@ public class TermLinkBag extends Bag<TermLink> {
      */
     protected int forgetRate() {
 //        return memory.getMainWindow().forgetBW.value();
-        return memory.getBeliefForgettingRate();  
+        return memory.getBeliefForgettingRate().get();  
     }
 
     /**

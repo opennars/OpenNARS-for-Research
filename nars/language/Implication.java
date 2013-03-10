@@ -59,8 +59,8 @@ public class Implication extends Statement {
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
-     * @param subject The first compoment
-     * @param predicate The second compoment
+     * @param subject The first component
+     * @param predicate The second component
      * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
      */

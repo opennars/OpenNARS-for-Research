@@ -22,6 +22,7 @@ package nars.storage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import nars.entity.BudgetValue;
 import nars.entity.Concept;
@@ -43,7 +44,7 @@ import nars.main_nogui.ReasonerBatch;
  */
 public class Memory {
 
-    /** Backward pointer to the reasoner */
+	/** Backward pointer to the reasoner */
     private ReasonerBatch reasoner;
 
     /* ---------- Long-term storage for multiple cycles ---------- */
@@ -54,7 +55,11 @@ public class Memory {
     /** Inference record text to be written into a log file */
     private InferenceRecorder recorder;
 
-    /* ---------- Short-term workspace for a single cycle ---------- */
+	private AtomicInteger beliefForgettingRate = new AtomicInteger( Parameters.TERM_LINK_FORGETTING_CYCLE );
+	private AtomicInteger taskForgettingRate = new AtomicInteger( Parameters.TASK_LINK_FORGETTING_CYCLE );
+	private AtomicInteger conceptForgettingRate = new AtomicInteger( Parameters.CONCEPT_FORGETTING_CYCLE );
+
+	/* ---------- Short-term workspace for a single cycle ---------- */
     /** List of new tasks accumulated in one cycle, to be processed in the next cycle */
     private ArrayList<Task> newTasks;
     /** List of Strings or Tasks to be sent to the output channels */
@@ -165,7 +170,7 @@ public class Memory {
     /**
      * Get the Concept associated to a Term, or create it.
      * @param term indicating the concept
-     * @return an existing Concept, or a new one
+     * @return an existing Concept, or a new one, or null ( TODO bad smell )
      */
     public Concept getConcept(Term term) {
         if (!term.isConstant()) {
@@ -230,7 +235,7 @@ public class Memory {
         if (sentence.isQuestion()) {
             float s = task.getBudget().summary();
 //            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
-            float minSilent = reasoner.getSilenceValue() / 100.0f;
+            float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             if (s > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
@@ -247,7 +252,7 @@ public class Memory {
             recorder.append("!!! Derived: " + task + "\n");
             float budget = task.getBudget().summary();
 //            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
-            float minSilent = reasoner.getSilenceValue() / 100.0f;
+            float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             if (budget > minSilent) {  // only report significant derived Tasks
                 report(task.getSentence(), false);
             }
@@ -427,6 +432,15 @@ public class Memory {
      * @param input whether the task is input
      */
     public void report(Sentence sentence, boolean input) {
+    	if (ReasonerBatch.DEBUG) {
+    		System.out.println("// report( clock " + reasoner.getTime()
+    				+ ", input " + input
+    				+ ", timer " + reasoner.getTimer()
+    				+ ", Sentence " + sentence
+    				+ ", exportStrings " + exportStrings
+    				);
+    		System.out.flush();
+    	}
         if (exportStrings.isEmpty()) {
 //          long timer = reasoner.getMainWindow().updateTimer();
             long timer = reasoner.updateTimer();
@@ -471,13 +485,16 @@ public class Memory {
 				item.toString();
 	}
 
-	public int getTaskForgettingRate() {
-		// TODO
-		return Parameters.TASK_LINK_FORGETTING_CYCLE;
+	public AtomicInteger getTaskForgettingRate() {
+		return taskForgettingRate;
 	}
 
-	public int getBeliefForgettingRate() {
-		// TODO
-		return Parameters.TERM_LINK_FORGETTING_CYCLE;
+	public AtomicInteger getBeliefForgettingRate() {
+		return beliefForgettingRate;
 	}
+
+	public AtomicInteger getConceptForgettingRate() {
+		return conceptForgettingRate;
+	}
+
 }

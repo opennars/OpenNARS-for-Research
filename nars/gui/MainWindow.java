@@ -77,10 +77,10 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         experienceWriter = new ExperienceWriter(reasoner);
         inputWindow = reasoner.getInputWindow();
         conceptWin = new TermWindow(memory);
-        forgetTW = new ParameterWindow("Task Forgetting Rate", Parameters.TASK_LINK_FORGETTING_CYCLE);
-        forgetBW = new ParameterWindow("Belief Forgetting Rate", Parameters.TERM_LINK_FORGETTING_CYCLE);
-        forgetCW = new ParameterWindow("Concept Forgetting Rate", Parameters.CONCEPT_FORGETTING_CYCLE);
-        silentW = new ParameterWindow("Report Silence Level", Parameters.SILENT_LEVEL);
+        forgetTW = new ParameterWindow("Task Forgetting Rate", Parameters.TASK_LINK_FORGETTING_CYCLE, memory.getTaskForgettingRate() );
+        forgetBW = new ParameterWindow("Belief Forgetting Rate", Parameters.TERM_LINK_FORGETTING_CYCLE, memory.getBeliefForgettingRate() );
+        forgetCW = new ParameterWindow("Concept Forgetting Rate", Parameters.CONCEPT_FORGETTING_CYCLE, memory.getConceptForgettingRate() );
+        silentW = new ParameterWindow("Report Silence Level", Parameters.SILENT_LEVEL, reasoner.getSilenceValue() );
 
         setBackground(MAIN_WINDOW_COLOR);
         MenuBar menuBar = new MenuBar();
@@ -310,4 +310,9 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         initTimer();
         return i;
     }
+
+	public long getTimer() {
+		return timer;
+	}
+
 }

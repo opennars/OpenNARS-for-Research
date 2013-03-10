@@ -1,6 +1,7 @@
 package nars.main_nogui;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import nars.entity.Stamp;
 import nars.entity.Task;
@@ -12,7 +13,8 @@ import nars.io.Symbols;
 import nars.storage.Memory;
 
 public class ReasonerBatch {
-
+	/** global DEBUG print switch */
+	public static final boolean DEBUG = false;
 	/** The name of the reasoner */
 	protected String name;
 	/** The memory of the reasoner */
@@ -32,6 +34,8 @@ public class ReasonerBatch {
 	private boolean finishedInputs;
     /** System clock - number of cycles since last output */
 	private long timer;
+
+	private AtomicInteger silenceValue = new AtomicInteger( Parameters.SILENT_LEVEL );
 
 	public ReasonerBatch() {      
 		memory = new Memory(this);
@@ -109,7 +113,17 @@ public class ReasonerBatch {
 	}
 
 	public void doTick() {
-		if (walkingSteps == 0) {
+		if (DEBUG)
+			if ( running || walkingSteps > 0 || !finishedInputs ) {
+				System.out.println("// doTick: "
+						+ "walkingSteps " + walkingSteps
+						+ ", clock " + clock
+						+ ", getTimer " + getTimer()
+						+ "\n//    memory.getExportStrings() " + memory.getExportStrings()
+						);
+				System.out.flush();
+			}
+      	if (walkingSteps == 0) {
 			boolean reasonerShouldRun = false;
 			for (InputChannel channelIn : inputChannels) {
 				reasonerShouldRun = reasonerShouldRun ||
@@ -117,7 +131,7 @@ public class ReasonerBatch {
 			}
 			finishedInputs = ! reasonerShouldRun;
 		}
-		// forward output to output Channels
+		// forward to output Channels
 		ArrayList<String> output = memory.getExportStrings();
 		if (!output.isEmpty()) {
 			for (OutputChannel channelOut : outputChannels) {
@@ -174,10 +188,8 @@ public class ReasonerBatch {
 	}
 
 	/** Report Silence Level */ 
-	public float getSilenceValue() {
-		// TODO
-		return Parameters.SILENT_LEVEL;
-
+	public AtomicInteger getSilenceValue() {
+		return silenceValue;
 	}
 
     /** cf {@link MainWindow#updateTimer()}
@@ -185,18 +197,26 @@ public class ReasonerBatch {
      * @return The previous timer value
      */
 	public long updateTimer() {
-        long i = timer;
+        long i = getTimer();
         initTimer();
         return i;
 	}
 
 	public void initTimer() {
-		timer = 0;		
+		setTimer(0);		
 	}
 	
     /** Update timer */
     public void tickTimer() {
-		timer++;
+		setTimer(getTimer() + 1);
+	}
+
+	public long getTimer() {
+		return timer;
+	}
+
+	private void setTimer(long timer) {
+		this.timer = timer;
 	}
 
 }

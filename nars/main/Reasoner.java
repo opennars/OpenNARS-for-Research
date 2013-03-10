@@ -83,4 +83,8 @@ public class Reasoner extends ReasonerBatch {
 	public void tickTimer() {
 		mainWindow.tickTimer();
 	}
+	
+	public long getTimer() {
+		return mainWindow.getTimer();
+	}
 }

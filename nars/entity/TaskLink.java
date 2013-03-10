@@ -31,7 +31,7 @@ import nars.main_nogui.Parameters;
  */
 public class TaskLink extends TermLink {
 
-    /** The Task linked. The "target" field in TermLink is not used here. */
+	/** The Task linked. The "target" field in TermLink is not used here. */
     private Task targetTask;
     /** Remember the TermLinks that has been used recently with this TaskLink */
     private String recordedLinks[];
@@ -110,6 +110,12 @@ public class TaskLink extends TermLink {
         return true;
     }
 
+
+    @Override
+	public String toString() {
+		return super.toString() + " " + getTargetTask().getSentence().getStamp();
+	}
+    
 //    /**
 //     * Merge one TaskLink into another
 //     * @param that The other TaskLink
