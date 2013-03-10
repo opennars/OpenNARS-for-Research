@@ -30,8 +30,7 @@ import nars.storage.Bag;
  * Window display the priority distribution of items within a given bag
  */
 public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener {
-
-    /** The bag to be displayed */
+	/** The bag to be displayed */
     private Bag<?> bag;
     /** The lowest level displayed */
     private int showLevel;
@@ -43,7 +42,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     private Label valueLabel;
     /** Adjustable display level */
     private Scrollbar valueBar;
-    /** The location of the display area, shifted according to the number of windows openned */
+    /** The location of the display area, shifted according to the number of windows opened */
     private static int counter;
 
     /**
@@ -84,12 +83,12 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         gridbag.setConstraints(valueBar, c);
         add(valueBar);
 
-        playButton = new Button("Play");
+		playButton = new Button(NarsFrame.ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button("Stop");
+        stopButton = new Button(NarsFrame.OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);

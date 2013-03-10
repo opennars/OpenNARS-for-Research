@@ -85,12 +85,12 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         watchType.addItemListener(this);
         add(watchType);
 
-        playButton = new Button("Play");
+        playButton = new Button(ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button("Stop");
+        stopButton = new Button(OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);

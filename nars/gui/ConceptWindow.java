@@ -68,12 +68,12 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
 
         c.weighty = 0.0;
         c.gridwidth = 1;
-        playButton = new Button("Play");
+        playButton = new Button(ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button("Stop");
+        stopButton = new Button(OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);

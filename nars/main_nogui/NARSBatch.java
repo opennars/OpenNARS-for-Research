@@ -53,6 +53,10 @@ public class NARSBatch {
         		+ nars.reasoner.toString() );
     }
 
+    public NARSBatch() {
+    	init();
+    }
+    
     /** non-static equivalent to {@link #main(String[])} */
     public void runInference(String args[]) {
         init(args);
@@ -60,7 +64,6 @@ public class NARSBatch {
 	}
 
 	public void init(String[] args) {
-        init();
         if (args.length > 0) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
@@ -100,4 +103,8 @@ public class NARSBatch {
      private void log(String mess) {
     	if(logging) System.out.println( "/ " + mess);
      }
+
+	public ReasonerBatch getReasoner() {
+		return reasoner;
+	}
 }

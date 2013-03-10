@@ -42,6 +42,8 @@ public abstract class NarsFrame extends Frame implements WindowListener {
     static final Font NarsFont = new Font("Helvetica", Font.PLAIN, 11);
     /** Message for unimplemented functions */
     static final String UNAVAILABLE = "\n Not implemented in this demo applet.";
+	static final String ON_LABEL = "On";
+	static final String OFF_LABEL = "Off";
 
     /** Default constructor */
     NarsFrame() {
