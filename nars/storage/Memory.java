@@ -409,6 +409,14 @@ public class Memory {
     /* ---------- display ---------- */
     /**
      * Display active concepts, called from MainWindow.
+     * 
+     * TODO we don't want to expose fields concepts and novelTasks,
+     * AND we want to separate GUI and inference,
+     * so this method will become
+     * conceptsStartPlay( BagObserver bagObserver, String s)
+     *  and this method will call
+     * concepts.addBagObserver( bagObserver, s)
+     * see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)}
      * @param s the window title
      */
     public void conceptsStartPlay(String s) {
@@ -417,6 +425,7 @@ public class Memory {
 
     /**
      * Display new tasks, called from MainWindow.
+     * TODO see {@link #conceptsStartPlay(String)}
      * @param s the window title
      */
     public void taskBuffersStartPlay(String s) {
@@ -449,6 +458,7 @@ public class Memory {
                 exportStrings.add(String.valueOf(timer));
             }
         }
+
         String s;
         if (input) {
             s = "  IN: ";

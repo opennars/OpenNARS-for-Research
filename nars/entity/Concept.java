@@ -22,6 +22,7 @@ package nars.entity;
 
 import java.util.ArrayList;
 
+import nars.gui.BagWindow;
 import nars.gui.ConceptWindow;
 import nars.inference.BudgetFunctions;
 import nars.inference.LocalRules;
@@ -32,6 +33,7 @@ import nars.language.Term;
 import nars.main.NARS;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.Parameters;
+import nars.storage.Bag;
 import nars.storage.Memory;
 import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
@@ -436,6 +438,8 @@ public final class Concept extends Item {
      * Start displaying contents and links, called from ConceptWindow,
      * TermWindow
      * or Memory.processTask only
+     * 
+     * TODO same design as for Bag and {@link BagWindow}; see {@link Bag#startPlay(String)}
      * @param showLinks Whether to display the task links
      */
     public void startPlay(boolean showLinks) {
@@ -465,7 +469,11 @@ public final class Concept extends Item {
     public void stop() {
         showing = false;
     }
+    /* ---------- display ---------- : jmv : TODO this part should go elsewhere : ConceptWindow */
 
+    
+    
+    
     /**
      * Collect direct isBelief, questions, and goals for display
      * @return String representation of direct content

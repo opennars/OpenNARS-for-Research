@@ -53,6 +53,7 @@ public abstract class Bag<Type extends Item> {
     /** shared DISTRIBUTOR that produce the probability distribution */
     private static final Distributor DISTRIBUTOR = new Distributor(TOTAL_LEVEL); //
     /** mapping from key to item */
+    
     private HashMap<String, Type> nameTable;
     /** array of lists of items, for items on different level */
     private ArrayList<ArrayList<Type>> itemTable;
@@ -66,10 +67,12 @@ public abstract class Bag<Type extends Item> {
     private int currentLevel;
     /** maximum number of items to be taken out at current level */
     private int currentCounter;
+    
     /** whether this bag has an active window */
     private boolean showing;
     /** display window TODO : remove GUI dependency */
     private BagWindow window;
+    
     /** reference to memory */
     protected Memory memory;
 
@@ -289,7 +292,12 @@ public abstract class Bag<Type extends Item> {
 
     /**
      * To start displaying the Bag in a BagWindow
-     * TODO these 4 GUI methods should be moved in class {@link BagWindow}
+     * 
+     * TODO startPlay should  be renamed 
+     * addBagObserver( BagObserver bagObserver, String title)
+     * and BagWindow will implement new interface BagObserver;
+     * the 3 following GUI methods should be moved in class {@link BagWindow},
+     * 
      * @param title The title of the window
      */
     public void startPlay(String title) {
@@ -307,19 +315,19 @@ public abstract class Bag<Type extends Item> {
     }
 
     /**
+     * Stop display
+     */
+    public void stop() {
+        showing = false;
+    }
+    
+    /**
      * Refresh display
      */
     public void refresh() {
         if (showing) {
             window.post(toString());
         }
-    }
-
-    /**
-     * Stop display
-     */
-    public void stop() {
-        showing = false;
     }
 
     /**
