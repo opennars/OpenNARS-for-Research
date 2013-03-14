@@ -23,7 +23,7 @@ package nars.entity;
 import java.util.ArrayList;
 
 import nars.gui.BagWindow;
-import nars.gui.ConceptWindow;
+import nars.gui.EntityObserver;
 import nars.inference.BudgetFunctions;
 import nars.inference.LocalRules;
 import nars.inference.RuleTables;
@@ -34,7 +34,9 @@ import nars.main.NARS;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.Parameters;
 import nars.storage.Bag;
+import nars.storage.BagObserver;
 import nars.storage.Memory;
+import nars.storage.NullBagObserver;
 import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
 
@@ -60,12 +62,10 @@ public final class Concept extends Item {
     private ArrayList<Task> questions;
     /** Sentences directly made about the term, with non-future tense */
     private ArrayList<Sentence> beliefs;
-    /** Whether the content of the concept is being displayed */
-    private boolean showing = false;
-    /** The display window */
-    private ConceptWindow window = null;
     /** Reference to the memory */
     Memory memory;
+    /** The display window */
+    private EntityObserver entityObserver = new NullEntityObserver();
 
 
     /* ---------- constructor and initialization ---------- */
@@ -105,9 +105,10 @@ public final class Concept extends Item {
         if (task.getBudget().aboveThreshold()) {    // still need to be processed
             linkToTask(task);
         }
-        if (showing) {
-            window.post(displayContent());
-        }
+//        if (showing) {
+//            window.post(displayContent());
+//        }
+        entityObserver.refresh(displayContent());
     }
 
     /**
@@ -439,19 +440,22 @@ public final class Concept extends Item {
      * TermWindow
      * or Memory.processTask only
      * 
-     * TODO same design as for Bag and {@link BagWindow}; see {@link Bag#startPlay(String)}
+     * TODO same design as for Bag and {@link BagWindow}; see {@link Bag#addBagObserver(BagObserver, String)}
+     * @param entityObserver TODO
      * @param showLinks Whether to display the task links
      */
-    public void startPlay(boolean showLinks) {
-        if (window != null && window.isVisible()) {
-            window.detachFromConcept();
-        }
-        window = new ConceptWindow(this);
-        showing = true;
-        window.post(displayContent());
+    public void startPlay(EntityObserver entityObserver, boolean showLinks) {
+    	this.entityObserver = entityObserver;
+    	entityObserver.startPlay(this, showLinks);
+//        if (window != null && window.isVisible()) {
+//            window.detachFromConcept();
+//        }
+//        window = new ConceptWindow(this);
+//        showing = true;
+    	entityObserver.post(displayContent());
         if (showLinks) {
-            taskLinks.startPlay("Task Links in " + term);
-            termLinks.startPlay("Term Links in " + term);
+            taskLinks.addBagObserver(entityObserver.createBagObserver(), "Task Links in " + term);
+            termLinks.addBagObserver(entityObserver.createBagObserver(), "Term Links in " + term);
         }
     }
 
@@ -459,21 +463,20 @@ public final class Concept extends Item {
      * Resume display, called from ConceptWindow only
      */
     public void play() {
-        showing = true;
-        window.post(displayContent());
+//        showing = true;
+//        window.post(displayContent());
+//        showing = true;
+        entityObserver.post(displayContent());
     }
 
     /**
      * Stop display, called from ConceptWindow only
      */
     public void stop() {
-        showing = false;
+        entityObserver.stop();
     }
     /* ---------- display ---------- : jmv : TODO this part should go elsewhere : ConceptWindow */
 
-    
-    
-    
     /**
      * Collect direct isBelief, questions, and goals for display
      * @return String representation of direct content
@@ -493,6 +496,23 @@ public final class Concept extends Item {
             }
         }
         return buffer.toString();
+    }
+    
+    class NullEntityObserver implements EntityObserver {
+		@Override
+		public void post(String str) {}
+		@SuppressWarnings("rawtypes")
+		@Override
+		public BagObserver createBagObserver() {
+			return new NullBagObserver();
+		}
+		@Override
+		public void startPlay(Concept concept, boolean showLinks) {}
+		@Override
+		public void stop() {}
+		@Override
+		public void refresh(String message) {}
+    	
     }
 }
 

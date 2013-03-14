@@ -42,7 +42,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     /** Type of caught text */
     private String watched = "";
     /** Inference recorder */
-    private IInferenceRecorder recorder;
+    private IInferenceRecorder recorder = new NullInferenceRecorder();
 
     /**
      * Constructor
@@ -166,5 +166,26 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
      */
     public void resetBackground() {
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
+    }
+    
+    class NullInferenceRecorder implements IInferenceRecorder {
+		@Override
+		public void init() {}
+		@Override
+		public void show() {}
+		@Override
+		public void play() {}
+		@Override
+		public void stop() {}
+		@Override
+		public void append(String s) {}
+		@Override
+		public void openLogFile() {}
+		@Override
+		public void closeLogFile() {}
+		@Override
+		public boolean isLogging() {
+			return false;
+		}    	
     }
 }

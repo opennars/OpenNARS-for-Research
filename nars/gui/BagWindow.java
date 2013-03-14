@@ -25,11 +25,12 @@ import java.awt.event.*;
 
 import nars.main_nogui.Parameters;
 import nars.storage.Bag;
+import nars.storage.BagObserver;
 
 /**
  * Window display the priority distribution of items within a given bag
  */
-public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener {
+public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener, BagObserver {
 	/** The bag to be displayed */
     private Bag<?> bag;
     /** The lowest level displayed */
@@ -44,15 +45,20 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     private Scrollbar valueBar;
     /** The location of the display area, shifted according to the number of windows opened */
     private static int counter;
-
+    /** whether this bag window is active */
+    private boolean showing;
+    
     /**
      * Constructor
      * @param b The bag to be displayed
      * @param title The title of the window
      */
-    public BagWindow(Bag<?> b, String title) {
-        super(title);
-        bag = b;
+    public BagWindow(
+//    		Bag<?> b
+//    		, String title
+    		) {
+//        super(title);
+//        bag = b;
         showLevel = Parameters.BAG_THRESHOLD;
         setBackground(MULTIPLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
@@ -103,11 +109,9 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         setVisible(true);
     }
 
-    /**
-     * Post the bag content
-     * @param str The text
-     */
-    public void post(String str) {
+    @Override
+	public void post(String str) {
+    	showing = true;
         text.setText(str);
     }
 
@@ -161,4 +165,23 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
             bag.play();
         }
     }
+
+	@Override
+	public void setBag(Bag<?> bag) {
+		this.bag = bag;
+	}
+	
+    /**
+     * Refresh display if in showing state
+     */
+    public void refresh( String message) {
+        if (showing) {
+            post( message );
+        }
+    }
+
+	@Override
+	public void stop() {
+      showing = false;		
+	}
 }

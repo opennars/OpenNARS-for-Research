@@ -68,13 +68,14 @@ public abstract class Bag<Type extends Item> {
     /** maximum number of items to be taken out at current level */
     private int currentCounter;
     
-    /** whether this bag has an active window */
-    private boolean showing;
+//    /** whether this bag has an active window */
+//    private boolean showing;
     /** display window TODO : remove GUI dependency */
     private BagWindow window;
     
     /** reference to memory */
     protected Memory memory;
+	private BagObserver bagObserver = new NullBagObserver<Type>();
 
     /**
      * constructor, called from subclasses
@@ -82,7 +83,7 @@ public abstract class Bag<Type extends Item> {
      */
     protected Bag(Memory memory) {
         this.memory = memory;
-        showing = false;
+//        showing = false;
         capacity = capacity();
         init();
     }
@@ -297,37 +298,43 @@ public abstract class Bag<Type extends Item> {
      * addBagObserver( BagObserver bagObserver, String title)
      * and BagWindow will implement new interface BagObserver;
      * the 3 following GUI methods should be moved in class {@link BagWindow},
-     * 
+     * @param bagObserver TODO
      * @param title The title of the window
      */
-    public void startPlay(String title) {
-        window = new BagWindow(this, title);
-        showing = true;
-        window.post(toString());
+    public void addBagObserver(BagObserver bagObserver, String title) {
+    	this.bagObserver = bagObserver;
+    	bagObserver.post(toString());
+    	bagObserver.setTitle(title);
+//        window = new BagWindow(this, title);
+//        showing = true;
+//        window.post(toString());
     }
 
     /**
      * Resume display
      */
     public void play() {
-        showing = true;
-        window.post(toString());
+    	bagObserver.post(toString());
+//        showing = true;
+//        window.post(toString());
     }
 
     /**
      * Stop display
      */
     public void stop() {
-        showing = false;
+    	bagObserver.stop();
+//        showing = false;
     }
     
     /**
      * Refresh display
      */
     public void refresh() {
-        if (showing) {
-            window.post(toString());
-        }
+    	bagObserver.refresh(toString());
+//        if (showing) {
+//            window.post(toString());
+//        }
     }
 
     /**

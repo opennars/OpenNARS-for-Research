@@ -93,7 +93,8 @@ public class TermWindow extends NarsFrame implements ActionListener {
         if (b == playButton) {
             Concept concept = memory.nameToConcept(termField.getText().trim());
             if (concept != null) {
-                concept.startPlay(true);
+                EntityObserver entityObserver = new ConceptWindow(concept);
+				concept.startPlay(entityObserver , true);
             }
         } else if (b == hideButton) {
             close();

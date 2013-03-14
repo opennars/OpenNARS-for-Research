@@ -49,6 +49,5 @@ public class ConceptBag extends Bag<Concept> {
      */
     protected int forgetRate() {
     	return memory.getConceptForgettingRate().get();
-//        return memory.getMainWindow().forgetCW.value();
     }
 }

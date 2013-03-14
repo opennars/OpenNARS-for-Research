@@ -416,20 +416,23 @@ public class Memory {
      * conceptsStartPlay( BagObserver bagObserver, String s)
      *  and this method will call
      * concepts.addBagObserver( bagObserver, s)
-     * see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)}
+     * see design for Bag and {@link BagWindow} in {@link Bag#addBagObserver(BagObserver, String)}
+     * @param bagObserver TODO
      * @param s the window title
      */
-    public void conceptsStartPlay(String s) {
-        concepts.startPlay(s);
+    public void conceptsStartPlay(BagObserver bagObserver, String s) {
+    	bagObserver.setBag(concepts);
+        concepts.addBagObserver(bagObserver, s);
     }
 
     /**
      * Display new tasks, called from MainWindow.
-     * TODO see {@link #conceptsStartPlay(String)}
+     * TODO see {@link #conceptsStartPlay(BagObserver, String)}
+     * @param bagObserver TODO
      * @param s the window title
      */
-    public void taskBuffersStartPlay(String s) {
-        novelTasks.startPlay(s);
+    public void taskBuffersStartPlay(BagObserver bagObserver, String s) {
+        novelTasks.addBagObserver(bagObserver, s);
     }
 
     /**

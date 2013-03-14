@@ -26,11 +26,12 @@ import java.awt.event.*;
 //import java.beans.PropertyChangeListener;
 
 import nars.entity.Concept;
+import nars.storage.BagObserver;
 
 /**
  * Window displaying the content of a Concept, such as beliefs, goals, and questions
  */
-public class ConceptWindow extends NarsFrame implements ActionListener {
+public class ConceptWindow extends NarsFrame implements ActionListener, EntityObserver {
 
     /** Control buttons */
     private Button playButton, stopButton, playInNewWindowButton, closeButton;
@@ -38,6 +39,8 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
     private TextArea text;
     /** The concept to be displayed */
     private Concept concept;
+    /** Whether the content of the concept is being displayed */
+    private boolean showing = false;
     /** Used to adjust the screen position */
     private static int instanceCount = 0;
 
@@ -94,11 +97,12 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
         setVisible(true);
     }
 
-    /**
-     * Display the content of the concept
-     * @param str The text to be displayed
-     */
-    public void post(String str) {
+    /* (non-Javadoc)
+	 * @see nars.gui.EntityObserver#post(java.lang.String)
+	 */
+    @Override
+	public void post(String str) {
+      showing = true;
         text.setText(str);
     }
 
@@ -123,7 +127,8 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
             concept.stop();
         } else if (s == playInNewWindowButton) {
             concept.stop();
-            concept.startPlay(false);
+            EntityObserver entityObserver = new ConceptWindow(concept);
+            concept.startPlay(entityObserver, false);
         } else if (s == closeButton) {
             close();
         }
@@ -138,4 +143,34 @@ public class ConceptWindow extends NarsFrame implements ActionListener {
     public void windowClosing(WindowEvent e) {
         close();
     }
+
+	@Override
+	public BagObserver createBagObserver() {
+		return new BagWindow();
+	}
+
+	@Override
+	public void startPlay(Concept concept, boolean showLinks) {
+        if (this.isVisible()) {
+            this.detachFromConcept();
+        }
+//        this = new ConceptWindow(this);
+        showing = true;
+        this.post(concept.displayContent());	
+	}
+	
+    /**
+     * Refresh display if in showing state
+     */
+	@Override
+    public void refresh( String message) {
+        if (showing) {
+            post( message );
+        }
+    }
+
+	@Override
+	public void stop() {
+        showing = false;
+	}
 }

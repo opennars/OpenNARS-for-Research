@@ -27,11 +27,11 @@ import nars.io.IInferenceRecorder;
 
 /**
  * Inference log, which record input/output of each inference step
- * jmv: make it an interface, with 2 implementations: GUI or batch, or apply MVC design pattern : append() is the event
+ * interface with 1 implementation: GUI ( batch not implemented )
  */
 public class InferenceRecorder implements IInferenceRecorder {
 
-    /** the display window TODO jmv: elsewhere ! */
+    /** the display window */
     private InferenceWindow window = new InferenceWindow(this);
     /** whether to display */
     private boolean isReporting = false;

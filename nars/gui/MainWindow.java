@@ -223,7 +223,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
             }
         } else if (obj instanceof MenuItem) {
             String label = e.getActionCommand();
-            if (label.equals("Load Experience")) {
+			if (label.equals("Load Experience")) {
                 experienceReader = new ExperienceReader(reasoner);
                 experienceReader.openLoadFile();
             } else if (label.equals("Save Experience")) {
@@ -246,13 +246,10 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
                 reasoner.reset();
                 memory.getExportStrings().add("*****RESET*****");
             } else if (label.equals("Concepts")) {
-            	/* TODO see Memory.conceptsStartPlay
-            	 *  see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
-                memory.conceptsStartPlay("Active Concepts");
+            	/* see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
+                memory.conceptsStartPlay(new BagWindow(), "Active Concepts");
             } else if (label.equals("Buffered Tasks")) {
-            	/* TODO see Memory.taskBuffersStartPlay
-            	 *  see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
-                memory.taskBuffersStartPlay("Buffered Tasks");
+                memory.taskBuffersStartPlay(new BagWindow(), "Buffered Tasks");
             } else if (label.equals("Concept Content")) {
                 conceptWin.setVisible(true);
             } else if (label.equals("Inference Log")) {
