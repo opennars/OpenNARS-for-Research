@@ -23,7 +23,6 @@ package nars.storage;
 import java.util.*;
 
 import nars.entity.Item;
-import nars.gui.BagWindow;
 import nars.inference.BudgetFunctions;
 import nars.main_nogui.Parameters;
 

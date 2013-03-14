@@ -33,7 +33,6 @@ import nars.entity.Task;
 import nars.entity.TaskLink;
 import nars.entity.TermLink;
 import nars.entity.TruthValue;
-import nars.gui.InferenceRecorder;
 import nars.inference.BudgetFunctions;
 import nars.io.IInferenceRecorder;
 import nars.language.Term;
@@ -93,7 +92,7 @@ public class Memory {
      */
     public Memory(ReasonerBatch reasoner) {
         this.reasoner = reasoner;
-        recorder = new InferenceRecorder();
+        recorder = new NullInferenceRecorder();
         concepts = new ConceptBag(this);
         novelTasks = new NovelTaskBag(this);
         newTasks = new ArrayList<Task>();
@@ -511,4 +510,24 @@ public class Memory {
 		return conceptForgettingRate;
 	}
 
+	class NullInferenceRecorder implements IInferenceRecorder {
+		@Override
+		public void init() {}
+		@Override
+		public void show() {}
+		@Override
+		public void play() {}
+		@Override
+		public void stop() {}
+		@Override
+		public void append(String s) {}
+		@Override
+		public void openLogFile() {}
+		@Override
+		public void closeLogFile() {}
+		@Override
+		public boolean isLogging() {
+			return false;
+		}
+	}
 }

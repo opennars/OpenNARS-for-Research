@@ -23,7 +23,6 @@ package nars.io;
 import java.awt.FileDialog;
 import java.io.*;
 
-import nars.gui.InputWindow;
 import nars.main_nogui.ReasonerBatch;
 
 /**
