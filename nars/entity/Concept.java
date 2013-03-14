@@ -23,7 +23,6 @@ package nars.entity;
 import java.util.ArrayList;
 
 import nars.gui.BagWindow;
-import nars.gui.EntityObserver;
 import nars.inference.BudgetFunctions;
 import nars.inference.LocalRules;
 import nars.inference.RuleTables;

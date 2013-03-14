@@ -1,6 +1,5 @@
-package nars.gui;
+package nars.entity;
 
-import nars.entity.Concept;
 import nars.storage.BagObserver;
 
 public interface EntityObserver {

@@ -24,6 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import nars.entity.Concept;
+import nars.entity.EntityObserver;
 //import nars.io.StringParser;
 import nars.storage.Memory;
 

@@ -70,12 +70,14 @@ public abstract class Bag<Type extends Item> {
     
 //    /** whether this bag has an active window */
 //    private boolean showing;
-    /** display window TODO : remove GUI dependency */
-    private BagWindow window;
+//    /** display window : remove GUI dependency */
+//    private BagWindow window;
     
     /** reference to memory */
     protected Memory memory;
 	private BagObserver bagObserver = new NullBagObserver<Type>();
+	/** The lowest display level */
+	private int showLevel = Parameters.BAG_THRESHOLD;
 
     /**
      * constructor, called from subclasses
@@ -343,8 +345,8 @@ public abstract class Bag<Type extends Item> {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer(" ");
-        int showLevel = window == null ? 1 : window.showLevel();
-		for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
+//        int showLevel = window == null ? 1 : window.showLevel();
+		for (int i = TOTAL_LEVEL; i >= showLevel ; i--) {
             if (!emptyLevel(i - 1)) {
                 buf = buf.append("\n --- Level " + i + ":\n ");
                 for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
@@ -359,7 +361,6 @@ public abstract class Bag<Type extends Item> {
     public String toStringLong() {
         StringBuffer buf = new StringBuffer(" BAG " + getClass().getSimpleName() );
         buf.append(" ").append( showSizes() );
-        int showLevel = window == null ? 1 : window.showLevel();
 		for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
             if (!emptyLevel(i - 1)) {
                 buf = buf.append("\n --- LEVEL " + i + ":\n ");
@@ -383,4 +384,8 @@ public abstract class Bag<Type extends Item> {
 		}
     	return "Levels: " + Integer.toString( levels ) + ", sizes: " + buf;
     }
+
+	public void setShowLevel(int showLevel) {
+		this.showLevel = showLevel;
+	}
 }

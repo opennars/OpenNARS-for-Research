@@ -26,6 +26,7 @@ import java.awt.event.*;
 //import java.beans.PropertyChangeListener;
 
 import nars.entity.Concept;
+import nars.entity.EntityObserver;
 import nars.storage.BagObserver;
 
 /**
