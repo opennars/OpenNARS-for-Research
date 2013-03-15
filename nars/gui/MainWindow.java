@@ -81,7 +81,10 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         forgetBW = new ParameterWindow("Belief Forgetting Rate", Parameters.TERM_LINK_FORGETTING_CYCLE, memory.getBeliefForgettingRate() );
         forgetCW = new ParameterWindow("Concept Forgetting Rate", Parameters.CONCEPT_FORGETTING_CYCLE, memory.getConceptForgettingRate() );
         silentW = new ParameterWindow("Report Silence Level", Parameters.SILENT_LEVEL, reasoner.getSilenceValue() );
-
+        
+        record = new InferenceRecorder();
+        memory.setRecorder(record);
+        
         setBackground(MAIN_WINDOW_COLOR);
         MenuBar menuBar = new MenuBar();
 

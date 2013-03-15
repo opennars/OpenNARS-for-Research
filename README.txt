@@ -26,12 +26,36 @@ Due to the sensitivity of results regarding the implementation of the reasonner,
 
 Source Code status
 ------------------
+
 See also http://code.google.com/p/open-nars/wiki/ProjectStatus
 We are updating the wiki and doing some testing and bug-fixing, but there won't be any major change until May.
 Next version 1.5.2 has been fully tested for single capability at a time; there may still be bugs when combining capabilities.
 Current version 1.5.1 is already outdated; several bugs have been fixed.
 
-Jean-Marc Vanel is working on this short term roadmap, mainly in GUI and software engineering tasks :
-- 3. separe code for pure reasoning from GUI in different directories; for this remove dependencies towards packages main and gui from any other package; for this the simplest is applying the Model-View design pattern (aka publish-subscribe): the reasonner (Model) calls abstract listeners.
+Jean-Marc Vanel is working on this mid term roadmap, mainly in GUI and software engineering tasks :
+
 - 4. make an independant syntax verityer based on a grammar parser : it will give the column & line of error (there is a Scala combinator grammar)
 - 5. separe NARS in 2 modules with a Maven build : nars_gui and nars_core
+- understand the NPE in NAL5 before the test suite was fixed:
+	now (march 14) we know that it can be reproduced by changing the ConceptForgettingRate to be the TaskForgettingRate
+- work on Matt pattern matching cases
+- work on mail pattern matching cases
+- other AGI use cases from this list (mainly user assistants) : http://eulergui.svn.sourceforge.net/viewvc/eulergui/trunk/eulergui/html/AGI_use_cases.html
+- design to interact with an application: ECA (review the door1 case), or API to query the current state of NARS beliefs
+- save and reload the current state of NARS beliefs
+- design for explanation of beliefs
+- design verbalization for NARS sentences
+- test the new N3 to NARS translator; extend NARS to accept URI's with # like http://x.com/y#z as identifiers, and/or the N3 translator could output prefixed URI's
+- more non-regression high level test: multistep, etc
+- unit tests for Bag, inference rules
+- ATTEMPTO ==> NARS translator
+
+Suggestions for NARS GUI
+- pull down combobox menu for concepts
+- logo for iconification : Narcissus http://imagebin.org/249908
+- check box for On/Off, instead of 2 buttons
+- activate control-a for output text areas; 
+- allow writing in text areas;
+- migrate to Swing ? (benefits: more robustness, same look and feel across platforms, tooltips); 
+	cons: Aplet will be more difficult to run
+- user can change the default frequency and belief for input

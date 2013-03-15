@@ -118,6 +118,10 @@ public class Memory {
         return recorder;
     }
 
+    public void setRecorder( IInferenceRecorder recorder ) {
+        this.recorder = recorder;
+    }
+    
     public long getTime() {
         return reasoner.getTime();
     }
