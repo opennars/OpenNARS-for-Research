@@ -19,12 +19,11 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
-import java.awt.Button;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -39,9 +38,9 @@ import nars.main_nogui.ReasonerBatch;
 public class InputWindow extends NarsFrame implements ActionListener, InputChannel {
     private ReasonerBatch reasoner;
     /** Control buttons */
-    private Button okButton, holdButton, clearButton, closeButton;
+    private JButton okButton, holdButton, clearButton, closeButton;
     /** Input area */
-    private TextArea inputText;
+    private JTextArea inputText;
     /** Whether the window is ready to accept new input (in fact whether the Reasoner will read the content of {@link #inputText} ) */
     private boolean ready;
     /** number of cycles between experience lines */
@@ -65,24 +64,24 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        inputText = new TextArea("");
+        inputText = new JTextArea("");
         gridbag.setConstraints(inputText, c);
         add(inputText);
         c.weighty = 0.0;
         c.gridwidth = 1;
-        okButton = new Button("OK");
+        okButton = new JButton("OK");
         okButton.addActionListener(this);
         gridbag.setConstraints(okButton, c);
         add(okButton);
-        holdButton = new Button("Hold");
+        holdButton = new JButton("Hold");
         holdButton.addActionListener(this);
         gridbag.setConstraints(holdButton, c);
         add(holdButton);
-        clearButton = new Button("Clear");
+        clearButton = new JButton("Clear");
         clearButton.addActionListener(this);
         gridbag.setConstraints(clearButton, c);
         add(clearButton);
-        closeButton = new Button("Hide");
+        closeButton = new JButton("Hide");
         closeButton.addActionListener(this);
         gridbag.setConstraints(closeButton, c);
         add(closeButton);
@@ -105,7 +104,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
-        Button b = (Button) e.getSource();
+        JButton b = (JButton) e.getSource();
         if (b == okButton) {
             ready = true;
         } else if (b == holdButton) {

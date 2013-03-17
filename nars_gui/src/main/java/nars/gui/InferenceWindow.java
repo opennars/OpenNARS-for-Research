@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -27,18 +28,18 @@ import nars.io.*;
 //import nars.term.Term;
 
 /**
- * Window displaying inference log
+ * JWindow displaying inference log
  */
 public class InferenceWindow extends NarsFrame implements ActionListener, ItemListener {
 
     /** Control buttons */
-    private Button playButton, stopButton, hideButton;
+    private JButton playButton, stopButton, hideButton;
     /** Display area */
-    private TextArea text;
+    private JTextArea text;
     /** String to be caught */
-    private TextField watchText;
+    private JTextField watchText;
     /** Type of caught text */
-    private Choice watchType;
+    private JComboBox watchType;
     /** Type of caught text */
     private String watched = "";
     /** Inference recorder */
@@ -64,7 +65,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        text = new TextArea("");
+        text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
         gridbag.setConstraints(text, c);
@@ -73,29 +74,28 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         c.weighty = 0.0;
         c.gridwidth = 1;
 
-        watchText = new TextField(20);
+        watchText = new JTextField(20);
         gridbag.setConstraints(watchText, c);
         add(watchText);
 
-        watchType = new Choice();
-        watchType.add("No Watch");
-        watchType.add("Watch Term");
-        watchType.add("Watch String");
+        watchType = new JComboBox( new String[] {"No Watch",
+        		"Watch Term",
+        		"Watch String" } );
         gridbag.setConstraints(watchType, c);
         watchType.addItemListener(this);
         add(watchType);
 
-        playButton = new Button(ON_LABEL);
+        playButton = new JButton(ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button(OFF_LABEL);
+        stopButton = new JButton(OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
 
-        hideButton = new Button("Hide");
+        hideButton = new JButton("Hide");
         gridbag.setConstraints(hideButton, c);
         hideButton.addActionListener(this);
         add(hideButton);

@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -30,14 +31,14 @@ import nars.entity.EntityObserver;
 import nars.storage.BagObserver;
 
 /**
- * Window displaying the content of a Concept, such as beliefs, goals, and questions
+ * JWindow displaying the content of a Concept, such as beliefs, goals, and questions
  */
 public class ConceptWindow extends NarsFrame implements ActionListener, EntityObserver {
 
     /** Control buttons */
-    private Button playButton, stopButton, playInNewWindowButton, closeButton;
+    private JButton playButton, stopButton, playInNewWindowButton, closeButton;
     /** Display area */
-    private TextArea text;
+    private JTextArea text;
     /** The concept to be displayed */
     private Concept concept;
     /** Whether the content of the concept is being displayed */
@@ -64,7 +65,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        text = new TextArea("");
+        text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
         gridbag.setConstraints(text, c);
@@ -72,22 +73,22 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
 
         c.weighty = 0.0;
         c.gridwidth = 1;
-        playButton = new Button(ON_LABEL);
+        playButton = new JButton(ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button(OFF_LABEL);
+        stopButton = new JButton(OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
 
-        playInNewWindowButton = new Button("Play in New Window");
+        playInNewWindowButton = new JButton("Play in New Window");
         gridbag.setConstraints(playInNewWindowButton, c);
         playInNewWindowButton.addActionListener(this);
         add(playInNewWindowButton);
 
-        closeButton = new Button("Close");
+        closeButton = new JButton("Close");
         gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
         add(closeButton);

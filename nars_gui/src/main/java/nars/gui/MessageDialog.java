@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -26,10 +27,10 @@ import java.awt.event.*;
 /**
  * Pop-up message for the user to accept
  */
-public class MessageDialog extends Dialog implements ActionListener, WindowListener {
+public class MessageDialog extends JDialog implements ActionListener, WindowListener {
 
-    protected Button button;
-    protected TextArea text;
+    protected JButton button;
+    protected JTextArea text;
 
     /**
      * Constructor
@@ -41,12 +42,12 @@ public class MessageDialog extends Dialog implements ActionListener, WindowListe
         setLayout(new BorderLayout(5, 5));
         setBackground(NarsFrame.SINGLE_WINDOW_COLOR);
         setFont(NarsFrame.NarsFont);
-        text = new TextArea(message);
+        text = new JTextArea(message);
         text.setBackground(NarsFrame.DISPLAY_BACKGROUND_COLOR);
         this.add("Center", text);
-        button = new Button(" OK ");
+        button = new JButton(" OK ");
         button.addActionListener(this);
-        Panel p = new Panel();
+        JPanel p = new JPanel();
         p.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         p.add(button);
         this.add("South", p);

@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -28,7 +29,7 @@ import nars.storage.Bag;
 import nars.storage.BagObserver;
 
 /**
- * Window display the priority distribution of items within a given bag
+ * JWindow display the priority distribution of items within a given bag
  */
 public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener, BagObserver {
 	/** The bag to be displayed */
@@ -36,13 +37,13 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
 //    /** The lowest level displayed */
 //    private int showLevel;
     /** Control buttons */
-    private Button playButton, stopButton, closeButton;
+    private JButton playButton, stopButton, closeButton;
     /** Display area */
-    private TextArea text;
+    private JTextArea text;
     /** Display label */
-    private Label valueLabel;
+    private JLabel valueLabel;
     /** Adjustable display level */
-    private Scrollbar valueBar;
+    private JScrollBar valueBar;
     /** The location of the display area, shifted according to the number of windows opened */
     private static int counter;
     /** whether this bag window is active */
@@ -63,7 +64,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        text = new TextArea("");
+        text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
         gridbag.setConstraints(text, c);
@@ -71,26 +72,26 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
 
         c.weighty = 0.0;
         c.gridwidth = 1;
-        valueLabel = new Label(String.valueOf(showLevel), Label.RIGHT);
+        valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);
         gridbag.setConstraints(valueLabel, c);
         add(valueLabel);
 
-        valueBar = new Scrollbar(Scrollbar.HORIZONTAL, showLevel, 0, 1, Parameters.BAG_LEVEL);
+        valueBar = new JScrollBar(Scrollbar.HORIZONTAL, showLevel, 0, 1, Parameters.BAG_LEVEL);
         valueBar.addAdjustmentListener(this);
         gridbag.setConstraints(valueBar, c);
         add(valueBar);
 
-		playButton = new Button(NarsFrame.ON_LABEL);
+		playButton = new JButton(NarsFrame.ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
 
-        stopButton = new Button(NarsFrame.OFF_LABEL);
+        stopButton = new JButton(NarsFrame.OFF_LABEL);
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
 
-        closeButton = new Button("Close");
+        closeButton = new JButton("Close");
         gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
         add(closeButton);

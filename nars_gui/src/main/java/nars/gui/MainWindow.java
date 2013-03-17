@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -46,20 +47,20 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
     /** Reference to the experience writer */
     private ExperienceWriter experienceWriter;
     /** Experience display area */
-    private TextArea ioText;
+    private JTextArea ioText;
     /** Control buttons */
-    private Button stopButton, walkButton, runButton, exitButton;
+    private JButton stopButton, walkButton, runButton, exitButton;
     /** Clock display field */
-    private TextField timerText;
-    /** Label of the clock */
-    private Label timerLabel;
+    private JTextField timerText;
+    /** JLabel of the clock */
+    private JLabel timerLabel;
     /** System clock - number of cycles since last output */
     private long timer;
     /** Whether the experience is saving into a file */
     private boolean savingExp = false;
     /** Input experience window */
     public InputWindow inputWindow;
-    /** Window to accept a Term to be looked into */
+    /** JWindow to accept a Term to be looked into */
     public TermWindow conceptWin;
     /** Windows for run-time parameter adjustment */
     public ParameterWindow forgetTW, forgetBW, forgetCW, silentW;
@@ -86,46 +87,48 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         memory.setRecorder(record);
         
         setBackground(MAIN_WINDOW_COLOR);
-        MenuBar menuBar = new MenuBar();
+        JMenuBar menuBar = new JMenuBar();
 
-        Menu m = new Menu("File");
-        m.add(new MenuItem("Load Experience"));
-        m.add(new MenuItem("Save Experience"));
+        JMenu m = new JMenu("File");
+        m.add(new JMenuItem("Load Experience"));
+        m.add(new JMenuItem("Save Experience"));
         m.addSeparator();
-        m.add(new MenuItem("Record Inference"));
+        m.add(new JMenuItem("Record Inference"));
         m.addActionListener(this);
         menuBar.add(m);
 
-        m = new Menu("Memory");
-        m.add(new MenuItem("Initialize"));
+        m = new JMenu("Memory");
+        m.add(new JMenuItem("Initialize"));
         m.addActionListener(this);
         menuBar.add(m);
 
-        m = new Menu("View");
-        m.add(new MenuItem("Concepts"));
-        m.add(new MenuItem("Buffered Tasks"));
-        m.add(new MenuItem("Concept Content"));
-        m.add(new MenuItem("Inference Log"));
-        m.add(new MenuItem("Input Window"));
+        m = new JMenu("View");
+        JMenuItem menuItem = new JMenuItem("Concepts");
+		m.add(menuItem);
+        menuItem.addActionListener(this);
+        m.add(new JMenuItem("Buffered Tasks"));
+        m.add(new JMenuItem("Concept Content"));
+        m.add(new JMenuItem("Inference Log"));
+        m.add(new JMenuItem("Input Window"));
         m.addActionListener(this);
         menuBar.add(m);
 
-        m = new Menu("Parameter");
-        m.add(new MenuItem("Concept Forgetting Rate"));
-        m.add(new MenuItem("Task Forgetting Rate"));
-        m.add(new MenuItem("Belief Forgetting Rate"));
+        m = new JMenu("Parameter");
+        m.add(new JMenuItem("Concept Forgetting Rate"));
+        m.add(new JMenuItem("Task Forgetting Rate"));
+        m.add(new JMenuItem("Belief Forgetting Rate"));
         m.addSeparator();
-        m.add(new MenuItem("Report Silence Level"));
+        m.add(new JMenuItem("Report Silence Level"));
         m.addActionListener(this);
         menuBar.add(m);
 
-        m = new Menu("Help");
-        m.add(new MenuItem("Related Information"));
-        m.add(new MenuItem("About NARS"));
+        m = new JMenu("Help");
+        m.add(new JMenuItem("Related Information"));
+        m.add(new JMenuItem("About NARS"));
         m.addActionListener(this);
         menuBar.add(m);
 
-        setMenuBar(menuBar);
+        setJMenuBar(menuBar);
 
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
@@ -138,41 +141,44 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        ioText = new TextArea("");
+        ioText = new JTextArea("");
         ioText.setBackground(DISPLAY_BACKGROUND_COLOR);
         ioText.setEditable(false);
-        gridbag.setConstraints(ioText, c);
-        add(ioText);
+//        gridbag.setConstraints(ioText, c);
+//        add(ioText);
+        JScrollPane scrollPane = new JScrollPane(ioText);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
 
         c.weightx = 0.0;
         c.weighty = 0.0;
         c.gridwidth = 1;
-        runButton = new Button(" Run ");
+        runButton = new JButton(" Run ");
         gridbag.setConstraints(runButton, c);
         runButton.addActionListener(this);
         add(runButton);
-        walkButton = new Button(" Walk ");
+        walkButton = new JButton(" Walk ");
         gridbag.setConstraints(walkButton, c);
         walkButton.addActionListener(this);
         add(walkButton);
-        stopButton = new Button(" Stop ");
+        stopButton = new JButton(" Stop ");
         gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
         add(stopButton);
-        timerLabel = new Label("Clock:", Label.RIGHT);
+        timerLabel = new JLabel("Clock:", JLabel.RIGHT);
         timerLabel.setBackground(MAIN_WINDOW_COLOR);
         gridbag.setConstraints(timerLabel, c);
         add(timerLabel);
 
         c.weightx = 1.0;
-        timerText = new TextField("");
+        timerText = new JTextField("");
         timerText.setBackground(DISPLAY_BACKGROUND_COLOR);
         timerText.setEditable(false);
         gridbag.setConstraints(timerText, c);
         add(timerText);
 
         c.weightx = 0.0;
-        exitButton = new Button(" Exit ");
+        exitButton = new JButton(" Exit ");
         gridbag.setConstraints(exitButton, c);
         exitButton.addActionListener(this);
         add(exitButton);
@@ -214,7 +220,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      */
     public void actionPerformed(ActionEvent e) {
         Object obj = e.getSource();
-        if (obj instanceof Button) {
+        if (obj instanceof JButton) {
             if (obj == runButton) {
                 reasoner.run();
             } else if (obj == stopButton) {
@@ -224,7 +230,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
             } else if (obj == exitButton) {
                 close();
             }
-        } else if (obj instanceof MenuItem) {
+        } else if (obj instanceof JMenuItem) {
             String label = e.getActionCommand();
 			if (label.equals("Load Experience")) {
                 experienceReader = new ExperienceReader(reasoner);

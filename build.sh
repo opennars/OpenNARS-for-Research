@@ -2,7 +2,8 @@
 
 rm -rf classes
 mkdir classes
-javac -d classes -Xlint:unchecked nars/*/*.java
+javac -d classes -Xlint:unchecked nars_gui/src/main/java/*/*/*.java nars_core_java/src/main/java/*/*/*.java
+# javac -d classes -Xlint:unchecked nars/*/*.java
 echo 'Main-Class: nars.main.NARS' > manifest.txt
 jar cvfm NARS.jar manifest.txt -C classes . 
 rm manifest.txt

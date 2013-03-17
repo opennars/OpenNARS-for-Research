@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -26,7 +27,7 @@ import java.awt.event.*;
 /**
  * Specify shared properties of NARS windows
  */
-public abstract class NarsFrame extends Frame implements WindowListener {
+public abstract class NarsFrame extends JFrame implements WindowListener {
 
     /** Color for the background of the main window */
     static final Color MAIN_WINDOW_COLOR = new Color(120, 120, 255);

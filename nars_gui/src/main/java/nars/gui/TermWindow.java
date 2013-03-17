@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -29,16 +30,16 @@ import nars.entity.EntityObserver;
 import nars.storage.Memory;
 
 /**
- * Window accept a Term, then display the content of the corresponding Concept
+ * JWindow accept a Term, then display the content of the corresponding Concept
  */
 public class TermWindow extends NarsFrame implements ActionListener {
 
     /** Display label */
-    private Label termLabel;
+    private JLabel termLabel;
     /** Input field for term name */
-    private TextField termField;
+    private JTextField termField;
     /** Control buttons */
-    private Button playButton, hideButton;
+    private JButton playButton, hideButton;
     /** Reference to the memory */
     private Memory memory;
 
@@ -61,23 +62,23 @@ public class TermWindow extends NarsFrame implements ActionListener {
         c.gridwidth = 1;
         c.weightx = 0.0;
         c.weighty = 0.0;
-        termLabel = new Label("Term:", Label.RIGHT);
+        termLabel = new JLabel("Term:", JLabel.RIGHT);
         termLabel.setBackground(SINGLE_WINDOW_COLOR);
         gridbag.setConstraints(termLabel, c);
         add(termLabel);
 
         c.weightx = 1.0;
-        termField = new TextField("");
+        termField = new JTextField("");
         gridbag.setConstraints(termField, c);
         add(termField);
 
         c.weightx = 0.0;
-        playButton = new Button("Show");
+        playButton = new JButton("Show");
         playButton.addActionListener(this);
         gridbag.setConstraints(playButton, c);
         add(playButton);
 
-        hideButton = new Button("Hide");
+        hideButton = new JButton("Hide");
         hideButton.addActionListener(this);
         gridbag.setConstraints(hideButton, c);
         add(hideButton);
@@ -90,7 +91,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
-        Button b = (Button) e.getSource();
+        JButton b = (JButton) e.getSource();
         if (b == playButton) {
             Concept concept = memory.nameToConcept(termField.getText().trim());
             if (concept != null) {

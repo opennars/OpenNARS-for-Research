@@ -19,22 +19,23 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Window displaying a system parameter that can be adjusted in run time
+ * JWindow displaying a system parameter that can be adjusted in run time
  */
 public class ParameterWindow extends NarsFrame implements ActionListener, AdjustmentListener {
 
     /** Display label */
-    private Label valueLabel;
+    private JLabel valueLabel;
     /** Control buttons */
-    private Button hideButton, undoButton, defaultButton;
+    private JButton hideButton, undoButton, defaultButton;
     /** Adjusting bar */
-    private Scrollbar valueBar;
+    private JScrollBar valueBar;
     /** parameter values */
     private int defaultValue, previousValue; // , currentValue;
     AtomicInteger currentValue;
@@ -54,27 +55,27 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         currentValue.set( dft );
         setLayout(new GridLayout(3, 3, 8, 4));
         setBackground(SINGLE_WINDOW_COLOR);
-        Label sp1 = new Label("");
+        JLabel sp1 = new JLabel("");
         sp1.setBackground(SINGLE_WINDOW_COLOR);
         add(sp1);
-        valueLabel = new Label(String.valueOf(dft), Label.CENTER);
+        valueLabel = new JLabel(String.valueOf(dft), JLabel.CENTER);
         valueLabel.setBackground(SINGLE_WINDOW_COLOR);
         add(valueLabel);
-        Label sp2 = new Label("");
+        JLabel sp2 = new JLabel("");
         sp2.setBackground(SINGLE_WINDOW_COLOR);
         add(sp2);
-        add(new Label("0", Label.RIGHT));
-        valueBar = new Scrollbar(Scrollbar.HORIZONTAL, dft, 0, 0, 101);
+        add(new JLabel("0", JLabel.RIGHT));
+        valueBar = new JScrollBar(Scrollbar.HORIZONTAL, dft, 0, 0, 101);
         valueBar.addAdjustmentListener(this);
         add(valueBar);
-        add(new Label("100", Label.LEFT));
-        undoButton = new Button("Undo");
+        add(new JLabel("100", JLabel.LEFT));
+        undoButton = new JButton("Undo");
         undoButton.addActionListener(this);
         add(undoButton);
-        defaultButton = new Button("Default");
+        defaultButton = new JButton("Default");
         defaultButton.addActionListener(this);
         add(defaultButton);
-        hideButton = new Button("Hide");
+        hideButton = new JButton("Hide");
         hideButton.addActionListener(this);
         add(hideButton);
         this.setBounds(300, 300, 250, 120);
