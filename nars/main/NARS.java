@@ -23,6 +23,7 @@ package nars.main;
 import java.applet.Applet;
 
 import nars.io.ExperienceReader;
+import nars.main_nogui.NARSBatch;
 import nars.main_nogui.ReasonerBatch;
 
 /**
@@ -46,10 +47,6 @@ public class NARS extends Applet implements Runnable {
             " Open-NARS website:  http://code.google.com/p/open-nars/ \n" +
             "      NARS website:  http://sites.google.com/site/narswang/ ";
     /**
-     * Flag to distinguish the two running modes of the project.
-     */
-    private static boolean standAlone = false;
-    /**
      * The internal working thread of the system.
      */
     Thread narsThread = null;
@@ -66,7 +63,7 @@ public class NARS extends Applet implements Runnable {
      * @param args optional argument used : one input file
      */
     public static void main(String args[]) {
-        standAlone = true;
+        NARSBatch.setStandAlone(true);
         NARS nars = new NARS();
         nars.init(args);
         nars.start();
@@ -128,14 +125,6 @@ public class NARS extends Applet implements Runnable {
 				e.printStackTrace();
 			}
         }
-    }
-
-    /**
-     * Whether the project running as an application.
-     * @return true for application; false for applet.
-     */
-    public static boolean isStandAlone() {
-        return standAlone;
     }
 
     /**

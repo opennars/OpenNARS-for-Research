@@ -28,7 +28,6 @@ import nars.inference.RuleTables;
 import nars.inference.UtilityFunctions;
 import nars.language.CompoundTerm;
 import nars.language.Term;
-import nars.main.NARS;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.Parameters;
 import nars.storage.Bag;
@@ -331,7 +330,7 @@ public final class Concept extends Item {
      */
     @Override
     public String toString() {  // called from concept bag
-        if (NARS.isStandAlone()) {
+        if (NARSBatch.isStandAlone()) {
             return (super.toStringBrief() + " " + key);
         } else {
             return key;

@@ -40,6 +40,10 @@ public class NARSBatch {
 	private boolean logging;
 	private PrintStream out = System.out;
 	private boolean dumpLastState = true;
+	/**
+	 * Flag to distinguish the two running modes of the project.
+	 */
+	private static boolean standAlone = false;
 
     /** The entry point of the standalone application.
      * <p>
@@ -48,6 +52,7 @@ public class NARSBatch {
      */
     public static void main(String args[]) {
         NARSBatch nars = new NARSBatch();
+        setStandAlone(true);
         nars.runInference(args);
         if(nars.dumpLastState) System.out.println( "==== Dump Last State ====\n"
         		+ nars.reasoner.toString() );
@@ -106,5 +111,17 @@ public class NARSBatch {
 
 	public ReasonerBatch getReasoner() {
 		return reasoner;
+	}
+
+	/**
+	 * Whether the project running as an application.
+	 * @return true for application; false for applet.
+	 */
+	public static boolean isStandAlone() {
+	    return standAlone;
+	}
+
+	public static void setStandAlone(boolean standAlone) {
+		NARSBatch.standAlone = standAlone;
 	}
 }
