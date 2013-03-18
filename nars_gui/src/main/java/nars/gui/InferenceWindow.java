@@ -39,7 +39,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     /** String to be caught */
     private JTextField watchText;
     /** Type of caught text */
-    private JComboBox watchType;
+    private JComboBox<String> watchType;
     /** Type of caught text */
     private String watched = "";
     /** Inference recorder */
@@ -78,7 +78,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         gridbag.setConstraints(watchText, c);
         add(watchText);
 
-        watchType = new JComboBox( new String[] {"No Watch",
+        watchType = new JComboBox<String>( new String[] {"No Watch",
         		"Watch Term",
         		"Watch String" } );
         gridbag.setConstraints(watchType, c);

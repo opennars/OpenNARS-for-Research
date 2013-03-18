@@ -19,7 +19,6 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
-import javax.swing.*;
 
 import java.awt.FileDialog;
 import java.io.*;
