@@ -154,11 +154,10 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1.0;
         c.weighty = 1.0;
+
         ioText = new JTextArea("");
         ioText.setBackground(DISPLAY_BACKGROUND_COLOR);
-        ioText.setEditable(false);
-//        gridbag.setConstraints(ioText, c);
-//        add(ioText);
+		ioText.setEditable(true);
         JScrollPane scrollPane = new JScrollPane(ioText);
         gridbag.setConstraints(scrollPane, c);
 		add(scrollPane);
@@ -166,6 +165,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         c.weightx = 0.0;
         c.weighty = 0.0;
         c.gridwidth = 1;
+
         runButton = new JButton(" Run ");
         gridbag.setConstraints(runButton, c);
         runButton.addActionListener(this);
@@ -184,10 +184,9 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         add(timerLabel);
 
         c.weightx = 1.0;
-		timerText = new JTextField("    ");
+		timerText = new JTextField("");
         timerText.setBackground(DISPLAY_BACKGROUND_COLOR);
         timerText.setEditable(false);
-		timerText.setColumns(10);
         gridbag.setConstraints(timerText, c);
         add(timerText);
 
@@ -197,7 +196,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         exitButton.addActionListener(this);
         add(exitButton);
 
-        setBounds(0, 250, 400, 350);
+		setBounds(0, 250, 600, 350);
         setVisible(true);
 
         initTimer();
