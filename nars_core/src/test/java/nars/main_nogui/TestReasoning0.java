@@ -63,6 +63,9 @@ public class TestReasoning0 {
 			NARSBatch nars = new NARSBatch();
 			File resultFile = new File( tmpDir, file.getName().replace( IN_TXT, OUT_TXT ) );
 			nars.setPrintStream(new PrintStream(resultFile));
+			if( file.getName().startsWith( "MultiStep" ) ) {
+				nars.getReasoner().getSilenceValue().set(100);
+			}
 			nars.runInference( new String[]{ file.getAbsolutePath() } );
 			return compareResult( file, resultFile );
 		} catch ( Exception e) {

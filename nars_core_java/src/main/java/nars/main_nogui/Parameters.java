@@ -38,7 +38,7 @@ public class Parameters {
     /* ---------- time management ---------- */
     /** Task decay rate in TaskBuffer, in [1, 99]. */
     public static final int NEW_TASK_FORGETTING_CYCLE = 1;
-    /** Maximum TermLinks checked for novelity for each TaskLink in TermLinkBag */
+    /** Maximum TermLinks checked for novelty for each TaskLink in TermLinkBag */
     public static final int MAX_MATCHED_TERM_LINK = 10;
     /** Maximum TermLinks used in reasoning for each Task in Concept */
     public static final int MAX_REASONED_TERM_LINK = 3;
@@ -50,13 +50,13 @@ public class Parameters {
     public static final float RELIANCE = (float) 1.0;    // the same as default confidence?
 
     /* ---------- budget thresholds ---------- */
-    /** The budget threthold rate for task to be accepted. */
+    /** The budget threshold rate for task to be accepted. */
     public static final float BUDGET_THRESHOLD = (float) 0.1;
 
     /* ---------- default input values ---------- */
-    /** Default expectation for conformation. */
+    /** Default expectation for confirmation. */
     public static final float DEFAULT_CONFIRMATION_EXPECTATION = (float) 0.8;
-    /** Default expectation for conformation. */
+    /** Default expectation for confirmation. */
     public static final float DEFAULT_CREATION_EXPECTATION = (float) 0.66;
     /** Default confidence of input judgment. */
     public static final float DEFAULT_JUDGMENT_CONFIDENCE = (float) 0.9;

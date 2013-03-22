@@ -18,6 +18,8 @@
  */
 package nars.main_nogui;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
@@ -29,8 +31,7 @@ import nars.main_nogui.ReasonerBatch;;
  * The main class of the project.
  * <p>
  * Define an application with batch functionality;
- * TODO duplicated code with {@link nars.main.NARS}
- * TODO still instantiates windows
+ * TODO check duplicated code with {@link nars.main.NARS}
  * <p>
  * Manage the internal working thread. Communicate with Reasoner only.
  */
@@ -53,6 +54,7 @@ public class NARSBatch {
     public static void main(String args[]) {
         NARSBatch nars = new NARSBatch();
         setStandAlone(true);
+        CommandLineParameters.decode( args, nars.getReasoner() );
         nars.runInference(args);
         if(nars.dumpLastState) System.out.println( "==== Dump Last State ====\n"
         		+ nars.reasoner.toString() );
@@ -62,12 +64,13 @@ public class NARSBatch {
     	init();
     }
     
-    /** non-static equivalent to {@link #main(String[])} */
+    /** non-static equivalent to {@link #main(String[])} : run to completion from an input file */
     public void runInference(String args[]) {
         init(args);
         run();
 	}
-
+    
+    /** initialize from an input file */
 	public void init(String[] args) {
         if (args.length > 0) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
@@ -77,14 +80,28 @@ public class NARSBatch {
         		new PrintWriter( out , true ) ) );
     }
 
-    /**Initialize the system at the control center.<p>
+    /** non-static equivalent to {@link #main(String[])} : run to completion from a BufferedReader */
+    public void runInference( BufferedReader r, BufferedWriter w ) {
+        init(r, w);
+        run();
+	}
+    
+    private void init(BufferedReader r, BufferedWriter w) {
+        ExperienceReader experienceReader = new ExperienceReader(reasoner);
+        experienceReader.setBufferedReader( r );
+        reasoner.addOutputChannel( new ExperienceWriter(reasoner,
+    		new PrintWriter( w, true ) ) 
+        );		
+	}
+
+	/**Initialize the system at the control center.<p>
      * Can instantiate multiple reasoners
      */
     public void init() {
         reasoner = new ReasonerBatch();
     }
 
-    /** Repeatedly execute NARS working cycle, until Inputs are Finished, or 1000 steps.
+    /** Run to completion: repeatedly execute NARS working cycle, until Inputs are Finished, or 1000 steps.
      * This method is called when the Runnable's thread is started. */
     public void run() {
         while ( true ) {
@@ -95,7 +112,7 @@ public class NARSBatch {
         	log("NARSBatch.run(): after tick"
         			+ " step " + reasoner.getTime()
         			+ " " + reasoner.isFinishedInputs()
-        	);       	
+        	);
 			if( reasoner.isFinishedInputs() ||
 					reasoner.getTime() == 1000 ) break;
         }

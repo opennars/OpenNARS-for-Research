@@ -23,6 +23,7 @@ package nars.main;
 import java.applet.Applet;
 
 import nars.io.ExperienceReader;
+import nars.main_nogui.CommandLineParameters;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.ReasonerBatch;
 
@@ -60,7 +61,8 @@ public class NARS extends Applet implements Runnable {
      * The entry point of the standalone application.
      * <p>
      * Create an instance of the class, then run the init and start methods.
-     * @param args optional argument used : one input file
+     * @param args optional argument used : one input file,
+     * possibly followed by --silence <integer>
      */
     public static void main(String args[]) {
         NARSBatch.setStandAlone(true);
@@ -75,6 +77,7 @@ public class NARS extends Applet implements Runnable {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
         }
+        CommandLineParameters.decode( args, reasoner );
     }
 
     /* Applet/Application code */

@@ -34,7 +34,8 @@ public class ExperienceReader implements InputChannel {
     private ReasonerBatch reasoner;
     /** Input experience from a file */
     private BufferedReader inExp;
-    /** Remaining working cycles before reading the next line */
+
+	/** Remaining working cycles before reading the next line */
     private int timer;
 
     /**
@@ -67,9 +68,10 @@ public class ExperienceReader implements InputChannel {
         }
         reasoner.addInputChannel(this);
     }
-
+    
     /**
      * Close an input experience file
+     * (close the reader in fact)
      */
     public void closeLoadFile() {
         try {
@@ -80,6 +82,11 @@ public class ExperienceReader implements InputChannel {
         reasoner.removeInputChannel(this);
     }
 
+    public void setBufferedReader(BufferedReader inExp) {
+		this.inExp = inExp;
+        reasoner.addInputChannel(this);
+	}
+    
     /**
      * Process the next chunk of input data
      * TODO duplicated code with {@link InputWindow#nextInput()}
