@@ -56,7 +56,8 @@ class TestReasoning {
     var testPassed = true
     for (i <- 0 until allFiles.length) {
       val file = allFiles(i)
-      if (file.getName.contains(IN_TXT)) {
+      if (file.getName.contains(IN_TXT)
+		&& ! file.isHidden() ) {
         println("Test file " + file)
         testPassed &= checkReasoning(file)
       }

@@ -139,7 +139,7 @@ public class Stamp implements Cloneable {
     }
 
     /**
-     * Initialize the stamp machenism of the system, called in Reasoner
+     * Initialize the stamp mechanism of the system, called in Reasoner
      */
     public static void init() {
         currentSerial = 0;

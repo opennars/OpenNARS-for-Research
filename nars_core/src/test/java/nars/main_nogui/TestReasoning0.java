@@ -49,7 +49,8 @@ public class TestReasoning0 {
 		boolean testPassed = true;
 		for (int i = 0; i < allFiles.length; i++) {
 			File file = allFiles[i];
-			if( file.getName().contains( IN_TXT )) {
+			if( file.getName().contains( IN_TXT )
+					&& ! file.isHidden() ) {
 				System.out.println( "Test file " + file );
 				testPassed &= checkReasoning(file);
 			}

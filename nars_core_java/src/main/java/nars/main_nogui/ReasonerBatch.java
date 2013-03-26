@@ -51,6 +51,7 @@ public class ReasonerBatch {
 	    clock = 0;
 	    memory.init();
 	    Stamp.init();
+//	    timer = 0;
 	}
 
 	public Memory getMemory() {
