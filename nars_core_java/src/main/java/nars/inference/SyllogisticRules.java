@@ -32,7 +32,9 @@ public final class SyllogisticRules {
 
     /* --------------- rules used in both first-tense inference and higher-tense inference --------------- */
     /**
+     * <pre>
      * {<S ==> M>, <M ==> P>} |- {<S ==> P>, <P ==> S>}
+     * </pre>
      * @param term1 Subject of the first new task
      * @param term2 Predicate of the first new task
      * @param sentence The first premise

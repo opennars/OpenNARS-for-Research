@@ -22,6 +22,8 @@ package nars.entity;
 
 import java.util.ArrayList;
 
+import javax.imageio.stream.MemoryCacheImageInputStream;
+
 import nars.inference.BudgetFunctions;
 import nars.inference.LocalRules;
 import nars.inference.RuleTables;
@@ -397,35 +399,35 @@ public final class Concept extends Item {
 
     /* ---------- main loop ---------- */
     /**
-     * An atomic step in a concept, only called in Memory.processConcept
+     * An atomic step in a concept, only called in {@link Memory#} processConcept
      */
     public void fire() {
-        TaskLink tLink = taskLinks.takeOut();
-        if (tLink == null) {
+        TaskLink currentTaskLink = taskLinks.takeOut();
+        if (currentTaskLink == null) {
             return;
         }
-        memory.currentTaskLink = tLink;
+        memory.currentTaskLink = currentTaskLink;
         memory.currentBeliefLink = null;
-        memory.getRecorder().append(" * Selected TaskLink: " + tLink + "\n");
-        Task task = tLink.getTargetTask();
+        memory.getRecorder().append(" * Selected TaskLink: " + currentTaskLink + "\n");
+        Task task = currentTaskLink.getTargetTask();
         memory.currentTask = task;  // one of the two places where this variable is set
-        if (tLink.getType() == TermLink.TRANSFORM) {
-            RuleTables.transformTask(tLink, memory);  // to turn this into structural inference as below?
+        if (currentTaskLink.getType() == TermLink.TRANSFORM) {
+            RuleTables.transformTask(currentTaskLink, memory);  // to turn this into structural inference as below?
         }
         int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
         while (memory.noResult() && (termLinkCount > 0)) {
-            TermLink termLink = termLinks.takeOut(tLink, memory.getTime());
+            TermLink termLink = termLinks.takeOut(currentTaskLink, memory.getTime());
             if (termLink != null) {
                 memory.getRecorder().append(" * Selected TermLink: " + termLink + "\n");
                 memory.currentBeliefLink = termLink;
-                RuleTables.reason(tLink, termLink, memory);
+                RuleTables.reason(currentTaskLink, termLink, memory);
                 termLinks.putBack(termLink);
                 termLinkCount--;
             } else {
                 termLinkCount = 0;
             }
         }
-        taskLinks.putBack(tLink);
+        taskLinks.putBack(currentTaskLink);
     }
 
     /* ---------- display ---------- */

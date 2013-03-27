@@ -68,8 +68,11 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
-        gridbag.setConstraints(text, c);
-        add(text);
+        JScrollPane scrollPane = new JScrollPane(text);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
+//        gridbag.setConstraints(text, c);
+//        add(text);
 
         c.weighty = 0.0;
         c.gridwidth = 1;
