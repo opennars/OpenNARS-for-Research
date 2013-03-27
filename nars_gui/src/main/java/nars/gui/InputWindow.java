@@ -65,8 +65,11 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         c.weightx = 1.0;
         c.weighty = 1.0;
         inputText = new JTextArea("");
-        gridbag.setConstraints(inputText, c);
-        add(inputText);
+        JScrollPane scrollPane = new JScrollPane(inputText);
+//        gridbag.setConstraints(inputText, c);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
+//        add(inputText);
         c.weighty = 0.0;
         c.gridwidth = 1;
         okButton = new JButton("OK");
