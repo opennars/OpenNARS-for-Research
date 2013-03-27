@@ -102,9 +102,6 @@ public final class Concept extends Item {
         if (task.getBudget().aboveThreshold()) {    // still need to be processed
             linkToTask(task);
         }
-//        if (showing) {
-//            window.post(displayContent());
-//        }
         entityObserver.refresh(displayContent());
     }
 
@@ -431,24 +428,19 @@ public final class Concept extends Item {
         taskLinks.putBack(tLink);
     }
 
-    /* ---------- display ---------- : jmv : TODO this part should go elsewhere : ConceptWindow */
+    /* ---------- display ---------- */
     /**
      * Start displaying contents and links, called from ConceptWindow,
      * TermWindow
      * or Memory.processTask only
      * 
-     * TODO same design as for Bag and {@link BagWindow}; see {@link Bag#addBagObserver(BagObserver, String)}
-     * @param entityObserver TODO
+     * same design as for Bag and {@link BagWindow}; see {@link Bag#addBagObserver(BagObserver, String)}
+     * @param entityObserver TODO make it a real observer pattern (i.e. with a plurality of observers)
      * @param showLinks Whether to display the task links
      */
     public void startPlay(EntityObserver entityObserver, boolean showLinks) {
     	this.entityObserver = entityObserver;
     	entityObserver.startPlay(this, showLinks);
-//        if (window != null && window.isVisible()) {
-//            window.detachFromConcept();
-//        }
-//        window = new ConceptWindow(this);
-//        showing = true;
     	entityObserver.post(displayContent());
         if (showLinks) {
             taskLinks.addBagObserver(entityObserver.createBagObserver(), "Task Links in " + term);
@@ -460,9 +452,6 @@ public final class Concept extends Item {
      * Resume display, called from ConceptWindow only
      */
     public void play() {
-//        showing = true;
-//        window.post(displayContent());
-//        showing = true;
         entityObserver.post(displayContent());
     }
 
@@ -472,7 +461,6 @@ public final class Concept extends Item {
     public void stop() {
         entityObserver.stop();
     }
-    /* ---------- display ---------- : jmv : TODO this part should go elsewhere : ConceptWindow */
 
     /**
      * Collect direct isBelief, questions, and goals for display
@@ -508,8 +496,7 @@ public final class Concept extends Item {
 		@Override
 		public void stop() {}
 		@Override
-		public void refresh(String message) {}
-    	
+		public void refresh(String message) {}   	
     }
 }
 
