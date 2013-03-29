@@ -37,6 +37,5 @@ Next version 1.5.2 has been fully tested for single capability at a time; there 
 Current version 1.5.1 is already outdated; several bugs have been fixed.
 
 Jean-Marc Vanel is working on this short term roadmap, mainly in GUI and software engineering tasks :
-- 3. separe code for pure reasoning from GUI in different directories; for this remove dependencies towards packages main and gui from any other package; for this the simplest is applying the Model-View design pattern (aka publish-subscribe): the reasonner (Model) calls abstract listeners.
-- 4. make an independant syntax verityer based on a grammar parser : it will give the column & line of error (there is a Scala combinator grammar)
-- 5. separe NARS in 2 modules with a Maven build : nars_gui and nars_core
+- 4. make an independant syntax verifyer based on a grammar parser : it will give the column & line of error (there is a Scala combinator grammar)
+- 5. separe NARS in 2 modules with a Maven build : nars_gui and nars_core_java

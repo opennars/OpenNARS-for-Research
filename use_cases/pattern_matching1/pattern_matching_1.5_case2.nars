@@ -5,3 +5,4 @@
 
 // NARS is then asked if the remaining initial statement from Case 1 is true
 <(&&, <$r --> [red]>,<$b --> [blue]>) ==> <(*,$r,$b) --> pattern1>>?
+300

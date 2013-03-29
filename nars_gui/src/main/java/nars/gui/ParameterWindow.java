@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * JWindow displaying a system parameter that can be adjusted in run time
  */
-public class ParameterWindow extends NarsFrame implements ActionListener, AdjustmentListener {
+public class ParameterWindow extends NarsFrame implements ActionListener, AdjustmentListener, WindowFocusListener {
 
     /** Display label */
     private JLabel valueLabel;
@@ -38,7 +38,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
     private JScrollBar valueBar;
     /** parameter values */
     private int defaultValue, previousValue; // , currentValue;
-    AtomicInteger currentValue;
+    private AtomicInteger currentValue;
     
     /**
      * Constructor
@@ -48,10 +48,14 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
      */
     ParameterWindow(String title, int dft, AtomicInteger currentValue ) {
         super(title);
+        System.out.println("ParameterWindow.ParameterWindow(): " +
+        		"title " + title +
+        		"currentValue " + currentValue);
         defaultValue = dft;
         this.currentValue = currentValue;
         
-        previousValue = dft;
+//        previousValue = dft;
+        previousValue = currentValue.get();
         currentValue.set( dft );
         setLayout(new GridLayout(3, 3, 8, 4));
         setBackground(SINGLE_WINDOW_COLOR);
@@ -65,8 +69,10 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         sp2.setBackground(SINGLE_WINDOW_COLOR);
         add(sp2);
         add(new JLabel("0", JLabel.RIGHT));
-        valueBar = new JScrollBar(Scrollbar.HORIZONTAL, dft, 0, 0, 101);
+//        valueBar = new JScrollBar(Scrollbar.HORIZONTAL, dft, 0, 0, 100);
+        valueBar = new JScrollBar(Scrollbar.HORIZONTAL, currentValue.get(), 0, 0, 100);
         valueBar.addAdjustmentListener(this);
+        addWindowFocusListener(this);
         add(valueBar);
         add(new JLabel("100", JLabel.LEFT));
         undoButton = new JButton("Undo");
@@ -130,4 +136,17 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
             currentValue.set( v );
         }
     }
+
+	@Override
+	/** hack to update the slider to the correct value when app. has been started with
+	 * --silence 100
+	 * <p/>
+	 * I consider using PropertyChangeSupport for the silence level,
+	 * or leveraging valueBar's model. */
+	public void windowGainedFocus(WindowEvent e) {
+		valueBar.setValue(currentValue.get());
+	}
+
+	@Override
+	public void windowLostFocus(WindowEvent e) {}
 }

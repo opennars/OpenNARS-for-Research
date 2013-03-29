@@ -68,7 +68,9 @@ public class NARS extends Applet implements Runnable {
         NARSBatch.setStandAlone(true);
         NARS nars = new NARS();
         nars.init(args);
+        System.out.println("NARS.main(): " + nars.reasoner.getSilenceValue() );
         nars.start();
+        System.out.println("NARS.main() 2: " + nars.reasoner.getSilenceValue() );
     }
 
     public void init(String[] args) {

@@ -12,6 +12,6 @@ echo ''
 echo 'You can now launch:'
 echo 'java -jar NARS.jar &'
 echo or
-echo 'java -jar NARS.jar nars-dist/Examples/Example-NAL1-in.txt &'
+echo 'java -jar NARS.jar nars-dist/Examples/Example-NAL1-in.txt --silence 90 &'
 echo or
 echo 'java -cp NARS.jar nars.main_nogui.NARSBatch  nars-dist/Examples/Example-NAL1-in.txt'
