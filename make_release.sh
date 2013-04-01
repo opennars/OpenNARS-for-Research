@@ -1,4 +1,4 @@
-build.sh
+./build.sh
 cp NARS.jar nars-dist
 rm -r nars-dist/javadoc/*
 javadoc -d nars-dist/javadoc nars_core_java/**/*.java nars_gui/**/*.java
