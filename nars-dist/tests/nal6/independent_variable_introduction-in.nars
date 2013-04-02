@@ -3,9 +3,9 @@
 **** Deduction , Exemplification : no result !!!
 < M --> P >.
 < S --> M >.
-<<$x --> S> ==> <$x --> P>>?
-<<$x --> P> ==> <$x --> S>>?
-600
+<< S --> $x > ==> <$x --> P>>?
+// <<$y --> P> ==> <S --> $y>>?
+6
 
 // Table 8.3: Sample Independent-Variable Introduction Rules
 **** Induction 
@@ -14,20 +14,26 @@
 <<$x --> S> ==> <$x --> P>>?
 4
 *
+**** Com : no result !!! but verbatim like in table 8.3
+<M --> P>.
+<M --> S>.
+<<$x --> S> <=> <$x --> P>>?
+4
+*
 
-**** Abduction : no result !!! 
+**** Abduction
 < P --> M >.
 < S --> M >.
-<<$x --> S> ==> <$x --> P>>?
-<<$x --> P> ==> <$x --> S>>?
-600
+<< S --> $x > ==> < P --> $x >>?
+// <<$y --> P> ==> <$y --> S>>?
+4
 
 **** Exemplification , Deduction : no result !!!
 < P --> M >.
 < M --> S >.
-<<$x --> S> ==> <$x --> P>>?
-<<$x --> P> ==> <$x --> S>>?
-600
+<<$x --> S> ==> < P --> $x >>?
+// Deduction <<$y --> P> ==> <$y --> S>>?
+6
 
 **** Conversion : no result !!!
 < P --> S >.
