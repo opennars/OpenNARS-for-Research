@@ -1,5 +1,4 @@
 // Table 3.3: The Basic Syllogistic Rules
-// J2 \ J1
 **** Deduction , Exemplification 
 < M --> P >.
 < S --> M >.
@@ -27,4 +26,4 @@
 **** Conversion
 < P --> S >.
 < S --> P >?
-
+3

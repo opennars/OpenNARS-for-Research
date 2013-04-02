@@ -48,9 +48,9 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
      */
     ParameterWindow(String title, int dft, AtomicInteger currentValue ) {
         super(title);
-        System.out.println("ParameterWindow.ParameterWindow(): " +
-        		"title " + title +
-        		"currentValue " + currentValue);
+//        System.out.println("ParameterWindow.ParameterWindow(): " +
+//        		"title " + title +
+//        		"currentValue " + currentValue);
         defaultValue = dft;
         this.currentValue = currentValue;
         

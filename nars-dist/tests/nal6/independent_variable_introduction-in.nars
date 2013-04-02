@@ -1,0 +1,35 @@
+// made by combining Table 8.3 and Table 3.3: Basic Syllogistic Rules
+
+**** Deduction , Exemplification : no result !!!
+< M --> P >.
+< S --> M >.
+<<$x --> S> ==> <$x --> P>>?
+<<$x --> P> ==> <$x --> S>>?
+600
+
+// Table 8.3: Sample Independent-Variable Introduction Rules
+**** Induction 
+<M --> P>.
+<M --> S>.
+<<$x --> S> ==> <$x --> P>>?
+4
+*
+
+**** Abduction : no result !!! 
+< P --> M >.
+< S --> M >.
+<<$x --> S> ==> <$x --> P>>?
+<<$x --> P> ==> <$x --> S>>?
+600
+
+**** Exemplification , Deduction : no result !!!
+< P --> M >.
+< M --> S >.
+<<$x --> S> ==> <$x --> P>>?
+<<$x --> P> ==> <$x --> S>>?
+600
+
+**** Conversion : no result !!!
+< P --> S >.
+<<$x --> S> ==> <$x --> P>>?
+300

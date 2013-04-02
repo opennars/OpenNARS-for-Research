@@ -1,0 +1,22 @@
+// Table 8.2: Sample Independent-Variable Elimination Rules
+// ded
+<<#x --> S> ==> <#x --> P >>.
+< M --> S >.
+<M --> P >?
+6
+
+*
+<<#x --> S> ==> <#x --> P >>.
+< M --> P >.
+<M --> S>?
+// abd
+6
+
+*
+<<#x --> S> <=> <#x --> P >>.
+<M --> S>.
+<M --> P>?
+// ana
+6
+
+// TODO :  other NAL1 rules
