@@ -1,12 +1,5 @@
 // made by combining Table 8.3 and Table 3.3: Basic Syllogistic Rules
 
-**** Deduction , Exemplification : no result !!!
-< M --> P >.
-< S --> M >.
-<< S --> $x > ==> <$x --> P>>?
-// <<$y --> P> ==> <S --> $y>>?
-6
-
 // Table 8.3: Sample Independent-Variable Introduction Rules
 **** Induction 
 <M --> P>.
@@ -14,28 +7,36 @@
 <<$x --> S> ==> <$x --> P>>?
 4
 *
-**** Com : no result !!! but verbatim like in table 8.3
+**** Comparison : verbatim like in table 8.3
 <M --> P>.
 <M --> S>.
 <<$x --> S> <=> <$x --> P>>?
 4
-*
 
 **** Abduction
 < P --> M >.
 < S --> M >.
 << S --> $x > ==> < P --> $x >>?
-// <<$y --> P> ==> <$y --> S>>?
+4
+**** Abduction and <=>
+< P --> M >.
+< S --> M >.
+<< S --> $x > <=> < P --> $x >>?
 4
 
-**** Exemplification , Deduction : no result !!!
+**** Deduction , Exemplification : no result
+< M --> P >.
+< S --> M >.
+<< S --> $x > ==> <$x --> P>>?
+6
+
+**** Exemplification , Deduction : no result
 < P --> M >.
 < M --> S >.
 <<$x --> S> ==> < P --> $x >>?
-// Deduction <<$y --> P> ==> <$y --> S>>?
 6
 
-**** Conversion : no result !!!
+**** Conversion : no result
 < P --> S >.
 <<$x --> S> ==> <$x --> P>>?
-300
+30

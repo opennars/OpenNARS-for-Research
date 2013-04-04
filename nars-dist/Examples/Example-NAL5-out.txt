@@ -105,12 +105,12 @@
   IN: <robin --> swimmer>. %0.00;0.90% {0 : 2} 
 3
  OUT: <robin --> flyer>. %1.00;0.81% {3 : 1;2} 
-********** compound composition, one premises
+********** compound composition, one premise
   IN: <robin --> flyer>. %0.90;0.90% {0 : 1} 
   IN: (||,<robin --> flyer>,<robin --> swimmer>)?  {0 : 2} 
 4
  OUT: (||,<robin --> flyer>,<robin --> swimmer>). %0.90;0.81% {4 : 1} 
-********** compound decomposition, one premises
+********** compound decomposition, one premise
   IN: (&&,<robin --> flyer>,<swan --> swimmer>). %0.90;0.90% {0 : 1} 
 9
  OUT: <robin --> flyer>. %0.90;0.81% {9 : 1} 

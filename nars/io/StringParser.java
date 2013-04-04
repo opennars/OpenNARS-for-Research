@@ -109,7 +109,7 @@ public abstract class StringParser extends Symbols {
             BudgetValue budget = parseBudget(budgetString, punc, truth);
             task = new Task(sentence, budget);
         } catch (InvalidInputException e) {
-            System.out.println(" !!! INVALID INPUT: " + buffer + " --- " + e.getMessage());
+            System.out.println(" !!! INVALID INPUT: parseTask: " + buffer + " --- " + e.getMessage());
         }
         return task;
     }
@@ -277,7 +277,7 @@ public abstract class StringParser extends Symbols {
                     return parseAtomicTerm(s);
             }
         } catch (InvalidInputException e) {
-            System.out.println(" !!! INVALID INPUT: " + s + " --- " + e.getMessage());
+            System.out.println(" !!! INVALID INPUT: parseTerm: " + s + " --- " + e.getMessage());
         }
         return null;
     }

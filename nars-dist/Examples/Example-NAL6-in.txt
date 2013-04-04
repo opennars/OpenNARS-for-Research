@@ -93,7 +93,7 @@
   IN: <{lock1} --> lock>. %0.90;0.90% {0 : 2} 
 1
  OUT: (&&,<#1 --> key>,<{lock1} --> (/,open,#1,_)>). %0.90;0.43% {1 : 2;1} 
-********** variable introduction
+********** variable introduction : induction
   IN: <swan --> bird>. %1.00;0.90% {0 : 1} 
   IN: <swan --> swimmer>. %0.80;0.90% {0 : 2} 
 1
@@ -101,7 +101,7 @@
  OUT: <<$1 --> swimmer> ==> <$1 --> bird>>. %1.00;0.39% {1 : 2;1} 
  OUT: <<$1 --> bird> <=> <$1 --> swimmer>>. %0.80;0.45% {1 : 2;1} 
  OUT: (&&,<#1 --> bird>,<#1 --> swimmer>). %0.80;0.81% {1 : 2;1} 
-********** variable introduction
+********** variable introduction : abduction
   IN: <gull --> swimmer>. %1.00;0.90% {0 : 1} 
   IN: <swan --> swimmer>. %0.80;0.90% {0 : 2} 
 1

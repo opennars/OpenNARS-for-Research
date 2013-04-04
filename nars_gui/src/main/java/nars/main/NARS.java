@@ -60,7 +60,7 @@ public class NARS extends Applet implements Runnable {
     /**
      * The entry point of the standalone application.
      * <p>
-     * Create an instance of the class, then run the init and start methods.
+     * Create an instance of the class, then run the {@link #init()} and {@link #start()} methods.
      * @param args optional argument used : one input file,
      * possibly followed by --silence <integer>
      */
@@ -68,14 +68,14 @@ public class NARS extends Applet implements Runnable {
         NARSBatch.setStandAlone(true);
         NARS nars = new NARS();
         nars.init(args);
-        System.out.println("NARS.main(): " + nars.reasoner.getSilenceValue() );
         nars.start();
-        System.out.println("NARS.main() 2: " + nars.reasoner.getSilenceValue() );
     }
 
+    /** TODO multiple files */
     public void init(String[] args) {
         init();
-        if (args.length > 0) {
+        if (args.length > 0
+        		&& CommandLineParameters.isReallyFile(args[0]) ) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
         }

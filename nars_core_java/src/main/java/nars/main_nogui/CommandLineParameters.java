@@ -11,4 +11,8 @@ public class CommandLineParameters {
 			}
 		}
 	}
+
+	public static boolean isReallyFile(String param) {
+		return ! "--silence".equals( param );
+	}
 }

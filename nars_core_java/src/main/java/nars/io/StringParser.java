@@ -22,6 +22,8 @@ package nars.io;
 
 import java.util.*;
 
+import deductions.runtime.swing.TemporaryFrame;
+
 import nars.entity.*;
 import nars.inference.*;
 import nars.language.*;
@@ -109,7 +111,9 @@ public abstract class StringParser extends Symbols {
             BudgetValue budget = parseBudget(budgetString, punc, truth);
             task = new Task(sentence, budget);
         } catch (InvalidInputException e) {
-            System.out.println(" !!! INVALID INPUT: " + buffer + " --- " + e.getMessage());
+            String message = " !!! INVALID INPUT: parseTask: " + buffer + " --- " + e.getMessage();
+			System.out.println(message);
+			showWarning(message);
         }
         return task;
     }
@@ -277,10 +281,17 @@ public abstract class StringParser extends Symbols {
                     return parseAtomicTerm(s);
             }
         } catch (InvalidInputException e) {
-            System.out.println(" !!! INVALID INPUT: " + s + " --- " + e.getMessage());
+            String message = " !!! INVALID INPUT: parseTerm: " + s + " --- " + e.getMessage();
+			System.out.println(message);
+			showWarning(message);
         }
         return null;
     }
+
+	private static void showWarning(String message) {
+		new TemporaryFrame( message + "\n( the faulty line has been kept in the input window )",
+				40000, TemporaryFrame.WARNING );
+	}
 
     /**
      * Parse a Term that has no internal structure.

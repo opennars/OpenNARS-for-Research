@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+import javax.management.RuntimeErrorException;
 import javax.swing.*;
 
 import java.awt.GridBagConstraints;
@@ -163,6 +164,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
 					reasoner.textInputLine(line);
 				} catch (NullPointerException e1) {
 					System.out.println("InputWindow.nextInput() - NullPointerException: please correct the input" );
+//					throw new RuntimeException( "Uncorrect line: please correct the input", e1 );
 					ready = false;
 					return false;
 				}
