@@ -513,12 +513,14 @@ public final class StructuralRules {
                     newPred = ImageExt.make((ImageExt) image, subject, i, memory);
                 }
                 inheritance = Inheritance.make(newSubj, newPred, memory);
-                if (truth == null) {
-                    budget = BudgetFunctions.compoundBackward(inheritance, memory);
-                } else {
-                    budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                if( inheritance != null ) { // jmv <<<<<
+                	if (truth == null) {
+                		budget = BudgetFunctions.compoundBackward(inheritance, memory);
+                	} else {
+                		budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                	}
+                	memory.singlePremiseTask(inheritance, truth, budget);
                 }
-                memory.singlePremiseTask(inheritance, truth, budget);
             }
         }
     }

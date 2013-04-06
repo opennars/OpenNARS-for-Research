@@ -56,7 +56,8 @@ public class NARSBatch {
         setStandAlone(true);
         CommandLineParameters.decode( args, nars.getReasoner() );
         nars.runInference(args);
-        if(nars.dumpLastState) System.out.println( "==== Dump Last State ====\n"
+        // TODO only if single run ( no reset in between )
+        if(nars.dumpLastState) System.out.println( "\n==== Dump Last State ====\n"
         		+ nars.reasoner.toString() );
     }
 

@@ -40,7 +40,7 @@ public class NARS extends Applet implements Runnable {
      * The information about the version and date of the project.
      */
     public static final String INFO =
-            "     Open-NARS     Version 1.5.2     March 2013  \n";
+            "     Open-NARS     Version 1.5.2     April 2013  \n";
     /**
      * The project websites.
      */
