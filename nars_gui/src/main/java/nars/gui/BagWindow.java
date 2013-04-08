@@ -67,9 +67,10 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
-        gridbag.setConstraints(text, c);
-        add(text);
-
+        JScrollPane scrollPane = new JScrollPane(text);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
+		
         c.weighty = 0.0;
         c.gridwidth = 1;
         valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);

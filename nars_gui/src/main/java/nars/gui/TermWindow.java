@@ -69,9 +69,10 @@ public class TermWindow extends NarsFrame implements ActionListener {
 
         c.weightx = 1.0;
         termField = new JTextField("");
-        gridbag.setConstraints(termField, c);
-        add(termField);
-
+        JScrollPane scrollPane = new JScrollPane(termField);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
+		
         c.weightx = 0.0;
         playButton = new JButton("Show");
         playButton.addActionListener(this);

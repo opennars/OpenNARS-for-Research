@@ -68,9 +68,10 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
-        gridbag.setConstraints(text, c);
-        add(text);
-
+        JScrollPane scrollPane = new JScrollPane(text);
+        gridbag.setConstraints(scrollPane, c);
+		add(scrollPane);
+		
         c.weighty = 0.0;
         c.gridwidth = 1;
         playButton = new JButton(ON_LABEL);
