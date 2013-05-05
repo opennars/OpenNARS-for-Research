@@ -21,7 +21,6 @@
 package nars.main;
 
 import java.applet.Applet;
-
 import nars.io.ExperienceReader;
 import nars.main_nogui.CommandLineParameters;
 import nars.main_nogui.NARSBatch;
@@ -39,7 +38,7 @@ public class NARS extends Applet implements Runnable {
     /**
      * The information about the version and date of the project.
      */
-    public static final String INFO = "Open-NARS\tVersion 1.5.3\tApril 2013 \n";
+    public static final String INFO = "Open-NARS\tVersion 1.5.4\tMay 2013 \n";
     /**
      * The project web sites.
      */
