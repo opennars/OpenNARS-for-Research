@@ -44,50 +44,77 @@ import nars.main_nogui.ReasonerBatch;
  */
 public class Memory {
 
-	/** Backward pointer to the reasoner */
+    /**
+     * Backward pointer to the reasoner
+     */
     private ReasonerBatch reasoner;
 
     /* ---------- Long-term storage for multiple cycles ---------- */
-    /** Concept bag. Containing all Concepts of the system */
+    /**
+     * Concept bag. Containing all Concepts of the system
+     */
     private ConceptBag concepts;
-    /** New tasks with novel composed terms, for delayed and selective processing */
+    /**
+     * New tasks with novel composed terms, for delayed and selective processing
+     */
     private NovelTaskBag novelTasks;
-    /** Inference record text to be written into a log file */
+    /**
+     * Inference record text to be written into a log file
+     */
     private IInferenceRecorder recorder;
+    private AtomicInteger beliefForgettingRate = new AtomicInteger(Parameters.TERM_LINK_FORGETTING_CYCLE);
+    private AtomicInteger taskForgettingRate = new AtomicInteger(Parameters.TASK_LINK_FORGETTING_CYCLE);
+    private AtomicInteger conceptForgettingRate = new AtomicInteger(Parameters.CONCEPT_FORGETTING_CYCLE);
 
-	private AtomicInteger beliefForgettingRate = new AtomicInteger( Parameters.TERM_LINK_FORGETTING_CYCLE );
-	private AtomicInteger taskForgettingRate = new AtomicInteger( Parameters.TASK_LINK_FORGETTING_CYCLE );
-	private AtomicInteger conceptForgettingRate = new AtomicInteger( Parameters.CONCEPT_FORGETTING_CYCLE );
-
-	/* ---------- Short-term workspace for a single cycle ---------- */
-    /** List of new tasks accumulated in one cycle, to be processed in the next cycle */
+    /* ---------- Short-term workspace for a single cycle ---------- */
+    /**
+     * List of new tasks accumulated in one cycle, to be processed in the next
+     * cycle
+     */
     private ArrayList<Task> newTasks;
-    /** List of Strings or Tasks to be sent to the output channels */
+    /**
+     * List of Strings or Tasks to be sent to the output channels
+     */
     private ArrayList<String> exportStrings;
-    /** The selected Term */
+    /**
+     * The selected Term
+     */
     public Term currentTerm;
-    /** The selected Concept */
+    /**
+     * The selected Concept
+     */
     public Concept currentConcept;
-    /** The selected TaskLink */
+    /**
+     * The selected TaskLink
+     */
     public TaskLink currentTaskLink;
-    /** The selected Task */
+    /**
+     * The selected Task
+     */
     public Task currentTask;
-    /** The selected TermLink */
+    /**
+     * The selected TermLink
+     */
     public TermLink currentBeliefLink;
-    /** The selected belief */
+    /**
+     * The selected belief
+     */
     public Sentence currentBelief;
-    /** The new Stamp */
+    /**
+     * The new Stamp
+     */
     public Stamp newStamp;
-    /** The substitution that unify the common term in the Task and the Belief
-     * TODO unused */
+    /**
+     * The substitution that unify the common term in the Task and the Belief
+     * TODO unused
+     */
     protected HashMap<Term, Term> substitute;
 
 
     /* ---------- Constructor ---------- */
     /**
-     * Create a new memory
-     * <p>
-     * Called in Reasoner.reset only
+     * Create a new memory <p> Called in Reasoner.reset only
+     *
      * @param reasoner
      */
     public Memory(ReasonerBatch reasoner) {
@@ -118,10 +145,10 @@ public class Memory {
         return recorder;
     }
 
-    public void setRecorder( IInferenceRecorder recorder ) {
+    public void setRecorder(IInferenceRecorder recorder) {
         this.recorder = recorder;
     }
-    
+
     public long getTime() {
         return reasoner.getTime();
     }
@@ -129,17 +156,18 @@ public class Memory {
 //    public MainWindow getMainWindow() {
 //        return reasoner.getMainWindow();
 //    }
-
-    /** Actually means that there are no new Tasks */
+    /**
+     * Actually means that there are no new Tasks
+     */
     public boolean noResult() {
         return newTasks.isEmpty();
     }
 
     /* ---------- conversion utilities ---------- */
     /**
-     * Get an existing Concept for a given name
-     * <p>
-     * called from Term and ConceptWindow.
+     * Get an existing Concept for a given name <p> called from Term and
+     * ConceptWindow.
+     *
      * @param name the name of a concept
      * @return a Concept or null
      */
@@ -148,9 +176,9 @@ public class Memory {
     }
 
     /**
-     * Get a Term for a given name of a Concept or Operator
-     * <p>
-     * called in StringParser and the make methods of compound terms.
+     * Get a Term for a given name of a Concept or Operator <p> called in
+     * StringParser and the make methods of compound terms.
+     *
      * @param name the name of a concept or operator
      * @return a Term or null (if no Concept/Operator has this name)
      */
@@ -164,6 +192,7 @@ public class Memory {
 
     /**
      * Get an existing Concept for a given Term.
+     *
      * @param term The Term naming a concept
      * @return a Concept or null
      */
@@ -173,6 +202,7 @@ public class Memory {
 
     /**
      * Get the Concept associated to a Term, or create it.
+     *
      * @param term indicating the concept
      * @return an existing Concept, or a new one, or null ( TODO bad smell )
      */
@@ -194,9 +224,9 @@ public class Memory {
 
     /* ---------- adjustment functions ---------- */
     /**
-     * Adjust the activation level of a Concept
-     * <p>
-     * called in Concept.insertTaskLink only
+     * Adjust the activation level of a Concept <p> called in
+     * Concept.insertTaskLink only
+     *
      * @param c the concept to be adjusted
      * @param b the new BudgetValue
      */
@@ -209,12 +239,13 @@ public class Memory {
     /* ---------- new task entries ---------- */
 
     /* There are several types of new tasks, all added into the
-    newTasks list, to be processed in the next workCycle.
-    Some of them are reported and/or logged. */
+     newTasks list, to be processed in the next workCycle.
+     Some of them are reported and/or logged. */
     /**
      * Input task processing. Invoked by the outside or inside environment.
-     * Outside: StringParser (input); Inside: Operator (feedback).
-     * Input tasks with low priority are ignored, and the others are put into task buffer.
+     * Outside: StringParser (input); Inside: Operator (feedback). Input tasks
+     * with low priority are ignored, and the others are put into task buffer.
+     *
      * @param task The input task
      */
     public void inputTask(Task task) {
@@ -228,10 +259,13 @@ public class Memory {
     }
 
     /**
-     * Activated task called in MatchingRules.trySolution and Concept.processGoal
+     * Activated task called in MatchingRules.trySolution and
+     * Concept.processGoal
+     *
      * @param budget The budget value of the new Task
      * @param sentence The content of the new Task
-     * @param candidateBelief The belief to be used in future inference, for forward/backward correspondence
+     * @param candidateBelief The belief to be used in future inference, for
+     * forward/backward correspondence
      */
     public void activatedTask(BudgetValue budget, Sentence sentence, Sentence candidateBelief) {
         Task task = new Task(sentence, budget, currentTask, sentence, candidateBelief);
@@ -249,6 +283,7 @@ public class Memory {
 
     /**
      * Derived task comes from the inference rules.
+     *
      * @param task the derived task
      */
     private void derivedTask(Task task) {
@@ -268,7 +303,9 @@ public class Memory {
 
     /* --------------- new task building --------------- */
     /**
-     * Shared final operations by all double-premise rules, called from the rules except StructuralRules
+     * Shared final operations by all double-premise rules, called from the
+     * rules except StructuralRules
+     *
      * @param newContent The content of the sentence in task
      * @param newTruth The truth value of the sentence in task
      * @param newBudget The budget value in task
@@ -282,7 +319,9 @@ public class Memory {
     }
 
     /**
-     * Shared final operations by all double-premise rules, called from the rules except StructuralRules
+     * Shared final operations by all double-premise rules, called from the
+     * rules except StructuralRules
+     *
      * @param newContent The content of the sentence in task
      * @param newTruth The truth value of the sentence in task
      * @param newBudget The budget value in task
@@ -298,7 +337,9 @@ public class Memory {
     }
 
     /**
-     * Shared final operations by all single-premise rules, called in StructuralRules
+     * Shared final operations by all single-premise rules, called in
+     * StructuralRules
+     *
      * @param newContent The content of the sentence in task
      * @param newTruth The truth value of the sentence in task
      * @param newBudget The budget value in task
@@ -308,7 +349,9 @@ public class Memory {
     }
 
     /**
-     * Shared final operations by all single-premise rules, called in StructuralRules
+     * Shared final operations by all single-premise rules, called in
+     * StructuralRules
+     *
      * @param newContent The content of the sentence in task
      * @param punctuation The punctuation of the sentence in task
      * @param newTruth The truth value of the sentence in task
@@ -328,9 +371,9 @@ public class Memory {
 
     /* ---------- system working workCycle ---------- */
     /**
-     * An atomic working workCycle of the system: process new Tasks, then fire a concept
-     * <p>
-     * Called from Reasoner.tick only
+     * An atomic working workCycle of the system: process new Tasks, then fire a
+     * concept <p> Called from Reasoner.tick only
+     *
      * @param clock The current time to be displayed
      */
     public void workCycle(long clock) {
@@ -346,8 +389,9 @@ public class Memory {
     }
 
     /**
-     * Process the newTasks accumulated in the previous workCycle, accept input ones
-     * and those that corresponding to existing concepts, plus one from the buffer.
+     * Process the newTasks accumulated in the previous workCycle, accept input
+     * ones and those that corresponding to existing concepts, plus one from the
+     * buffer.
      */
     private void processNewTask() {
         Task task;
@@ -395,8 +439,9 @@ public class Memory {
 
     /* ---------- task processing ---------- */
     /**
-     * Immediate processing of a new task, in constant time
-     * Local processing, in one concept only
+     * Immediate processing of a new task, in constant time Local processing, in
+     * one concept only
+     *
      * @param task the task to be accepted
      */
     private void immediateProcess(Task task) {
@@ -412,52 +457,52 @@ public class Memory {
     /* ---------- display ---------- */
     /**
      * Display active concepts, called from MainWindow.
-     * 
-     * we don't want to expose fields concepts and novelTasks,
-     * AND we want to separate GUI and inference,
-     * so this method has become
-     * conceptsStartPlay( BagObserver bagObserver, String s)
-     * and this method calls
-     * concepts.addBagObserver( bagObserver, s)
-     * see design for Bag and {@link BagWindow} in {@link Bag#addBagObserver(BagObserver, String)}
-     * @param bagObserver 
+     *
+     * we don't want to expose fields concepts and novelTasks, AND we want to
+     * separate GUI and inference, so this method has become conceptsStartPlay(
+     * BagObserver bagObserver, String s) and this method calls
+     * concepts.addBagObserver( bagObserver, s) see design for Bag and
+     * {@link BagWindow} in {@link Bag#addBagObserver(BagObserver, String)}
+     *
+     * @param bagObserver
      * @param s the window title
      */
     public void conceptsStartPlay(BagObserver bagObserver, String s) {
-    	bagObserver.setBag(concepts);
+        bagObserver.setBag(concepts);
         concepts.addBagObserver(bagObserver, s);
     }
 
     /**
-     * Display new tasks, called from MainWindow.
-     * see {@link #conceptsStartPlay(BagObserver, String)}
-     * @param bagObserver 
+     * Display new tasks, called from MainWindow. see
+     * {@link #conceptsStartPlay(BagObserver, String)}
+     *
+     * @param bagObserver
      * @param s the window title
      */
     public void taskBuffersStartPlay(BagObserver bagObserver, String s) {
-    	bagObserver.setBag(novelTasks);
+        bagObserver.setBag(novelTasks);
         novelTasks.addBagObserver(bagObserver, s);
     }
 
     /**
-     * Display input/output sentence in the output channels.
-     * The only place to add Objects into exportStrings. Currently only Strings
-     * are added, though in the future there can be outgoing Tasks;
-     * also if exportStrings is empty display the current value of timer
-     * ( exportStrings is emptied in {@link ReasonerBatch#doTick()} - TODO fragile mechanism) 
+     * Display input/output sentence in the output channels. The only place to
+     * add Objects into exportStrings. Currently only Strings are added, though
+     * in the future there can be outgoing Tasks; also if exportStrings is empty
+     * display the current value of timer ( exportStrings is emptied in
+     * {@link ReasonerBatch#doTick()} - TODO fragile mechanism)
+     *
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
      */
     public void report(Sentence sentence, boolean input) {
-    	if (ReasonerBatch.DEBUG) {
-    		System.out.println("// report( clock " + reasoner.getTime()
-    				+ ", input " + input
-    				+ ", timer " + reasoner.getTimer()
-    				+ ", Sentence " + sentence
-    				+ ", exportStrings " + exportStrings
-    				);
-    		System.out.flush();
-    	}
+        if (ReasonerBatch.DEBUG) {
+            System.out.println("// report( clock " + reasoner.getTime()
+                    + ", input " + input
+                    + ", timer " + reasoner.getTimer()
+                    + ", Sentence " + sentence
+                    + ", exportStrings " + exportStrings);
+            System.out.flush();
+        }
         if (exportStrings.isEmpty()) {
 //          long timer = reasoner.getMainWindow().updateTimer();
             long timer = reasoner.updateTimer();
@@ -475,64 +520,77 @@ public class Memory {
         s += sentence.toStringBrief();
         exportStrings.add(s);
     }
-    
-	@Override
-	public String toString() {
-		return
-				 toStringLongIfNotNull(concepts, "concepts")
-				+ toStringLongIfNotNull(novelTasks, "novelTasks")
-				+ toStringIfNotNull(newTasks, "newTasks")
-				+ toStringLongIfNotNull(currentTask, "currentTask")
-				+ toStringLongIfNotNull(currentBeliefLink, "currentBeliefLink")
-				+ toStringIfNotNull(currentBelief, "currentBelief")
-		;
-	}
 
-	private String toStringLongIfNotNull(Bag<?> item, String title) {
-		return item == null ? "" : "\n " + title + ":\n" + 
-				item.toStringLong();
-	}
-	
-	private String toStringLongIfNotNull(Item item, String title) {
-		return item == null ? "" : "\n " + title + ":\n" + 
-				item.toStringLong();
-	}
-	
-	private String toStringIfNotNull(Object item, String title) {
-		return item == null ? "" : "\n " + title + ":\n" + 
-				item.toString();
-	}
+    @Override
+    public String toString() {
+        return toStringLongIfNotNull(concepts, "concepts")
+                + toStringLongIfNotNull(novelTasks, "novelTasks")
+                + toStringIfNotNull(newTasks, "newTasks")
+                + toStringLongIfNotNull(currentTask, "currentTask")
+                + toStringLongIfNotNull(currentBeliefLink, "currentBeliefLink")
+                + toStringIfNotNull(currentBelief, "currentBelief");
+    }
 
-	public AtomicInteger getTaskForgettingRate() {
-		return taskForgettingRate;
-	}
+    private String toStringLongIfNotNull(Bag<?> item, String title) {
+        return item == null ? "" : "\n " + title + ":\n"
+                + item.toStringLong();
+    }
 
-	public AtomicInteger getBeliefForgettingRate() {
-		return beliefForgettingRate;
-	}
+    private String toStringLongIfNotNull(Item item, String title) {
+        return item == null ? "" : "\n " + title + ":\n"
+                + item.toStringLong();
+    }
 
-	public AtomicInteger getConceptForgettingRate() {
-		return conceptForgettingRate;
-	}
+    private String toStringIfNotNull(Object item, String title) {
+        return item == null ? "" : "\n " + title + ":\n"
+                + item.toString();
+    }
 
-	class NullInferenceRecorder implements IInferenceRecorder {
-		@Override
-		public void init() {}
-		@Override
-		public void show() {}
-		@Override
-		public void play() {}
-		@Override
-		public void stop() {}
-		@Override
-		public void append(String s) {}
-		@Override
-		public void openLogFile() {}
-		@Override
-		public void closeLogFile() {}
-		@Override
-		public boolean isLogging() {
-			return false;
-		}
-	}
+    public AtomicInteger getTaskForgettingRate() {
+        return taskForgettingRate;
+    }
+
+    public AtomicInteger getBeliefForgettingRate() {
+        return beliefForgettingRate;
+    }
+
+    public AtomicInteger getConceptForgettingRate() {
+        return conceptForgettingRate;
+    }
+
+    class NullInferenceRecorder implements IInferenceRecorder {
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public void show() {
+        }
+
+        @Override
+        public void play() {
+        }
+
+        @Override
+        public void stop() {
+        }
+
+        @Override
+        public void append(String s) {
+        }
+
+        @Override
+        public void openLogFile() {
+        }
+
+        @Override
+        public void closeLogFile() {
+        }
+
+        @Override
+        public boolean isLogging() {
+            return false;
+        }
+    }
 }

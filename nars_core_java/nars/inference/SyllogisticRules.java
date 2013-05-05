@@ -185,9 +185,10 @@ public final class SyllogisticRules {
         Term subject = statement.getSubject();
         Term predicate = statement.getPredicate();
         Term content;
-        if (side == 0) { // term.equals(subject)) {
+        Term term = subSentence.getContent();
+        if ((side == 0) && term.equals(subject)) {
             content = predicate;
-        } else if (side == 1) { //  term.equals(predicate)) {
+        } else if ((side == 1) && term.equals(predicate)) {
             content = subject;
         } else {
             return;

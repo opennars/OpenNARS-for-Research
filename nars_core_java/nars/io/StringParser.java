@@ -22,7 +22,7 @@ package nars.io;
 
 import java.util.*;
 
-import deductions.runtime.swing.TemporaryFrame;
+//import deductions.runtime.swing.TemporaryFrame;
 
 import nars.entity.*;
 import nars.inference.*;
@@ -289,8 +289,8 @@ public abstract class StringParser extends Symbols {
     }
 
 	private static void showWarning(String message) {
-		new TemporaryFrame( message + "\n( the faulty line has been kept in the input window )",
-				40000, TemporaryFrame.WARNING );
+//		new TemporaryFrame( message + "\n( the faulty line has been kept in the input window )",
+//				40000, TemporaryFrame.WARNING );
 	}
 
     /**

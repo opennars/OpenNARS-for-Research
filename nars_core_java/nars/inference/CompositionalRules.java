@@ -404,7 +404,7 @@ public final class CompositionalRules {
     static void introVarInner(Statement premise1, Statement premise2, CompoundTerm oldCompound, Memory memory) {
         Task task = memory.currentTask;
         Sentence taskSentence = task.getSentence();
-        if (!taskSentence.isJudgment() || (premise1.getClass() != premise2.getClass())) {
+        if (!taskSentence.isJudgment() || (premise1.getClass() != premise2.getClass()) || oldCompound.containComponent(premise1)) {
             return;
         }
         Term subject1 = premise1.getSubject();

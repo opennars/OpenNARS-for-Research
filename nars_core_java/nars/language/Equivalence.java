@@ -28,9 +28,7 @@ import nars.storage.Memory;
 /**
  * A Statement about an Equivalence relation.
  */
-public class Equivalence extends //	Implication ???
-									Statement
-{
+public class Equivalence extends Statement {
 
     /**
      * Constructor with partial values, called by make

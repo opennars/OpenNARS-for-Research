@@ -190,6 +190,10 @@ public class Sentence implements Cloneable {
         return (punctuation == Symbols.QUESTION_MARK);
     }
 
+    public boolean containQueryVar() {
+        return (content.getName().indexOf(Symbols.VAR_QUERY) >= 0);
+    }
+
     public boolean getRevisible() {
         return revisible;
     }

@@ -129,7 +129,8 @@ public final class Concept extends Item {
         }
         if (task.getBudget().aboveThreshold()) {
             for (Task ques : questions) {
-                LocalRules.trySolution(ques.getSentence(), judg, ques, memory);
+//                LocalRules.trySolution(ques.getSentence(), judg, ques, memory);
+                LocalRules.trySolution(judg, ques, memory);
             }
             addToTable(judg, beliefs, Parameters.MAXIMUM_BELIEF_LENGTH);
         }
@@ -161,7 +162,8 @@ public final class Concept extends Item {
         }
         Sentence newAnswer = evaluation(ques, beliefs);
         if (newAnswer != null) {
-            LocalRules.trySolution(ques, newAnswer, task, memory);
+//            LocalRules.trySolution(ques, newAnswer, task, memory);
+            LocalRules.trySolution(newAnswer, task, memory);
             return newAnswer.getTruth().getExpectation();
         } else {
             return 0.5f;

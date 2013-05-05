@@ -53,7 +53,8 @@ public class LocalRules {
                 revision(sentence, belief, true, memory);
             }
         } else if (Variable.unify(Symbols.VAR_QUERY, sentence.getContent(), (Term) belief.getContent().clone())) {
-            trySolution(sentence, belief, task, memory);
+//            trySolution(sentence, belief, task, memory);
+            trySolution(belief, task, memory);
         }
     }
 
@@ -92,7 +93,9 @@ public class LocalRules {
      * @param task The task to be processed
      * @param memory Reference to the memory
      */
-    public static void trySolution(Sentence problem, Sentence belief, Task task, Memory memory) {
+//    public static void trySolution(Sentence problem, Sentence belief, Task task, Memory memory) {
+    public static void trySolution(Sentence belief, Task task, Memory memory) {
+        Sentence problem = task.getSentence();
         Sentence oldBest = task.getBestSolution();
         float newQ = solutionQuality(problem, belief);
         if (oldBest != null) {
@@ -122,10 +125,10 @@ public class LocalRules {
             return solution.getTruth().getExpectation();
         }
         TruthValue truth = solution.getTruth();
-        if (problem.getContent().isConstant()) {   // "yes/no" question
-            return truth.getConfidence();
-        } else {                                    // "what" question or goal
+        if (problem.containQueryVar()) {   // "yes/no" question
             return truth.getExpectation() / solution.getContent().getComplexity();
+        } else {                                    // "what" question or goal
+            return truth.getConfidence();
         }
     }
 
