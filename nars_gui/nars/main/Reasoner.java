@@ -45,8 +45,8 @@ public class Reasoner extends ReasonerBatch {
     Reasoner(String name) {
     	super();
         this.name = name;
-        mainWindow = new MainWindow(this, name);
         inputWindow = new InputWindow(this, name);
+        mainWindow = new MainWindow(this, name);
         inputChannels.add(inputWindow);
         outputChannels.add(mainWindow);
         mainWindow.setVisible(true);
