@@ -40,7 +40,7 @@ public class MessageDialog extends JDialog implements ActionListener, WindowList
     public MessageDialog(Frame parent, String message) {
         super(parent, "Message", false);
         setLayout(new BorderLayout(5, 5));
-        setBackground(NarsFrame.SINGLE_WINDOW_COLOR);
+        getContentPane().setBackground(NarsFrame.SINGLE_WINDOW_COLOR);
         setFont(NarsFrame.NarsFont);
         text = new JTextArea(message);
         text.setBackground(NarsFrame.DISPLAY_BACKGROUND_COLOR);

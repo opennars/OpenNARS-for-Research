@@ -58,7 +58,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         previousValue = currentValue.get();
         currentValue.set( dft );
         setLayout(new GridLayout(3, 3, 8, 4));
-        setBackground(SINGLE_WINDOW_COLOR);
+        getContentPane().setBackground(SINGLE_WINDOW_COLOR);
         JLabel sp1 = new JLabel("");
         sp1.setBackground(SINGLE_WINDOW_COLOR);
         add(sp1);
@@ -84,7 +84,7 @@ public class ParameterWindow extends NarsFrame implements ActionListener, Adjust
         hideButton = new JButton("Hide");
         hideButton.addActionListener(this);
         add(hideButton);
-        this.setBounds(300, 300, 250, 120);
+        this.setBounds(600, 600, 250, 120);
     }
 
     /**

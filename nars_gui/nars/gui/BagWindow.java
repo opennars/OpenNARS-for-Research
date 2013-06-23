@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+
 import javax.swing.*;
 
 import java.awt.*;
@@ -32,27 +33,43 @@ import nars.storage.BagObserver;
  * JWindow display the priority distribution of items within a given bag
  */
 public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener, BagObserver {
-	/** The bag to be displayed */
+
+    /**
+     * The bag to be displayed
+     */
     private Bag<?> bag;
 //    /** The lowest level displayed */
 //    private int showLevel;
-    /** Control buttons */
+    /**
+     * Control buttons
+     */
     private JButton playButton, stopButton, closeButton;
-    /** Display area */
+    /**
+     * Display area
+     */
     private JTextArea text;
-    /** Display label */
+    /**
+     * Display label
+     */
     private JLabel valueLabel;
-    /** Adjustable display level */
+    /**
+     * Adjustable display level
+     */
     private JScrollBar valueBar;
-    /** The location of the display area, shifted according to the number of windows opened */
+    /**
+     * The location of the display area, shifted according to the number of
+     * windows opened
+     */
     private static int counter;
-    /** whether this bag window is active */
+    /**
+     * whether this bag window is active
+     */
     private boolean showing;
-    
+
     public BagWindow() {
         /* The lowest level displayed */
         int showLevel = Parameters.BAG_THRESHOLD;
-        setBackground(MULTIPLE_WINDOW_COLOR);
+        getContentPane().setBackground(MULTIPLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
@@ -69,8 +86,8 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         text.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(text);
         gridbag.setConstraints(scrollPane, c);
-		add(scrollPane);
-		
+        add(scrollPane);
+
         c.weighty = 0.0;
         c.gridwidth = 1;
         valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);
@@ -82,7 +99,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         gridbag.setConstraints(valueBar, c);
         add(valueBar);
 
-		playButton = new JButton(NarsFrame.ON_LABEL);
+        playButton = new JButton(NarsFrame.ON_LABEL);
         gridbag.setConstraints(playButton, c);
         playButton.addActionListener(this);
         add(playButton);
@@ -97,29 +114,31 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         closeButton.addActionListener(this);
         add(closeButton);
 
-        setBounds(400, 60 + counter * 20, 400, 270);
+        setBounds(600, 60 + counter * 40, 600, 300);
         counter++;
         setVisible(true);
     }
 
     @Override
-	public void post(String str) {
-    	showing = true;
+    public void post(String str) {
+        showing = true;
         text.setText(str);
     }
 
     /**
      * The lowest display level
+     *
      * @return The level
      */
 //    public int showLevel() {
 //        return showLevel;
 //    }
-
     /**
      * Handling button click
+     *
      * @param e The ActionEvent
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         if (source == playButton) {
@@ -147,37 +166,40 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
 
     /**
      * Handling scrollbar movement
+     *
      * @param e The AdjustmentEvent
      */
+    @Override
     public void adjustmentValueChanged(AdjustmentEvent e) {
         if (e.getSource() == valueBar) {
 //          int v = valueBar.getValue();
-        	int showLevel = valueBar.getValue();
+            int showLevel = valueBar.getValue();
             valueLabel.setText(String.valueOf(showLevel)); // v));
             valueBar.setValue(showLevel); // v);
 //            showLevel = v;
-    		bag.setShowLevel(showLevel);
+            bag.setShowLevel(showLevel);
             bag.play();
         }
     }
 
-	@Override
-	public void setBag(Bag<?> bag) {
-		this.bag = bag;
+    @Override
+    public void setBag(Bag<?> bag) {
+        this.bag = bag;
 //		bag.setShowLevel(showLevel);
-	}
-	
+    }
+
     /**
      * Refresh display if in showing state
      */
-    public void refresh( String message) {
+    @Override
+    public void refresh(String message) {
         if (showing) {
-            post( message );
+            post(message);
         }
     }
 
-	@Override
-	public void stop() {
-      showing = false;		
-	}
+    @Override
+    public void stop() {
+        showing = false;
+    }
 }

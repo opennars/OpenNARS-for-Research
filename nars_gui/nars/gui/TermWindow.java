@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+
 import javax.swing.*;
 
 import java.awt.*;
@@ -34,13 +35,21 @@ import nars.storage.Memory;
  */
 public class TermWindow extends NarsFrame implements ActionListener {
 
-    /** Display label */
+    /**
+     * Display label
+     */
     private JLabel termLabel;
-    /** Input field for term name */
+    /**
+     * Input field for term name
+     */
     private JTextField termField;
-    /** Control buttons */
+    /**
+     * Control buttons
+     */
     private JButton playButton, hideButton;
-    /** Reference to the memory */
+    /**
+     * Reference to the memory
+     */
     private Memory memory;
 
     /**
@@ -50,7 +59,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
         super("Term Window");
         this.memory = memory;
 
-        setBackground(SINGLE_WINDOW_COLOR);
+        getContentPane().setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
@@ -71,8 +80,8 @@ public class TermWindow extends NarsFrame implements ActionListener {
         termField = new JTextField("");
         JScrollPane scrollPane = new JScrollPane(termField);
         gridbag.setConstraints(scrollPane, c);
-		add(scrollPane);
-		
+        add(scrollPane);
+
         c.weightx = 0.0;
         playButton = new JButton("Show");
         playButton.addActionListener(this);
@@ -84,11 +93,12 @@ public class TermWindow extends NarsFrame implements ActionListener {
         gridbag.setConstraints(hideButton, c);
         add(hideButton);
 
-        setBounds(400, 0, 400, 100);
+        setBounds(600, 0, 600, 100);
     }
 
     /**
      * Handling button click
+     *
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
@@ -97,7 +107,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
             Concept concept = memory.nameToConcept(termField.getText().trim());
             if (concept != null) {
                 EntityObserver entityObserver = new ConceptWindow(concept);
-				concept.startPlay(entityObserver , true);
+                concept.startPlay(entityObserver, true);
             }
         } else if (b == hideButton) {
             close();

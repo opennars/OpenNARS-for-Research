@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+
 import javax.swing.*;
 
 import java.awt.*;
@@ -31,29 +32,41 @@ import nars.entity.EntityObserver;
 import nars.storage.BagObserver;
 
 /**
- * JWindow displaying the content of a Concept, such as beliefs, goals, and questions
+ * JWindow displaying the content of a Concept, such as beliefs, goals, and
+ * questions
  */
 public class ConceptWindow extends NarsFrame implements ActionListener, EntityObserver {
 
-    /** Control buttons */
+    /**
+     * Control buttons
+     */
     private JButton playButton, stopButton, playInNewWindowButton, closeButton;
-    /** Display area */
+    /**
+     * Display area
+     */
     private JTextArea text;
-    /** The concept to be displayed */
+    /**
+     * The concept to be displayed
+     */
     private Concept concept;
-    /** Whether the content of the concept is being displayed */
+    /**
+     * Whether the content of the concept is being displayed
+     */
     private boolean showing = false;
-    /** Used to adjust the screen position */
+    /**
+     * Used to adjust the screen position
+     */
     private static int instanceCount = 0;
 
     /**
      * Constructor
+     *
      * @param concept The concept to be displayed
      */
     public ConceptWindow(Concept concept) {
         super(concept.getKey());
         this.concept = concept;
-        setBackground(MULTIPLE_WINDOW_COLOR);
+        getContentPane().setBackground(MULTIPLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
@@ -70,8 +83,8 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         text.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(text);
         gridbag.setConstraints(scrollPane, c);
-		add(scrollPane);
-		
+        add(scrollPane);
+
         c.weighty = 0.0;
         c.gridwidth = 1;
         playButton = new JButton(ON_LABEL);
@@ -95,17 +108,17 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         add(closeButton);
 
         // Offset the screen location of each new instance.
-        setBounds(400 + (instanceCount % 10) * 10, 60 + (instanceCount % 10) * 20, 400, 270);
+        setBounds(600 + (instanceCount % 10) * 20, 60 + (instanceCount % 10) * 20, 600, 270);
         ++instanceCount;
         setVisible(true);
     }
 
     /* (non-Javadoc)
-	 * @see nars.gui.EntityObserver#post(java.lang.String)
-	 */
+     * @see nars.gui.EntityObserver#post(java.lang.String)
+     */
     @Override
-	public void post(String str) {
-      showing = true;
+    public void post(String str) {
+        showing = true;
         text.setText(str);
     }
 
@@ -120,6 +133,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
 
     /**
      * Handling button click
+     *
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
@@ -147,33 +161,33 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         close();
     }
 
-	@Override
-	public BagObserver createBagObserver() {
-		return new BagWindow();
-	}
+    @Override
+    public BagObserver createBagObserver() {
+        return new BagWindow();
+    }
 
-	@Override
-	public void startPlay(Concept concept, boolean showLinks) {
+    @Override
+    public void startPlay(Concept concept, boolean showLinks) {
         if (this.isVisible()) {
             this.detachFromConcept();
         }
 //        this = new ConceptWindow(this);
         showing = true;
-        this.post(concept.displayContent());	
-	}
-	
+        this.post(concept.displayContent());
+    }
+
     /**
      * Refresh display if in showing state
      */
-	@Override
-    public void refresh( String message) {
+    @Override
+    public void refresh(String message) {
         if (showing) {
-            post( message );
+            post(message);
         }
     }
 
-	@Override
-	public void stop() {
+    @Override
+    public void stop() {
         showing = false;
-	}
+    }
 }

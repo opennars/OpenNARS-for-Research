@@ -131,7 +131,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         record = new InferenceRecorder();
         memory.setRecorder(record);
 
-        setBackground(MAIN_WINDOW_COLOR);
+        getContentPane().setBackground(MAIN_WINDOW_COLOR);
         JMenuBar menuBar = new JMenuBar();
 
         JMenu m = new JMenu("File");
@@ -226,7 +226,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         exitButton.addActionListener(this);
         add(exitButton);
 
-        setBounds(0, 250, 600, 350);
+        setBounds(0, 250, 600, 600);
         setVisible(true);
 
         initTimer();
