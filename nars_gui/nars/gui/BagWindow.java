@@ -90,7 +90,8 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
 
         c.weighty = 0.0;
         c.gridwidth = 1;
-        valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);
+//        valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);
+        valueLabel = new JLabel( "00", JLabel.RIGHT);
         gridbag.setConstraints(valueLabel, c);
         add(valueLabel);
 
@@ -117,9 +118,19 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         setBounds(600, 60 + counter * 40, 600, 300);
         counter++;
         setVisible(true);
+        
+        adjustLabelAndCursor(showLevel);
     }
 
-    @Override
+    private void adjustLabelAndCursor(int showLevel) {
+        String valueText = String.valueOf(showLevel);
+        // always occupy 2 characters:
+        valueText = showLevel> 9 ? valueText : "0" + valueText;
+		valueLabel.setText(valueText);
+        valueBar.setValue(showLevel);		
+	}
+
+	@Override
     public void post(String str) {
         showing = true;
         text.setText(str);
@@ -172,11 +183,10 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     @Override
     public void adjustmentValueChanged(AdjustmentEvent e) {
         if (e.getSource() == valueBar) {
-//          int v = valueBar.getValue();
             int showLevel = valueBar.getValue();
-            valueLabel.setText(String.valueOf(showLevel)); // v));
-            valueBar.setValue(showLevel); // v);
-//            showLevel = v;
+            adjustLabelAndCursor(showLevel);
+//            valueLabel.setText(String.valueOf(showLevel));
+//            valueBar.setValue(showLevel);
             bag.setShowLevel(showLevel);
             bag.play();
         }
