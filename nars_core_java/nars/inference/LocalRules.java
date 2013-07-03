@@ -26,14 +26,14 @@ import nars.language.*;
 import nars.io.Symbols;
 
 /**
- * Directly process a task by a oldBelief, with only two Terms in both. 
- * In matching, the new task is compared with all existing direct Tasks in that Concept, to carry out:
+ * Directly process a task by a oldBelief, with only two Terms in both. In
+ * matching, the new task is compared with all existing direct Tasks in that
+ * Concept, to carry out:
  * <p>
- * revision: between judgments on non-overlapping evidence;
- * revision: between judgments;
- * satisfy: between a Sentence and a Question/Goal;
- * merge: between items of the same type and stamp;
- * conversion: between different inheritance relations.
+ * revision: between judgments on non-overlapping evidence; revision: between
+ * judgments; satisfy: between a Sentence and a Question/Goal; merge: between
+ * items of the same type and stamp; conversion: between different inheritance
+ * relations.
  */
 public class LocalRules {
 
@@ -42,6 +42,7 @@ public class LocalRules {
      * The task and belief have the same content
      * <p>
      * called in RuleTables.reason
+     *
      * @param task The task
      * @param belief The belief
      * @param memory Reference to the memory
@@ -53,13 +54,13 @@ public class LocalRules {
                 revision(sentence, belief, true, memory);
             }
         } else if (Variable.unify(Symbols.VAR_QUERY, sentence.getContent(), (Term) belief.getContent().clone())) {
-//            trySolution(sentence, belief, task, memory);
             trySolution(belief, task, memory);
         }
     }
 
     /**
      * Check whether two sentences can be used in revision
+     *
      * @param s1 The first sentence
      * @param s2 The second sentence
      * @return If revision is possible between the two sentences
@@ -72,6 +73,7 @@ public class LocalRules {
      * Belief revision
      * <p>
      * called from Concept.reviseTable and match
+     *
      * @param newBelief The new belief in task
      * @param oldBelief The previous belief with the same content
      * @param feedbackToLinks Whether to send feedback to the links
@@ -88,12 +90,11 @@ public class LocalRules {
 
     /**
      * Check if a Sentence provide a better answer to a Question or Goal
-     * @param problem The Goal or Question to be answered
+     *
      * @param belief The proposed answer
      * @param task The task to be processed
      * @param memory Reference to the memory
      */
-//    public static void trySolution(Sentence problem, Sentence belief, Task task, Memory memory) {
     public static void trySolution(Sentence belief, Task task, Memory memory) {
         Sentence problem = task.getSentence();
         Sentence oldBest = task.getBestSolution();
@@ -116,6 +117,7 @@ public class LocalRules {
 
     /**
      * Evaluate the quality of the judgment as a solution to a problem
+     *
      * @param problem A goal or question
      * @param solution The solution to be evaluated
      * @return The quality of the judgment as the solution
@@ -135,6 +137,7 @@ public class LocalRules {
     /* -------------------- same terms, difference relations -------------------- */
     /**
      * The task and belief match reversely
+     *
      * @param memory Reference to the memory
      */
     public static void matchReverse(Memory memory) {
@@ -150,6 +153,7 @@ public class LocalRules {
 
     /**
      * Inheritance/Implication matches Similarity/Equivalence
+     *
      * @param asym A Inheritance/Implication sentence
      * @param sym A Similarity/Equivalence sentence
      * @param figure location of the shared term
@@ -165,8 +169,9 @@ public class LocalRules {
 
     /* -------------------- two-premise inference rules -------------------- */
     /**
-     * {<S --> P>, <P --> S} |- <S <-> p>
-     * Produce Similarity/Equivalence from a pair of reversed Inheritance/Implication
+     * {<S --> P>, <P --> S} |- <S <-> p> Produce Similarity/Equivalence from a
+     * pair of reversed Inheritance/Implication
+     *
      * @param judgment1 The first premise
      * @param judgment2 The second premise
      * @param memory Reference to the memory
@@ -189,8 +194,9 @@ public class LocalRules {
     }
 
     /**
-     * {<S <-> P>, <P --> S>} |- <S --> P>
-     * Produce an Inheritance/Implication from a Similarity/Equivalence and a reversed Inheritance/Implication
+     * {<S <-> P>, <P --> S>} |- <S --> P> Produce an Inheritance/Implication
+     * from a Similarity/Equivalence and a reversed Inheritance/Implication
+     *
      * @param asym The asymmetric premise
      * @param sym The symmetric premise
      * @param memory Reference to the memory
@@ -207,8 +213,9 @@ public class LocalRules {
 
     /* -------------------- one-premise inference rules -------------------- */
     /**
-     * {<P --> S>} |- <S --> P>
-     * Produce an Inheritance/Implication from a reversed Inheritance/Implication
+     * {<P --> S>} |- <S --> P> Produce an Inheritance/Implication from a
+     * reversed Inheritance/Implication
+     *
      * @param memory Reference to the memory
      */
     private static void conversion(Memory memory) {
@@ -218,9 +225,9 @@ public class LocalRules {
     }
 
     /**
-     * {<S --> P>} |- <S <-> P>
-     * {<S <-> P>} |- <S --> P>
-     * Switch between Inheritance/Implication and Similarity/Equivalence
+     * {<S --> P>} |- <S <-> P> {<S <-> P>} |- <S --> P> Switch between
+     * Inheritance/Implication and Similarity/Equivalence
+     *
      * @param memory Reference to the memory
      */
     private static void convertRelation(Memory memory) {
@@ -235,9 +242,10 @@ public class LocalRules {
     }
 
     /**
-     * Convert jusgment into different relation
+     * Convert judgment into different relation
      * <p>
      * called in MatchingRules
+     *
      * @param budget The budget value of the new task
      * @param truth The truth value of the new task
      * @param memory Reference to the memory

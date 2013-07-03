@@ -30,20 +30,27 @@ import nars.main_nogui.ReasonerBatch;
 /**
  * A NARS Reasoner has its memory, I/O channels, and internal clock.
  * <p>
- * Create static main window and input channel, reset memory, and manage system clock.
+ * Create static main window and input channel, reset memory, and manage system
+ * clock.
  */
 public class Reasoner extends ReasonerBatch {
 
-	/** The unique main window */
+    /**
+     * The unique main window
+     */
     MainWindow mainWindow;
-    /** Input experience from a window */
+    /**
+     * Input experience from a window
+     */
     private InputWindow inputWindow;
+
     /**
      * Start the initial windows and memory. Called from NARS only.
+     *
      * @param name The name of the reasoner
      */
     Reasoner(String name) {
-    	super();
+        super();
         this.name = name;
         inputWindow = new InputWindow(this, name);
         mainWindow = new MainWindow(this, name);
@@ -52,15 +59,16 @@ public class Reasoner extends ReasonerBatch {
         mainWindow.setVisible(true);
     }
 
-	@Override
-	public void tick() {
-		final ReasonerBatch reasoner = this;
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				reasoner.doTick();
-		} } );
-	}
+    @Override
+    public void tick() {
+        final ReasonerBatch reasoner = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                reasoner.doTick();
+            }
+        });
+    }
 
     public MainWindow getMainWindow() {
         return mainWindow;
@@ -69,23 +77,24 @@ public class Reasoner extends ReasonerBatch {
     public InputWindow getInputWindow() {
         return inputWindow;
     }
-    
-	@Override
-	public long updateTimer() {
-		return mainWindow.updateTimer();
-	}
 
-	@Override
-	public void initTimer() {
-		mainWindow.initTimer();
-	}
+    @Override
+    public long updateTimer() {
+        return mainWindow.updateTimer();
+    }
 
-	@Override
-	public void tickTimer() {
-		mainWindow.tickTimer();
-	}
-	
-	public long getTimer() {
-		return mainWindow.getTimer();
-	}
+    @Override
+    public void initTimer() {
+        mainWindow.initTimer();
+    }
+
+    @Override
+    public void tickTimer() {
+        mainWindow.tickTimer();
+    }
+
+    @Override
+    public long getTimer() {
+        return mainWindow.getTimer();
+    }
 }

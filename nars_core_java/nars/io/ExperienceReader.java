@@ -30,16 +30,22 @@ import nars.main_nogui.ReasonerBatch;
  */
 public class ExperienceReader implements InputChannel {
 
-    /** Reference to the reasoner */
+    /**
+     * Reference to the reasoner
+     */
     private ReasonerBatch reasoner;
-    /** Input experience from a file */
+    /**
+     * Input experience from a file
+     */
     private BufferedReader inExp;
-
-	/** Remaining working cycles before reading the next line */
+    /**
+     * Remaining working cycles before reading the next line
+     */
     private int timer;
 
     /**
      * Default constructor
+     *
      * @param reasoner Backward link to the reasoner
      */
     public ExperienceReader(ReasonerBatch reasoner) {
@@ -47,7 +53,9 @@ public class ExperienceReader implements InputChannel {
         inExp = null;
     }
 
-    /** Open an input experience file with a FileDialog */
+    /**
+     * Open an input experience file with a FileDialog
+     */
     public void openLoadFile() {
         FileDialog dialog = new FileDialog((FileDialog) null, "Load experience", FileDialog.LOAD);
         dialog.setVisible(true);
@@ -57,7 +65,9 @@ public class ExperienceReader implements InputChannel {
         openLoadFile(filePath);
     }
 
-    /** Open an input experience file from given file Path
+    /**
+     * Open an input experience file from given file Path
+     *
      * @param filePath File to be read as experience
      */
     public void openLoadFile(String filePath) {
@@ -68,10 +78,9 @@ public class ExperienceReader implements InputChannel {
         }
         reasoner.addInputChannel(this);
     }
-    
+
     /**
-     * Close an input experience file
-     * (close the reader in fact)
+     * Close an input experience file (close the reader in fact)
      */
     public void closeLoadFile() {
         try {
@@ -83,15 +92,17 @@ public class ExperienceReader implements InputChannel {
     }
 
     public void setBufferedReader(BufferedReader inExp) {
-		this.inExp = inExp;
+        this.inExp = inExp;
         reasoner.addInputChannel(this);
-	}
-    
+    }
+
     /**
-     * Process the next chunk of input data
-     * TODO duplicated code with {@link InputWindow#nextInput()}
+     * Process the next chunk of input data TODO duplicated code with
+     * {@link InputWindow#nextInput()}
+     *
      * @return Whether the input channel should be checked again
      */
+    @Override
     public boolean nextInput() {
         if (timer > 0) {
             timer--;

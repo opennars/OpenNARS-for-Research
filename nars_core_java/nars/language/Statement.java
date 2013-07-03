@@ -61,7 +61,7 @@ public abstract class Statement extends CompoundTerm {
      * @param relation The relation String
      * @param subject The first component
      * @param predicate The second component
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      * @return The Statement built
      */
     public static Statement make(String relation, Term subject, Term predicate, Memory memory) {
@@ -98,7 +98,7 @@ public abstract class Statement extends CompoundTerm {
      * @param subj The first component
      * @param pred The second component
      * @param statement A sample statement providing the class type
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      */
     public static Statement make(Statement statement, Term subj, Term pred, Memory memory) {
         if (statement instanceof Inheritance) {
@@ -121,7 +121,7 @@ public abstract class Statement extends CompoundTerm {
      * @param statement A sample asymmetric statement providing the class type
      * @param subj The first component
      * @param pred The second component
-     * @param memory Reference to the memeory
+     * @param memory Reference to the memory
      * @return The Statement built
      */
     public static Statement makeSym(Statement statement, Term subj, Term pred, Memory memory) {
@@ -170,10 +170,10 @@ public abstract class Statement extends CompoundTerm {
      * @return The nameStr of the term
      */
     protected static String makeStatementName(Term subject, String relation, Term predicate) {
-        StringBuffer nameStr = new StringBuffer();
+        StringBuilder nameStr = new StringBuilder();
         nameStr.append(Symbols.STATEMENT_OPENER);
         nameStr.append(subject.getName());
-        nameStr.append(' ' + relation + ' ');
+        nameStr.append(' ').append(relation).append(' ');
         nameStr.append(predicate.getName());
         nameStr.append(Symbols.STATEMENT_CLOSER);
         return nameStr.toString();

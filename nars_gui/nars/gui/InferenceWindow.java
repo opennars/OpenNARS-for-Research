@@ -19,6 +19,7 @@
  * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.gui;
+
 import javax.swing.*;
 
 import java.awt.*;
@@ -32,28 +33,41 @@ import nars.io.*;
  */
 public class InferenceWindow extends NarsFrame implements ActionListener, ItemListener {
 
-    /** Control buttons */
+    /**
+     * Control buttons
+     */
     private JButton playButton, stopButton, hideButton;
-    /** Display area */
+    /**
+     * Display area
+     */
     private JTextArea text;
-    /** String to be caught */
+    /**
+     * String to be caught
+     */
     private JTextField watchText;
-    /** Type of caught text */
+    /**
+     * Type of caught text
+     */
     private JComboBox<String> watchType;
-    /** Type of caught text */
+    /**
+     * Type of caught text
+     */
     private String watched = "";
-    /** Inference recorder */
+    /**
+     * Inference recorder
+     */
     private IInferenceRecorder recorder = new NullInferenceRecorder();
 
     /**
      * Constructor
+     *
      * @param recorder The inference recorder
      */
     public InferenceWindow(IInferenceRecorder recorder) {
         super("Inference log");
         this.recorder = recorder;
 
-        setBackground(SINGLE_WINDOW_COLOR);
+        getContentPane().setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
@@ -70,7 +84,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         text.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(text);
         gridbag.setConstraints(scrollPane, c);
-		add(scrollPane);
+        add(scrollPane);
 //        gridbag.setConstraints(text, c);
 //        add(text);
 
@@ -81,9 +95,9 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         gridbag.setConstraints(watchText, c);
         add(watchText);
 
-        watchType = new JComboBox<String>( new String[] {"No Watch",
-        		"Watch Term",
-        		"Watch String" } );
+        watchType = new JComboBox<String>(new String[]{"No Watch",
+            "Watch Term",
+            "Watch String"});
         gridbag.setConstraints(watchType, c);
         watchType.addItemListener(this);
         add(watchType);
@@ -103,7 +117,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
         hideButton.addActionListener(this);
         add(hideButton);
 
-        setBounds(400, 200, 400, 400);
+        setBounds(600, 200, 600, 600);
     }
 
     /**
@@ -115,6 +129,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
 
     /**
      * Append a new line to display
+     *
      * @param str Text to be added into display
      */
     public void append(String str) {
@@ -126,6 +141,7 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
 
     /**
      * Handling button click
+     *
      * @param e The ActionEvent
      */
     public void actionPerformed(ActionEvent e) {
@@ -170,25 +186,40 @@ public class InferenceWindow extends NarsFrame implements ActionListener, ItemLi
     public void resetBackground() {
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
     }
-    
+
     class NullInferenceRecorder implements IInferenceRecorder {
-		@Override
-		public void init() {}
-		@Override
-		public void show() {}
-		@Override
-		public void play() {}
-		@Override
-		public void stop() {}
-		@Override
-		public void append(String s) {}
-		@Override
-		public void openLogFile() {}
-		@Override
-		public void closeLogFile() {}
-		@Override
-		public boolean isLogging() {
-			return false;
-		}    	
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public void show() {
+        }
+
+        @Override
+        public void play() {
+        }
+
+        @Override
+        public void stop() {
+        }
+
+        @Override
+        public void append(String s) {
+        }
+
+        @Override
+        public void openLogFile() {
+        }
+
+        @Override
+        public void closeLogFile() {
+        }
+
+        @Override
+        public boolean isLogging() {
+            return false;
+        }
     }
 }

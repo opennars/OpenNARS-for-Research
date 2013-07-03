@@ -35,6 +35,7 @@ public final class SyllogisticRules {
      * <pre>
      * {<S ==> M>, <M ==> P>} |- {<S ==> P>, <P ==> S>}
      * </pre>
+     *
      * @param term1 Subject of the first new task
      * @param term2 Predicate of the first new task
      * @param sentence The first premise
@@ -68,6 +69,7 @@ public final class SyllogisticRules {
 
     /**
      * {<M ==> S>, <M ==> P>} |- {<S ==> P>, <P ==> S>, <S <=> P>}
+     *
      * @param term1 Subject of the first new task
      * @param term2 Predicate of the first new task
      * @param taskSentence The first premise
@@ -108,6 +110,7 @@ public final class SyllogisticRules {
 
     /**
      * {<S ==> P>, <M <=> P>} |- <S ==> P>
+     *
      * @param term1 Subject of the new task
      * @param term2 Predicate of the new task
      * @param asym The asymmetric premise
@@ -119,8 +122,7 @@ public final class SyllogisticRules {
         if (Statement.invalidStatement(term1, term2)) {
             return;
         }
-        Statement asymSt = (Statement) asym.getContent();
-//        Statement symSt = (Statement) sym.getContent();
+        Statement st = (Statement) asym.getContent();
         TruthValue truth = null;
         BudgetValue budget;
         Sentence sentence = memory.currentTask.getSentence();
@@ -135,12 +137,13 @@ public final class SyllogisticRules {
             truth = TruthFunctions.analogy(asym.getTruth(), sym.getTruth());
             budget = BudgetFunctions.forward(truth, memory);
         }
-        Term content = Statement.make(asymSt, term1, term2, memory);
+        Term content = Statement.make(st, term1, term2, memory);
         memory.doublePremiseTask(content, truth, budget);
     }
 
     /**
      * {<S <=> M>, <M <=> P>} |- <S <=> P>
+     *
      * @param term1 Subject of the new task
      * @param term2 Predicate of the new task
      * @param belief The first premise
@@ -152,8 +155,7 @@ public final class SyllogisticRules {
         if (Statement.invalidStatement(term1, term2)) {
             return;
         }
-        Statement st1 = (Statement) belief.getContent();
-//        Statement st2 = (Statement) sentence.getContent();
+        Statement st = (Statement) belief.getContent();
         TruthValue truth = null;
         BudgetValue budget;
         if (sentence.isQuestion()) {
@@ -162,16 +164,16 @@ public final class SyllogisticRules {
             truth = TruthFunctions.resemblance(belief.getTruth(), sentence.getTruth());
             budget = BudgetFunctions.forward(truth, memory);
         }
-        Term statement = Statement.make(st1, term1, term2, memory);
+        Term statement = Statement.make(st, term1, term2, memory);
         memory.doublePremiseTask(statement, truth, budget);
     }
 
     /* --------------- rules used only in conditional inference --------------- */
     /**
-     * {<<M --> S> ==> <M --> P>>, <M --> S>} |- <M --> P>
-     * {<<M --> S> ==> <M --> P>>, <M --> P>} |- <M --> S>
-     * {<<M --> S> <=> <M --> P>>, <M --> S>} |- <M --> P>
-     * {<<M --> S> <=> <M --> P>>, <M --> P>} |- <M --> S>
+     * {<<M --> S> ==> <M --> P>>, <M --> S>} |- <M --> P> {<<M --> S> ==> <M
+     * --> P>>, <M --> P>} |- <M --> S> {<<M --> S> <=> <M --> P>>, <M --> S>}
+     * |- <M --> P> {<<M --> S> <=> <M --> P>>, <M --> P>} |- <M --> S>
+     *
      * @param mainSentence The implication/equivalence premise
      * @param subSentence The premise on part of s1
      * @param side The location of s2 in s1
@@ -225,13 +227,16 @@ public final class SyllogisticRules {
     }
 
     /**
-     * {<(&&, S1, S2, S3) ==> P>, S1} |- <(&&, S2, S3) ==> P>
-     * {<(&&, S2, S3) ==> P>, <S1 ==> S2>} |- <(&&, S1, S3) ==> P>
-     * {<(&&, S1, S3) ==> P>, <S1 ==> S2>} |- <(&&, S2, S3) ==> P>
+     * {<(&&, S1, S2, S3) ==> P>, S1} |- <(&&, S2, S3) ==> P> {<(&&, S2, S3) ==>
+     * P>, <S1 ==> S2>} |- <(&&, S1, S3) ==> P> {<(&&, S1, S3) ==> P>, <S1 ==>
+     * S2>} |- <(&&, S2, S3) ==> P>
+     *
      * @param premise1 The conditional premise
      * @param index The location of the shared term in the condition of premise1
-     * @param premise2 The premise which, or part of which, appears in the condition of premise1
-     * @param side The location of the shared term in premise2: 0 for subject, 1 for predicate, -1 for the whole term
+     * @param premise2 The premise which, or part of which, appears in the
+     * condition of premise1
+     * @param side The location of the shared term in premise2: 0 for subject, 1
+     * for predicate, -1 for the whole term
      * @param memory Reference to the memory
      */
     static void conditionalDedInd(Implication premise1, short index, Term premise2, int side, Memory memory) {
@@ -300,10 +305,13 @@ public final class SyllogisticRules {
 
     /**
      * {<(&&, S1, S2) <=> P>, (&&, S1, S2)} |- P
+     *
      * @param premise1 The equivalence premise
      * @param index The location of the shared term in the condition of premise1
-     * @param premise2 The premise which, or part of which, appears in the condition of premise1
-     * @param side The location of the shared term in premise2: 0 for subject, 1 for predicate, -1 for the whole term
+     * @param premise2 The premise which, or part of which, appears in the
+     * condition of premise1
+     * @param side The location of the shared term in premise2: 0 for subject, 1
+     * for predicate, -1 for the whole term
      * @param memory Reference to the memory
      */
     static void conditionalAna(Equivalence premise1, short index, Term premise2, int side, Memory memory) {
@@ -364,6 +372,7 @@ public final class SyllogisticRules {
 
     /**
      * {<(&&, S2, S3) ==> P>, <(&&, S1, S3) ==> P>} |- <S1 ==> S2>
+     *
      * @param cond1 The condition of the first premise
      * @param cond2 The condition of the second premise
      * @param taskContent The first premise
@@ -380,9 +389,11 @@ public final class SyllogisticRules {
         }
         Term term1 = null;
         Term term2 = null;
+//        if ((cond1 instanceof Conjunction) && !Variable.containVarDep(cond1.getName())) {
         if (cond1 instanceof Conjunction) {
             term1 = CompoundTerm.reduceComponents((Conjunction) cond1, cond2, memory);
         }
+//        if ((cond2 instanceof Conjunction) && !Variable.containVarDep(cond2.getName())) {
         if (cond2 instanceof Conjunction) {
             term2 = CompoundTerm.reduceComponents((Conjunction) cond2, cond1, memory);
         }
@@ -430,6 +441,7 @@ public final class SyllogisticRules {
 
     /**
      * {(&&, <#x() --> S>, <#x() --> P>>, <M --> P>} |- <M --> S>
+     *
      * @param compound The compound term to be decomposed
      * @param component The part of the compound to be removed
      * @param compoundTask Whether the compound comes from the task

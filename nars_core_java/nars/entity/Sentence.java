@@ -24,29 +24,43 @@ import nars.io.Symbols;
 import nars.language.Term;
 
 /**
- * A Sentence is an abstract class, mainly containing a Term, a TruthValue, and a Stamp.
- *<p>
+ * A Sentence is an abstract class, mainly containing a Term, a TruthValue, and
+ * a Stamp.
+ * <p>
  * It is used as the premises and conclusions of all inference rules.
  */
 public class Sentence implements Cloneable {
 
-    /** The content of a Sentence is a Term */
+    /**
+     * The content of a Sentence is a Term
+     */
     private Term content;
-    /** The punctuation also indicates the type of the Sentence: Judgment, Question, or Goal */
+    /**
+     * The punctuation also indicates the type of the Sentence: Judgment,
+     * Question, or Goal
+     */
     private char punctuation;
-    /** The truth value of Judgment */
+    /**
+     * The truth value of Judgment
+     */
     private TruthValue truth;
-    /** Partial record of the derivation path */
+    /**
+     * Partial record of the derivation path
+     */
     private Stamp stamp;
-    /** Whether the sentence can be revised */
+    /**
+     * Whether the sentence can be revised
+     */
     private boolean revisible;
 
     /**
      * Create a Sentence with the given fields
+     *
      * @param content The Term that forms the content of the sentence
      * @param punctuation The punctuation indicating the type of the sentence
      * @param truth The truth value of the sentence, null for question
-     * @param stamp The stamp of the sentence indicating its derivation time and base
+     * @param stamp The stamp of the sentence indicating its derivation time and
+     * base
      */
     public Sentence(Term content, char punctuation, TruthValue truth, Stamp stamp) {
         this.content = content;
@@ -59,10 +73,12 @@ public class Sentence implements Cloneable {
 
     /**
      * Create a Sentence with the given fields
+     *
      * @param content The Term that forms the content of the sentence
      * @param punctuation The punctuation indicating the type of the sentence
      * @param truth The truth value of the sentence, null for question
-     * @param stamp The stamp of the sentence indicating its derivation time and base
+     * @param stamp The stamp of the sentence indicating its derivation time and
+     * base
      * @param revisible Whether the sentence can be revised
      */
     public Sentence(Term content, char punctuation, TruthValue truth, Stamp stamp, boolean revisible) {
@@ -76,6 +92,7 @@ public class Sentence implements Cloneable {
 
     /**
      * To check whether two sentences are equal
+     *
      * @param that The other sentence
      * @return Whether the two sentences have the same content
      */
@@ -90,6 +107,7 @@ public class Sentence implements Cloneable {
 
     /**
      * To produce the hashcode of a sentence
+     *
      * @return A hashcode
      */
     @Override
@@ -106,6 +124,7 @@ public class Sentence implements Cloneable {
      * Check whether the judgment is equivalent to another one
      * <p>
      * The two may have different keys
+     *
      * @param that The other judgment
      * @return Whether the two are equivalent
      */
@@ -116,6 +135,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Clone the Sentence
+     *
      * @return The clone
      */
     @Override
@@ -128,6 +148,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Get the content of the sentence
+     *
      * @return The content Term
      */
     public Term getContent() {
@@ -136,6 +157,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Get the punctuation of the sentence
+     *
      * @return The character '.' or '?'
      */
     public char getPunctuation() {
@@ -144,6 +166,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Clone the content of the sentence
+     *
      * @return A clone of the content Term
      */
     public Term cloneContent() {
@@ -152,6 +175,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Set the content Term of the Sentence
+     *
      * @param t The new content
      */
     public void setContent(Term t) {
@@ -160,6 +184,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Get the truth value of the sentence
+     *
      * @return Truth value, null for question
      */
     public TruthValue getTruth() {
@@ -168,6 +193,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Get the stamp of the sentence
+     *
      * @return The stamp
      */
     public Stamp getStamp() {
@@ -176,6 +202,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Distinguish Judgment from Goal ("instanceof Judgment" doesn't work)
+     *
      * @return Whether the object is a Judgment
      */
     public boolean isJudgment() {
@@ -184,6 +211,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Distinguish Question from Quest ("instanceof Question" doesn't work)
+     *
      * @return Whether the object is a Question
      */
     public boolean isQuestion() {
@@ -204,13 +232,14 @@ public class Sentence implements Cloneable {
 
     /**
      * Get a String representation of the sentence
+     *
      * @return The String
      */
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append(content.toString());
-        s.append(punctuation + " ");
+        s.append(punctuation).append(" ");
         if (truth != null) {
             s.append(truth.toString());
         }
@@ -220,6 +249,7 @@ public class Sentence implements Cloneable {
 
     /**
      * Get a String representation of the sentence, with 2-digit accuracy
+     *
      * @return The String
      */
     public String toStringBrief() {
@@ -228,12 +258,13 @@ public class Sentence implements Cloneable {
 
     /**
      * Get a String representation of the sentence for key of Task and TaskLink
+     *
      * @return The String
      */
     public String toKey() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append(content.toString());
-        s.append(punctuation + " ");
+        s.append(punctuation).append(" ");
         if (truth != null) {
             s.append(truth.toStringBrief());
         }

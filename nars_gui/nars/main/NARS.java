@@ -29,7 +29,8 @@ import nars.main_nogui.ReasonerBatch;
 /**
  * The main class of the project.
  * <p>
- * Define an application with full functionality and an applet with partial functionality.
+ * Define an application with full functionality and an applet with partial
+ * functionality.
  * <p>
  * Manage the internal working thread. Communicate with Reasoner only.
  */
@@ -38,14 +39,14 @@ public class NARS extends Applet implements Runnable {
     /**
      * The information about the version and date of the project.
      */
-    public static final String INFO = "Open-NARS\tVersion 1.5.4\tMay 2013 \n";
+    public static final String INFO = "Open-NARS\tVersion 1.5.4\tJuly 2013 \n";
     /**
      * The project web sites.
      */
     public static final String WEBSITE =
-            " Open-NARS website:  http://code.google.com/p/open-nars/ \n" +
-            "      NARS website:  http://sites.google.com/site/narswang/ \n\n" +
-            "Meet us on IRC channel #nars on freenode.net.";
+            " Open-NARS website:  http://code.google.com/p/open-nars/ \n"
+            + "      NARS website:  http://sites.google.com/site/narswang/ \n\n"
+            + "Meet us on IRC channel #nars on freenode.net.";
     /**
      * The internal working thread of the system.
      */
@@ -59,9 +60,11 @@ public class NARS extends Applet implements Runnable {
     /**
      * The entry point of the standalone application.
      * <p>
-     * Create an instance of the class, then run the {@link #init()} and {@link #start()} methods.
-     * @param args optional argument used : one input file,
-     * possibly followed by --silence <integer>
+     * Create an instance of the class, then run the {@link #init()} and
+     * {@link #start()} methods.
+     *
+     * @param args optional argument used : one input file, possibly followed by
+     * --silence <integer>
      */
     public static void main(String args[]) {
         NARSBatch.setStandAlone(true);
@@ -70,15 +73,17 @@ public class NARS extends Applet implements Runnable {
         nars.start();
     }
 
-    /** TODO multiple files */
+    /**
+     * TODO multiple files
+     */
     public void init(String[] args) {
         init();
         if (args.length > 0
-        		&& CommandLineParameters.isReallyFile(args[0]) ) {
+                && CommandLineParameters.isReallyFile(args[0])) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
         }
-        CommandLineParameters.decode( args, reasoner );
+        CommandLineParameters.decode(args, reasoner);
     }
 
     /* Applet/Application code */
@@ -92,12 +97,13 @@ public class NARS extends Applet implements Runnable {
     }
 
     /**
-     * Start the thread if necessary, called when the page containing the applet first appears on the screen.
+     * Start the thread if necessary, called when the page containing the applet
+     * first appears on the screen.
      */
     @Override
     public void start() {
         if (narsThread == null) {
-            narsThread = new Thread(this, "Inference" );
+            narsThread = new Thread(this, "Inference");
             narsThread.start();
         }
     }
@@ -112,7 +118,8 @@ public class NARS extends Applet implements Runnable {
 
     /* Implementing the Runnable Interface */
     /**
-     * Repeatedly execute NARS working cycle. This method is called when the Runnable's thread is started.
+     * Repeatedly execute NARS working cycle. This method is called when the
+     * Runnable's thread is started.
      */
     @Override
     public void run() {
@@ -123,16 +130,16 @@ public class NARS extends Applet implements Runnable {
             } catch (InterruptedException e) {
             }
             try {
-            	// NOTE: try/catch not necessary for input errors , but may be useful for other troubles
-				reasoner.tick();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+                // NOTE: try/catch not necessary for input errors , but may be useful for other troubles
+                reasoner.tick();
+            } catch (Exception e) {
+            }
         }
     }
 
     /**
      * Provide system information for the applet.
+     *
      * @return The string containing the information about the applet.
      */
     @Override

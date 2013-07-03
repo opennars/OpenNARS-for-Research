@@ -33,10 +33,14 @@ import nars.main_nogui.ReasonerBatch;
 public class ExperienceWriter implements OutputChannel {
 
     private ReasonerBatch reasoner;
-    /** Input experience from a file */
+    /**
+     * Input experience from a file
+     */
     private PrintWriter outExp;
 
-    /** Default constructor
+    /**
+     * Default constructor
+     *
      * @param reasoner
      */
     public ExperienceWriter(ReasonerBatch reasoner) {
@@ -44,11 +48,11 @@ public class ExperienceWriter implements OutputChannel {
     }
 
     public ExperienceWriter(ReasonerBatch reasoner, PrintWriter outExp) {
-		this(reasoner);
-		this.outExp = outExp;
-	}
+        this(reasoner);
+        this.outExp = outExp;
+    }
 
-	/**
+    /**
      * Open an output experience file
      */
     public void openSaveFile() {
@@ -74,8 +78,10 @@ public class ExperienceWriter implements OutputChannel {
 
     /**
      * Process the next chunk of output data
+     *
      * @param lines The text to be displayed
      */
+    @Override
     public void nextOutput(ArrayList<String> lines) {
         if (outExp != null) {
             for (Object line : lines) {
@@ -84,7 +90,7 @@ public class ExperienceWriter implements OutputChannel {
         }
     }
 
-	@Override
-	public void tickTimer() {		
-	}
+    @Override
+    public void tickTimer() {
+    }
 }

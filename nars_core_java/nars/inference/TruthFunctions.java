@@ -113,7 +113,7 @@ public final class TruthFunctions extends UtilityFunctions {
         float f1 = v1.getFrequency();
         float c1 = v1.getConfidence();
         float c = and(f1, c1, reliance);
-        return new TruthValue(f1, c);
+        return new TruthValue(f1, c, true);
     }
 
     /**
@@ -155,6 +155,9 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue abduction(TruthValue v1, TruthValue v2) {
+        if (v1.getAnalytic() || v2.getAnalytic()) {
+            return new TruthValue(0.5f, 0f);
+        }
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
@@ -171,11 +174,14 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue abduction(TruthValue v1, float reliance) {
+        if (v1.getAnalytic()) {
+            return new TruthValue(0.5f, 0f);
+        }
         float f1 = v1.getFrequency();
         float c1 = v1.getConfidence();
         float w = and(c1, reliance);
         float c = w2c(w);
-        return new TruthValue(f1, c);
+        return new TruthValue(f1, c, true);
     }
 
     /**
@@ -195,6 +201,9 @@ public final class TruthFunctions extends UtilityFunctions {
      * @return Truth value of the conclusion
      */
     static TruthValue exemplification(TruthValue v1, TruthValue v2) {
+        if (v1.getAnalytic() || v2.getAnalytic()) {
+            return new TruthValue(0.5f, 0f);
+        }
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
@@ -300,7 +309,6 @@ public final class TruthFunctions extends UtilityFunctions {
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float f = or(f1, f2);
-//        float c = or(and(f1, c1), and(f2, c2)) + and(1 - f1, 1 - f2, c1, c2);
         float c = and(c1, c2);
         return new TruthValue(f, c);
     }

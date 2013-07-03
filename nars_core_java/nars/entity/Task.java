@@ -27,17 +27,26 @@ import nars.language.Term;
  */
 public class Task extends Item {
 
-    /** The sentence of the Task */
+    /**
+     * The sentence of the Task
+     */
     private Sentence sentence;
-    /** Task from which the Task is derived, or null if input */
+    /**
+     * Task from which the Task is derived, or null if input
+     */
     private Task parentTask;
-    /** Belief from which the Task is derived, or null if derived from a theorem */
+    /**
+     * Belief from which the Task is derived, or null if derived from a theorem
+     */
     private Sentence parentBelief;
-    /** For Question and Goal: best solution found so far */
+    /**
+     * For Question and Goal: best solution found so far
+     */
     private Sentence bestSolution;
 
     /**
      * Constructor for input task
+     *
      * @param s The sentence
      * @param b The budget
      */
@@ -49,6 +58,7 @@ public class Task extends Item {
 
     /**
      * Constructor for a derived task
+     *
      * @param s The sentence
      * @param b The budget
      * @param parentTask The task from which this new task is derived
@@ -62,19 +72,21 @@ public class Task extends Item {
 
     /**
      * Constructor for an activated task
+     *
      * @param s The sentence
      * @param b The budget
      * @param parentTask The task from which this new task is derived
      * @param parentBelief The belief from which this new task is derived
      * @param solution The belief to be used in future inference
      */
-     public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief, Sentence solution) {
-        this(s, b, parentTask, parentBelief); 
+    public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief, Sentence solution) {
+        this(s, b, parentTask, parentBelief);
         this.bestSolution = solution;
     }
 
     /**
      * Get the sentence
+     *
      * @return The sentence
      */
     public Sentence getSentence() {
@@ -83,6 +95,7 @@ public class Task extends Item {
 
     /**
      * Directly get the content of the sentence
+     *
      * @return The content of the sentence
      */
     public Term getContent() {
@@ -91,6 +104,7 @@ public class Task extends Item {
 
     /**
      * Directly get the creation time of the sentence
+     *
      * @return The creation time of the sentence
      */
     public long getCreationTime() {
@@ -99,6 +113,7 @@ public class Task extends Item {
 
     /**
      * Check if a Task is a direct input
+     *
      * @return Whether the Task is derived from another task
      */
     public boolean isInput() {
@@ -107,14 +122,15 @@ public class Task extends Item {
 
     /**
      * Check if a Task is derived by a StructuralRule
+     *
      * @return Whether the Task is derived by a StructuralRule
      */
-    public boolean isStructural() {
-        return (parentBelief == null) && (parentTask != null);
-    }
-
+//    public boolean isStructural() {
+//        return (parentBelief == null) && (parentTask != null);
+//    }
     /**
      * Merge one Task into another
+     *
      * @param that The other Task
      */
     @Override
@@ -128,6 +144,7 @@ public class Task extends Item {
 
     /**
      * Get the best-so-far solution for a Question or Goal
+     *
      * @return The stored Sentence or null
      */
     public Sentence getBestSolution() {
@@ -135,7 +152,9 @@ public class Task extends Item {
     }
 
     /**
-     * Set the best-so-far solution for a Question or Goal, and report answer for input question
+     * Set the best-so-far solution for a Question or Goal, and report answer
+     * for input question
+     *
      * @param judg The solution to be remembered
      */
     public void setBestSolution(Sentence judg) {
@@ -144,6 +163,7 @@ public class Task extends Item {
 
     /**
      * Get the parent belief of a task
+     *
      * @return The belief from which the task is derived
      */
     public Sentence getParentBelief() {
@@ -151,25 +171,33 @@ public class Task extends Item {
     }
 
     /**
+     * Get the parent task of a task
+     *
+     * @return The task from which the task is derived
+     */
+    public Task getParentTask() {
+        return parentTask;
+    }
+
+    /**
      * Get a String representation of the Task
+     *
      * @return The Task as a String
      */
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer();
-        s.append(super.toString() + " ");
-        s.append( getSentence().getStamp() );
+        StringBuilder s = new StringBuilder();
+        s.append(super.toString()).append(" ");
+        s.append(getSentence().getStamp());
         if (parentTask != null) {
-            s.append("  \n from task: " + parentTask.toStringBrief());
+            s.append("  \n from task: ").append(parentTask.toStringBrief());
             if (parentBelief != null) {
-                s.append("  \n from belief: " + parentBelief.toStringBrief());
+                s.append("  \n from belief: ").append(parentBelief.toStringBrief());
             }
         }
         if (bestSolution != null) {
-            s.append("  \n solution: " + bestSolution.toStringBrief());
+            s.append("  \n solution: ").append(bestSolution.toStringBrief());
         }
-//        s.append("\n>>>> end of Task");
-
         return s.toString();
     }
 }

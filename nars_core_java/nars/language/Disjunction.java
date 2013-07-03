@@ -54,21 +54,22 @@ public class Disjunction extends CompoundTerm {
      * Clone an object
      * @return A new object
      */
+    @Override
     public Object clone() {
         return new Disjunction(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a new Disjunction from two components. Called by the inference rules.
-     * @param term1 The first compoment
-     * @param term2 The first compoment
+     * @param term1 The first component
+     * @param term2 The first component
      * @param memory Reference to the memory
      * @return A Disjunction generated or a Term it reduced to
      */
     public static Term make(Term term1, Term term2, Memory memory) {
         TreeSet<Term> set;
         if (term1 instanceof Disjunction) {
-            set = new TreeSet<Term>(((CompoundTerm) term1).cloneComponents());
+            set = new TreeSet<>(((CompoundTerm) term1).cloneComponents());
             if (term2 instanceof Disjunction) {
                 set.addAll(((CompoundTerm) term2).cloneComponents());
             } // (&,(&,P,Q),(&,R,S)) = (&,P,Q,R,S)
@@ -76,10 +77,10 @@ public class Disjunction extends CompoundTerm {
                 set.add((Term) term2.clone());
             }                          // (&,(&,P,Q),R) = (&,P,Q,R)
         } else if (term2 instanceof Disjunction) {
-            set = new TreeSet<Term>(((CompoundTerm) term2).cloneComponents());
+            set = new TreeSet<>(((CompoundTerm) term2).cloneComponents());
             set.add((Term) term1.clone());                              // (&,R,(&,P,Q)) = (&,P,Q,R)
         } else {
-            set = new TreeSet<Term>();
+            set = new TreeSet<>();
             set.add((Term) term1.clone());
             set.add((Term) term2.clone());
         }
@@ -88,18 +89,18 @@ public class Disjunction extends CompoundTerm {
 
     /**
      * Try to make a new IntersectionExt. Called by StringParser.
-     * @param argList a list of Term as compoments
+     * @param argList a list of Term as components
      * @param memory Reference to the memory
      * @return the Term generated from the arguments
      */
     public static Term make(ArrayList<Term> argList, Memory memory) {
-        TreeSet<Term> set = new TreeSet<Term>(argList); // sort/merge arguments
+        TreeSet<Term> set = new TreeSet<>(argList); // sort/merge arguments
         return make(set, memory);
     }
 
     /**
      * Try to make a new Disjunction from a set of components. Called by the public make methods.
-     * @param set a set of Term as compoments
+     * @param set a set of Term as components
      * @param memory Reference to the memory
      * @return the Term generated from the arguments
      */
@@ -107,7 +108,7 @@ public class Disjunction extends CompoundTerm {
         if (set.size() == 1) {
             return set.first();
         }                         // special case: single component
-        ArrayList<Term> argument = new ArrayList<Term>(set);
+        ArrayList<Term> argument = new ArrayList<>(set);
         String name = makeCompoundName(Symbols.DISJUNCTION_OPERATOR, argument);
         Term t = memory.nameToListedTerm(name);
         return (t != null) ? t : new Disjunction(argument);
@@ -117,13 +118,14 @@ public class Disjunction extends CompoundTerm {
      * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.DISJUNCTION_OPERATOR;
     }
 
     /**
-     * Disjunction is communitative.
-     * @return true for communitative
+     * Disjunction is commutative.
+     * @return true for commutative
      */
     @Override
     public boolean isCommutative() {

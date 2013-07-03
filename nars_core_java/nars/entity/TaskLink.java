@@ -26,24 +26,33 @@ import nars.main_nogui.Parameters;
 /**
  * Reference to a Task.
  * <p>
- * The reason to separate a Task and a TaskLink is that the same Task can be linked from 
- * multiple Concepts, with different BudgetValue.
+ * The reason to separate a Task and a TaskLink is that the same Task can be
+ * linked from multiple Concepts, with different BudgetValue.
  */
 public class TaskLink extends TermLink {
 
-	/** The Task linked. The "target" field in TermLink is not used here. */
+    /**
+     * The Task linked. The "target" field in TermLink is not used here.
+     */
     private Task targetTask;
-    /** Remember the TermLinks that has been used recently with this TaskLink */
+    /**
+     * Remember the TermLinks that has been used recently with this TaskLink
+     */
     private String recordedLinks[];
-    /** Remember the time when each TermLink is used with this TaskLink */
+    /**
+     * Remember the time when each TermLink is used with this TaskLink
+     */
     private long recordingTime[];
-    /** The number of TermLinks remembered */
+    /**
+     * The number of TermLinks remembered
+     */
     int counter;
 
     /**
      * Constructor
      * <p>
      * only called in Memory.continuedProcess
+     *
      * @param t The target Task
      * @param template The TermLink template
      * @param v The budget
@@ -67,6 +76,7 @@ public class TaskLink extends TermLink {
 
     /**
      * Get the target Task
+     *
      * @return The linked Task
      */
     public Task getTargetTask() {
@@ -74,10 +84,11 @@ public class TaskLink extends TermLink {
     }
 
     /**
-     * To check whether a TaskLink should use a TermLink, return false if they 
+     * To check whether a TaskLink should use a TermLink, return false if they
      * interacted recently
      * <p>
      * called in TermLinkBag only
+     *
      * @param termLink The TermLink to be checked
      * @param currentTime The current time
      * @return Whether they are novel to each other
@@ -88,8 +99,7 @@ public class TaskLink extends TermLink {
             return false;
         }
         String linkKey = termLink.getKey();
-        int next = 0;
-        int i;
+        int next, i;
         for (i = 0; i < counter; i++) {
             next = i % Parameters.TERM_LINK_RECORD_LENGTH;
             if (linkKey.equals(recordedLinks[next])) {
@@ -110,23 +120,8 @@ public class TaskLink extends TermLink {
         return true;
     }
 
-
     @Override
-	public String toString() {
-		return super.toString() + " " + getTargetTask().getSentence().getStamp();
-	}
-    
-//    /**
-//     * Merge one TaskLink into another
-//     * @param that The other TaskLink
-//     */
-//    @Override
-//    public void merge(Item that) {
-//        if (targetTask.getCreationTime() > ((TaskLink) that).getTargetTask().getCreationTime()) {
-//            super.merge(that);
-//        } else {
-//            ((Item) that).merge(this);
-//        }
-//    }
+    public String toString() {
+        return super.toString() + " " + getTargetTask().getSentence().getStamp();
+    }
 }
-

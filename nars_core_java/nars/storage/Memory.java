@@ -122,8 +122,8 @@ public class Memory {
         recorder = new NullInferenceRecorder();
         concepts = new ConceptBag(this);
         novelTasks = new NovelTaskBag(this);
-        newTasks = new ArrayList<Task>();
-        exportStrings = new ArrayList<String>();
+        newTasks = new ArrayList<>();
+        exportStrings = new ArrayList<>();
     }
 
     public void init() {
@@ -131,7 +131,6 @@ public class Memory {
         novelTasks.init();
         newTasks.clear();
         exportStrings.clear();
-//      reasoner.getMainWindow().initTimer();
         reasoner.initTimer();
         recorder.append("\n-----RESET-----\n");
     }
@@ -220,6 +219,17 @@ public class Memory {
             }
         }
         return concept;
+    }
+
+    /**
+     * Get the current activation level of a concept.
+     *
+     * @param t The Term naming a concept
+     * @return the priority value of the concept
+     */
+    public float getConceptActivation(Term t) {
+        Concept c = termToConcept(t);
+        return (c == null) ? 0f : c.getPriority();
     }
 
     /* ---------- adjustment functions ---------- */
@@ -358,10 +368,14 @@ public class Memory {
      * @param newBudget The budget value in task
      */
     public void singlePremiseTask(Term newContent, char punctuation, TruthValue newTruth, BudgetValue newBudget) {
+        Task parentTask = currentTask.getParentTask();
+        if (parentTask != null && newContent.equals(parentTask.getContent())) { // circular structural inference
+            return;
+        }
         Sentence taskSentence = currentTask.getSentence();
         if (taskSentence.isJudgment() || currentBelief == null) {
             newStamp = new Stamp(taskSentence.getStamp(), getTime());
-        } else {
+        } else {    // to answer a question with negation in NAL-5 --- move to activated task?
             newStamp = new Stamp(currentBelief.getStamp(), getTime());
         }
         Sentence newSentence = new Sentence(newContent, punctuation, newTruth, newStamp, taskSentence.getRevisible());
@@ -371,7 +385,7 @@ public class Memory {
 
     /* ---------- system working workCycle ---------- */
     /**
-     * An atomic working workCycle of the system: process new Tasks, then fire a
+     * An atomic working cycle of the system: process new Tasks, then fire a
      * concept <p> Called from Reasoner.tick only
      *
      * @param clock The current time to be displayed
@@ -450,6 +464,7 @@ public class Memory {
         currentTerm = task.getContent();
         currentConcept = getConcept(currentTerm);
         if (currentConcept != null) {
+            activateConcept(currentConcept, task.getBudget());
             currentConcept.directProcess(task);
         }
     }
@@ -504,13 +519,11 @@ public class Memory {
             System.out.flush();
         }
         if (exportStrings.isEmpty()) {
-//          long timer = reasoner.getMainWindow().updateTimer();
             long timer = reasoner.updateTimer();
             if (timer > 0) {
                 exportStrings.add(String.valueOf(timer));
             }
         }
-
         String s;
         if (input) {
             s = "  IN: ";

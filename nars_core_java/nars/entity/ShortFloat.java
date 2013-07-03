@@ -65,7 +65,7 @@ public class ShortFloat implements Cloneable {
      * Set new value, rounded, with validity checking
      * @param v The new value
      */
-    public void setValue(float v) {
+    public final void setValue(float v) {
         if ((v < 0) || (v > 1)) {
             throw new ArithmeticException("Invalid value: " + v);
         } else {
@@ -93,7 +93,7 @@ public class ShortFloat implements Cloneable {
     }
 
     /**
-     * To create an identifical copy of the ShortFloat
+     * To create an identical copy of the ShortFloat
      * @return A cloned ShortFloat
      */
     @Override

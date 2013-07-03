@@ -26,12 +26,13 @@ import nars.io.Symbols;
 import nars.storage.Memory;
 
 /**
- * A negation of a Statement.
+ * A negation of a statement.
  */
 public class Negation extends CompoundTerm {
 
     /**
      * Constructor with partial values, called by make
+     *
      * @param n The name of the term
      * @param arg The component list of the term
      */
@@ -41,6 +42,7 @@ public class Negation extends CompoundTerm {
 
     /**
      * Constructor with full values, called by clone
+     *
      * @param n The name of the term
      * @param cs Component list
      * @param open Open variable list
@@ -52,15 +54,18 @@ public class Negation extends CompoundTerm {
 
     /**
      * Clone an object
+     *
      * @return A new object
      */
+    @Override
     public Object clone() {
         return new Negation(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a Negation of one component. Called by the inference rules.
-     * @param t The compoment
+     *
+     * @param t The component
      * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
      */
@@ -68,13 +73,14 @@ public class Negation extends CompoundTerm {
         if (t instanceof Negation) {
             return ((CompoundTerm) t).cloneComponents().get(0);
         }         // (--,(--,P)) = P
-        ArrayList<Term> argument = new ArrayList<Term>();
+        ArrayList<Term> argument = new ArrayList<>();
         argument.add(t);
         return make(argument, memory);
     }
 
     /**
-     * Try to make a new SetExt. Called by StringParser.
+     * Try to make a new Negation. Called by StringParser.
+     *
      * @return the Term generated from the arguments
      * @param argument The list of components
      * @param memory Reference to the memory
@@ -90,8 +96,10 @@ public class Negation extends CompoundTerm {
 
     /**
      * Get the operator of the term.
+     *
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.NEGATION_OPERATOR;
     }

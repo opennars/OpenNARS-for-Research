@@ -53,7 +53,7 @@ public class RuleTables {
         if (belief != null) {
             LocalRules.match(task, belief, memory);
         }
-        if (!memory.noResult()) {
+        if (!memory.noResult() && task.getSentence().isJudgment()) {
             return;
         }
         short tIndex = tLink.getIndex(0);
@@ -120,7 +120,6 @@ public class RuleTables {
                         break;
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
-//                            bIndex = bLink.getIndex(1);
                             syllogisms(tLink, bLink, taskTerm, beliefTerm, memory);
                         }
                         break;
@@ -138,9 +137,10 @@ public class RuleTables {
                 switch (bLink.getType()) {
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
-                            if (taskTerm instanceof Implication)
-                        		// TODO maybe put instanceof test within conditionalDedIndWithVar()
-                            	conditionalDedIndWithVar((Implication) taskTerm, tIndex, (Statement) beliefTerm, bIndex, memory);
+                            if (taskTerm instanceof Implication) // TODO maybe put instanceof test within conditionalDedIndWithVar()
+                            {
+                                conditionalDedIndWithVar((Implication) taskTerm, tIndex, (Statement) beliefTerm, bIndex, memory);
+                            }
                         }
                         break;
                 }
@@ -236,8 +236,8 @@ public class RuleTables {
                     }
                     t1 = s2.getPredicate();
                     t2 = s1.getPredicate();
-                    SyllogisticRules.abdIndCom(t1, t2, sentence, belief, figure, memory);
                     CompositionalRules.composeCompound(s1, s2, 0, memory);
+                    SyllogisticRules.abdIndCom(t1, t2, sentence, belief, figure, memory);
                 }
 
                 break;
@@ -277,8 +277,8 @@ public class RuleTables {
                     t1 = s1.getSubject();
                     t2 = s2.getSubject();
                     if (!SyllogisticRules.conditionalAbd(t1, t2, s1, s2, memory)) {         // if conditional abduction, skip the following
-                        SyllogisticRules.abdIndCom(t1, t2, sentence, belief, figure, memory);
                         CompositionalRules.composeCompound(s1, s2, 1, memory);
+                        SyllogisticRules.abdIndCom(t1, t2, sentence, belief, figure, memory);
                     }
                 }
                 break;
@@ -453,7 +453,8 @@ public class RuleTables {
             } else if (compound.containComponent(component)) {
                 StructuralRules.structuralCompound(compound, component, compoundTask, memory);
             }
-        } else if ((compound instanceof Negation) && !memory.currentTask.isStructural()) {
+//        } else if ((compound instanceof Negation) && !memory.currentTask.isStructural()) {
+        } else if (compound instanceof Negation) {
             if (compoundTask) {
                 StructuralRules.transformNegation(((Negation) compound).componentAt(0), memory);
             } else {
@@ -501,7 +502,8 @@ public class RuleTables {
                 }
             }
         } else {
-            if (!task.isStructural() && task.getSentence().isJudgment()) {
+//            if (!task.isStructural() && task.getSentence().isJudgment()) {
+            if (task.getSentence().isJudgment()) {
                 if (statement instanceof Inheritance) {
                     StructuralRules.structuralCompose1(compound, index, statement, memory);
 //                    if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
@@ -525,23 +527,23 @@ public class RuleTables {
      * @param memory Reference to the memory
      */
     private static void componentAndStatement(CompoundTerm compound, short index, Statement statement, short side, Memory memory) {
-        if (!memory.currentTask.isStructural()) {
-            if (statement instanceof Inheritance) {
-                StructuralRules.structuralDecompose1(compound, index, statement, memory);
-                if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
-                    StructuralRules.structuralDecompose2(statement, memory);    // {(C-B) --> (C-A), A @ (C-A)} |- A --> B
-                } else {
-                    StructuralRules.transformSetRelation(compound, statement, side, memory);
-                }
-            } else if (statement instanceof Similarity) {
-                StructuralRules.structuralDecompose2(statement, memory);        // {(C-B) --> (C-A), A @ (C-A)} |- A --> B
-                if ((compound instanceof SetExt) || (compound instanceof SetInt)) {
-                    StructuralRules.transformSetRelation(compound, statement, side, memory);
-                }
-            } else if ((statement instanceof Implication) && (compound instanceof Negation)) {
-                StructuralRules.contraposition(statement, memory);
+//        if (!memory.currentTask.isStructural()) {
+        if (statement instanceof Inheritance) {
+            StructuralRules.structuralDecompose1(compound, index, statement, memory);
+            if (!(compound instanceof SetExt) && !(compound instanceof SetInt)) {
+                StructuralRules.structuralDecompose2(statement, index, memory);    // {(C-B) --> (C-A), A @ (C-A)} |- A --> B
+            } else {
+                StructuralRules.transformSetRelation(compound, statement, side, memory);
             }
+        } else if (statement instanceof Similarity) {
+            StructuralRules.structuralDecompose2(statement, index, memory);        // {(C-B) --> (C-A), A @ (C-A)} |- A --> B
+            if ((compound instanceof SetExt) || (compound instanceof SetInt)) {
+                StructuralRules.transformSetRelation(compound, statement, side, memory);
+            }
+        } else if ((statement instanceof Implication) && (compound instanceof Negation)) {
+            StructuralRules.contraposition(statement, memory);
         }
+//        }
     }
 
     /* ----- inference with one TaskLink only ----- */

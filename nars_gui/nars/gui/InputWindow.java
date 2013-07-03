@@ -54,7 +54,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
      */
     public InputWindow(ReasonerBatch reasoner, String title) {
         super(title + " - Input Window");
-        setBackground(SINGLE_WINDOW_COLOR);
+        getContentPane().setBackground(SINGLE_WINDOW_COLOR);
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         setLayout(gridbag);
@@ -89,7 +89,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         closeButton.addActionListener(this);
         gridbag.setConstraints(closeButton, c);
         add(closeButton);
-        setBounds(0, 40, 400, 210);
+        setBounds(0, 40, 600, 210);
         setVisible(true);
 
         this.reasoner = reasoner;

@@ -53,6 +53,7 @@ public class Equivalence extends Statement {
      * Clone an object
      * @return A new object
      */
+    @Override
     public Object clone() {
         return new Equivalence(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
@@ -92,6 +93,7 @@ public class Equivalence extends Statement {
      * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.EQUIVALENCE_RELATION;
     }

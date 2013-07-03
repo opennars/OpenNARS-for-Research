@@ -21,7 +21,9 @@ import org.junit.Test;
  * */
 public class TestReasoning {
 
-	private static final String IN_TXT = "-in.txt";
+	private static final String IN_TXT = 
+			// "-unedited.txt";
+			"-in.txt";
 	private static final String OUT_TXT = "-out.txt";
 	private File tmpDir;
 
@@ -43,7 +45,8 @@ public class TestReasoning {
 
 	@Test
 	public void testExamples() {
-		String testDir_ = "nars-dist/Examples";
+		String testDir_ = "/home/jmv/src/open-nars-jmv/" +
+				"nars-dist/Examples";
 		File testDir = new File(testDir_);
 		File[] allFiles = testDir.listFiles();
 		boolean testPassed = true;

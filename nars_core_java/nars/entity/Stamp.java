@@ -178,7 +178,7 @@ public class Stamp implements Cloneable {
      * @return The TreeSet representation of the evidential base
      */
     private TreeSet<Long> toSet() {
-        TreeSet<Long> set = new TreeSet<Long>();
+        TreeSet<Long> set = new TreeSet<>();
         for (int i = 0; i < baseLength; i++) {
             set.add(evidentialBase[i]);
         }
@@ -224,14 +224,14 @@ public class Stamp implements Cloneable {
      */
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer(" " + Symbols.STAMP_OPENER + creationTime);
-        buffer.append(" " + Symbols.STAMP_STARTER + " ");
+        StringBuilder buffer = new StringBuilder(" " + Symbols.STAMP_OPENER + creationTime);
+        buffer.append(" ").append(Symbols.STAMP_STARTER).append(" ");
         for (int i = 0; i < baseLength; i++) {
             buffer.append(Long.toString(evidentialBase[i]));
             if (i < (baseLength - 1)) {
                 buffer.append(Symbols.STAMP_SEPARATOR);
             } else {
-                buffer.append(Symbols.STAMP_CLOSER + " ");
+                buffer.append(Symbols.STAMP_CLOSER).append(" ");
             }
         }
         return buffer.toString();

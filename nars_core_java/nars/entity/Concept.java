@@ -38,36 +38,54 @@ import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
 
 /**
- * A concept contains information associated with a term, including directly 
- * and indirectly related tasks and beliefs.
+ * A concept contains information associated with a term, including directly and
+ * indirectly related tasks and beliefs.
  * <p>
- * To make sure the space will be released, the only allowed reference to a concept are
- * those in a ConceptBag. All other access go through the Term that names the concept.
+ * To make sure the space will be released, the only allowed reference to a
+ * concept are those in a ConceptBag. All other access go through the Term that
+ * names the concept.
  */
 public final class Concept extends Item {
 
-    /** The term is the unique ID of the concept */
+    /**
+     * The term is the unique ID of the concept
+     */
     private Term term;
-    /** Task links for indirect processing */
+    /**
+     * Task links for indirect processing
+     */
     private TaskLinkBag taskLinks;
-    /** Term links between the term and its components and compounds */
+    /**
+     * Term links between the term and its components and compounds
+     */
     private TermLinkBag termLinks;
-    /** Link templates of TermLink, only in concepts with CompoundTerm
-     * jmv TODO explain more */
+    /**
+     * Link templates of TermLink, only in concepts with CompoundTerm jmv TODO
+     * explain more
+     */
     private ArrayList<TermLink> termLinkTemplates;
-    /** Question directly asked about the term */
+    /**
+     * Question directly asked about the term
+     */
     private ArrayList<Task> questions;
-    /** Sentences directly made about the term, with non-future tense */
+    /**
+     * Sentences directly made about the term, with non-future tense
+     */
     private ArrayList<Sentence> beliefs;
-    /** Reference to the memory */
+    /**
+     * Reference to the memory
+     */
     Memory memory;
-    /** The display window */
+    /**
+     * The display window
+     */
     private EntityObserver entityObserver = new NullEntityObserver();
 
 
     /* ---------- constructor and initialization ---------- */
     /**
      * Constructor, called in Memory.getConcept only
+     *
      * @param tm A term corresponding to the concept
      * @param memory A reference to the memory
      */
@@ -75,8 +93,8 @@ public final class Concept extends Item {
         super(tm.getName());
         term = tm;
         this.memory = memory;
-        questions = new ArrayList<Task>();
-        beliefs = new ArrayList<Sentence>();
+        questions = new ArrayList<>();
+        beliefs = new ArrayList<>();
         taskLinks = new TaskLinkBag(memory);
         termLinks = new TermLinkBag(memory);
         if (tm instanceof CompoundTerm) {
@@ -86,11 +104,12 @@ public final class Concept extends Item {
 
     /* ---------- direct processing of tasks ---------- */
     /**
-     * Directly process a new task. Called exactly once on each task.
-     * Using local information and finishing in a constant time.
-     * Provide feedback in the taskBudget value of the task.
+     * Directly process a new task. Called exactly once on each task. Using
+     * local information and finishing in a constant time. Provide feedback in
+     * the taskBudget value of the task.
      * <p>
      * called in Memory.immediateProcess only
+     *
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
@@ -106,7 +125,9 @@ public final class Concept extends Item {
     }
 
     /**
-     * To accept a new judgment as isBelief, and check for revisions and solutions
+     * To accept a new judgment as isBelief, and check for revisions and
+     * solutions
+     *
      * @param judg The judgment to be accepted
      * @param task The task to be processed
      * @return Whether to continue the processing of the task
@@ -115,9 +136,12 @@ public final class Concept extends Item {
         Sentence judg = task.getSentence();
         Sentence oldBelief = evaluation(judg, beliefs);
         if (oldBelief != null) {
-            Stamp newStamp = judg.getStamp(), oldStamp = oldBelief.getStamp();
+            Stamp newStamp = judg.getStamp();
+            Stamp oldStamp = oldBelief.getStamp();
             if (newStamp.equals(oldStamp)) {
-                task.getBudget().decPriority(0);    // duplicated task
+                if (task.getParentTask().getSentence().isJudgment()) {
+                    task.getBudget().decPriority(0);    // duplicated task
+                }   // else: activated belief
                 return;
             } else if (LocalRules.revisible(judg, oldBelief)) {
                 memory.newStamp = Stamp.make(newStamp, oldStamp, memory.getTime());
@@ -138,6 +162,7 @@ public final class Concept extends Item {
 
     /**
      * To answer a question by existing beliefs
+     *
      * @param task The task to be processed
      * @return Whether to continue the processing of the task
      */
@@ -175,6 +200,7 @@ public final class Concept extends Item {
      * the near future for unspecified time.
      * <p>
      * The only method that calls the TaskLink constructor.
+     *
      * @param task The task to be linked
      * @param content The content of the task
      */
@@ -205,8 +231,9 @@ public final class Concept extends Item {
     }
 
     /**
-     * Add a new belief (or goal) into the table
-     * Sort the beliefs/goals by rank, and remove redundant or low rank one
+     * Add a new belief (or goal) into the table Sort the beliefs/goals by rank,
+     * and remove redundant or low rank one
+     *
      * @param newSentence The judgment to be processed
      * @param table The table to be revised
      * @param capacity The capacity of the table
@@ -238,6 +265,7 @@ public final class Concept extends Item {
 
     /**
      * Evaluate a query against beliefs (and desires in the future)
+     *
      * @param query The question to be processed
      * @param list The list of beliefs to be used
      * @return The best candidate belief selected
@@ -264,6 +292,7 @@ public final class Concept extends Item {
      * Insert a TaskLink into the TaskLink bag
      * <p>
      * called only from Memory.continuedProcess
+     *
      * @param taskLink The termLink to be inserted
      */
     public void insertTaskLink(TaskLink taskLink) {
@@ -276,6 +305,7 @@ public final class Concept extends Item {
      * Recursively build TermLinks between a compound and its components
      * <p>
      * called only from Memory.continuedProcess
+     *
      * @param taskBudget The BudgetValue of the task
      */
     public void buildTermLinks(BudgetValue taskBudget) {
@@ -308,6 +338,7 @@ public final class Concept extends Item {
      * Insert a TermLink into the TermLink bag
      * <p>
      * called from buildTermLinks only
+     *
      * @param termLink The termLink to be inserted
      */
     public void insertTermLink(TermLink termLink) {
@@ -317,6 +348,7 @@ public final class Concept extends Item {
     /* ---------- access local information ---------- */
     /**
      * Return the associated term, called from Memory only
+     *
      * @return The associated term
      */
     public Term getTerm() {
@@ -325,6 +357,7 @@ public final class Concept extends Item {
 
     /**
      * Return a string representation of the concept, called in ConceptBag only
+     *
      * @return The concept name, with taskBudget in the full version
      */
     @Override
@@ -336,26 +369,30 @@ public final class Concept extends Item {
         }
     }
 
-	/** called from {@link NARSBatch} */
+    /**
+     * called from {@link NARSBatch}
+     */
+    @Override
     public String toStringLong() {
-    	String res = toStringBrief() + " " + key
-    			+ toStringIfNotNull(termLinks, "termLinks")
-    			+ toStringIfNotNull(taskLinks, "taskLinks")
-    	;
-    	res += toStringIfNotNull( null, "questions" );
-    	for (Task t : questions) {
-    		res += t.toString();
-		}
-    	// TODO other details?
-		return res;
+        String res = toStringBrief() + " " + key
+                + toStringIfNotNull(termLinks, "termLinks")
+                + toStringIfNotNull(taskLinks, "taskLinks");
+        res += toStringIfNotNull(null, "questions");
+        for (Task t : questions) {
+            res += t.toString();
+        }
+        // TODO other details?
+        return res;
     }
 
-	private String toStringIfNotNull(Object item, String title) {
-		return item == null ? "" : "\n " + title + ":" + item.toString();
-	}
-	
+    private String toStringIfNotNull(Object item, String title) {
+        return item == null ? "" : "\n " + title + ":" + item.toString();
+    }
+
     /**
-     * Recalculate the quality of the concept [to be refined to show extension/intension balance]
+     * Recalculate the quality of the concept [to be refined to show
+     * extension/intension balance]
+     *
      * @return The quality value
      */
     @Override
@@ -366,7 +403,9 @@ public final class Concept extends Item {
     }
 
     /**
-     * Return the templates for TermLinks, only called in Memory.continuedProcess
+     * Return the templates for TermLinks, only called in
+     * Memory.continuedProcess
+     *
      * @return The template get
      */
     public ArrayList<TermLink> getTermLinkTemplates() {
@@ -379,6 +418,7 @@ public final class Concept extends Item {
      * get the first qualified one
      * <p>
      * only called in RuleTables.reason
+     *
      * @param task The selected task
      * @return The selected isBelief
      */
@@ -399,7 +439,7 @@ public final class Concept extends Item {
 
     /* ---------- main loop ---------- */
     /**
-     * An atomic step in a concept, only called in {@link Memory#} processConcept
+     * An atomic step in a concept, only called in {@link Memory#processConcept}
      */
     public void fire() {
         TaskLink currentTaskLink = taskLinks.takeOut();
@@ -411,20 +451,24 @@ public final class Concept extends Item {
         memory.getRecorder().append(" * Selected TaskLink: " + currentTaskLink + "\n");
         Task task = currentTaskLink.getTargetTask();
         memory.currentTask = task;  // one of the two places where this variable is set
+//      memory.getRecorder().append(" * Selected Task: " + task + "\n");    // for debugging
         if (currentTaskLink.getType() == TermLink.TRANSFORM) {
+            memory.currentBelief = null;
             RuleTables.transformTask(currentTaskLink, memory);  // to turn this into structural inference as below?
-        }
-        int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
-        while (memory.noResult() && (termLinkCount > 0)) {
-            TermLink termLink = termLinks.takeOut(currentTaskLink, memory.getTime());
-            if (termLink != null) {
-                memory.getRecorder().append(" * Selected TermLink: " + termLink + "\n");
-                memory.currentBeliefLink = termLink;
-                RuleTables.reason(currentTaskLink, termLink, memory);
-                termLinks.putBack(termLink);
-                termLinkCount--;
-            } else {
-                termLinkCount = 0;
+        } else {
+            int termLinkCount = Parameters.MAX_REASONED_TERM_LINK;
+//        while (memory.noResult() && (termLinkCount > 0)) {
+            while (termLinkCount > 0) {
+                TermLink termLink = termLinks.takeOut(currentTaskLink, memory.getTime());
+                if (termLink != null) {
+                    memory.getRecorder().append(" * Selected TermLink: " + termLink + "\n");
+                    memory.currentBeliefLink = termLink;
+                    RuleTables.reason(currentTaskLink, termLink, memory);
+                    termLinks.putBack(termLink);
+                    termLinkCount--;
+                } else {
+                    termLinkCount = 0;
+                }
             }
         }
         taskLinks.putBack(currentTaskLink);
@@ -433,17 +477,19 @@ public final class Concept extends Item {
     /* ---------- display ---------- */
     /**
      * Start displaying contents and links, called from ConceptWindow,
-     * TermWindow
-     * or Memory.processTask only
-     * 
-     * same design as for Bag and {@link BagWindow}; see {@link Bag#addBagObserver(BagObserver, String)}
-     * @param entityObserver TODO make it a real observer pattern (i.e. with a plurality of observers)
+     * TermWindow or Memory.processTask only
+     *
+     * same design as for Bag and {@link BagWindow}; see
+     * {@link Bag#addBagObserver(BagObserver, String)}
+     *
+     * @param entityObserver TODO make it a real observer pattern (i.e. with a
+     * plurality of observers)
      * @param showLinks Whether to display the task links
      */
     public void startPlay(EntityObserver entityObserver, boolean showLinks) {
-    	this.entityObserver = entityObserver;
-    	entityObserver.startPlay(this, showLinks);
-    	entityObserver.post(displayContent());
+        this.entityObserver = entityObserver;
+        entityObserver.startPlay(this, showLinks);
+        entityObserver.post(displayContent());
         if (showLinks) {
             taskLinks.addBagObserver(entityObserver.createBagObserver(), "Task Links in " + term);
             termLinks.addBagObserver(entityObserver.createBagObserver(), "Term Links in " + term);
@@ -466,39 +512,48 @@ public final class Concept extends Item {
 
     /**
      * Collect direct isBelief, questions, and goals for display
+     *
      * @return String representation of direct content
      */
     public String displayContent() {
         StringBuilder buffer = new StringBuilder();
+        buffer.append("\n  Beliefs:\n");
         if (beliefs.size() > 0) {
-            buffer.append("\n  Beliefs:\n");
             for (Sentence s : beliefs) {
                 buffer.append(s).append("\n");
             }
         }
+        buffer.append("\n  Question:\n");
         if (questions.size() > 0) {
-            buffer.append("\n  Question:\n");
             for (Task t : questions) {
                 buffer.append(t).append("\n");
             }
         }
         return buffer.toString();
     }
-    
+
     class NullEntityObserver implements EntityObserver {
-		@Override
-		public void post(String str) {}
-		@SuppressWarnings("rawtypes")
-		@Override
-		public BagObserver createBagObserver() {
-			return new NullBagObserver();
-		}
-		@Override
-		public void startPlay(Concept concept, boolean showLinks) {}
-		@Override
-		public void stop() {}
-		@Override
-		public void refresh(String message) {}   	
+
+        @Override
+        public void post(String str) {
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        public BagObserver createBagObserver() {
+            return new NullBagObserver();
+        }
+
+        @Override
+        public void startPlay(Concept concept, boolean showLinks) {
+        }
+
+        @Override
+        public void stop() {
+        }
+
+        @Override
+        public void refresh(String message) {
+        }
     }
 }
-

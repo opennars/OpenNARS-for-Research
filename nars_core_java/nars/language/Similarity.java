@@ -54,15 +54,16 @@ public class Similarity extends Statement {
      * Clone an object
      * @return A new object, to be casted into a Similarity
      */
+    @Override
     public Object clone() {
         return new Similarity(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
     /**
      * Try to make a new compound from two components. Called by the inference rules.
-     * @param subject The first compoment
-     * @param predicate The second compoment
-     * @param memory Reference to the memeory
+     * @param subject The first component
+     * @param predicate The second component
+     * @param memory Reference to the memory
      * @return A compound generated or null
      */
     public static Similarity make(Term subject, Term predicate, Memory memory) {
@@ -85,13 +86,14 @@ public class Similarity extends Statement {
      * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.SIMILARITY_RELATION;
     }
 
     /**
-     * Check if the compound is communitative.
-     * @return true for communitative
+     * Check if the compound is commutative.
+     * @return true for commutative
      */
     @Override
     public boolean isCommutative() {

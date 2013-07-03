@@ -115,7 +115,7 @@ public class TermLink extends Item {
     /**
      * Set the key of the link
      */
-    protected void setKey() {
+    protected final void setKey() {
         String at1, at2;
         if ((type % 2) == 1) {  // to component
             at1 = Symbols.TO_COMPONENT_1;
