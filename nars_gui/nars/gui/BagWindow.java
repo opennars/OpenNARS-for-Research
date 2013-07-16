@@ -20,6 +20,7 @@
  */
 package nars.gui;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -32,6 +33,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -79,61 +81,46 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         /* The lowest level displayed */
         int showLevel = Parameters.BAG_THRESHOLD;
         getContentPane().setBackground(MULTIPLE_WINDOW_COLOR);
-        GridBagLayout gridbag = new GridBagLayout();
-        GridBagConstraints c = new GridBagConstraints();
-        setLayout(gridbag);
 
-        c.ipadx = 3;
-        c.ipady = 3;
-        c.insets = new Insets(5, 5, 5, 5);
-        c.fill = GridBagConstraints.BOTH;
-        c.gridwidth = GridBagConstraints.REMAINDER;
-        c.weightx = 1.0;
-        c.weighty = 1.0;
         text = new JTextArea("");
         text.setBackground(DISPLAY_BACKGROUND_COLOR);
         text.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(text);
-        gridbag.setConstraints(scrollPane, c);
-        add(scrollPane);
-
-        c.weighty = 0.0;
-        c.gridwidth = 1;
+        JScrollPane textScrollPane = new JScrollPane(text);
         valueLabel = new JLabel( "00", JLabel.RIGHT);
-        gridbag.setConstraints(valueLabel, c);
-        add(valueLabel);
-
         valueBar = new JScrollBar(Scrollbar.HORIZONTAL, showLevel, 0, 1, Parameters.BAG_LEVEL);
         valueBar.addAdjustmentListener(this);
-        gridbag.setConstraints(valueBar, c);
-        add(valueBar);
-
-        playButton = new JButton(NarsFrame.ON_LABEL);
-        gridbag.setConstraints(playButton, c);
-        playButton.addActionListener(this);
-        add(playButton);
-
         stopButton = new JButton(NarsFrame.OFF_LABEL);
-        gridbag.setConstraints(stopButton, c);
         stopButton.addActionListener(this);
-        add(stopButton);
-
+        playButton = new JButton(NarsFrame.ON_LABEL);
+        playButton.addActionListener(this);
         closeButton = new JButton("Close");
-        gridbag.setConstraints(closeButton, c);
         closeButton.addActionListener(this);
-        add(closeButton);
+        
+        applyBorderLayout(textScrollPane);
 
         setBounds(600, 60 + counter * 40, 600, 300);
-        counter++;
-        setVisible(true);
-        
+        counter++;        
         adjustLabelAndCursor(showLevel);
+        setVisible(true);
     }
+
+	private void applyBorderLayout(JScrollPane textScrollPane) {
+		setLayout(new BorderLayout());
+        add(textScrollPane, BorderLayout.CENTER );
+        JPanel bottomPanel = new JPanel();
+        add( bottomPanel, BorderLayout.SOUTH );
+        bottomPanel.add(valueLabel );
+        bottomPanel.add(valueBar );
+        bottomPanel.add(playButton );
+        bottomPanel.add(stopButton );
+        bottomPanel.add(closeButton );
+	}
 
     private void adjustLabelAndCursor(int showLevel) {
         String valueText = String.valueOf(showLevel);
-        // always occupy 2 characters:
-        valueText = showLevel> 9 ? valueText : "0" + valueText;
+        // always occupy 3 characters (padding):
+        valueText = showLevel> 9 ? "0" + valueText : "00" + valueText;
+        valueText = showLevel > 99 ? ""+showLevel : valueText;
 		valueLabel.setText(valueText);
         valueBar.setValue(showLevel);		
 	}
@@ -206,4 +193,32 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     public void stop() {
         showing = false;
     }
+
+	@SuppressWarnings("unused")
+	private void applyGridBagLayout(JScrollPane textScrollPane) {
+		GridBagLayout gridbag = new GridBagLayout();
+	    GridBagConstraints c = new GridBagConstraints();
+	    setLayout(gridbag);
+	    c.ipadx = 3;
+	    c.ipady = 3;
+	    c.insets = new Insets(5, 5, 5, 5);
+	    c.fill = GridBagConstraints.BOTH;
+	    c.gridwidth = GridBagConstraints.REMAINDER;
+	    c.weightx = 1.0;
+	    c.weighty = 1.0;
+	    gridbag.setConstraints(textScrollPane, c);
+	    add(textScrollPane);   
+	    c.weighty = 0.0;
+	    c.gridwidth = 1;
+	    gridbag.setConstraints(valueLabel, c);
+	    add(valueLabel);
+	    gridbag.setConstraints(valueBar, c);
+	    add(valueBar);
+	    gridbag.setConstraints(playButton, c);
+	    add(playButton);
+	    gridbag.setConstraints(stopButton, c);
+	    add(stopButton);
+	    gridbag.setConstraints(closeButton, c);
+	    add(closeButton);
+	}
 }
