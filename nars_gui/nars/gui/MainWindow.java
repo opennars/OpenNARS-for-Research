@@ -36,6 +36,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
@@ -330,11 +331,14 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
             } else if (label.equals("Report Silence Level")) {
                 silentW.setVisible(true);
             } else if (label.equals("Related Information")) {
-                MessageDialog web = new MessageDialog(this, NARS.WEBSITE);
+//                MessageDialog web = 
+                		new MessageDialog(this, NARS.WEBSITE);
             } else if (label.equals("About NARS")) {
-                MessageDialog info = new MessageDialog(this, NARS.INFO);
+//                MessageDialog info = 
+                		new MessageDialog(this, NARS.INFO);
             } else {
-                MessageDialog ua = new MessageDialog(this, UNAVAILABLE);
+//                MessageDialog ua = 
+                		new MessageDialog(this, UNAVAILABLE);
             }
         }
     }
@@ -358,14 +362,17 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      * @param lines The text lines to be displayed
      */
     @Override
-    public void nextOutput(ArrayList<String> lines) {
-        if (!lines.isEmpty()) {
-            String text = "";
-            for (Object line : lines) {
-                text += line + "\n";
-            }
-            ioText.append(text);
-        }
+    public void nextOutput(final ArrayList<String> lines) {
+    	if (!lines.isEmpty()) {
+    		SwingUtilities.invokeLater( new Runnable() {
+    			@Override public void run() {
+    				String text = "";
+    				for (Object line : lines) {
+    					text += line + "\n";
+    				}
+    				ioText.append(text);
+    			}});
+    	}
     }
 
     /**
