@@ -20,7 +20,8 @@
  */
 package nars.storage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import nars.entity.Item;
 import nars.inference.BudgetFunctions;
@@ -90,17 +91,13 @@ public abstract class Bag<Type extends Item> {
      * maximum number of items to be taken out at current level
      */
     private int currentCounter;
-//    /** whether this bag has an active window */
-//    private boolean showing;
-//    /** display window : remove GUI dependency */
-//    private BagWindow window;
     /**
      * reference to memory
      */
     protected Memory memory;
     private BagObserver bagObserver = new NullBagObserver<>();
     /**
-     * The lowest display level
+     * The display level; initialized at lowest
      */
     private int showLevel = Parameters.BAG_THRESHOLD;
 
@@ -344,13 +341,10 @@ public abstract class Bag<Type extends Item> {
     }
 
     /**
-     * To start displaying the Bag in a BagWindow
+     * To start displaying the Bag in a BagWindow;
+     * {@link nars.gui.BagWindow} implements interface {@link BagObserver};
      *
-     * TODO startPlay should be renamed addBagObserver( BagObserver bagObserver,
-     * String title) and BagWindow will implement new interface BagObserver; the
-     * 3 following GUI methods should be moved in class {@link BagWindow},
-     *
-     * @param bagObserver TODO
+     * @param bagObserver BagObserver to set
      * @param title The title of the window
      */
     public void addBagObserver(BagObserver bagObserver, String title) {
@@ -358,9 +352,6 @@ public abstract class Bag<Type extends Item> {
         bagObserver.post(toString());
         bagObserver.setTitle(title);
         bagObserver.setBag(this);
-//        window = new BagWindow(this, title);
-//        showing = true;
-//        window.post(toString());
     }
 
     /**
@@ -368,8 +359,6 @@ public abstract class Bag<Type extends Item> {
      */
     public void play() {
         bagObserver.post(toString());
-//        showing = true;
-//        window.post(toString());
     }
 
     /**
@@ -377,7 +366,6 @@ public abstract class Bag<Type extends Item> {
      */
     public void stop() {
         bagObserver.stop();
-//        showing = false;
     }
 
     /**
@@ -385,9 +373,6 @@ public abstract class Bag<Type extends Item> {
      */
     public void refresh() {
         bagObserver.refresh(toString());
-//        if (showing) {
-//            window.post(toString());
-//        }
     }
 
     /**
@@ -396,7 +381,6 @@ public abstract class Bag<Type extends Item> {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer(" ");
-//        int showLevel = window == null ? 1 : window.showLevel();
         for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
             if (!emptyLevel(i - 1)) {
                 buf = buf.append("\n --- Level ").append(i).append(":\n ");
@@ -409,7 +393,7 @@ public abstract class Bag<Type extends Item> {
     }
 
     /**
-     * TODO bad paste from preceding
+     * TODO refactor : paste from preceding method
      */
     public String toStringLong() {
         StringBuffer buf = new StringBuffer(" BAG " + getClass().getSimpleName());
@@ -426,6 +410,7 @@ public abstract class Bag<Type extends Item> {
         return buf.toString();
     }
 
+    /** show item Table Sizes */
     String showSizes() {
         StringBuilder buf = new StringBuilder(" ");
         int levels = 0;
@@ -438,6 +423,7 @@ public abstract class Bag<Type extends Item> {
         return "Levels: " + Integer.toString(levels) + ", sizes: " + buf;
     }
 
+    /** set Show Level */
     public void setShowLevel(int showLevel) {
         this.showLevel = showLevel;
     }

@@ -1,5 +1,6 @@
 package nars.storage;
 
+/** a {@link BagObserver} that does nothing (null design pattern) */
 public class NullBagObserver<Type> implements BagObserver{
 	@Override
 	public void setTitle(String title) {}

@@ -171,7 +171,6 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
         if (this.isVisible()) {
             this.detachFromConcept();
         }
-//        this = new ConceptWindow(this);
         showing = true;
         this.post(concept.displayContent());
     }

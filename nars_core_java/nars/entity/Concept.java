@@ -30,7 +30,6 @@ import nars.language.CompoundTerm;
 import nars.language.Term;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.Parameters;
-import nars.storage.Bag;
 import nars.storage.BagObserver;
 import nars.storage.Memory;
 import nars.storage.NullBagObserver;
@@ -479,10 +478,11 @@ public final class Concept extends Item {
      * Start displaying contents and links, called from ConceptWindow,
      * TermWindow or Memory.processTask only
      *
-     * same design as for Bag and {@link BagWindow}; see
-     * {@link Bag#addBagObserver(BagObserver, String)}
+     * same design as for {@link nars.storage.Bag} and {@link nars.gui.BagWindow}; see
+     * {@link nars.storage.Bag#addBagObserver(BagObserver, String)}
      *
-     * @param entityObserver TODO make it a real observer pattern (i.e. with a
+     * @param entityObserver {@link EntityObserver} to set;
+     * TODO make it a real observer pattern (i.e. with a
      * plurality of observers)
      * @param showLinks Whether to display the task links
      */

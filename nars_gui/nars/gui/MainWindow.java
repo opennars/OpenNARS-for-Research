@@ -379,6 +379,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         return i;
     }
 
+    /** @return System clock : number of cycles since last output */
     public long getTimer() {
         return timer;
     }

@@ -471,20 +471,21 @@ public class Memory {
 
     /* ---------- display ---------- */
     /**
-     * Display active concepts, called from MainWindow.
+     * Start display active concepts on given bagObserver, called from MainWindow.
      *
      * we don't want to expose fields concepts and novelTasks, AND we want to
-     * separate GUI and inference, so this method has become conceptsStartPlay(
-     * BagObserver bagObserver, String s) and this method calls
-     * concepts.addBagObserver( bagObserver, s) see design for Bag and
-     * {@link BagWindow} in {@link Bag#addBagObserver(BagObserver, String)}
+     * separate GUI and inference, so this method takes as argument a 
+     * {@link BagObserver} and calls {@link ConceptBag#addBagObserver(BagObserver, String)} ;
+     * 
+     * see design for {@link Bag} and {@link nars.gui.BagWindow}
+     * in {@link Bag#addBagObserver(BagObserver, String)}
      *
-     * @param bagObserver
-     * @param s the window title
+     * @param bagObserver bag Observer that will receive notifications
+     * @param title the window title
      */
-    public void conceptsStartPlay(BagObserver bagObserver, String s) {
+    public void conceptsStartPlay(BagObserver bagObserver, String title) {
         bagObserver.setBag(concepts);
-        concepts.addBagObserver(bagObserver, s);
+        concepts.addBagObserver(bagObserver, title);
     }
 
     /**

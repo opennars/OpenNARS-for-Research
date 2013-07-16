@@ -20,10 +20,21 @@
  */
 package nars.gui;
 
-import javax.swing.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Scrollbar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.WindowEvent;
 
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import nars.main_nogui.Parameters;
 import nars.storage.Bag;
@@ -38,8 +49,6 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
      * The bag to be displayed
      */
     private Bag<?> bag;
-//    /** The lowest level displayed */
-//    private int showLevel;
     /**
      * Control buttons
      */
@@ -90,7 +99,6 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
 
         c.weighty = 0.0;
         c.gridwidth = 1;
-//        valueLabel = new JLabel(String.valueOf(showLevel), JLabel.RIGHT);
         valueLabel = new JLabel( "00", JLabel.RIGHT);
         gridbag.setConstraints(valueLabel, c);
         add(valueLabel);
@@ -137,14 +145,6 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     }
 
     /**
-     * The lowest display level
-     *
-     * @return The level
-     */
-//    public int showLevel() {
-//        return showLevel;
-//    }
-    /**
      * Handling button click
      *
      * @param e The ActionEvent
@@ -185,8 +185,6 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
         if (e.getSource() == valueBar) {
             int showLevel = valueBar.getValue();
             adjustLabelAndCursor(showLevel);
-//            valueLabel.setText(String.valueOf(showLevel));
-//            valueBar.setValue(showLevel);
             bag.setShowLevel(showLevel);
             bag.play();
         }
@@ -195,12 +193,8 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     @Override
     public void setBag(Bag<?> bag) {
         this.bag = bag;
-//		bag.setShowLevel(showLevel);
     }
 
-    /**
-     * Refresh display if in showing state
-     */
     @Override
     public void refresh(String message) {
         if (showing) {

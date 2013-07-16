@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import nars.entity.Stamp;
 import nars.entity.Task;
+import nars.gui.MainWindow;
 import nars.io.InputChannel;
 import nars.io.OutputChannel;
 import nars.io.StringParser;
@@ -65,7 +66,7 @@ public class ReasonerBatch {
 
     /**
      * Reset the system with an empty memory and reset clock. Called locally and
-     * from MainWindow.
+     * from {@link MainWindow}.
      */
     public void reset() {
         running = false;
@@ -97,7 +98,7 @@ public class ReasonerBatch {
     }
 
     /**
-     * Get the current time from the clock Called in nars.entity.Stamp
+     * Get the current time from the clock Called in {@link nars.entity.Stamp}
      *
      * @return The current time
      */
@@ -122,7 +123,7 @@ public class ReasonerBatch {
     }
 
     /**
-     * Stop the inference process
+     * Will stop the inference process
      */
     public void stop() {
         running = false;
@@ -220,8 +221,9 @@ public class ReasonerBatch {
     }
 
     /**
-     * cf {@link MainWindow#updateTimer()} To get the timer value and then to
-     * reset it
+     * To get the timer value and then to
+     * reset it by {@link #initTimer()};
+     * plays the same role as {@link nars.gui.MainWindow#updateTimer()} 
      *
      * @return The previous timer value
      */
@@ -231,6 +233,10 @@ public class ReasonerBatch {
         return i;
     }
 
+    /**
+     * Reset timer;
+     * plays the same role as {@link nars.gui.MainWindow#initTimer()} 
+     */
     public void initTimer() {
         setTimer(0);
     }
@@ -242,10 +248,12 @@ public class ReasonerBatch {
         setTimer(getTimer() + 1);
     }
 
+    /** @return System clock : number of cycles since last output */
     public long getTimer() {
         return timer;
     }
 
+    /** set System clock : number of cycles since last output */
     private void setTimer(long timer) {
         this.timer = timer;
     }

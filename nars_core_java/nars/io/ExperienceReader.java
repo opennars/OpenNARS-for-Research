@@ -21,7 +21,9 @@
 package nars.io;
 
 import java.awt.FileDialog;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 import nars.main_nogui.ReasonerBatch;
 
@@ -97,8 +99,9 @@ public class ExperienceReader implements InputChannel {
     }
 
     /**
-     * Process the next chunk of input data TODO duplicated code with
-     * {@link InputWindow#nextInput()}
+     * Process the next chunk of input data;
+     * TODO some duplicated code with
+     * {@link nars.gui.InputWindow#nextInput()}
      *
      * @return Whether the input channel should be checked again
      */
