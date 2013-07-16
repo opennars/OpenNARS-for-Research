@@ -15,7 +15,8 @@ The test suite is nars_core/src/test/java/nars/main_nogui/TestReasoning0.java .
 
 Build
 -----
-There are scripts for Linux and Windows to compile and create the executable jar: build.sh and build.bat .
+There are scripts for Linux and Windows to compile and create the executable jar:
+build.sh and build.bat .
 
 Test
 ----
@@ -32,10 +33,9 @@ Due to the sensitivity of results regarding the implementation of the reasonner,
 Source Code status
 ------------------
 See also http://code.google.com/p/open-nars/wiki/ProjectStatus
-We are updating the wiki and doing some testing and bug-fixing, but there won't be any major change until May.
-Next version 1.5.2 has been fully tested for single capability at a time; there may still be bugs when combining capabilities.
-Current version 1.5.1 is already outdated; several bugs have been fixed.
+Current version has been fully tested for single capability at a time; there may still be bugs when combining capabilities.
 
-Jean-Marc Vanel is working on this short term roadmap, mainly in GUI and software engineering tasks :
-- 4. make an independant syntax verifyer based on a grammar parser : it will give the column & line of error (there is a Scala combinator grammar)
-- 5. separe NARS in 2 modules with a Maven build : nars_gui and nars_core_java
+Jean-Marc Vanel is working on this roadmap, mainly in GUI and software engineering tasks :
+- reestablish a non-regression test suite
+- make an independant syntax verifyer based on a grammar parser : it will give the column & line of error (there is a Scala combinator grammar)
+- separe NARS in 2 modules with a Maven build : nars_gui and nars_core_java
