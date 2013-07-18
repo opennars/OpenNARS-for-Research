@@ -366,13 +366,14 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
     @Override
     public void nextOutput(final ArrayList<String> lines) {
     	if (!lines.isEmpty()) {
-    		SwingUtilities.invokeLater( new Runnable() {
+			String text = "";
+			for (Object line : lines) {
+				text += line + "\n";
+			}
+			final String text2 = text;
+			SwingUtilities.invokeLater( new Runnable() {
     			@Override public void run() {
-    				String text = "";
-    				for (Object line : lines) {
-    					text += line + "\n";
-    				}
-    				ioText.append(text);
+    				ioText.append(text2);
     			}});
     	}
     }
