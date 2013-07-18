@@ -20,16 +20,22 @@
  */
 package nars.gui;
 
-import javax.swing.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 
-import java.awt.*;
-import java.awt.event.*;
-//import java.beans.PropertyChangeEvent;
-//import java.beans.PropertyChangeListener;
+import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import nars.entity.Concept;
 import nars.entity.EntityObserver;
 import nars.storage.BagObserver;
+//import java.beans.PropertyChangeEvent;
+//import java.beans.PropertyChangeListener;
 
 /**
  * JWindow displaying the content of a Concept, such as beliefs, goals, and
@@ -40,15 +46,15 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
     /**
      * Control buttons
      */
-    private JButton playButton, stopButton, playInNewWindowButton, closeButton;
+    private final JButton playButton, stopButton, playInNewWindowButton, closeButton;
     /**
      * Display area
      */
-    private JTextArea text;
+    private final JTextArea text;
     /**
      * The concept to be displayed
      */
-    private Concept concept;
+    private final Concept concept;
     /**
      * Whether the content of the concept is being displayed
      */
@@ -136,7 +142,8 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
      *
      * @param e The ActionEvent
      */
-    public void actionPerformed(ActionEvent e) {
+    @Override
+	public void actionPerformed(ActionEvent e) {
         Object s = e.getSource();
         if (s == playButton) {
             concept.play();
@@ -162,8 +169,8 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
     }
 
     @Override
-    public BagObserver createBagObserver() {
-        return new BagWindow();
+	public BagObserver<Concept> createBagObserver() {
+		return new BagWindow<Concept>();
     }
 
     @Override

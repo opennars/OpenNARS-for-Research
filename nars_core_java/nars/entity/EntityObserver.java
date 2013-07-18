@@ -15,6 +15,7 @@ public interface EntityObserver {
 	public abstract void post(String str);
 
 	/** create a {@link BagObserver} of the right type (Factory design pattern) */
+	@SuppressWarnings("rawtypes")
 	public abstract BagObserver createBagObserver();
 
     /**

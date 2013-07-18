@@ -38,6 +38,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import nars.entity.Item;
 import nars.main_nogui.Parameters;
 import nars.storage.Bag;
 import nars.storage.BagObserver;
@@ -45,7 +46,8 @@ import nars.storage.BagObserver;
 /**
  * JWindow display the priority distribution of items within a given bag
  */
-public class BagWindow extends NarsFrame implements ActionListener, AdjustmentListener, BagObserver {
+public class BagWindow<BagType extends Item> extends NarsFrame implements ActionListener, AdjustmentListener,
+		BagObserver<BagType> {
 
     /**
      * The bag to be displayed
@@ -54,19 +56,19 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     /**
      * Control buttons
      */
-    private JButton playButton, stopButton, closeButton;
+    private final JButton playButton, stopButton, closeButton;
     /**
      * Display area
      */
-    private JTextArea text;
+    private final JTextArea text;
     /**
      * Display label
      */
-    private JLabel valueLabel;
+    private final JLabel valueLabel;
     /**
      * Adjustable display level
      */
-    private JScrollBar valueBar;
+    private final JScrollBar valueBar;
     /**
      * The location of the display area, shifted according to the number of
      * windows opened
@@ -178,7 +180,7 @@ public class BagWindow extends NarsFrame implements ActionListener, AdjustmentLi
     }
 
     @Override
-    public void setBag(Bag<?> bag) {
+	public void setBag( Bag<BagType> bag ) {
         this.bag = bag;
     }
 

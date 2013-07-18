@@ -38,6 +38,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import nars.entity.Concept;
+import nars.entity.Task;
 import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
 import nars.io.IInferenceRecorder;
@@ -312,9 +314,9 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
                 memory.getExportStrings().add("*****RESET*****");
             } else if (label.equals("Concepts")) {
                 /* see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
-                memory.conceptsStartPlay(new BagWindow(), "Active Concepts");
+				memory.conceptsStartPlay(new BagWindow<Concept>(), "Active Concepts");
             } else if (label.equals("Buffered Tasks")) {
-                memory.taskBuffersStartPlay(new BagWindow(), "Buffered Tasks");
+				memory.taskBuffersStartPlay(new BagWindow<Task>(), "Buffered Tasks");
             } else if (label.equals("Concept Content")) {
                 conceptWin.setVisible(true);
             } else if (label.equals("Inference Log")) {

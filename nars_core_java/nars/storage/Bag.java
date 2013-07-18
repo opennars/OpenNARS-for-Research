@@ -74,7 +74,7 @@ public abstract class Bag<Type extends Item> {
     /**
      * defined in different bags
      */
-    private int capacity;
+    private final int capacity;
     /**
      * current sum of occupied level
      */
@@ -95,7 +95,7 @@ public abstract class Bag<Type extends Item> {
      * reference to memory
      */
     protected Memory memory;
-    private BagObserver bagObserver = new NullBagObserver<>();
+	private BagObserver<Type> bagObserver = new NullBagObserver<Type>();
     /**
      * The display level; initialized at lowest
      */
@@ -347,7 +347,7 @@ public abstract class Bag<Type extends Item> {
      * @param bagObserver BagObserver to set
      * @param title The title of the window
      */
-    public void addBagObserver(BagObserver bagObserver, String title) {
+	public void addBagObserver( BagObserver<Type> bagObserver, String title ) {
         this.bagObserver = bagObserver;
         bagObserver.post(toString());
         bagObserver.setTitle(title);

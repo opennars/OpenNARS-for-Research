@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/bin/zsh
 ./build.sh
 cp NARS.jar nars-dist
 rm -r nars-dist/javadoc/*

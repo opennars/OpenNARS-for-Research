@@ -49,15 +49,15 @@ public final class Concept extends Item {
     /**
      * The term is the unique ID of the concept
      */
-    private Term term;
+    private final Term term;
     /**
      * Task links for indirect processing
      */
-    private TaskLinkBag taskLinks;
+    private final TaskLinkBag taskLinks;
     /**
      * Term links between the term and its components and compounds
      */
-    private TermLinkBag termLinks;
+    private final TermLinkBag termLinks;
     /**
      * Link templates of TermLink, only in concepts with CompoundTerm jmv TODO
      * explain more
@@ -66,11 +66,11 @@ public final class Concept extends Item {
     /**
      * Question directly asked about the term
      */
-    private ArrayList<Task> questions;
+    private final ArrayList<Task> questions;
     /**
      * Sentences directly made about the term, with non-future tense
      */
-    private ArrayList<Sentence> beliefs;
+    private final ArrayList<Sentence> beliefs;
     /**
      * Reference to the memory
      */
@@ -243,7 +243,7 @@ public final class Concept extends Item {
         float rank2;
         int i;
         for (i = 0; i < table.size(); i++) {
-            judgment2 = (Sentence) table.get(i);
+            judgment2 = table.get(i);
             rank2 = BudgetFunctions.rankBelief(judgment2);
             if (rank1 >= rank2) {
                 if (newSentence.equivalentTo(judgment2)) {
@@ -486,7 +486,8 @@ public final class Concept extends Item {
      * plurality of observers)
      * @param showLinks Whether to display the task links
      */
-    public void startPlay(EntityObserver entityObserver, boolean showLinks) {
+	@SuppressWarnings("unchecked")
+	public void startPlay( EntityObserver entityObserver, boolean showLinks ) {
         this.entityObserver = entityObserver;
         entityObserver.startPlay(this, showLinks);
         entityObserver.post(displayContent());
@@ -538,10 +539,9 @@ public final class Concept extends Item {
         public void post(String str) {
         }
 
-        @SuppressWarnings("rawtypes")
         @Override
-        public BagObserver createBagObserver() {
-            return new NullBagObserver();
+		public BagObserver<TermLink> createBagObserver() {
+			return new NullBagObserver<TermLink>();
         }
 
         @Override

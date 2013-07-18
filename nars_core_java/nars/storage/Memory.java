@@ -47,35 +47,35 @@ public class Memory {
     /**
      * Backward pointer to the reasoner
      */
-    private ReasonerBatch reasoner;
+    private final ReasonerBatch reasoner;
 
     /* ---------- Long-term storage for multiple cycles ---------- */
     /**
      * Concept bag. Containing all Concepts of the system
      */
-    private ConceptBag concepts;
+    private final ConceptBag concepts;
     /**
      * New tasks with novel composed terms, for delayed and selective processing
      */
-    private NovelTaskBag novelTasks;
+    private final NovelTaskBag novelTasks;
     /**
      * Inference record text to be written into a log file
      */
     private IInferenceRecorder recorder;
-    private AtomicInteger beliefForgettingRate = new AtomicInteger(Parameters.TERM_LINK_FORGETTING_CYCLE);
-    private AtomicInteger taskForgettingRate = new AtomicInteger(Parameters.TASK_LINK_FORGETTING_CYCLE);
-    private AtomicInteger conceptForgettingRate = new AtomicInteger(Parameters.CONCEPT_FORGETTING_CYCLE);
+    private final AtomicInteger beliefForgettingRate = new AtomicInteger(Parameters.TERM_LINK_FORGETTING_CYCLE);
+    private final AtomicInteger taskForgettingRate = new AtomicInteger(Parameters.TASK_LINK_FORGETTING_CYCLE);
+    private final AtomicInteger conceptForgettingRate = new AtomicInteger(Parameters.CONCEPT_FORGETTING_CYCLE);
 
     /* ---------- Short-term workspace for a single cycle ---------- */
     /**
      * List of new tasks accumulated in one cycle, to be processed in the next
      * cycle
      */
-    private ArrayList<Task> newTasks;
+    private final ArrayList<Task> newTasks;
     /**
      * List of Strings or Tasks to be sent to the output channels
      */
-    private ArrayList<String> exportStrings;
+    private final ArrayList<String> exportStrings;
     /**
      * The selected Term
      */
@@ -483,7 +483,7 @@ public class Memory {
      * @param bagObserver bag Observer that will receive notifications
      * @param title the window title
      */
-    public void conceptsStartPlay(BagObserver bagObserver, String title) {
+	public void conceptsStartPlay( BagObserver<Concept> bagObserver, String title ) {
         bagObserver.setBag(concepts);
         concepts.addBagObserver(bagObserver, title);
     }
@@ -495,7 +495,7 @@ public class Memory {
      * @param bagObserver
      * @param s the window title
      */
-    public void taskBuffersStartPlay(BagObserver bagObserver, String s) {
+	public void taskBuffersStartPlay( BagObserver<Task> bagObserver, String s ) {
         bagObserver.setBag(novelTasks);
         novelTasks.addBagObserver(bagObserver, s);
     }
