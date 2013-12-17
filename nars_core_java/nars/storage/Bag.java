@@ -39,9 +39,9 @@ import nars.main_nogui.Parameters;
  * management, and below, space management. Differences: (1) level selection vs.
  * item selection, (2) decay rate
  *
- * @param <Type> The type of the Item in the Bag
+ * @param <E> The type of the Item in the Bag
  */
-public abstract class Bag<Type extends Item> {
+public abstract class Bag<E extends Item> {
 
     /**
      * priority levels
@@ -66,11 +66,11 @@ public abstract class Bag<Type extends Item> {
     /**
      * mapping from key to item
      */
-    private HashMap<String, Type> nameTable;
+    private HashMap<String, E> nameTable;
     /**
      * array of lists of items, for items on different level
      */
-    private ArrayList<ArrayList<Type>> itemTable;
+    private ArrayList<ArrayList<E>> itemTable;
     /**
      * defined in different bags
      */
@@ -95,7 +95,7 @@ public abstract class Bag<Type extends Item> {
      * reference to memory
      */
     protected Memory memory;
-	private BagObserver<Type> bagObserver = new NullBagObserver<Type>();
+	private BagObserver<E> bagObserver = new NullBagObserver<E>();
     /**
      * The display level; initialized at lowest
      */
@@ -116,7 +116,7 @@ public abstract class Bag<Type extends Item> {
     public void init() {
         itemTable = new ArrayList<>(TOTAL_LEVEL);
         for (int i = 0; i < TOTAL_LEVEL; i++) {
-            itemTable.add(new ArrayList<Type>());
+            itemTable.add(new ArrayList<E>());
         }
         nameTable = new HashMap<>((int) (capacity / LOAD_FACTOR), LOAD_FACTOR);
         currentLevel = TOTAL_LEVEL - 1;
@@ -171,7 +171,7 @@ public abstract class Bag<Type extends Item> {
      * @param it An item
      * @return Whether the Item is in the Bag
      */
-    public boolean contains(Type it) {
+    public boolean contains(E it) {
         return nameTable.containsValue(it);
     }
 
@@ -181,7 +181,7 @@ public abstract class Bag<Type extends Item> {
      * @param key The key of the Item
      * @return The Item with the given key
      */
-    public Type get(String key) {
+    public E get(String key) {
         return nameTable.get(key);
     }
 
@@ -191,14 +191,14 @@ public abstract class Bag<Type extends Item> {
      * @param newItem The new Item
      * @return Whether the new Item is added into the Bag
      */
-    public boolean putIn(Type newItem) {
+    public boolean putIn(E newItem) {
         String newKey = newItem.getKey();
-        Type oldItem = nameTable.put(newKey, newItem);
+        E oldItem = nameTable.put(newKey, newItem);
         if (oldItem != null) {                  // merge duplications
             outOfBase(oldItem);
             newItem.merge(oldItem);
         }
-        Type overflowItem = intoBase(newItem);  // put the (new or merged) item into itemTable
+        E overflowItem = intoBase(newItem);  // put the (new or merged) item into itemTable
         if (overflowItem != null) {             // remove overflow
             String overflowKey = overflowItem.getKey();
             nameTable.remove(overflowKey);
@@ -216,7 +216,7 @@ public abstract class Bag<Type extends Item> {
      * @param oldItem The Item to put back
      * @return Whether the new Item is added into the Bag
      */
-    public boolean putBack(Type oldItem) {
+    public boolean putBack(E oldItem) {
         BudgetFunctions.forget(oldItem.getBudget(), forgetRate(), RELATIVE_THRESHOLD);
         return putIn(oldItem);
     }
@@ -227,7 +227,7 @@ public abstract class Bag<Type extends Item> {
      *
      * @return The selected Item
      */
-    public Type takeOut() {
+    public E takeOut() {
         if (nameTable.isEmpty()) { // empty bag
             return null;
         }
@@ -244,7 +244,7 @@ public abstract class Bag<Type extends Item> {
                 currentCounter = itemTable.get(currentLevel).size();
             }
         }
-        Type selected = takeOutFirst(currentLevel); // take out the first item in the level
+        E selected = takeOutFirst(currentLevel); // take out the first item in the level
         currentCounter--;
         nameTable.remove(selected.getKey());
         refresh();
@@ -257,8 +257,8 @@ public abstract class Bag<Type extends Item> {
      * @param key The given key
      * @return The Item with the key
      */
-    public Type pickOut(String key) {
-        Type picked = nameTable.get(key);
+    public E pickOut(String key) {
+        E picked = nameTable.get(key);
         if (picked != null) {
             outOfBase(picked);
             nameTable.remove(key);
@@ -282,7 +282,7 @@ public abstract class Bag<Type extends Item> {
      * @param item The Item to put in
      * @return The put-in level
      */
-    private int getLevel(Type item) {
+    private int getLevel(E item) {
         float fl = item.getPriority() * TOTAL_LEVEL;
         int level = (int) Math.ceil(fl) - 1;
         return (level < 0) ? 0 : level;     // cannot be -1
@@ -294,8 +294,8 @@ public abstract class Bag<Type extends Item> {
      * @param newItem The Item to put in
      * @return The overflow Item
      */
-    private Type intoBase(Type newItem) {
-        Type oldItem = null;
+    private E intoBase(E newItem) {
+        E oldItem = null;
         int inLevel = getLevel(newItem);
         if (size() > capacity) {      // the bag is full
             int outLevel = 0;
@@ -315,13 +315,13 @@ public abstract class Bag<Type extends Item> {
     }
 
     /**
-     * Take out the first or last Type in a level from the itemTable
+     * Take out the first or last E in a level from the itemTable
      *
      * @param level The current level
      * @return The first Item
      */
-    private Type takeOutFirst(int level) {
-        Type selected = itemTable.get(level).get(0);
+    private E takeOutFirst(int level) {
+        E selected = itemTable.get(level).get(0);
         itemTable.get(level).remove(0);
         mass -= (level + 1);
         refresh();
@@ -333,7 +333,7 @@ public abstract class Bag<Type extends Item> {
      *
      * @param oldItem The Item to be removed
      */
-    protected void outOfBase(Type oldItem) {
+    protected void outOfBase(E oldItem) {
         int level = getLevel(oldItem);
         itemTable.get(level).remove(oldItem);
         mass -= (level + 1);
@@ -347,7 +347,7 @@ public abstract class Bag<Type extends Item> {
      * @param bagObserver BagObserver to set
      * @param title The title of the window
      */
-	public void addBagObserver( BagObserver<Type> bagObserver, String title ) {
+	public void addBagObserver( BagObserver<E> bagObserver, String title ) {
         this.bagObserver = bagObserver;
         bagObserver.post(toString());
         bagObserver.setTitle(title);
@@ -414,7 +414,7 @@ public abstract class Bag<Type extends Item> {
     String showSizes() {
         StringBuilder buf = new StringBuilder(" ");
         int levels = 0;
-        for (ArrayList<Type> items : itemTable) {
+        for (ArrayList<E> items : itemTable) {
             if ((items != null) && !items.isEmpty()) {
                 levels++;
                 buf.append(items.size()).append(" ");

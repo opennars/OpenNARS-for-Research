@@ -229,7 +229,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
         exitButton.addActionListener(this);
         add(exitButton);
 
-        setBounds(0, 250, 600, 600);
+        setBounds(0, 200, 600, 560);
         setVisible(true);
 
         initTimer();

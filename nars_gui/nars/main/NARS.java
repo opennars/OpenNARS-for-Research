@@ -20,21 +20,17 @@
  */
 package nars.main;
 
-import java.applet.Applet;
 import nars.io.ExperienceReader;
 import nars.main_nogui.CommandLineParameters;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.ReasonerBatch;
 
 /**
- * The main class of the project.
- * <p>
- * Define an application with full functionality and an applet with partial
- * functionality.
+ * The main class of the open-nars project.
  * <p>
  * Manage the internal working thread. Communicate with Reasoner only.
  */
-public class NARS extends Applet implements Runnable {
+public class NARS implements Runnable {
 
     /**
      * The information about the version and date of the project.
@@ -45,8 +41,7 @@ public class NARS extends Applet implements Runnable {
      */
     public static final String WEBSITE =
             " Open-NARS website:  http://code.google.com/p/open-nars/ \n"
-            + "      NARS website:  http://sites.google.com/site/narswang/ \n\n"
-            + "Meet us on IRC channel #nars on freenode.net.";
+            + "      NARS website:  http://sites.google.com/site/narswang/";
     /**
      * The internal working thread of the system.
      */
@@ -56,12 +51,10 @@ public class NARS extends Applet implements Runnable {
      */
     ReasonerBatch reasoner;
 
-    /* Application-only code */
     /**
      * The entry point of the standalone application.
      * <p>
-     * Create an instance of the class, then run the {@link #init()} and
-     * {@link #start()} methods.
+     * Create an instance of the class
      *
      * @param args optional argument used : one input file, possibly followed by
      * --silence <integer>
@@ -77,7 +70,7 @@ public class NARS extends Applet implements Runnable {
      * TODO multiple files
      */
     public void init(String[] args) {
-        init();
+        reasoner = new Reasoner("NARS Reasoner");
         if (args.length > 0
                 && CommandLineParameters.isReallyFile(args[0])) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
@@ -86,34 +79,15 @@ public class NARS extends Applet implements Runnable {
         CommandLineParameters.decode(args, reasoner);
     }
 
-    /* Applet/Application code */
-    /**
-     * Initialize the system at the control center.<p>
-     * Can instantiate multiple reasoners
-     */
-    @Override
-    public void init() {
-        reasoner = new Reasoner("NARS Reasoner");
-    }
-
     /**
      * Start the thread if necessary, called when the page containing the applet
      * first appears on the screen.
      */
-    @Override
     public void start() {
         if (narsThread == null) {
             narsThread = new Thread(this, "Inference");
             narsThread.start();
         }
-    }
-
-    /**
-     * Called when the page containing the applet is no longer on the screen.
-     */
-    @Override
-    public void stop() {
-        narsThread = null;
     }
 
     /* Implementing the Runnable Interface */
@@ -135,15 +109,5 @@ public class NARS extends Applet implements Runnable {
             } catch (Exception e) {
             }
         }
-    }
-
-    /**
-     * Provide system information for the applet.
-     *
-     * @return The string containing the information about the applet.
-     */
-    @Override
-    public String getAppletInfo() {
-        return INFO;
     }
 }

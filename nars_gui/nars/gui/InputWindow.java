@@ -90,7 +90,7 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         closeButton.addActionListener(this);
         gridbag.setConstraints(closeButton, c);
         add(closeButton);
-        setBounds(0, 40, 600, 210);
+        setBounds(0, 0, 600, 200);
         setVisible(true);
 
         this.reasoner = reasoner;
