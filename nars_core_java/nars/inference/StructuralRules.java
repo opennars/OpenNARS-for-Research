@@ -547,10 +547,10 @@ public final class StructuralRules {
             if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction))) {
                 truth = TruthFunctions.deduction(truth, RELIANCE);
             } else {
-                    TruthValue v1, v2;
-                    v1 = TruthFunctions.negation(truth);
-                    v2 = TruthFunctions.deduction(v1, RELIANCE);
-                    truth = TruthFunctions.negation(v2);
+                TruthValue v1, v2;
+                v1 = TruthFunctions.negation(truth);
+                v2 = TruthFunctions.deduction(v1, RELIANCE);
+                truth = TruthFunctions.negation(v2);
             }
             budget = BudgetFunctions.forward(truth, memory);
         }

@@ -370,6 +370,8 @@ public final class Concept extends Item {
 
     /**
      * called from {@link NARSBatch}
+     *
+     * @return A string representation of the concept
      */
     @Override
     public String toStringLong() {
@@ -423,9 +425,7 @@ public final class Concept extends Item {
      */
     public Sentence getBelief(Task task) {
         Sentence taskSentence = task.getSentence();
-        Sentence belief;
-        for (int i = 0; i < beliefs.size(); i++) {
-            belief = beliefs.get(i);
+        for (Sentence belief : beliefs) {
             memory.getRecorder().append(" * Selected Belief: " + belief + "\n");
             memory.newStamp = Stamp.make(taskSentence.getStamp(), belief.getStamp(), memory.getTime());
             if (memory.newStamp != null) {
@@ -478,16 +478,16 @@ public final class Concept extends Item {
      * Start displaying contents and links, called from ConceptWindow,
      * TermWindow or Memory.processTask only
      *
-     * same design as for {@link nars.storage.Bag} and {@link nars.gui.BagWindow}; see
+     * same design as for {@link nars.storage.Bag} and
+     * {@link nars.gui.BagWindow}; see
      * {@link nars.storage.Bag#addBagObserver(BagObserver, String)}
      *
-     * @param entityObserver {@link EntityObserver} to set;
-     * TODO make it a real observer pattern (i.e. with a
-     * plurality of observers)
+     * @param entityObserver {@link EntityObserver} to set; TODO make it a real
+     * observer pattern (i.e. with a plurality of observers)
      * @param showLinks Whether to display the task links
      */
-	@SuppressWarnings("unchecked")
-	public void startPlay( EntityObserver entityObserver, boolean showLinks ) {
+    @SuppressWarnings("unchecked")
+    public void startPlay(EntityObserver entityObserver, boolean showLinks) {
         this.entityObserver = entityObserver;
         entityObserver.startPlay(this, showLinks);
         entityObserver.post(displayContent());
@@ -540,8 +540,8 @@ public final class Concept extends Item {
         }
 
         @Override
-		public BagObserver<TermLink> createBagObserver() {
-			return new NullBagObserver<TermLink>();
+        public BagObserver<TermLink> createBagObserver() {
+            return new NullBagObserver<>();
         }
 
         @Override

@@ -26,13 +26,14 @@ import nars.io.Symbols;
 import nars.storage.Memory;
 
 /**
- * A statement is a compound term, consisting of a subject, a predicate,
- * and a relation symbol in between. It can be of either first-order or higher-order.
+ * A statement is a compound term, consisting of a subject, a predicate, and a
+ * relation symbol in between. It can be of either first-order or higher-order.
  */
 public abstract class Statement extends CompoundTerm {
 
     /**
      * Constructor with partial values, called by make
+     *
      * @param arg The component list of the term
      */
     protected Statement(ArrayList<Term> arg) {
@@ -47,6 +48,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Constructor with full values, called by clone
+     *
      * @param n The nameStr of the term
      * @param cs Component list
      * @param con Constant indicator
@@ -58,6 +60,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Make a Statement from String, called by StringParser
+     *
      * @param relation The relation String
      * @param subject The first component
      * @param predicate The second component
@@ -94,6 +97,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Make a Statement from given components, called by the rules
+     *
      * @return The Statement built
      * @param subj The first component
      * @param pred The second component
@@ -117,7 +121,9 @@ public abstract class Statement extends CompoundTerm {
     }
 
     /**
-     * Make a symmetric Statement from given components and temporal information, called by the rules
+     * Make a symmetric Statement from given components and temporal
+     * information, called by the rules
+     *
      * @param statement A sample asymmetric statement providing the class type
      * @param subj The first component
      * @param pred The second component
@@ -136,6 +142,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Check Statement relation symbol, called in StringPaser
+     *
      * @param s0 The String to be checked
      * @return if the given String is a relation symbol
      */
@@ -144,17 +151,19 @@ public abstract class Statement extends CompoundTerm {
         if (s.length() != 3) {
             return false;
         }
-        return (s.equals(Symbols.INHERITANCE_RELATION) ||
-                s.equals(Symbols.SIMILARITY_RELATION) ||
-                s.equals(Symbols.INSTANCE_RELATION) ||
-                s.equals(Symbols.PROPERTY_RELATION) ||
-                s.equals(Symbols.INSTANCE_PROPERTY_RELATION) ||
-                s.equals(Symbols.IMPLICATION_RELATION) ||
-                s.equals(Symbols.EQUIVALENCE_RELATION));
+        return (s.equals(Symbols.INHERITANCE_RELATION)
+                || s.equals(Symbols.SIMILARITY_RELATION)
+                || s.equals(Symbols.INSTANCE_RELATION)
+                || s.equals(Symbols.PROPERTY_RELATION)
+                || s.equals(Symbols.INSTANCE_PROPERTY_RELATION)
+                || s.equals(Symbols.IMPLICATION_RELATION)
+                || s.equals(Symbols.EQUIVALENCE_RELATION));
     }
 
     /**
-     * Override the default in making the nameStr of the current term from existing fields
+     * Override the default in making the nameStr of the current term from
+     * existing fields
+     *
      * @return the nameStr of the term
      */
     @Override
@@ -164,6 +173,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Default method to make the nameStr of an image term from given fields
+     *
      * @param subject The first component
      * @param predicate The second component
      * @param relation The relation operator
@@ -181,6 +191,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Check the validity of a potential Statement. [To be refined]
+     *
      * @param subject The first component
      * @param predicate The second component
      * @return Whether The Statement is invalid
@@ -208,19 +219,19 @@ public abstract class Statement extends CompoundTerm {
         }
         return false;
     }
-    
-    
+
     /**
-     * Check if one term is identical to or included in another one, except
-     * in a reflexive relation
+     * Check if one term is identical to or included in another one, except in a
+     * reflexive relation
      * <p>
      * @param t1 The first term
      * @param t2 The second term
      * @return Whether they cannot be related in a statement
      */
     private static boolean invalidReflexive(Term t1, Term t2) {
-        if (!(t1 instanceof CompoundTerm))
+        if (!(t1 instanceof CompoundTerm)) {
             return false;
+        }
         CompoundTerm com = (CompoundTerm) t1;
         if ((com instanceof ImageExt) || (com instanceof ImageInt)) {
             return false;
@@ -228,10 +239,21 @@ public abstract class Statement extends CompoundTerm {
         return com.containComponent(t2);
     }
 
+    public static boolean invalidPair(String s1, String s2) {
+        if (Variable.containVarIndep(s1) && !Variable.containVarIndep(s2)) {
+            return true;
+        } else if (!Variable.containVarIndep(s1) && Variable.containVarIndep(s2)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check the validity of a potential Statement. [To be refined]
      * <p>
-     * Minimum requirement: the two terms cannot be the same, or containing each other as component
+     * Minimum requirement: the two terms cannot be the same, or containing each
+     * other as component
+     *
      * @return Whether The Statement is invalid
      */
     public boolean invalid() {
@@ -240,6 +262,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Return the first component of the statement
+     *
      * @return The first component
      */
     public Term getSubject() {
@@ -248,6 +271,7 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Return the second component of the statement
+     *
      * @return The second component
      */
     public Term getPredicate() {

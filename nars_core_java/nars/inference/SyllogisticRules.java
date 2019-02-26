@@ -78,7 +78,7 @@ public final class SyllogisticRules {
      * @param memory Reference to the memory
      */
     static void abdIndCom(Term term1, Term term2, Sentence taskSentence, Sentence belief, int figure, Memory memory) {
-        if (Statement.invalidStatement(term1, term2)) {
+        if (Statement.invalidStatement(term1, term2) || Statement.invalidPair(term1.getName(), term2.getName())) {
             return;
         }
         Statement taskContent = (Statement) taskSentence.getContent();

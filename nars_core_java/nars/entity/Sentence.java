@@ -200,6 +200,10 @@ public class Sentence implements Cloneable {
         return stamp;
     }
 
+    public void setStamp(Stamp s) {
+        stamp = s;
+    }
+    
     /**
      * Distinguish Judgment from Goal ("instanceof Judgment" doesn't work)
      *
