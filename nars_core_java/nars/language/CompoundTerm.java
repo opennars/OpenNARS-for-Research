@@ -543,8 +543,13 @@ public abstract class CompoundTerm extends Term {
         } else {
             success = list.remove(t2);
         }
-        if (success && (list.size() > 1)) {
-            return make(t1, list, memory);
+        if (success) {
+            if (list.size() > 1) {
+                return make(t1, list, memory);
+            }
+            if ((list.size() == 1) && ((t1 instanceof Conjunction) || (t1 instanceof Disjunction))) {
+                return list.get(0);
+            }
         }
         return null;
     }

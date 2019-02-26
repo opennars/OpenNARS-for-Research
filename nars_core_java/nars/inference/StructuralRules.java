@@ -39,6 +39,7 @@ public final class StructuralRules {
     /**
      * {<S --> P>, S@(S&T)} |- <(S&T) --> (P&T)> {<S --> P>, S@(M-S)} |- <(M-P)
      * --> (M-S)>
+     *
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
@@ -107,6 +108,7 @@ public final class StructuralRules {
 
     /**
      * {<(S&T) --> (P&T)>, S@(S&T)} |- <S --> P>
+     *
      * @param statement The premise
      * @param memory Reference to the memory
      */
@@ -163,6 +165,7 @@ public final class StructuralRules {
 
     /**
      * {<S --> P>, P@(P&Q)} |- <S --> (P&Q)>
+     *
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
@@ -209,6 +212,7 @@ public final class StructuralRules {
 
     /**
      * {<(S&T) --> P>, S@(S&T)} |- <S --> P>
+     *
      * @param compound The compound term
      * @param index The location of the indicated term in the compound
      * @param statement The premise
@@ -303,8 +307,9 @@ public final class StructuralRules {
                 content = Inheritance.make(sub, pre, memory);
             }
         }
-        if (content == null)
+        if (content == null) {
             return;
+        }
         Task task = memory.currentTask;
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
@@ -323,6 +328,7 @@ public final class StructuralRules {
      * S@(*, S, M)} |- <S --> (/, P, _, M)> {<S --> (/, P, _, M)>, P@(/, P, _,
      * M)} |- <(*, S, M) --> P> {<S --> (/, P, _, M)>, M@(/, P, _, M)} |- <M -->
      * (/, P, S, _)>
+     *
      * @param inh An Inheritance statement
      * @param oldContent The whole content
      * @param indices The indices of the TaskLink
@@ -414,6 +420,7 @@ public final class StructuralRules {
      * a compound {<(*, S, M) --> P>, S@(*, S, M)} |- <S --> (/, P, _, M)> {<S
      * --> (/, P, _, M)>, P@(/, P, _, M)} |- <(*, S, M) --> P> {<S --> (/, P, _,
      * M)>, M@(/, P, _, M)} |- <M --> (/, P, S, _)>
+     *
      * @param subject The subject term
      * @param predicate The predicate term
      * @param memory Reference to the memory
@@ -463,6 +470,7 @@ public final class StructuralRules {
      * is a compound {<(*, S, M) --> P>, S@(*, S, M)} |- <S --> (/, P, _, M)>
      * {<S --> (/, P, _, M)>, P@(/, P, _, M)} |- <(*, S, M) --> P> {<S --> (/,
      * P, _, M)>, M@(/, P, _, M)} |- <M --> (/, P, S, _)>
+     *
      * @param subject The subject term
      * @param predicate The predicate term
      * @param memory Reference to the memory
@@ -512,7 +520,9 @@ public final class StructuralRules {
 
     /* --------------- Disjunction and Conjunction transform --------------- */
     /**
-     * {(&&, A, B), A@(&&, A, B)} |- A {(||, A, B), A@(||, A, B)} |- A
+     * {(&&, A, B), A@(&&, A, B)} |- A, or answer (&&, A, B)? using A {(||, A,
+     * B), A@(||, A, B)} |- A, or answer (||, A, B)? using A
+     *
      * @param compound The premise
      * @param component The recognized component in the premise
      * @param compoundTask Whether the compound comes from the task
@@ -524,6 +534,7 @@ public final class StructuralRules {
         }
         Term content = (compoundTask ? component : compound);
         Task task = memory.currentTask;
+        Sentence belief = memory.currentBelief;
 //        if (task.isStructural()) {
 //            return;
 //        }
@@ -536,7 +547,10 @@ public final class StructuralRules {
             if ((sentence.isJudgment()) == (compoundTask == (compound instanceof Conjunction))) {
                 truth = TruthFunctions.deduction(truth, RELIANCE);
             } else {
-                return;
+                    TruthValue v1, v2;
+                    v1 = TruthFunctions.negation(truth);
+                    v2 = TruthFunctions.deduction(v1, RELIANCE);
+                    truth = TruthFunctions.negation(v2);
             }
             budget = BudgetFunctions.forward(truth, memory);
         }
@@ -546,6 +560,7 @@ public final class StructuralRules {
     /* --------------- Negation related rules --------------- */
     /**
      * {A, A@(--, A)} |- (--, A)
+     *
      * @param content The premise
      * @param memory Reference to the memory
      */
@@ -567,6 +582,7 @@ public final class StructuralRules {
 
     /**
      * {<A ==> B>, A@(--, A)} |- <(--, B) ==> (--, A)>
+     *
      * @param statement The premise
      * @param memory Reference to the memory
      */
