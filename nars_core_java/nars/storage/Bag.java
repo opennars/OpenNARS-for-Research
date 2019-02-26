@@ -20,8 +20,7 @@
  */
 package nars.storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import nars.entity.Item;
 import nars.inference.BudgetFunctions;
@@ -70,7 +69,7 @@ public abstract class Bag<E extends Item> {
     /**
      * array of lists of items, for items on different level
      */
-    private ArrayList<ArrayList<E>> itemTable;
+    private ArrayList<LinkedList<E>> itemTable;
     /**
      * defined in different bags
      */
@@ -95,7 +94,9 @@ public abstract class Bag<E extends Item> {
      * reference to memory
      */
     protected Memory memory;
-	private BagObserver<E> bagObserver = new NullBagObserver<E>();
+    
+    private BagObserver<E> bagObserver = new NullBagObserver<E>();
+    
     /**
      * The display level; initialized at lowest
      */
@@ -108,7 +109,6 @@ public abstract class Bag<E extends Item> {
      */
     protected Bag(Memory memory) {
         this.memory = memory;
-//        showing = false;
         capacity = capacity();
         init();
     }
@@ -116,7 +116,7 @@ public abstract class Bag<E extends Item> {
     public void init() {
         itemTable = new ArrayList<>(TOTAL_LEVEL);
         for (int i = 0; i < TOTAL_LEVEL; i++) {
-            itemTable.add(new ArrayList<E>());
+            itemTable.add(new LinkedList<E>());
         }
         nameTable = new HashMap<>((int) (capacity / LOAD_FACTOR), LOAD_FACTOR);
         currentLevel = TOTAL_LEVEL - 1;
@@ -321,8 +321,8 @@ public abstract class Bag<E extends Item> {
      * @return The first Item
      */
     private E takeOutFirst(int level) {
-        E selected = itemTable.get(level).get(0);
-        itemTable.get(level).remove(0);
+        E selected = itemTable.get(level).getFirst();
+        itemTable.get(level).removeFirst();
         mass -= (level + 1);
         refresh();
         return selected;
@@ -341,13 +341,13 @@ public abstract class Bag<E extends Item> {
     }
 
     /**
-     * To start displaying the Bag in a BagWindow;
-     * {@link nars.gui.BagWindow} implements interface {@link BagObserver};
+     * To start displaying the Bag in a BagWindow; {@link nars.gui.BagWindow}
+     * implements interface {@link BagObserver};
      *
      * @param bagObserver BagObserver to set
      * @param title The title of the window
      */
-	public void addBagObserver( BagObserver<E> bagObserver, String title ) {
+    public void addBagObserver(BagObserver<E> bagObserver, String title) {
         this.bagObserver = bagObserver;
         bagObserver.post(toString());
         bagObserver.setTitle(title);
@@ -372,7 +372,6 @@ public abstract class Bag<E extends Item> {
      * Refresh display
      */
     public void refresh() {
-        bagObserver.refresh(toString());
         if (bagObserver != null && !(bagObserver instanceof NullBagObserver)) {
             bagObserver.refresh(toString());
         }
@@ -380,6 +379,7 @@ public abstract class Bag<E extends Item> {
 
     /**
      * Collect Bag content into a String for display
+     * @return A String representation of the content
      */
     @Override
     public String toString() {
@@ -413,11 +413,13 @@ public abstract class Bag<E extends Item> {
         return buf.toString();
     }
 
-    /** show item Table Sizes */
+    /**
+     * show item Table Sizes
+     */
     String showSizes() {
         StringBuilder buf = new StringBuilder(" ");
         int levels = 0;
-        for (ArrayList<E> items : itemTable) {
+        for (LinkedList<E> items : itemTable) {
             if ((items != null) && !items.isEmpty()) {
                 levels++;
                 buf.append(items.size()).append(" ");
@@ -426,7 +428,9 @@ public abstract class Bag<E extends Item> {
         return "Levels: " + Integer.toString(levels) + ", sizes: " + buf;
     }
 
-    /** set Show Level */
+    /**
+     * set Show Level
+     */
     public void setShowLevel(int showLevel) {
         this.showLevel = showLevel;
     }
