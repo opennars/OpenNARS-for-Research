@@ -102,7 +102,11 @@ public class RuleTables {
                     case TermLink.COMPOUND_CONDITION:
                         if (belief != null) {
                             if (beliefTerm instanceof Implication) {
-                                SyllogisticRules.conditionalDedInd((Implication) beliefTerm, bIndex, taskTerm, -1, memory);
+                                if (Variable.unify(Symbols.VAR_INDEPENDENT, ((Implication) beliefTerm).getSubject(), taskTerm, beliefTerm, taskTerm)) {
+                                    detachmentWithVar(belief, taskSentence, bIndex, memory);
+                                } else {
+                                    SyllogisticRules.conditionalDedInd((Implication) beliefTerm, bIndex, taskTerm, -1, memory);
+                                }
                             } else if (beliefTerm instanceof Equivalence) {
                                 SyllogisticRules.conditionalAna((Equivalence) beliefTerm, bIndex, taskTerm, -1, memory);
                             }
@@ -135,6 +139,11 @@ public class RuleTables {
                 break;
             case TermLink.COMPOUND_CONDITION:
                 switch (bLink.getType()) {
+                    case TermLink.COMPOUND:
+                        if (belief != null) {
+                            detachmentWithVar(taskSentence, belief, tIndex, memory);
+                        }
+                        break;
                     case TermLink.COMPOUND_STATEMENT:
                         if (belief != null) {
                             if (taskTerm instanceof Implication) // TODO maybe put instanceof test within conditionalDedIndWithVar()
@@ -407,7 +416,7 @@ public class RuleTables {
         Statement statement = (Statement) mainSentence.getContent();
         Term component = statement.componentAt(index);
         Term content = subSentence.getContent();
-        if ((component instanceof Inheritance) && (memory.currentBelief != null)) {
+        if (((component instanceof Inheritance) || (component instanceof Negation)) && (memory.currentBelief != null)) {
             if (component.isConstant()) {
                 SyllogisticRules.detachment(mainSentence, subSentence, index, memory);
             } else if (Variable.unify(Symbols.VAR_INDEPENDENT, component, content, statement, content)) {
@@ -559,7 +568,7 @@ public class RuleTables {
             if (index == 0) {
                 StructuralRules.contraposition(statement, memory.currentTask.getSentence(), memory);
             } else {
-                StructuralRules.contraposition(statement, memory.currentBelief, memory);            
+                StructuralRules.contraposition(statement, memory.currentBelief, memory);
             }
         }
 //        }
