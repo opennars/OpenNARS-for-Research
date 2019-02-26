@@ -34,6 +34,43 @@ import nars.storage.Memory;
  */
 public final class CompositionalRules {
 
+    static void IntroVarSameSubjectOrPredicate(Sentence originalMainSentence, Sentence subSentence, Term component, Term content, int index,Memory memory) {
+        Sentence cloned=(Sentence) originalMainSentence.clone();
+        Term T1=cloned.getContent();
+        if(!(T1 instanceof CompoundTerm) || !(content instanceof CompoundTerm)) {
+            return;
+        }
+        CompoundTerm T=(CompoundTerm) T1;
+        CompoundTerm T2=(CompoundTerm) content.clone();
+        if((component instanceof Inheritance && content instanceof Inheritance) ||
+           (component instanceof Similarity && content instanceof Similarity)) {
+            CompoundTerm result=T;
+            if(component.equals(content)) {
+                return; //wouldnt make sense to create a conjunction here, would contain a statement twice
+            }
+            if(((Statement)component).getPredicate().equals(((Statement)content).getPredicate()) && !(((Statement)component).getPredicate() instanceof Variable)) {
+                Variable V=new Variable("#depIndVar1");
+                CompoundTerm zw=(CompoundTerm) T.getComponents().get(index).clone();
+                zw=(CompoundTerm) CompoundTerm.setComponent(zw,1,V,memory);
+                T2=(CompoundTerm) CompoundTerm.setComponent(T2,1,V,memory);
+                Conjunction res=(Conjunction) Conjunction.make(zw, T2, memory);
+                T=(CompoundTerm) CompoundTerm.setComponent(T, index, res, memory);
+            }
+            else 
+            if(((Statement)component).getSubject().equals(((Statement)content).getSubject()) && !(((Statement)component).getSubject() instanceof Variable)) {
+                Variable V=new Variable("#depIndVar2");
+                CompoundTerm zw=(CompoundTerm) T.getComponents().get(index).clone();
+                zw=(CompoundTerm) CompoundTerm.setComponent(zw,0,V,memory);
+                T2=(CompoundTerm) CompoundTerm.setComponent(T2,0,V,memory);
+                Conjunction res=(Conjunction) Conjunction.make(zw, T2, memory);
+                T=(CompoundTerm) CompoundTerm.setComponent(T, index, res, memory);
+            }
+            TruthValue truth = TruthFunctions.induction(originalMainSentence.getTruth(), subSentence.getTruth());
+            BudgetValue budget = BudgetFunctions.compoundForward(truth, T, memory);
+            memory.doublePremiseTask(T, truth, budget);
+        }
+    }
+    
     /* -------------------- intersections and differences -------------------- */
     /**
      * {<S ==> M>, <P ==> M>} |- {<(S|P) ==> M>, <(S&P) ==> M>, <(S-P) ==> M>,
