@@ -56,6 +56,9 @@ public final class CompositionalRules {
                 CompoundTerm zw=(CompoundTerm) T.getComponents().get(index).clone();
                 zw=(CompoundTerm) CompoundTerm.setComponent(zw,1,V,memory);
                 T2=(CompoundTerm) CompoundTerm.setComponent(T2,1,V,memory);
+                if(zw == null || T2 == null || zw.equals(T2)) {
+                    return;
+                }
                 Conjunction res=(Conjunction) Conjunction.make(zw, T2, memory);
                 T=(CompoundTerm) CompoundTerm.setComponent(T, index, res, memory);
             }
@@ -65,6 +68,9 @@ public final class CompositionalRules {
                 CompoundTerm zw=(CompoundTerm) T.getComponents().get(index).clone();
                 zw=(CompoundTerm) CompoundTerm.setComponent(zw,0,V,memory);
                 T2=(CompoundTerm) CompoundTerm.setComponent(T2,0,V,memory);
+                if(zw == null || T2 == null || zw.equals(T2)) {
+                    return;
+                }
                 Conjunction res=(Conjunction) Conjunction.make(zw, T2, memory);
                 T=(CompoundTerm) CompoundTerm.setComponent(T, index, res, memory);
             }
