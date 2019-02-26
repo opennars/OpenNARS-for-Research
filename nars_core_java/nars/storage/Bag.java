@@ -100,7 +100,7 @@ public abstract class Bag<E extends Item> {
     /**
      * The display level; initialized at lowest
      */
-    private int showLevel = Parameters.BAG_THRESHOLD;
+    private int showLevel = THRESHOLD;
 
     /**
      * constructor, called from subclasses

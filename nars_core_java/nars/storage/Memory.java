@@ -20,8 +20,7 @@
  */
 package nars.storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import nars.entity.BudgetValue;
@@ -71,7 +70,7 @@ public class Memory {
      * List of new tasks accumulated in one cycle, to be processed in the next
      * cycle
      */
-    private final ArrayList<Task> newTasks;
+    private final LinkedList<Task> newTasks;
     /**
      * List of Strings or Tasks to be sent to the output channels
      */
@@ -122,7 +121,7 @@ public class Memory {
         recorder = new NullInferenceRecorder();
         concepts = new ConceptBag(this);
         novelTasks = new NovelTaskBag(this);
-        newTasks = new ArrayList<>();
+        newTasks = new LinkedList<>();
         exportStrings = new ArrayList<>();
     }
 
@@ -411,7 +410,7 @@ public class Memory {
         Task task;
         int counter = newTasks.size();  // don't include new tasks produced in the current workCycle
         while (counter-- > 0) {
-            task = newTasks.remove(0);
+            task = newTasks.removeFirst();
             if (task.isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
                 immediateProcess(task);
             } else {
