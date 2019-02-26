@@ -35,12 +35,12 @@ public class NARS implements Runnable {
     /**
      * The information about the version and date of the project.
      */
-    public static final String INFO = "Open-NARS\tVersion 1.5.5\tJuly 2013 \n";
+    public static final String INFO = "Open-NARS\tVersion 1.5.6\tJuly 2014 \n";
     /**
      * The project web sites.
      */
-    public static final String WEBSITE =
-            " Open-NARS website:  http://code.google.com/p/open-nars/ \n"
+    public static final String WEBSITE
+            = " Open-NARS website:  http://code.google.com/p/open-nars/ \n"
             + "      NARS website:  http://sites.google.com/site/narswang/";
     /**
      * The internal working thread of the system.
@@ -68,11 +68,12 @@ public class NARS implements Runnable {
 
     /**
      * TODO multiple files
+     *
+     * @param args Input file
      */
     public void init(String[] args) {
         reasoner = new Reasoner("NARS Reasoner");
-        if (args.length > 0
-                && CommandLineParameters.isReallyFile(args[0])) {
+        if ((args.length > 0) && CommandLineParameters.isReallyFile(args[0])) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
         }
