@@ -181,8 +181,6 @@ public abstract class Statement extends CompoundTerm {
 
     /**
      * Check the validity of a potential Statement. [To be refined]
-     * <p>
-     * Minimum requirement: the two terms cannot be the same, or containing each other as component
      * @param subject The first component
      * @param predicate The second component
      * @return Whether The Statement is invalid
@@ -191,10 +189,10 @@ public abstract class Statement extends CompoundTerm {
         if (subject.equals(predicate)) {
             return true;
         }
-        if ((subject instanceof CompoundTerm) && ((CompoundTerm) subject).containComponent(predicate)) {
+        if (invalidReflexive(subject, predicate)) {
             return true;
         }
-        if ((predicate instanceof CompoundTerm) && ((CompoundTerm) predicate).containComponent(subject)) {
+        if (invalidReflexive(predicate, subject)) {
             return true;
         }
         if ((subject instanceof Statement) && (predicate instanceof Statement)) {
@@ -209,6 +207,25 @@ public abstract class Statement extends CompoundTerm {
             }
         }
         return false;
+    }
+    
+    
+    /**
+     * Check if one term is identical to or included in another one, except
+     * in a reflexive relation
+     * <p>
+     * @param t1 The first term
+     * @param t2 The second term
+     * @return Whether they cannot be related in a statement
+     */
+    private static boolean invalidReflexive(Term t1, Term t2) {
+        if (!(t1 instanceof CompoundTerm))
+            return false;
+        CompoundTerm com = (CompoundTerm) t1;
+        if ((com instanceof ImageExt) || (com instanceof ImageInt)) {
+            return false;
+        }
+        return com.containComponent(t2);
     }
 
     /**
