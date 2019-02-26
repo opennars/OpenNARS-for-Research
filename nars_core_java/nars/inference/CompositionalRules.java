@@ -426,6 +426,9 @@ public final class CompositionalRules {
             substitute.put(commonTerm2, new Variable("$varInd2"));
         }
         content = Implication.make(premise1, oldCompound, memory);
+        if (content == null) {
+            return;
+        }
         content.applySubstitute(substitute);
         if (premise1.equals(taskSentence.getContent())) {
             truth = TruthFunctions.induction(belief.getTruth(), taskSentence.getTruth());
