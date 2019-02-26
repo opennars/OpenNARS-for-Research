@@ -373,6 +373,9 @@ public abstract class Bag<E extends Item> {
      */
     public void refresh() {
         bagObserver.refresh(toString());
+        if (bagObserver != null && !(bagObserver instanceof NullBagObserver)) {
+            bagObserver.refresh(toString());
+        }
     }
 
     /**
