@@ -109,7 +109,8 @@ public class Memory {
      */
     protected HashMap<Term, Term> substitute;
 
-
+    public static Random randomNumber = new Random(1);
+    
     /* ---------- Constructor ---------- */
     /**
      * Create a new memory <p> Called in Reasoner.reset only
@@ -131,6 +132,7 @@ public class Memory {
         newTasks.clear();
         exportStrings.clear();
         reasoner.initTimer();
+        randomNumber = new Random(1);
         recorder.append("\n-----RESET-----\n");
     }
 
