@@ -25,6 +25,8 @@ import java.util.*;
 import nars.entity.*;
 import nars.storage.*;
 import nars.io.Symbols;
+import static nars.language.CompoundTerm.make;
+import static nars.language.CompoundTerm.makeCompoundName;
 
 /**
  * A CompoundTerm is a Term with internal (syntactic) structure
@@ -131,34 +133,40 @@ public abstract class CompoundTerm extends Term {
         }
     }
 
+    @Override
+    public boolean equals(Object that) {
+        return (that instanceof Term) && (compareTo((Term) that) == 0);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 43 * hash + Objects.hashCode(this.components);
+        return hash;
+    }
+
     /**
-     * Orders among terms: variable < atomic < compound
+     * Orders among terms: variable < atomic < compound @p
      *
-     * @param that The Term to be compared with the current Term @return The
-     * same as compareTo as defined on Strings
-     * @return The order of the two terms
+     *
+     * aram that The Term to be compared with the current Term @return The same
+     * as compareTo as defined on Strings
      */
     @Override
-    public int compareTo(final Term that) {
-        if (!(that instanceof CompoundTerm)) {
+    public int compareTo(Term that) {
+        if (that instanceof CompoundTerm) {
+            CompoundTerm t = (CompoundTerm) that;
+            int minSize = Math.min(size(), t.size());
+            for (int i = 0; i < minSize; i++) {
+                int diff = componentAt(i).compareTo(t.componentAt(i));
+                if (diff != 0) {
+                    return diff;
+                }
+            }
+            return size() - t.size();
+        } else {
             return 1;
         }
-        final CompoundTerm t = (CompoundTerm) that;
-        int diff = size() - t.size();
-        if (diff != 0) {
-            return diff;
-        }
-        diff = this.operator().compareTo(t.operator());
-        if (diff != 0) {
-            return diff;
-        }
-        for (int i = 0; i < size(); i++) {
-            diff = componentAt(i).compareTo(t.componentAt(i));
-            if (diff != 0) {
-                return diff;
-            }
-        }
-        return 0;
     }
 
     /* static methods making new compounds, which may return null */
@@ -444,8 +452,8 @@ public abstract class CompoundTerm extends Term {
             return null;
         }
         ArrayList<Term> arr = new ArrayList<>(original.size());
-        for (Term original1 : original) {
-            arr.add((Term) ((Term) original1).clone());
+        for (int i = 0; i < original.size(); i++) {
+            arr.add((Term) ((Term) original.get(i)).clone());
         }
         return arr;
     }
@@ -529,7 +537,10 @@ public abstract class CompoundTerm extends Term {
         } else {
             success = list.remove(t2);
         }
-        return (success ? make(t1, list, memory) : null);
+        if (success && (list.size() > 1)) {
+            return make(t1, list, memory);
+        }
+        return null;
     }
 
     /**
