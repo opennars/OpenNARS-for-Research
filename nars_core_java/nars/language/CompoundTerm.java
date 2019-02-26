@@ -547,8 +547,12 @@ public abstract class CompoundTerm extends Term {
             if (list.size() > 1) {
                 return make(t1, list, memory);
             }
-            if ((list.size() == 1) && ((t1 instanceof Conjunction) || (t1 instanceof Disjunction))) {
-                return list.get(0);
+            if (list.size() == 1) {
+                if ((t1 instanceof Conjunction) || (t1 instanceof Disjunction)
+                        || (t1 instanceof IntersectionExt) || (t1 instanceof IntersectionInt)
+                        || (t1 instanceof DifferenceExt) || (t1 instanceof DifferenceInt)) {
+                    return list.get(0);
+                }
             }
         }
         return null;
