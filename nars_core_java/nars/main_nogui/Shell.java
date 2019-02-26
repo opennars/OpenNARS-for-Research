@@ -24,6 +24,7 @@ public class Shell {
         reasoner.addOutputChannel(new ShellOutput());
         InputThread thr = new InputThread(System.in, reasoner);
         thr.start();
+        System.out.println("Welcome to the OpenNARS Shell, type some Narsese input and press enter, use questions to get answers, or increase volume with *volume=n with n=0..100");
         reasoner.run();
         reasoner.getSilenceValue().set(100);
         int cnt = 0;
@@ -32,11 +33,23 @@ public class Shell {
             synchronized(inputString) {
                 if(!"".equals(inputString)) {
                     try {
-                        reasoner.textInputLine(inputString);
+                        if(inputString.startsWith("*volume=")) { //volume to be consistent with OpenNARS
+                            int val = Integer.parseInt(inputString.split("\\*volume=")[1]);
+                            if(val >= 0 && val <= 100) {
+                                reasoner.getSilenceValue().set(100-val);
+                            }
+                            else
+                            {
+                                System.out.println("Volume ignored, not in range");
+                            }
+                        }
+                        else {
+                            reasoner.textInputLine(inputString);
+                        }
                         inputString = "";
                     }
                     catch(Exception ex) {
-                        System.out.println("input failed: " + inputString);
+                        inputString = "";
                     }
                 }
             }
