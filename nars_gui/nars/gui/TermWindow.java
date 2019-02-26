@@ -93,7 +93,7 @@ public class TermWindow extends NarsFrame implements ActionListener {
         gridbag.setConstraints(hideButton, c);
         add(hideButton);
 
-        setBounds(600, 0, 600, 100);
+        setBounds(600, 22, 600, 100);
     }
 
     /**
