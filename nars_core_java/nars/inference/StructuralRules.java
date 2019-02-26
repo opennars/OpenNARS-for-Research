@@ -59,18 +59,18 @@ public final class StructuralRules {
         }
         if (side == 0) {
             if (components.contains(sub)) {
-                if (pred instanceof CompoundTerm) {
-                    return;
-                }
+//                if (pred instanceof CompoundTerm) {
+//                    return;
+//                }
                 sub = compound;
                 components.set(index, pred);
                 pred = CompoundTerm.make(compound, components, memory);
             }
         } else {
             if (components.contains(pred)) {
-                if (sub instanceof CompoundTerm) {
-                    return;
-                }
+//                if (sub instanceof CompoundTerm) {
+//                    return;
+//                }
                 components.set(index, sub);
                 sub = CompoundTerm.make(compound, components, memory);
                 pred = compound;
