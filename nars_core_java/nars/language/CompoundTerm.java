@@ -132,27 +132,33 @@ public abstract class CompoundTerm extends Term {
     }
 
     /**
-     * Orders among terms: variable < atomic < compound @p
+     * Orders among terms: variable < atomic < compound
      *
-     *
-     * aram that The Term to be compared with the current Term @return The same
-     * as compareTo as defined on Strings
+     * @param that The Term to be compared with the current Term @return The
+     * same as compareTo as defined on Strings
+     * @return The order of the two terms
      */
     @Override
-    public int compareTo(Term that) {
-        if (that instanceof CompoundTerm) {
-            CompoundTerm t = (CompoundTerm) that;
-            int minSize = Math.min(size(), t.size());
-            for (int i = 0; i < minSize; i++) {
-                int diff = componentAt(i).compareTo(t.componentAt(i));
-                if (diff != 0) {
-                    return diff;
-                }
-            }
-            return size() - t.size();
-        } else {
+    public int compareTo(final Term that) {
+        if (!(that instanceof CompoundTerm)) {
             return 1;
         }
+        final CompoundTerm t = (CompoundTerm) that;
+        int diff = size() - t.size();
+        if (diff != 0) {
+            return diff;
+        }
+        diff = this.operator().compareTo(t.operator());
+        if (diff != 0) {
+            return diff;
+        }
+        for (int i = 0; i < size(); i++) {
+            diff = componentAt(i).compareTo(t.componentAt(i));
+            if (diff != 0) {
+                return diff;
+            }
+        }
+        return 0;
     }
 
     /* static methods making new compounds, which may return null */
@@ -438,8 +444,8 @@ public abstract class CompoundTerm extends Term {
             return null;
         }
         ArrayList<Term> arr = new ArrayList<>(original.size());
-        for (int i = 0; i < original.size(); i++) {
-            arr.add((Term) ((Term) original.get(i)).clone());
+        for (Term original1 : original) {
+            arr.add((Term) ((Term) original1).clone());
         }
         return arr;
     }
