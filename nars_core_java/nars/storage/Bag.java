@@ -95,7 +95,7 @@ public abstract class Bag<E extends Item> {
      */
     protected Memory memory;
     
-    private BagObserver<E> bagObserver = new NullBagObserver<E>();
+    private BagObserver<E> bagObserver = new NullBagObserver<>();
     
     /**
      * The display level; initialized at lowest
@@ -273,7 +273,7 @@ public abstract class Bag<E extends Item> {
      * @return Whether that level is empty
      */
     protected boolean emptyLevel(int n) {
-        return ((itemTable.get(n) == null) || itemTable.get(n).isEmpty());
+        return (itemTable.get(n).isEmpty());
     }
 
     /**

@@ -59,18 +59,12 @@ public final class StructuralRules {
         }
         if (side == 0) {
             if (components.contains(sub)) {
-//                if (pred instanceof CompoundTerm) {
-//                    return;
-//                }
                 sub = compound;
                 components.set(index, pred);
                 pred = CompoundTerm.make(compound, components, memory);
             }
         } else {
             if (components.contains(pred)) {
-//                if (sub instanceof CompoundTerm) {
-//                    return;
-//                }
                 components.set(index, sub);
                 sub = CompoundTerm.make(compound, components, memory);
                 pred = compound;
@@ -236,7 +230,6 @@ public final class StructuralRules {
                 structuralStatement(component, pred, truthDed, memory);
             } else if (compound instanceof SetExt) {
                 structuralStatement(SetExt.make(component, memory), pred, truthDed, memory);
-//            } else if ((compound instanceof DifferenceExt) && (index == 0)) {
             } else if (compound instanceof DifferenceInt) {
                 if (index == 0) {
                     structuralStatement(component, pred, truthDed, memory);
@@ -249,14 +242,12 @@ public final class StructuralRules {
                 structuralStatement(subj, component, truthDed, memory);
             } else if (compound instanceof SetInt) {
                 structuralStatement(subj, SetInt.make(component, memory), truthDed, memory);
-//            } else if (compound instanceof IntersectionInt) {
             } else if (compound instanceof DifferenceExt) {
                 if (index == 0) {
                     structuralStatement(subj, component, truthDed, memory);
                 } else {
                     structuralStatement(subj, component, truthNDed, memory);
                 }
-//            } else if ((compound instanceof DifferenceInt) && (index == 0)) {
             }
         }
     }
@@ -440,12 +431,14 @@ public final class StructuralRules {
                 newSubj = product.componentAt(i);
                 newPred = ImageExt.make(product, predicate, i, memory);
                 inheritance = Inheritance.make(newSubj, newPred, memory);
-                if (truth == null) {
-                    budget = BudgetFunctions.compoundBackward(inheritance, memory);
-                } else {
-                    budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                if (inheritance != null) {
+                    if (truth == null) {
+                        budget = BudgetFunctions.compoundBackward(inheritance, memory);
+                    } else {
+                        budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                    }
+                    memory.singlePremiseTask(inheritance, truth, budget);
                 }
-                memory.singlePremiseTask(inheritance, truth, budget);
             }
         } else if (subject instanceof ImageInt) {
             ImageInt image = (ImageInt) subject;
@@ -459,12 +452,14 @@ public final class StructuralRules {
                     newPred = image.componentAt(i);
                 }
                 inheritance = Inheritance.make(newSubj, newPred, memory);
-                if (truth == null) {
-                    budget = BudgetFunctions.compoundBackward(inheritance, memory);
-                } else {
-                    budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                if (inheritance != null) {
+                    if (truth == null) {
+                        budget = BudgetFunctions.compoundBackward(inheritance, memory);
+                    } else {
+                        budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                    }
+                    memory.singlePremiseTask(inheritance, truth, budget);
                 }
-                memory.singlePremiseTask(inheritance, truth, budget);
             }
         }
     }
@@ -490,12 +485,14 @@ public final class StructuralRules {
                 newSubj = ImageInt.make(product, subject, i, memory);
                 newPred = product.componentAt(i);
                 inheritance = Inheritance.make(newSubj, newPred, memory);
-                if (truth == null) {
-                    budget = BudgetFunctions.compoundBackward(inheritance, memory);
-                } else {
-                    budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                if (inheritance != null) {
+                    if (truth == null) {
+                        budget = BudgetFunctions.compoundBackward(inheritance, memory);
+                    } else {
+                        budget = BudgetFunctions.compoundForward(truth, inheritance, memory);
+                    }
+                    memory.singlePremiseTask(inheritance, truth, budget);
                 }
-                memory.singlePremiseTask(inheritance, truth, budget);
             }
         } else if (predicate instanceof ImageExt) {
             ImageExt image = (ImageExt) predicate;
@@ -538,10 +535,6 @@ public final class StructuralRules {
         }
         Term content = (compoundTask ? component : compound);
         Task task = memory.currentTask;
-        Sentence belief = memory.currentBelief;
-//        if (task.isStructural()) {
-//            return;
-//        }
         Sentence sentence = task.getSentence();
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
@@ -602,13 +595,13 @@ public final class StructuralRules {
             } else {
                 budget = BudgetFunctions.compoundBackward(content, memory);
             }
-        memory.singlePremiseTask(content, Symbols.QUESTION_MARK, truth, budget);
+            memory.singlePremiseTask(content, Symbols.QUESTION_MARK, truth, budget);
         } else {
             if (content instanceof Implication) {
                 truth = TruthFunctions.contraposition(truth);
             }
             budget = BudgetFunctions.compoundForward(truth, content, memory);
-        memory.singlePremiseTask(content, Symbols.JUDGMENT_MARK, truth, budget);
+            memory.singlePremiseTask(content, Symbols.JUDGMENT_MARK, truth, budget);
         }
     }
 }
