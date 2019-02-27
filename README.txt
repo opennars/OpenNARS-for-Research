@@ -1,4 +1,6 @@
-![OpenNARS Declarative Core Logo](https://user-images.githubusercontent.com/8284677/53459976-6ee8bb80-3a33-11e9-8ae4-2325fc587565.png)
+OpenNARS Declarative Core
+-------------------------
+![OpenNARS_Declarative_Core_Logo](https://user-images.githubusercontent.com/8284677/53459976-6ee8bb80-3a33-11e9-8ae4-2325fc587565.png)
 
 Source Code
 -----------
