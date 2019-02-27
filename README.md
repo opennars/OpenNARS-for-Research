@@ -8,10 +8,7 @@ In nars_core_java/ and nars_gui/ are the NARS core and the Swing GUI in Java. Th
 
 nars-dist/ contains a NARS distribution (executable, examples, web page with applet), that could be zipped for releases.
 
-In nars_core/ there is an embryo of NARS in Scala (not currently active, just to see how NARS could look in Scala).
-
 The test suite is nars_core/src/test/java/nars/main_nogui/TestReasoning0.java .
-
 
 Build
 -----
