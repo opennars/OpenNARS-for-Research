@@ -1,3 +1,5 @@
+!(OpenNARS Declarative Core Logo)[https://user-images.githubusercontent.com/8284677/53459976-6ee8bb80-3a33-11e9-8ae4-2325fc587565.png]
+
 Source Code
 -----------
 Under the nars/ directory is the code Pei Wang originally moved into the project, which is still the base of his own programming. This is no active anymore, replaces by nars_core_java/ and nars_gui/ .
