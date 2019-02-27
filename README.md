@@ -3,7 +3,7 @@ OpenNARS Declarative Core
 ![OpenNARS_Declarative_Core_Logo](https://user-images.githubusercontent.com/8284677/53459976-6ee8bb80-3a33-11e9-8ae4-2325fc587565.png)
 
 Intended for people wanting to implement NAL7/8 in a different way.
-Users, better go to https://github.com/opennars/opennars
+Users, better go to https://github.com/opennars/opennars to enjoy a system that has full NAL1-8 implemented.
 
 Source Code
 -----------
