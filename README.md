@@ -4,10 +4,6 @@ OpenNARS Declarative Core
 
 Source Code
 -----------
-Under the nars/ directory is the code Pei Wang originally moved into the project, which is still the base of his own programming. This is no active anymore, replaces by nars_core_java/ and nars_gui/ .
-
-Later Joe Geldart started the open-nars version of NARS, which contains many good ideas (many of which are accepted into 1.5), but it isn't fully consistent with Pei's plan, especially about the new layers (7,8,9), so Pei didn't continue on that code base.
-
 In nars_core_java/ and nars_gui/ are the NARS core and the Swing GUI in Java. This came out of the code of Pei Wang in nars/ directory. This is the currently active code.
 
 nars-dist/ contains a NARS distribution (executable, examples, web page with applet), that could be zipped for releases.
