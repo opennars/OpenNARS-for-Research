@@ -38,7 +38,7 @@ public class NARS implements Runnable {
     /**
      * The information about the version and date of the project.
      */
-    public static final String INFO = "Open-NARS\tVersion 1.5.8\tFebruary 2020 \n";
+    public static final String INFO = "Open-NARS\tVersion 1.5.8\tFebruary 2019 \n";
     /**
      * The project web sites.
      */
