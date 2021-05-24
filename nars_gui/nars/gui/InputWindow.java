@@ -164,14 +164,15 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
         		timer = Integer.parseInt(line);
         		reasoner.walk(timer);
         	} catch (NumberFormatException e) {
-        		try {
-					reasoner.textInputLine(line);
-				} catch (NullPointerException e1) {
-					System.out.println("InputWindow.nextInput() - NullPointerException: please correct the input" );
-//					throw new RuntimeException( "Uncorrect line: please correct the input", e1 );
-					ready = false;
-					return false;
-				}
+                    try {
+                        //System.out.println("Line: " + line);
+                        reasoner.textInputLine(line);
+                    } catch (NullPointerException e1) {
+                        System.out.println("InputWindow.nextInput() - NullPointerException: please correct the input" );
+//                      throw new RuntimeException( "Uncorrect line: please correct the input", e1 );
+                        ready = false;
+                        return false;
+                    }
         	}
         	inputText.setText(text);	// update input Text widget to rest of text
         	if (text.isEmpty()) {

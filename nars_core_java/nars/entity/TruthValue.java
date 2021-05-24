@@ -24,6 +24,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
+import nars.main_nogui.Parameters;
 
 /**
  * Frequency and confidence.
@@ -46,10 +47,16 @@ public class TruthValue implements Cloneable { // implements Cloneable {
      * The confidence factor of the truth value
      */
     private ShortFloat confidence;
+    
+    private ShortFloat ignorance;
+    
+    private ShortFloat sharpness;
     /**
      * Whether the truth value is derived from a definition
      */
     private boolean isAnalytic = false;
+    
+    private boolean eternal;
 
     /**
      * Constructor with two ShortFloats
@@ -60,6 +67,16 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     public TruthValue(float f, float c) {
         frequency = new ShortFloat(f);
         confidence = (c < 1) ? new ShortFloat(c) : new ShortFloat(0.9999f);
+        eternal = true;
+    }
+    
+    public TruthValue(float f, float c, boolean b, boolean eternal){
+        
+        frequency = new ShortFloat(f);
+        confidence = (c < 1) ? new ShortFloat(c) : new ShortFloat(0.9999f);
+        isAnalytic = b;
+        this.eternal = eternal;
+        
     }
 
     /**
@@ -73,6 +90,7 @@ public class TruthValue implements Cloneable { // implements Cloneable {
         frequency = new ShortFloat(f);
         confidence = (c < 1) ? new ShortFloat(c) : new ShortFloat(0.9999f);
         isAnalytic = b;
+        eternal = true;
     }
 
     /**
@@ -84,6 +102,7 @@ public class TruthValue implements Cloneable { // implements Cloneable {
         frequency = new ShortFloat(v.getFrequency());
         confidence = new ShortFloat(v.getConfidence());
         isAnalytic = v.getAnalytic();
+        eternal = true;
     }
 
     /**
@@ -119,6 +138,16 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     public void setAnalytic() {
         isAnalytic = true;
     }
+    
+    public boolean isEternal(){
+        return eternal;
+    }
+    
+    public void setEternal(boolean eternal){
+        
+        this.eternal = eternal;
+        
+    }
 
     /**
      * Calculate the expectation value of the truth value
@@ -139,6 +168,18 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     public float getExpDifAbs(TruthValue t) {
         return Math.abs(getExpectation() - t.getExpectation());
     }
+    
+    public float getIgnorance(){
+        
+        return (float)(1-confidence.getValue());
+        
+    }
+    
+    public float getSharpness(){
+        
+        return (float)(2 * Math.pow(Math.abs(getExpectation() - 0.5), 4));
+        
+    }
 
     /**
      * Check if the truth value is negative
@@ -147,6 +188,18 @@ public class TruthValue implements Cloneable { // implements Cloneable {
      */
     public boolean isNegative() {
         return getFrequency() < 0.5;
+    }
+    
+    public float getIgnornce(){
+        return (float) (1.0 - confidence.getValue());
+    }
+    
+    public TruthValue setConfidence(float c){
+        
+        float max_confidence = 1.0f - Parameters.TRUTH_EPSILON;
+        this.confidence = new ShortFloat((c < max_confidence ? c : max_confidence));
+        return this;
+        
     }
 
     /**
@@ -173,7 +226,7 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public TruthValue clone() {
         return new TruthValue(getFrequency(), getConfidence(), getAnalytic());
     }
 

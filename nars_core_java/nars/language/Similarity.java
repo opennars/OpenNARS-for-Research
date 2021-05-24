@@ -58,7 +58,7 @@ public class Similarity extends Statement {
      * @return A new object, to be casted into a Similarity
      */
     @Override
-    public Object clone() {
+    public Similarity clone() {
         return new Similarity(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 

@@ -57,7 +57,7 @@ public class DifferenceExt extends CompoundTerm {
      * Clone an object
      * @return A new object, to be casted into a DifferenceExt
      */
-    public Object clone() {
+    public DifferenceExt clone() {
         return new DifferenceExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 

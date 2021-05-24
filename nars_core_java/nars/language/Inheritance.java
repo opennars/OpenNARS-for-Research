@@ -38,7 +38,7 @@ public class Inheritance extends Statement {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private Inheritance(ArrayList<Term> arg) {
+    public Inheritance(ArrayList<Term> arg) {
         super(arg);
     }
 
@@ -57,7 +57,7 @@ public class Inheritance extends Statement {
      * Clone an object
      * @return A new object, to be casted into a SetExt
      */
-    public Object clone() {
+    public Inheritance clone() {
         return new Inheritance(name, (ArrayList<Term>) cloneList(components), isConstant, complexity);
     }
 

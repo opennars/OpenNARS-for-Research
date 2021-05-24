@@ -53,7 +53,8 @@ public class Shell {
                     }
                 }
             }
-            reasoner.tick();
+            if(reasoner.getWalkingSteps() > 0)
+                reasoner.tick();
             cnt++;
             //if(cnt%10000 == 0) {
             //    System.out.println(cnt);
@@ -107,6 +108,12 @@ public class Shell {
                 } catch (final InterruptedException e) {
                     throw new IllegalStateException("Unexpectadly interrupted while sleeping.", e);
                 }
+                
+               /* try{
+                    reasoner.tick();
+                }catch (Exception e){
+                
+                }*/
             }
         }
     }

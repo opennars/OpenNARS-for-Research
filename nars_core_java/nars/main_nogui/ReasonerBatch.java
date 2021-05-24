@@ -1,31 +1,7 @@
-/* 
- * The MIT License
- *
- * Copyright 2019 The OpenNARS authors.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package nars.main_nogui;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import nars.entity.Stamp;
 import nars.entity.Task;
 import nars.gui.MainWindow;
@@ -33,7 +9,9 @@ import nars.io.InputChannel;
 import nars.io.OutputChannel;
 import nars.io.StringParser;
 import nars.io.Symbols;
+import nars.storage.InternalExperience;
 import nars.storage.Memory;
+import nars.storage.OveralExperience;
 
 public class ReasonerBatch {
 
@@ -79,12 +57,22 @@ public class ReasonerBatch {
      * System clock - number of cycles since last output
      */
     private long timer;
-    private AtomicInteger silenceValue = new AtomicInteger(Parameters.SILENT_LEVEL);
+    private final AtomicInteger silenceValue = new AtomicInteger(Parameters.SILENT_LEVEL);
+    private final InternalExperience internalBuffer;
+    private final OveralExperience globalBuffer;
+    //private final Experience_From_Narsese narsese_Channel;
+    
+    private final int internal_Duration = Parameters.MAX_BUFFER_DURATION_FACTOR * Parameters.DURATION_FOR_INTERNAL_BUFFER;
+    private final int global_Duration = Parameters.MAX_BUFFER_DURATION_FACTOR * Parameters.DURATION_FOR_GLOBAL_BUFFER;
 
     public ReasonerBatch() {
         memory = new Memory(this);
-        inputChannels = new ArrayList<>();
-        outputChannels = new ArrayList<>();
+        //System.out.println(memory.newStamp.getOccurrenceTime());
+        inputChannels = new ArrayList();
+        outputChannels = new ArrayList();
+        internalBuffer = new InternalExperience(memory, internal_Duration, "Internal");
+        globalBuffer = new OveralExperience(memory, global_Duration, "Global");
+       // narsese_Channel = new Experience_From_Narsese(memory, global_Duration);
     }
 
     /**
@@ -92,6 +80,7 @@ public class ReasonerBatch {
      * from {@link MainWindow}.
      */
     public void reset() {
+        //CompositionalRules.rand = new Random(1);
         running = false;
         walkingSteps = 0;
         clock = 0;
@@ -187,18 +176,33 @@ public class ReasonerBatch {
             }
             output.clear();	// this will trigger display the current value of timer in Memory.report()
         }
+        
         if (running || walkingSteps > 0) {
             clock++;
             tickTimer();
+            
             memory.workCycle(clock);
             if (walkingSteps > 0) {
                 walkingSteps--;
             }
         }
     }
+    
+    public int getWalkingSteps(){
+        return walkingSteps;
+    }
+    
+    public InternalExperience getInternalBuffer(){
+        return internalBuffer;        
+    }
+    
+    public OveralExperience getGlobalBuffer(){
+        return globalBuffer;
+    }
 
     /**
      * determines the end of {@link NARSBatch} program
+     * @return 
      */
     public boolean isFinishedInputs() {
         return finishedInputs;
@@ -210,6 +214,7 @@ public class ReasonerBatch {
      * @param text
      */
     public void textInputLine(String text) {
+        
         if (text.isEmpty()) {
             return;
         }
@@ -223,14 +228,33 @@ public class ReasonerBatch {
                 int i = Integer.parseInt(text);
                 walk(i);
             } catch (NumberFormatException e) {
-                Task task = StringParser.parseExperience(new StringBuffer(text), memory, clock);
+                
+                Task task = StringParser.parseExperience(new StringBuffer(text), memory, clock);              
                 if (task != null) {
-                    memory.inputTask(task);
+                    inputNarseseTask(task);
                 }
             }
         }
     }
 
+    private void inputNarseseTask(Task task){
+        
+        if(task.getBudget().aboveThreshold()){
+            
+            memory.getRecorder().append("!!! Perceived: " + task + "\n");
+            memory.report(task.getSentence(), true, false);
+            task.getBudget().incPriority((float)0.1);
+            globalBuffer.preProcessing(task, true);
+            //globalBuffer.putInSequenceList(task, memory.getTime());
+            
+        }else{
+            
+            memory.getRecorder().append("!!! Neglected: " + task + "\n");
+            
+        }
+        
+    }
+    
     @Override
     public String toString() {
         return memory.toString();

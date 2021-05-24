@@ -24,6 +24,7 @@
 package nars.language;
 
 import java.util.*;
+import nars.inference.TemporalRules;
 
 import nars.io.Symbols;
 import nars.storage.Memory;
@@ -33,6 +34,8 @@ import nars.storage.Memory;
  */
 public class Equivalence extends Statement {
 
+    private int temporalOrder;
+    //private static String name;
     /**
      * Constructor with partial values, called by make
      * @param components The component list of the term
@@ -51,24 +54,34 @@ public class Equivalence extends Statement {
     protected Equivalence(String n, ArrayList<Term> components, boolean constant, short complexity) {
         super(n, components, constant, complexity);
     }
+    
+    protected Equivalence(String name, ArrayList<Term> arg, int temporalOrder, long interval){
+        
+        super(name, arg);
+        this.temporalOrder = temporalOrder;
+        this.setInterval(interval);
+        //System.out.println("name: " + name);
+    }
 
     /**
      * Clone an object
      * @return A new object
      */
     @Override
-    public Object clone() {
-        return new Equivalence(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
+    public Equivalence clone() {
+        return new Equivalence(name, (ArrayList<Term>) cloneList(components), temporalOrder, this.getInterval());
     }
-
+    
     /**
-     * Try to make a new compound from two components. Called by the inference rules.
+     * Try to make a new compound from two components.Called by the inference rules.
      * @param subject The first component
      * @param predicate The second component
+     * @param temporalOrder
      * @param memory Reference to the memory
+     * @param interval
      * @return A compound generated or null
      */
-    public static Equivalence make(Term subject, Term predicate, Memory memory) {  // to be extended to check if subject is Conjunction
+    public static Equivalence make(Term subject, Term predicate, int temporalOrder,  Memory memory, long interval) {  // to be extended to check if subject is Conjunction
         if ((subject instanceof Implication) || (subject instanceof Equivalence)) {
             return null;
         }
@@ -77,19 +90,34 @@ public class Equivalence extends Statement {
         }
         if (invalidStatement(subject, predicate)) {
             return null;
-        }
-        if (subject.compareTo(predicate) > 0) {
+        }      
+        
+        if (subject.compareTo(predicate) > 0 && temporalOrder != TemporalRules.ORDER_BACKWARD && temporalOrder != TemporalRules.ORDER_FORWARD) {
             Term interm = subject;
             subject = predicate;
             predicate = interm;
         }
-        String name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
-        Term t = memory.nameToListedTerm(name);
-        if (t != null) {
-            return (Equivalence) t;
+        
+        String name = "";
+        
+        switch(temporalOrder){
+            
+            case TemporalRules.ORDER_BACKWARD:
+                temporalOrder = TemporalRules.ORDER_FORWARD; 
+            case TemporalRules.ORDER_FORWARD:
+                name = makeStatementName(subject, Symbols.EQUIVALENCE_AFTER, predicate);
+                break;
+            case TemporalRules.ORDER_CONCURRENT:
+                name = makeStatementName(subject, Symbols.EQUIVALENCE_WHEN, predicate);
+                break;
+            default:
+                name = makeStatementName(subject, Symbols.EQUIVALENCE_RELATION, predicate);
+                break;
+            
         }
+        
         ArrayList<Term> argument = argumentsToList(subject, predicate);
-        return new Equivalence(argument);
+        return new Equivalence(name, argument, temporalOrder, interval);
     }
 
     /**
@@ -98,7 +126,24 @@ public class Equivalence extends Statement {
      */
     @Override
     public String operator() {
+        
+        switch(temporalOrder){
+            
+            case TemporalRules.ORDER_FORWARD:
+                return Symbols.EQUIVALENCE_AFTER;
+            case TemporalRules.ORDER_CONCURRENT:
+                return Symbols.EQUIVALENCE_WHEN;
+            case TemporalRules.ORDER_BACKWARD:
+                return Symbols.EQUIVALENCE_BEFORE;
+            
+        }
+        
         return Symbols.EQUIVALENCE_RELATION;
+    }
+    
+    @Override
+    public int getTemporalOrder(){
+        return temporalOrder;
     }
 
     /**

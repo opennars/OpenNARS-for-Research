@@ -29,6 +29,27 @@ import java.util.*;
 
 import nars.entity.*;
 import nars.inference.*;
+import static nars.io.Symbols.ARGUMENT_SEPARATOR;
+import static nars.io.Symbols.BUDGET_VALUE_MARK;
+import static nars.io.Symbols.COMPOUND_TERM_CLOSER;
+import static nars.io.Symbols.COMPOUND_TERM_OPENER;
+import static nars.io.Symbols.GOAL_MARK;
+import static nars.io.Symbols.INPUT_LINE;
+import static nars.io.Symbols.JUDGMENT_MARK;
+import static nars.io.Symbols.OUTPUT_LINE;
+import static nars.io.Symbols.PREFIX_MARK;
+import static nars.io.Symbols.QUESTION_MARK;
+import static nars.io.Symbols.QUEST_MARK;
+import static nars.io.Symbols.SET_EXT_CLOSER;
+import static nars.io.Symbols.SET_EXT_OPENER;
+import static nars.io.Symbols.SET_INT_CLOSER;
+import static nars.io.Symbols.SET_INT_OPENER;
+import static nars.io.Symbols.STAMP_CLOSER;
+import static nars.io.Symbols.STAMP_OPENER;
+import static nars.io.Symbols.STATEMENT_CLOSER;
+import static nars.io.Symbols.STATEMENT_OPENER;
+import static nars.io.Symbols.TRUTH_VALUE_MARK;
+import static nars.io.Symbols.VALUE_SEPARATOR;
 import nars.language.*;
 import nars.main_nogui.Parameters;
 import nars.storage.Memory;
@@ -81,6 +102,7 @@ public abstract class StringParser extends Symbols {
             int j = buffer.lastIndexOf(STAMP_OPENER + "");
             buffer.delete(j - 1, buffer.length());
         }
+        //System.out.println(buffer.toString());
         return parseTask(buffer.toString().trim(), memory, time);
     }
 
@@ -99,18 +121,30 @@ public abstract class StringParser extends Symbols {
         try {
             String budgetString = getBudgetString(buffer);
             String truthString = getTruthString(buffer);
+            Tense tense = parseTense(buffer);
             String str = buffer.toString().trim();
+
             int last = str.length() - 1;
             char punc = str.charAt(last);
-            Stamp stamp = new Stamp(time);
+            Stamp stamp = new Stamp(tense, time);   
+  
             TruthValue truth = parseTruth(truthString, punc);
+
+            if(tense != null && truth != null){
+                truth.setEternal(false);
+            }
+                        
             Term content = parseTerm(str.substring(0, last), memory);
             Sentence sentence = new Sentence(content, punc, truth, stamp);
             if ((content instanceof Conjunction) && Variable.containVarDep(content.getName())) {
                 sentence.setRevisible(false);
             }
-            BudgetValue budget = parseBudget(budgetString, punc, truth);
+            //System.out.println("sentence order: " + sentence.getTemporalOrder());
+            boolean isEvent = (tense != null);
+            BudgetValue budget = parseBudget(budgetString, punc, truth, isEvent);
             task = new Task(sentence, budget);
+            //System.out.println(task.getSentence().getContent().getName());
+            //System.out.println(task.getSentence().getTemporalOrder());
         } catch (InvalidInputException e) {
             String message = " !!! INVALID INPUT: parseTask: " + buffer + " --- " + e.getMessage();
             System.out.println(message);
@@ -205,16 +239,30 @@ public abstract class StringParser extends Symbols {
      * @throws nars.io.StringParser.InvalidInputException If the String cannot
      * be parsed into a BudgetValue
      */
-    private static BudgetValue parseBudget(String s, char punctuation, TruthValue truth) throws InvalidInputException {
+    private static BudgetValue parseBudget(String s, char punctuation, TruthValue truth, boolean isEvent) throws InvalidInputException {
         float priority, durability;
         switch (punctuation) {
             case JUDGMENT_MARK:
-                priority = Parameters.DEFAULT_JUDGMENT_PRIORITY;
-                durability = Parameters.DEFAULT_JUDGMENT_DURABILITY;
+                
+                if(isEvent){
+                    priority = Parameters.DEFAULT_EVENT_PRIORITY;
+                    durability = Parameters.DEFAULT_EVENT_DURABILITY;
+                }else{
+                    priority = Parameters.DEFAULT_JUDGMENT_PRIORITY;
+                    durability = Parameters.DEFAULT_JUDGMENT_DURABILITY;
+                }
                 break;
             case QUESTION_MARK:
                 priority = Parameters.DEFAULT_QUESTION_PRIORITY;
                 durability = Parameters.DEFAULT_QUESTION_DURABILITY;
+                break;
+            case GOAL_MARK:
+                priority = Parameters.DEFAULT_GOAL_PRIORITY;
+                durability = Parameters.DEFAULT_GOAL_DURABILITY;
+                break;
+            case QUEST_MARK:
+                priority = Parameters.DEFAULT_QUEST_PRIORITY;
+                durability = Parameters.DEFAULT_QUEST_DURABILITY;
                 break;
             default:
                 throw new InvalidInputException("unknown punctuation: '" + punctuation + "'");
@@ -247,6 +295,7 @@ public abstract class StringParser extends Symbols {
      * @return the Term generated from the String
      */
     public static Term parseTerm(String s0, Memory memory) {
+        //System.out.println("test: " + s0);
         String s = s0.trim();
         try {
             if (s.length() == 0) {
@@ -259,6 +308,8 @@ public abstract class StringParser extends Symbols {
             int index = s.length() - 1;
             char first = s.charAt(0);
             char last = s.charAt(index);
+            
+            
             switch (first) {
                 case COMPOUND_TERM_OPENER:
                     if (last == COMPOUND_TERM_CLOSER) {
@@ -318,6 +369,7 @@ public abstract class StringParser extends Symbols {
         {
             throw new InvalidInputException("invalid term");
         }
+        
         if (Variable.containVar(s)) {
             return new Variable(s);
         } else {
@@ -335,17 +387,25 @@ public abstract class StringParser extends Symbols {
      */
     private static Statement parseStatement(String s0, Memory memory) throws InvalidInputException {
         String s = s0.trim();
+        //System.out.println("parseStatement: " + s0);
         int i = topRelation(s);
+        //System.out.println(i);
         if (i < 0) {
             throw new InvalidInputException("invalid statement");
         }
+        //System.out.println("456: " + s);
         String relation = s.substring(i, i + 3);
+        //System.out.println(relation);
         Term subject = parseTerm(s.substring(0, i), memory);
         Term predicate = parseTerm(s.substring(i + 3), memory);
+        //System.out.println("reation: " + relation);
         Statement t = Statement.make(relation, subject, predicate, memory);
+        //System.out.println(t.getName());
         if (t == null) {
             throw new InvalidInputException("invalid statement");
         }
+        /*System.out.println("t: " + t.getName());
+        System.out.println("order: " + t.getTemporalOrder());*/
         return t;
     }
 
@@ -362,7 +422,18 @@ public abstract class StringParser extends Symbols {
         int firstSeparator = s.indexOf(ARGUMENT_SEPARATOR);
         String op = s.substring(0, firstSeparator).trim();
         if (!CompoundTerm.isOperator(op)) {
-            throw new InvalidInputException("unknown operator: " + op);
+            
+            String operatorString = Operator.addPrefix(op);
+            Operator operator = memory.getOperator(operatorString);
+            
+            if(operator != null){
+                ArrayList<Term> args = parseArguments(s.substring(firstSeparator + 1) + ARGUMENT_SEPARATOR, memory);
+                Operation o = Operation.make(operator, args);
+                //System.out.println(o.getClass().toString());
+                return o;
+            }
+            System.out.println("Invalid Compound or Operation");
+            return null;
         }
         ArrayList<Term> arg = parseArguments(s.substring(firstSeparator + 1) + ARGUMENT_SEPARATOR, memory);
         Term t = CompoundTerm.make(op, arg, memory);
@@ -490,5 +561,17 @@ public abstract class StringParser extends Symbols {
             return false;
         }
         return true;
+    }
+    
+    public static Tense parseTense(StringBuffer s){
+        final int i = s.indexOf(Symbols.TENSE_MARK);
+        String t = "";
+        if(i > 0){
+            t = s.substring(i).trim();
+            s.delete(i, s.length());
+        }
+        //System.out.println("t: " + t);
+        return Tense.tense(t);
+                
     }
 }

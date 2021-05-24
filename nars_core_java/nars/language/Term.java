@@ -23,6 +23,14 @@
  */
 package nars.language;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import nars.inference.TemporalRules;
+import nars.io.Symbols;
+import nars.storage.Memory;
+
 /**
  * Term is the basic component of Narsese, and the object of processing in NARS.
  * <p>
@@ -37,6 +45,8 @@ public class Term implements Cloneable, Comparable<Term> {
      * given alphabet (ASCII or Unicode)
      */
     protected String name;
+    
+    public static Term SELF = new SetExt(new ArrayList<Term>(Arrays.asList(new Term("SELF"))));
 
     /**
      * Default constructor that build an internal Term
@@ -52,7 +62,12 @@ public class Term implements Cloneable, Comparable<Term> {
     public Term(String name) {
         this.name = name;
     }
-
+    
+    
+    public boolean isExecutable(Memory mem){
+        return this instanceof Operation;
+    }
+    
     /**
      * Reporting the name of the current Term.
      *
@@ -61,6 +76,10 @@ public class Term implements Cloneable, Comparable<Term> {
     public String getName() {
         return name;
     }
+    
+    public void setName(String name){
+        this.name = name;
+    }
 
     /**
      * Make a new Term with the same name.
@@ -68,7 +87,7 @@ public class Term implements Cloneable, Comparable<Term> {
      * @return The new Term
      */
     @Override
-    public Object clone() {
+    public Term clone() /*throws CloneNotSupportedException*/ {
         return new Term(name);
     }
 
@@ -109,6 +128,14 @@ public class Term implements Cloneable, Comparable<Term> {
     public void renameVariables() {
     }
 
+    public int getTemporalOrder(){
+        return TemporalRules.ORDER_NONE;
+    }
+    
+    public int containedTemporalRelations(){
+        return 0;
+    }
+    
     /**
      * The syntactic complexity, for constant atomic Term, is 1.
      *
@@ -143,7 +170,7 @@ public class Term implements Cloneable, Comparable<Term> {
     public boolean containTerm(Term target) {
         return equals(target);
     }
-
+    
     /**
      * The same as getName by default, used in display only.
      *
@@ -153,4 +180,64 @@ public class Term implements Cloneable, Comparable<Term> {
     public final String toString() {
         return name;
     }
+    
+    public boolean hasVarQuery(){
+        return false;
+    }
+    
+    public boolean hasVarIndep(){
+        return false;
+    }
+    
+    public boolean hasVarDep(){
+        return false;
+    }
+    
+    public boolean hasInterval(){
+        return false;
+    }
+    
+    public boolean hasVar(char type){
+        
+        switch (type){
+            case Symbols.VAR_DEPENDENT: return hasVarDep();
+            case Symbols.VAR_INDEPENDENT: return hasVarIndep();
+            case Symbols.VAR_QUERY: return hasVarQuery();
+        }
+        throw new IllegalStateException("Invalid variable type: " + type);
+    }
+    
+    public boolean hasVar(){
+        return false;
+    }
+    
+    public Map<Term, Integer> countTerm(Map<Term, Integer> map){
+        
+        if(map == null)
+            map = new LinkedHashMap<Term, Integer>();
+        
+        map.put(this, map.getOrDefault(this, 0) + 1);
+        
+        return map;
+        
+    }
+    
+    public static ArrayList<Term> toSortedSetArray(ArrayList<Term> arg){
+        
+        switch(arg.size()){
+            
+            case 0: return new ArrayList();
+            case 1: return new ArrayList(Arrays.asList(arg.get(0)));
+            case 2: Term a = arg.get(0);
+                    Term b = arg.get(1);
+                    int c  = a.compareTo(b);
+                    
+                    if(c < 0) return new ArrayList(Arrays.asList(a, b));
+                    else if(c > 0) return new ArrayList(Arrays.asList(b, a));
+                    else return new ArrayList(Arrays.asList(a));
+        }
+            
+        return arg;
+    }
+    
 }

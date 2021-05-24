@@ -24,12 +24,19 @@
 package nars.entity;
 
 import java.util.ArrayList;
-
 import nars.inference.BudgetFunctions;
 import nars.inference.LocalRules;
 import nars.inference.RuleTables;
+import nars.inference.StructuralRules;
+import nars.inference.TemporalRules;
+import nars.inference.TruthFunctions;
 import nars.inference.UtilityFunctions;
+import nars.io.Symbols;
 import nars.language.CompoundTerm;
+import nars.language.Conjunction;
+import nars.language.Equivalence;
+import nars.language.Implication;
+import nars.language.Negation;
 import nars.language.Term;
 import nars.main_nogui.NARSBatch;
 import nars.main_nogui.Parameters;
@@ -65,7 +72,7 @@ public final class Concept extends Item {
      * Link templates of TermLink, only in concepts with CompoundTerm jmv TODO
      * explain more
      */
-    private ArrayList<TermLink> termLinkTemplates;
+    private final ArrayList<TermLink> termLinkTemplates;
     /**
      * Question directly asked about the term
      */
@@ -74,10 +81,23 @@ public final class Concept extends Item {
      * Sentences directly made about the term, with non-future tense
      */
     private final ArrayList<Sentence> beliefs;
+    
+    //private final ArrayList<Task> anticipationList;
+    private final ArrayList<Concept> anticipationList;
     /**
      * Reference to the memory
      */
-    Memory memory;
+    private final ArrayList<Task> quests;
+    
+    private final ArrayList<Task> desires;
+    
+    private ArrayList<Concept> executable_preconditions;
+    
+    private ArrayList<Task> general_executable_preconditions;
+    
+    public boolean observable = false;
+    //public List<AnticipationEntry> anticipations = new ArrayList<>();
+    private Memory memory;
     /**
      * The display window
      */
@@ -95,12 +115,20 @@ public final class Concept extends Item {
         super(tm.getName());
         term = tm;
         this.memory = memory;
-        questions = new ArrayList<>();
-        beliefs = new ArrayList<>();
+        questions = new ArrayList();
+        beliefs = new ArrayList();
         taskLinks = new TaskLinkBag(memory);
         termLinks = new TermLinkBag(memory);
+        quests = new ArrayList();
+        desires = new ArrayList();
+        anticipationList = new ArrayList();
+        this.executable_preconditions = new ArrayList();
+        this.general_executable_preconditions = new ArrayList();
+        
         if (tm instanceof CompoundTerm) {
             termLinkTemplates = ((CompoundTerm) tm).prepareComponentLinks();
+        }else{
+            termLinkTemplates = null;
         }
     }
 
@@ -115,12 +143,16 @@ public final class Concept extends Item {
      * @param task The task to be processed
      */
     public void directProcess(Task task) {
+        
         if (task.getSentence().isJudgment()) {
             processJudgment(task);
-        } else {
+        } else if(task.getSentence().isQuestion() || task.getSentence().isQuest()){
             processQuestion(task);
+        } else if(task.getSentence().isGoal()){
+            processGoal(task);
         }
-        if (task.getBudget().aboveThreshold()) {    // still need to be processed
+
+        if (task.getBudget().aboveThreshold() && !task.getSentence().isGoal()) {    // still need to be processed
             linkToTask(task);
         }
         entityObserver.refresh(displayContent());
@@ -134,16 +166,15 @@ public final class Concept extends Item {
      * @param task The task to be processed
      * @return Whether to continue the processing of the task
      */
-    private void processJudgment(Task task) {
+    public void processJudgment(Task task) {
+        
         Sentence judg = task.getSentence();
-        Sentence oldBelief = evaluation(judg, beliefs);
+        Sentence oldBelief = evaluation(judg, beliefs);     
+        
         if (oldBelief != null) {
             Stamp newStamp = judg.getStamp();
             Stamp oldStamp = oldBelief.getStamp();
-            if (newStamp.equals(oldStamp)) {
-                if (task.getParentTask().getSentence().isJudgment()) {
-                    task.getBudget().decPriority(0);    // duplicated task
-                }   // else: activated belief
+            if (newStamp.equals(oldStamp)) {  
                 return;
             } else if (LocalRules.revisible(judg, oldBelief)) {
                 memory.newStamp = Stamp.make(newStamp, oldStamp, memory.getTime());
@@ -153,16 +184,61 @@ public final class Concept extends Item {
                 }
             }
         }
+        
         if (task.getBudget().aboveThreshold()) {
-            for (Task ques : questions) {
-//                LocalRules.trySolution(ques.getSentence(), judg, ques, memory);
-                LocalRules.trySolution(judg, ques, memory);
+            for (Task ques : questions) 
+                LocalRules.trySolution(judg, ques, memory);          
+            
+            if(!task.isEternal()){
+                
+                for (Task desire : desires) {
+                    
+                    if(desire.getBestSolution() != null && task.getStamp().getOccurrenceTime() > desire.getBestSolution().getOccurrenceTime())
+                        desire.setBestSolution(task.getSentence());
+                }
+                
+            }else{
+                for (Task desire : desires)
+                    LocalRules.trySolution(judg, desire, memory);
             }
             addToTable(judg, beliefs, Parameters.MAXIMUM_BELIEF_LENGTH);
         }
-    }
+        // if the new judgment is implication generate anticipation relation in the concept of the 
+        // subject and goal relation in the post condition
+        generateAnticipations(task.getSentence());
+        generateGoalPreconditions(task.getSentence());
+    } 
 
     /**
+     *
+     * @param query
+     * @param list
+     * @return
+     */
+    public Sentence evaluation(Sentence query, ArrayList<Sentence> list) {
+        // 如果list为空，则返回空
+        if (list == null) {
+            return null;
+        }
+        // 初始化当前最优解
+        float currentBest = 0;
+        // belief的质量
+        float beliefQuality;
+        // 候选人
+        Sentence candidate = null;
+        // 遍历整个对应的列表, 返回信心值/预期最大的一个
+        for (Sentence judg : list) {
+            beliefQuality = LocalRules.solutionQuality(query, judg, memory);
+            // 如果当前项目信心/预期大于当前最右，则替换当前最优解
+            if (beliefQuality > currentBest) {
+                currentBest = beliefQuality;
+                candidate = judg;
+            }
+        }
+        return candidate;
+    }
+    
+    /*
      * To answer a question by existing beliefs
      *
      * @param task The task to be processed
@@ -181,22 +257,301 @@ public final class Concept extends Item {
                 }
             }
         }
+        
         if (newQuestion) {
             questions.add(task);
         }
+        
         if (questions.size() > Parameters.MAXIMUM_QUESTIONS_LENGTH) {
             questions.remove(0);    // FIFO
         }
+        
         Sentence newAnswer = evaluation(ques, beliefs);
         if (newAnswer != null) {
-//            LocalRules.trySolution(ques, newAnswer, task, memory);
             LocalRules.trySolution(newAnswer, task, memory);
             return newAnswer.getTruth().getExpectation();
         } else {
             return 0.5f;
         }
     }
+    
+    /**
+     * Select the existing goal with the highest confidence from the desire list
+     * @return 
+     */
+    private Task selectOldGoal(){
+        
+        Task oldGoal = null;
+        
+        if(!desires.isEmpty())
+            oldGoal = desires.get(0);
+        
+        for (Task goal : desires) {
+            
+            if(oldGoal != null){
+                if(oldGoal.getSentence().getTruth().getConfidence() < goal.getSentence().getTruth().getConfidence())
+                    oldGoal = goal;
+            }
+            
+        }
+        
+        if(oldGoal == null)
+            return null;
+            
+        return oldGoal;
+        
+    }
+    
+    /**
+     * 处理目标，如果输入是一个目标
+     * @param task 
+     */
+    private void processGoal(Task task){
+        
+        if(task.getContent() instanceof Negation){
+            memory.currentTask = task;
+            Task newTask = StructuralRules.transformNegation(task, memory);
+            Concept c = memory.getConcept(newTask.getContent());
+            
+            if(c != null)
+                c.processGoal(newTask);
+            
+            //System.out.println("!!!!!!!!!");
+            memory.derivedTask(newTask);
+        }
+        
+        // goal sentence
+        Sentence goal = task.getSentence();
+        // select the goal with highest confidence from the desires list
+        Task oldGoal = selectOldGoal();
+        // new time stamp
+        Stamp newStamp = goal.getStamp();
+        // if the old goal is not null
+        if(oldGoal != null){
+            Stamp oldStamp = oldGoal.getStamp();
+            // if the new stamp is identical to the old one return
+            if(newStamp.equals(oldStamp))
+                return;
+        }
+        
+        /*=====================================================================*/
+        // 信念为空
+        Sentence belief = null;
+        // if the budget of the task is above the threshold 
+        if(task.getBudget().aboveThreshold()){
+            // 从select the belief with the highest confidence to offer the new solution
+            belief = evaluation(task.getSentence(), beliefs);
+            // go over the question to see if the task can be a good solution for the question
+            for(Task iQuest : getQuests())
+                LocalRules.trySolution(task.getSentence(), iQuest, memory);
+            // fi the belief is not null, see if the belief can be a solution to be task
+            if(belief != null){
+                LocalRules.trySolution(belief, task, memory);
+            }
+        }
+        
+        // Do revision if two goals are revisible
+        if(oldGoal != null && oldGoal.getBudget().aboveThreshold() && LocalRules.revisible(goal, oldGoal.getSentence())){
+            // old stamp
+            Stamp oldStamp = oldGoal.getStamp();
+            // combine stamps
+            memory.setNewStamp(newStamp, oldStamp, memory.getTime());
+            // do the time projection for the old goal
+            Sentence projectedGoal = oldGoal.getSentence().projection(task.getSentence().getOccurrenceTime(), newStamp.getOccurrenceTime(), memory);
+            // if the projected goal is not null
+            if(projectedGoal != null){
+                
+                memory.currentBelief = projectedGoal;
+             
+                LocalRules.revision(task.getSentence(), projectedGoal, false, memory);
+                
+                return;
+            }
+        }
+        // 目标的时间戳
+        Stamp goalStamp = goal.getStamp().clone();
+        
+        if(!goalStamp.isEternal()){
+            
+            goalStamp.setOccurrenceTime(memory.getTime());
+            if(goalStamp.after(task.getSentence().getStamp(), Parameters.DURATION)){
+                
+            Sentence proGoal = task.getSentence().projection(memory.getTime(), Parameters.DURATION, memory);
+            
+            if(proGoal != null && proGoal.getTruth().getExpectation() > Parameters.DECISION_THRESHOLD)
+                memory.singlePremiseTask(proGoal.getContent(), proGoal.getTruth(), task.getBudget());
+            }
+            
+        }else if(task.getSentence().getTruth().getExpectation() > Parameters.DECISION_THRESHOLD){
+            memory.singlePremiseTask(task.getContent(), task.getSentence().getTruth(), task.getBudget());
+        }
+        
+        if(!task.getBudget().aboveThreshold())
+            return;
+        
+        float antiSatisfaction = 0.5f;    
+        
+        if(belief != null){
+            Sentence projectedBelief = belief.projection(task.getSentence().getOccurrenceTime(), memory.getTime(), memory);
+            antiSatisfaction = task.getSentence().getTruth().getExpDifAbs(projectedBelief.getTruth());
+        }
+        
+        task.setPriority(task.getPriority() * antiSatisfaction);
+        if (!task.getBudget().aboveThreshold()) {
+            return;
+        }
 
+        reactionToGoal();
+        addToTable(task, desires, Parameters.MAXIMUM_GOAL_LENGTH);                      
+        //reactionToGoal();
+    }
+    
+        /**
+     * Adding concept to the anticipation list
+     * @param concept the concept of the pre-condtion
+     * @param list which concepts are added to
+     * @return if the concept is added successfully
+     */
+    private boolean addToTable(Concept concept, ArrayList<Concept> list, int capacity){
+        
+        if(list.contains(concept)){
+            
+            list.remove(concept);
+            
+        }
+        
+        if(list.isEmpty()){
+            
+            list.add(concept);
+            
+        }else{
+            
+            if(list.size() < capacity){
+                
+                int i = 0;
+                
+                if(concept.getBeliefs().isEmpty())
+                    return false;
+                
+                while(concept.getBeliefs().get(0).getTruth().getExpectation() < list.get(i).getBeliefs().get(0).getTruth().getExpectation() && i < list.size() - 1)
+                    i++;
+                
+                list.add(i, concept);
+                return true;
+                
+            }else{
+            
+                if(concept.getBeliefs().isEmpty())
+                    return false;
+                
+                if(concept.getBeliefs().get(0).getTruth().getExpectation() < list.get(list.size() - 1).getBeliefs().get(0).getTruth().getExpectation()){
+                    return false;
+                }else{
+                    
+                    list.remove(list.size() - 1);
+                    
+                    int i = 0;                 
+                            
+                    while(concept.getBeliefs().get(0).getTruth().getExpectation() < list.get(i).getBeliefs().get(0).getTruth().getExpectation() && i < list.size() - 1)
+                        i++;
+                    
+                    list.add(i, concept);
+                    return true;
+                    
+                }
+            }
+        }
+        return false;
+    }
+    
+     /**
+     * use implication relation to generate anticipation
+     * @param term 
+     */
+    public void generateAnticipations(Sentence sentence){
+               
+        Term term = sentence.getContent();
+
+        // if the term has variable, return
+        if(term.hasVar())
+            return;
+        
+        if((term instanceof Implication && 
+                ((((Implication)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD) 
+             || (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_BACKWARD)))
+             || ((term instanceof Equivalence) && 
+                ((Equivalence)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD)){
+            //System.out.println("Term: " + term.getName());
+            Term precondition = null;
+
+            // find the precondition, which is the subject of the implication
+            if(term instanceof Implication && (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD)){
+                
+                if((((Implication)term).getSubject() instanceof Conjunction) && (((Implication)term).getPredicate()) instanceof Conjunction)
+                    return;
+                
+                precondition = ((Implication)term).getSubject();
+            }
+            else if(term instanceof Implication && (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_BACKWARD)){
+                precondition = ((Implication)term).getPredicate();
+            }
+            else if(term instanceof Equivalence && (((Equivalence)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD)){
+                precondition = ((Equivalence)term).getSubject();
+            }
+            else{
+                return;
+            }
+                   
+            // get the concept of the precondition      
+            Concept preConcept = memory.getConcept(precondition);
+            Concept concept = memory.getConcept(term);
+
+            // add this relation to the table of anticipation of the concept of the precondition
+            if(preConcept != null)     
+                preConcept.addToTable(concept, preConcept.getAnticipationList(), Parameters.ANTICIPATION_LIST_CAPACITY);
+        }
+    }
+    
+    /**
+     * genrate goal preconditions
+     * @param task 
+     */
+    public void generateGoalPreconditions(Sentence sentence){
+        
+        Term term = sentence.getContent();
+        if(term.hasVar())
+            return;
+        
+        if((term instanceof Implication && 
+                ((((Implication)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD) 
+             /*|| (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_BACKWARD)))
+             || ((term instanceof Equivalence) && 
+                ((Equivalence)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD)*/))){
+            
+            if(!(((Implication)term).getSubject() instanceof Conjunction))
+                return;
+            
+            Term postCondition = null;
+
+            // similar with anticipation, but adding the implication relation to the postcondition
+            if(term instanceof Implication && (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_FORWARD))
+                postCondition = ((Implication)term).getPredicate();
+            else if(term instanceof Implication && (((Implication)term).getTemporalOrder() == TemporalRules.ORDER_BACKWARD))
+                postCondition = ((Implication)term).getSubject();
+            else
+                postCondition = ((Equivalence)term).getPredicate();
+                
+            Concept postConcept = memory.getConcept(postCondition);
+            Concept concept = memory.getConcept(term);
+            
+            if(postConcept != null){
+                postConcept.addToTable(concept, postConcept.getExecutable_preconditions(), Parameters.GOAL_PRECONDITION_CAPACITY);
+            }
+        }
+        
+    }
+    
+    
     /**
      * Link to a new task from all relevant concepts for continued processing in
      * the near future for unspecified time.
@@ -240,7 +595,7 @@ public final class Concept extends Item {
      * @param table The table to be revised
      * @param capacity The capacity of the table
      */
-    private void addToTable(Sentence newSentence, ArrayList<Sentence> table, int capacity) {
+    public void addToTable(Sentence newSentence, ArrayList<Sentence> table, int capacity) {
         float rank1 = BudgetFunctions.rankBelief(newSentence);    // for the new isBelief
         Sentence judgment2;
         float rank2;
@@ -264,29 +619,58 @@ public final class Concept extends Item {
             table.add(newSentence);
         }
     }
-
+    
+    
     /**
-     * Evaluate a query against beliefs (and desires in the future)
-     *
-     * @param query The question to be processed
-     * @param list The list of beliefs to be used
-     * @return The best candidate belief selected
+     * Use for adding the task into the corresponding list, used for adding 
+     * goals into desire list
+     * @param task
+     * @param the goal which requires to add to the list
+     * @param list the desire list
+     * @param capacity of the desire list
+     * @return true if added successfully
      */
-    private Sentence evaluation(Sentence query, ArrayList<Sentence> list) {
-        if (list == null) {
-            return null;
-        }
-        float currentBest = 0;
-        float beliefQuality;
-        Sentence candidate = null;
-        for (Sentence judg : list) {
-            beliefQuality = LocalRules.solutionQuality(query, judg);
-            if (beliefQuality > currentBest) {
-                currentBest = beliefQuality;
-                candidate = judg;
+    public boolean addToTable(Task task, ArrayList<Task> list, int capacity){
+        
+        if(list.contains(task))
+            return false;
+        
+        if(list.isEmpty())
+            list.add(task);
+        else{
+            
+            if(list.size() < capacity){
+                
+                int i = 0;
+                
+                while(task.getPriority() < list.get(i).getPriority() && i < list.size() - 1)
+                    i++;
+                    
+                list.add(i, task);
+                return true;
+                
+            }else{
+            
+                if(task.getPriority() < list.get(list.size() - 1).getPriority()){
+                    
+                    return false;
+                    
+                }else{
+                    
+                    list.remove(list.size() - 1);
+                    
+                    int i = 0;
+                            
+                    while(task.getPriority() < list.get(i).getPriority() && i < list.size() - 1)
+                        i++;
+                    
+                    list.add(i, task);
+                    return true;
+                    
+                }
             }
         }
-        return candidate;
+        return false;
     }
 
     /* ---------- insert Links for indirect processing ---------- */
@@ -439,11 +823,111 @@ public final class Concept extends Item {
         return null;
     }
 
+    /**
+     * If there is a goal is unfulfilled, then what system need to do to fulfill the goal
+     */
+    public void reactionToGoal(){
+        
+        if(!desires.isEmpty()){
+
+            /*if(desires.get(0).fulfilled()){
+                return;
+            }*/
+            
+            // best operation, if there are several operations to reach the goal
+            Concept bestop = null;
+            
+            Term precondition = null;
+            
+            //memory.generalInfoReport(executable_preconditions.toString());
+            
+            if(!executable_preconditions.isEmpty()){
+                // go over the executable preconditions list
+                for (Concept c : executable_preconditions) {
+                    
+                    if(c != null && c.getTerm() instanceof Implication)   
+                        precondition = ((Implication)c.getTerm()).getSubject();  
+                    
+                    if(precondition == null)
+                        return;
+                    
+                    // if precondition is conjunction
+                    if(precondition instanceof Conjunction){
+                        
+                        // if the sequence lis tin the overall buffer is not null
+                        if(memory.getOveralExperience().getSequenceList().size() >= 1){                                                    
+                            
+                            boolean happening = false;
+                            
+                            // check if the precondition is happening 
+                            for(int i = memory.getOveralExperience().getSequenceList().size() - 1; i > 0; i--){
+                                
+                                if(((Conjunction)precondition).getComponents().get(0).getName().equals(memory.getOveralExperience().getSequenceList().get(i).getName())){
+                                    happening = true;
+                                    break;
+                                }
+                                
+                            }
+                            
+                            if(!happening)
+                                continue;
+                                
+                            // if best operation is null assign the current operation to it
+                            if(bestop == null)
+                                bestop = c;
+                            // if not null, check if the current relation gives better solution
+                            else if(c.getBeliefs().get(0).getTruth().getExpectation() > bestop.getBeliefs().get(0).getTruth().getExpectation())
+                                bestop = c;
+                            
+                        }
+                        
+                    }
+                    
+                }
+                
+                if(bestop == null)
+                    return;
+
+                TruthValue truth = null;
+                if(bestop.getBeliefs() != null)
+                    truth = TruthFunctions.deduction(desires.get(0).getSentence().getTruth(), bestop.getBeliefs().get(0).getTruth());
+                        
+                if(truth != null ){
+                    float priority = Parameters.DEFAULT_SUBGOAL_PRIORITY;
+                    float durability = Parameters.DEFAULT_EVENT_DURABILITY;
+                    float quality = BudgetFunctions.truthToQuality(truth);
+                        
+                    BudgetValue budget = new BudgetValue(priority, durability, quality);
+                    Stamp stamp = new Stamp(memory.getTime());
+                    
+                    Sentence sentence = null;
+                    
+                    precondition = ((Implication)bestop.getTerm()).getSubject();
+                    
+                    if(precondition instanceof Conjunction)
+                        sentence = new Sentence(((Conjunction)precondition).getComponents().get(1), Symbols.GOAL_MARK, truth, stamp);
+                    
+                    if(sentence == null)
+                        return;
+                    
+                    Task task = new Task(sentence, budget);
+                    memory.report(task.getSentence(), false, false);
+                    memory.getReasoner().getInternalBuffer().putInSequenceList(task, memory.getTime());
+                }
+                
+            }
+            
+        }
+        
+    }
     /* ---------- main loop ---------- */
     /**
      * An atomic step in a concept, only called in {@link Memory#processConcept}
      */
     public void fire() {
+        
+        reactionToGoal();          
+        
         TaskLink currentTaskLink = taskLinks.takeOut();
         if (currentTaskLink == null) {
             return;
@@ -464,7 +948,8 @@ public final class Concept extends Item {
                 TermLink termLink = termLinks.takeOut(currentTaskLink, memory.getTime());
                 if (termLink != null) {
                     memory.getRecorder().append(" * Selected TermLink: " + termLink + "\n");
-                    memory.currentBeliefLink = termLink;
+                    memory.currentBeliefLink = termLink;                 
+                    
                     RuleTables.reason(currentTaskLink, termLink, memory);
                     termLinks.putBack(termLink);
                     termLinkCount--;
@@ -535,6 +1020,20 @@ public final class Concept extends Item {
         }
         return buffer.toString();
     }
+    
+    public TruthValue getDesire(){
+        
+        if(desires.isEmpty())
+            return null;
+        
+        TruthValue topValue = desires.get(0).getSentence().getTruth();
+        return topValue;
+        
+    }
+    
+    public TaskLinkBag getTaskLinkBag(){
+        return taskLinks;
+    }
 
     class NullEntityObserver implements EntityObserver {
 
@@ -558,5 +1057,72 @@ public final class Concept extends Item {
         @Override
         public void refresh(String message) {
         }
+    }
+
+    public float acquiredQuality = 0.0f;
+    
+    public void incAcquiredQuality(){
+        
+        acquiredQuality += 0.1f;
+        
+        if(acquiredQuality > 1.0f);
+            acquiredQuality = 1.0f;
+        
+    }
+    
+    public ArrayList<Concept> getExecutable_preconditions() {
+        return executable_preconditions;
+    }
+
+    public ArrayList<Task> getGeneral_executable_preconditions() {
+        return general_executable_preconditions;
+    }
+
+    public void setGeneral_executable_preconditions(ArrayList<Task> general_executable_preconditions) {
+        this.general_executable_preconditions = general_executable_preconditions;
+    }
+
+    public boolean isObservable() {
+        return observable;
+    }
+
+    public void setObservable(boolean observable) {
+        this.observable = observable;
+    }
+
+    public Memory getMemory() {
+        return memory;
+    }
+
+    public void setMemory(Memory memory) {
+        this.memory = memory;
+    }
+
+    public EntityObserver getEntityObserver() {
+        return entityObserver;
+    }
+
+    public void setEntityObserver(EntityObserver entityObserver) {
+        this.entityObserver = entityObserver;
+    }
+    
+    public ArrayList<Task> getDesires(){
+        return desires;
+    }
+
+    public ArrayList<Sentence> getBeliefs(){
+        return beliefs;
+    }
+    
+    public ArrayList<Task> getQuests(){
+        return quests;
+    }
+    
+    public ArrayList<Concept> getAnticipationList(){
+        return anticipationList;
+    }
+    
+    public TermLinkBag getTermLinkBag(){
+        return termLinks;
     }
 }

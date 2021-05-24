@@ -24,6 +24,7 @@
 package nars.language;
 
 import java.util.*;
+import nars.inference.TemporalRules;
 
 import nars.io.Symbols;
 import nars.storage.Memory;
@@ -33,6 +34,7 @@ import nars.storage.Memory;
  */
 public class Implication extends Statement {
 
+    private int temporalOrder;
     /**
      * Constructor with partial values, called by make
      * @param arg The component list of the term
@@ -51,23 +53,33 @@ public class Implication extends Statement {
     protected Implication(String n, ArrayList<Term> cs, boolean con, short i) {
         super(n, cs, con, i);
     }
+    
+    protected Implication(String name, ArrayList<Term> arg, int temporalOrder, long interval){
+        super(name, arg);
+        this.temporalOrder = temporalOrder;
+        this.setInterval(interval);
+    }
 
     /**
      * Clone an object
      * @return A new object
      */
-    public Object clone() {
-        return new Implication(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
+    @Override
+    public Implication clone() {
+        return new Implication(name, (ArrayList<Term>) cloneList(components), temporalOrder, this.getInterval());
     }
 
     /**
-     * Try to make a new compound from two components. Called by the inference rules.
+     * Try to make a new compound from two components.Called by the inference rules.
      * @param subject The first component
      * @param predicate The second component
+     * @param temporalOrder
+     * @param interval
      * @param memory Reference to the memory
      * @return A compound generated or a term it reduced to
-     */
-    public static Implication make(Term subject, Term predicate, Memory memory) {
+     */   
+    
+    public static Implication make(Term subject, Term predicate, int temporalOrder, long interval, Memory memory) {
         if ((subject == null) || (predicate == null)) {
             return null;
         }
@@ -80,29 +92,62 @@ public class Implication extends Statement {
         if (invalidStatement(subject, predicate)) {
             return null;
         }
-        String name = makeStatementName(subject, Symbols.IMPLICATION_RELATION, predicate);
-        Term t = memory.nameToListedTerm(name);
-        if (t != null) {
-            return (Implication) t;
+        
+        String name = "";
+        //System.out.println("order: " + temporalOrder);
+        switch (temporalOrder) {
+            case TemporalRules.ORDER_FORWARD:
+                name = makeStatementName(subject, Symbols.IMPLICATION_AFTER, predicate);
+                break;
+            case TemporalRules.ORDER_BACKWARD:
+                //System.out.println("backward");
+                name = makeStatementName(subject, Symbols.IMPLICATION_BEFORE, predicate);
+                break;
+            case TemporalRules.ORDER_CONCURRENT:
+                //System.out.println("current");
+                name = makeStatementName(subject, Symbols.IMPLICATION_WHEN, predicate);
+                break;
+            default:
+                name = makeStatementName(subject, Symbols.IMPLICATION_RELATION, predicate);
+                break;
         }
+        
         if (predicate instanceof Implication) {
             Term oldCondition = ((Implication) predicate).getSubject();
             if ((oldCondition instanceof Conjunction) && ((Conjunction) oldCondition).containComponent(subject)) {
                 return null;
             }
-            Term newCondition = Conjunction.make(subject, oldCondition, memory);
-            return make(newCondition, ((Implication) predicate).getPredicate(), memory);
+            Term newCondition = Conjunction.make(subject, oldCondition, temporalOrder, memory);
+            return make(newCondition, ((Implication) predicate).getPredicate(), temporalOrder, ((Implication) predicate).getInterval(), memory);
         } else {
             ArrayList<Term> argument = argumentsToList(subject, predicate);
-            return new Implication(argument);
+            return new Implication(name, argument, temporalOrder, interval);
         }
     }
-
+    
     /**
      * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
+        
+        switch(temporalOrder){
+            
+            case TemporalRules.ORDER_FORWARD:
+                return Symbols.IMPLICATION_AFTER;
+            case TemporalRules.ORDER_CONCURRENT:
+                //System.out.println("what?");
+                return Symbols.IMPLICATION_WHEN;
+            case TemporalRules.ORDER_BACKWARD:
+                return Symbols.IMPLICATION_BEFORE;         
+        }
         return Symbols.IMPLICATION_RELATION;
     }
+    
+    @Override
+    public int getTemporalOrder(){
+        return temporalOrder;
+    }
+    
 }

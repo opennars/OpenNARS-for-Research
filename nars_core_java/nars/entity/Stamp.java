@@ -24,8 +24,15 @@
 package nars.entity;
 
 import java.util.*;
+import nars.inference.TemporalRules;
+import static nars.inference.TemporalRules.ORDER_BACKWARD;
+import static nars.inference.TemporalRules.ORDER_CONCURRENT;
+import static nars.inference.TemporalRules.ORDER_FORWARD;
 
 import nars.io.Symbols;
+import nars.language.Tense;
+import static nars.language.Tense.*;
+import nars.main_nogui.Debug;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.ReasonerBatch;
 
@@ -48,7 +55,83 @@ public class Stamp implements Cloneable {
     private int baseLength;
     /** creation time of the stamp */
     private long creationTime;
+    
+    private long putInTime;
 
+    private Tense tense;
+    
+    private long occurrenceTime;
+    
+    // default for a temporal events means "always" in Judgment/Question, but 
+    // "current" in Goal/Quest
+    public static final long ETERNAL = Integer.MIN_VALUE;
+    
+    public boolean before(final Stamp s, final int duration){
+        if(isEternal() || s.isEternal())
+            return false;
+        
+        return order(s.occurrenceTime, occurrenceTime, duration) == TemporalRules.ORDER_BACKWARD;
+    }
+    
+    public boolean after(final Stamp s, final int duration){
+        if(isEternal() || s.isEternal())
+            return false;
+        return order(s.occurrenceTime, occurrenceTime, duration) == TemporalRules.ORDER_FORWARD;
+    }
+    
+    public boolean isEternal(){
+        final boolean eternalOccurrence = occurrenceTime == ETERNAL;
+        
+        if(Debug.DETAILED){
+            if (eternalOccurrence && tense != Tense.Eternal)
+                throw new IllegalStateException("Stamp has inconsistent tense and eternal ocurrenceTime: tense=" + tense);
+        }
+        
+        return eternalOccurrence;
+    }
+    
+    public static boolean baseOverlap(Stamp a, Stamp b){
+        
+        long[] base1 = a.evidentialBase;
+        long[] base2 = b.evidentialBase;
+        
+        Set task_base = new LinkedHashSet(base1.length + base2.length);
+        
+        for(long base : base1){
+            if(task_base.contains(base))
+                return true;
+            task_base.add(base);
+        }
+        
+        for(long base : base2){
+            if(task_base.contains(base))
+                return true;
+            task_base.add(base);
+        }
+        return false;
+    }
+    
+    public long getOccurrenceTime(){
+        return occurrenceTime;
+    }
+    
+    public static int order(final long timeDiff, final int durationCycles){
+        final int halfDuration = durationCycles/2;
+        if(timeDiff > halfDuration)
+            return ORDER_FORWARD;
+        else if(timeDiff < -halfDuration)
+            return ORDER_BACKWARD;
+        else
+            return ORDER_CONCURRENT;
+    }
+    
+    public static int order(final long a, final long b, final int durationCycles){
+        if((a == Stamp.ETERNAL) || (b == Stamp.ETERNAL))
+            throw new IllegalStateException("order() does not compare ETERNAL times");
+        
+        return order(b - a, durationCycles);
+    }
+    
     /**
      * Generate a new stamp, with a new serial number, for a new Task
      * @param time Creation time of the stamp
@@ -65,10 +148,11 @@ public class Stamp implements Cloneable {
      * Generate a new stamp identical with a given one
      * @param old The stamp to be cloned
      */
-    private Stamp(Stamp old) {
+    public Stamp(Stamp old) {
         baseLength = old.length();
         evidentialBase = old.getBase();
         creationTime = old.getCreationTime();
+        occurrenceTime = old.getOccurrenceTime();
     }
 
     /**
@@ -82,6 +166,17 @@ public class Stamp implements Cloneable {
         baseLength = old.length();
         evidentialBase = old.getBase();
         creationTime = time;
+        occurrenceTime = old.getOccurrenceTime();
+    }
+    
+    public Stamp(Tense tense, long time){
+        currentSerial++;
+        baseLength = 1;
+        evidentialBase = new long[baseLength];
+        evidentialBase[0] = currentSerial;
+        this.tense = tense;
+        //this.creationTime = -1;
+        setCreationTime(time, Parameters.DURATION);
     }
 
     /**
@@ -90,25 +185,120 @@ public class Stamp implements Cloneable {
      * @param first The first Stamp
      * @param second The second Stamp
      */
-    private Stamp(Stamp first, Stamp second, long time) {
+    public Stamp(Stamp first, Stamp second, long time) {
         int i1, i2, j;
         i1 = i2 = j = 0;
         baseLength = Math.min(first.length() + second.length(), Parameters.MAXIMUM_STAMP_LENGTH);
         evidentialBase = new long[baseLength];
-        while (i2 < second.length() && j < baseLength) {
-            evidentialBase[j] = first.get(i1);
-            i1++;
-            j++;
-            evidentialBase[j] = second.get(i2);
-            i2++;
-            j++;
+        
+        if(first.baseLength > second.baseLength){
+            
+            while(i2 < second.baseLength && j < baseLength){
+                
+                evidentialBase[j] = first.get(i1);
+                i1++;
+                j++;
+                evidentialBase[j] = second.get(i2);
+                i2++;
+                j++;
+                
+            }
+            
+            while(i1 < first.baseLength && j < baseLength){
+                evidentialBase[j] = first.get(i1);
+                i1++;
+                j++;
+            }
+            
+        }else{
+        
+            while(i1 < first.baseLength && j < baseLength){
+                
+                evidentialBase[j] = first.get(i1);
+                i1++;
+                j++;
+                evidentialBase[j] = second.get(i2);
+                i2++;
+                j++;
+                
+            }
+            
+            while(i2 < second.baseLength && j < baseLength){
+                evidentialBase[j] = second.get(i2);
+                i2++;
+                j++;
+            }
         }
-        while (i1 < first.length() && j < baseLength) {
-            evidentialBase[j] = first.get(i1);
-            i1++;
-            j++;
-        }
+        
         creationTime = time;
+        
+        if(first.isEternal() || second.isEternal())
+            occurrenceTime = ETERNAL;
+        else
+            occurrenceTime = first.getOccurrenceTime();
+    }
+    
+    public Stamp(long time, Tense tense, long serial, int duration){
+        
+        this(tense, serial);
+        setCreationTime(time, duration);
+    }
+    
+    public void setCreationTime(long time){
+        creationTime = time;
+    }
+    
+    public void setCreationTime(long time, int duration){
+        
+        creationTime = time;
+        
+        if(tense == null)
+            occurrenceTime = ETERNAL;
+        else switch (tense) {
+            case Past:
+                occurrenceTime = time - duration;
+                break;
+            case Future:
+                occurrenceTime = time + duration;
+                break;
+            default:
+                occurrenceTime = time;
+                break;
+        }
+        
+    }
+    
+    public void setEternal(){
+        
+        occurrenceTime = ETERNAL;
+        
+    }
+    
+    public String getTense(long currentTime, int duration){
+        
+        if(isEternal())
+            return "";
+        
+        switch(TemporalRules.order(currentTime, occurrenceTime, duration)){
+            
+            case ORDER_FORWARD:
+                return Symbols.TENSE_FUTURE;
+            case ORDER_BACKWARD:
+                return Symbols.TENSE_PAST;
+            default:
+                return Symbols.TENSE_PRESENT;
+            
+        }
+        
+    }
+    
+    public void setOccurrenceTime(long time){
+        
+        if(occurrenceTime != time){   
+            occurrenceTime = time;
+            if(time == ETERNAL)
+                tense = Tense.Eternal;
+        } 
     }
 
     /**
@@ -140,7 +330,7 @@ public class Stamp implements Cloneable {
      * @return The cloned stamp
      */
     @Override
-    public Object clone() {
+    public Stamp clone() {
         return new Stamp(this);
     }
 
@@ -180,7 +370,7 @@ public class Stamp implements Cloneable {
      * Convert the evidentialBase into a set
      * @return The TreeSet representation of the evidential base
      */
-    private TreeSet<Long> toSet() {
+    public TreeSet<Long> toSet() {
         TreeSet<Long> set = new TreeSet<>();
         for (int i = 0; i < baseLength; i++) {
             set.add(evidentialBase[i]);
@@ -239,4 +429,29 @@ public class Stamp implements Cloneable {
         }
         return buffer.toString();
     }
+    
+    public long getPutInTime(){
+        return putInTime;
+    }
+    
+    public void setPutInTime(long time){
+        putInTime = time;
+    }
+    
+    public Tense getTense(){
+        return tense;
+    }
+    
+    public boolean evidenceIsCyclic(){
+        
+        TreeSet<Long> taskBase = new TreeSet(); 
+        
+        for(long l : evidentialBase){
+            if(!taskBase.add(l))
+                return true;
+        }
+        
+        return false;
+    }
+    
 }

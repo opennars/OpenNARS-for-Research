@@ -24,8 +24,10 @@
 package nars.language;
 
 import java.util.ArrayList;
+import nars.inference.TemporalRules;
 
 import nars.io.Symbols;
+import nars.main_nogui.Parameters;
 import nars.storage.Memory;
 
 /**
@@ -34,6 +36,7 @@ import nars.storage.Memory;
  */
 public abstract class Statement extends CompoundTerm {
 
+    private long interval;
     /**
      * Constructor with partial values, called by make
      *
@@ -41,6 +44,10 @@ public abstract class Statement extends CompoundTerm {
      */
     protected Statement(ArrayList<Term> arg) {
         super(arg);
+    }   
+    
+    protected Statement(String name, ArrayList<Term> arg){
+        super(name, arg);
     }
 
     /**
@@ -48,7 +55,7 @@ public abstract class Statement extends CompoundTerm {
      */
     protected Statement() {
     }
-
+    
     /**
      * Constructor with full values, called by clone
      *
@@ -61,6 +68,14 @@ public abstract class Statement extends CompoundTerm {
         super(n, cs, con, i);
     }
 
+    public long getInterval(){
+        return interval;
+    }
+    
+    public void setInterval(long interval){
+        this.interval = interval;
+    }
+    
     /**
      * Make a Statement from String, called by StringParser
      *
@@ -71,6 +86,7 @@ public abstract class Statement extends CompoundTerm {
      * @return The Statement built
      */
     public static Statement make(String relation, Term subject, Term predicate, Memory memory) {
+        //System.out.println("make relation: " + relation);
         if (invalidStatement(subject, predicate)) {
             return null;
         }
@@ -89,11 +105,27 @@ public abstract class Statement extends CompoundTerm {
         if (relation.equals(Symbols.INSTANCE_PROPERTY_RELATION)) {
             return InstanceProperty.make(subject, predicate, memory);
         }
-        if (relation.equals(Symbols.IMPLICATION_RELATION)) {
-            return Implication.make(subject, predicate, memory);
+        if (relation.equals(Symbols.IMPLICATION_RELATION) ) {
+            return Implication.make(subject, predicate, TemporalRules.ORDER_NONE, 0, memory);
+        }
+        if (relation.equals(Symbols.IMPLICATION_AFTER)){
+            return Implication.make(subject, predicate, TemporalRules.ORDER_FORWARD, Parameters.DEFAULT_TIME_INTERVAL , memory);
+        }
+        if (relation.equals(Symbols.IMPLICATION_BEFORE)){
+            //System.out.println("relation2: " + relation);
+            return Implication.make(subject, predicate, TemporalRules.ORDER_BACKWARD, Parameters.DEFAULT_TIME_INTERVAL , memory);
+        }
+        if (relation.equals(Symbols.IMPLICATION_WHEN)){
+            return Implication.make(subject, predicate, TemporalRules.ORDER_CONCURRENT, 0, memory);
+        }
+        if(relation.equals(Symbols.EQUIVALENCE_AFTER)){
+            return Equivalence.make(subject, predicate, TemporalRules.ORDER_FORWARD, memory, Parameters.DEFAULT_TIME_INTERVAL);
+        }
+        if(relation.equals(Symbols.EQUIVALENCE_WHEN)){
+            return Equivalence.make(subject, predicate, TemporalRules.ORDER_CONCURRENT, memory, Parameters.DEFAULT_TIME_INTERVAL);
         }
         if (relation.equals(Symbols.EQUIVALENCE_RELATION)) {
-            return Equivalence.make(subject, predicate, memory);
+            return Equivalence.make(subject, predicate, TemporalRules.ORDER_NONE, memory, 0);
         }
         return null;
     }
@@ -101,13 +133,14 @@ public abstract class Statement extends CompoundTerm {
     /**
      * Make a Statement from given components, called by the rules
      *
+     * @param temporalOrder
      * @return The Statement built
      * @param subj The first component
      * @param pred The second component
      * @param statement A sample statement providing the class type
      * @param memory Reference to the memory
      */
-    public static Statement make(Statement statement, Term subj, Term pred, Memory memory) {
+    public static Statement make(Statement statement, Term subj, Term pred, int temporalOrder, Memory memory) {
         if (statement instanceof Inheritance) {
             return Inheritance.make(subj, pred, memory);
         }
@@ -115,10 +148,13 @@ public abstract class Statement extends CompoundTerm {
             return Similarity.make(subj, pred, memory);
         }
         if (statement instanceof Implication) {
-            return Implication.make(subj, pred, memory);
+            if(temporalOrder == TemporalRules.ORDER_FORWARD || temporalOrder == TemporalRules.ORDER_BACKWARD)
+                return Implication.make(subj, pred, temporalOrder, Parameters.DEFAULT_TIME_INTERVAL, memory);
+            else
+                return Implication.make(subj, pred, temporalOrder, 0, memory);
         }
         if (statement instanceof Equivalence) {
-            return Equivalence.make(subj, pred, memory);
+            return Equivalence.make(subj, pred, temporalOrder, memory, 0);
         }
         return null;
     }
@@ -133,12 +169,12 @@ public abstract class Statement extends CompoundTerm {
      * @param memory Reference to the memory
      * @return The Statement built
      */
-    public static Statement makeSym(Statement statement, Term subj, Term pred, Memory memory) {
+    public static Statement makeSym(Statement statement, Term subj, Term pred, int temporalOrder, Memory memory) {
         if (statement instanceof Inheritance) {
             return Similarity.make(subj, pred, memory);
         }
         if (statement instanceof Implication) {
-            return Equivalence.make(subj, pred, memory);
+            return Equivalence.make(subj, pred, temporalOrder, memory, ((Implication)statement).getInterval());
         }
         return null;
     }
@@ -160,6 +196,12 @@ public abstract class Statement extends CompoundTerm {
                 || s.equals(Symbols.PROPERTY_RELATION)
                 || s.equals(Symbols.INSTANCE_PROPERTY_RELATION)
                 || s.equals(Symbols.IMPLICATION_RELATION)
+                || s.equals(Symbols.IMPLICATION_BEFORE)
+                || s.equals(Symbols.IMPLICATION_WHEN)
+                || s.equals(Symbols.IMPLICATION_AFTER)
+                || s.equals(Symbols.EQUIVALENCE_AFTER)
+                || s.equals(Symbols.EQUIVALENCE_WHEN)
+                || s.equals(Symbols.EQUIVALENCE_BEFORE)
                 || s.equals(Symbols.EQUIVALENCE_RELATION));
     }
 
@@ -171,6 +213,7 @@ public abstract class Statement extends CompoundTerm {
      */
     @Override
     protected String makeName() {
+        //System.out.println("???: " + operator());
         return makeStatementName(getSubject(), operator(), getPredicate());
     }
 
@@ -183,12 +226,14 @@ public abstract class Statement extends CompoundTerm {
      * @return The nameStr of the term
      */
     protected static String makeStatementName(Term subject, String relation, Term predicate) {
+        //System.out.println("relation3: " + relation);
         StringBuilder nameStr = new StringBuilder();
         nameStr.append(Symbols.STATEMENT_OPENER);
         nameStr.append(subject.getName());
         nameStr.append(' ').append(relation).append(' ');
         nameStr.append(predicate.getName());
         nameStr.append(Symbols.STATEMENT_CLOSER);
+        //System.out.println("sss: " + nameStr.toString());
         return nameStr.toString();
     }
 
@@ -200,7 +245,7 @@ public abstract class Statement extends CompoundTerm {
      * @return Whether The Statement is invalid
      */
     public static boolean invalidStatement(Term subject, Term predicate) {
-        if (subject.equals(predicate)) {
+        if (subject == null || predicate == null || subject.equals(predicate)) {
             return true;
         }
         if (invalidReflexive(subject, predicate)) {
@@ -226,19 +271,25 @@ public abstract class Statement extends CompoundTerm {
     /**
      * Check if one term is identical to or included in another one, except in a
      * reflexive relation
+     * 检查一个词项是否与另一个相同，或者被包含到另外一个词项中，除非在一个反身的关系中
      * <p>
      * @param t1 The first term
      * @param t2 The second term
      * @return Whether they cannot be related in a statement
      */
     private static boolean invalidReflexive(Term t1, Term t2) {
+        // 如果t1不是一个复合词项，直接返回false，因为原子词项不可能包含另一个原子词项
         if (!(t1 instanceof CompoundTerm)) {
             return false;
         }
+        
         CompoundTerm com = (CompoundTerm) t1;
+        // 假如t1是一个外延镜像或者是内涵镜像，则返回false
         if ((com instanceof ImageExt) || (com instanceof ImageInt)) {
             return false;
         }
+        
+        // 返回t1是否包含t2
         return com.containComponent(t2);
     }
 

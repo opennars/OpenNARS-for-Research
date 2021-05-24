@@ -26,10 +26,9 @@ package nars.language;
 import java.util.*;
 
 import nars.entity.*;
+import nars.inference.TemporalRules;
 import nars.storage.*;
 import nars.io.Symbols;
-import static nars.language.CompoundTerm.make;
-import static nars.language.CompoundTerm.makeCompoundName;
 
 /**
  * A CompoundTerm is a Term with internal (syntactic) structure
@@ -53,6 +52,7 @@ public abstract class CompoundTerm extends Term {
      * Whether the term names a concept
      */
     protected boolean isConstant = true;
+    
 
     /* ----- abstract methods to be implemented in subclasses ----- */
     /**
@@ -61,14 +61,16 @@ public abstract class CompoundTerm extends Term {
      * @return The operator in a String
      */
     public abstract String operator();
-
+    
+    private boolean hasVariable, hasVarQueries, hasVarIndeps, hasVarDeps, hasIntervals;
+    
     /**
      * Abstract clone method
      *
      * @return A clone of the compound term
      */
     @Override
-    public abstract Object clone();
+    public abstract CompoundTerm clone();
 
     /* ----- object builders, called from subclasses ----- */
     /**
@@ -102,7 +104,27 @@ public abstract class CompoundTerm extends Term {
         calcComplexity();
         name = makeName();
         isConstant = !Variable.containVar(name);
+        
+        hasVariable = hasVarQueries = hasVarIndeps = hasVarDeps = hasIntervals = false;
+        
+        for(Term t : components){
+            hasVariable |= t.hasVar();
+            hasVarDeps |= t.hasVarDep();
+            hasVarIndeps |= t.hasVarIndep();
+            hasVarQueries |= t.hasVarQuery();
+            hasIntervals |= t.hasInterval();
+        }
     }
+    
+    /*protected CompoundTerm(ArrayList<Term> components, int temporalOrder){
+        
+        this.components = components;
+        this.temporalOrder = temporalOrder;
+        calcComplexity();
+        name = makeName();
+        isConstant = !Variable.containVar(name);
+        
+    }*/
 
     /**
      * Constructor called from subclasses constructors to initialize the fields
@@ -115,6 +137,14 @@ public abstract class CompoundTerm extends Term {
         isConstant = !Variable.containVar(name);
         this.components = components;
         calcComplexity();
+        
+        for(Term t : components){
+            hasVariable |= t.hasVar();
+            hasVarDeps |= t.hasVarDep();
+            hasVarIndeps |= t.hasVarIndep();
+            hasVarQueries |= t.hasVarQuery();
+            hasIntervals |= t.hasInterval();
+        }
     }
 
     /**
@@ -122,7 +152,7 @@ public abstract class CompoundTerm extends Term {
      *
      * @param s The new oldName
      */
-    protected void setName(String s) {
+    public void setName(String s) {
         name = s;
     }
 
@@ -245,8 +275,14 @@ public abstract class CompoundTerm extends Term {
                 return Disjunction.make(arg, memory);
             }
             if (op.equals(Symbols.CONJUNCTION_OPERATOR)) {
-                return Conjunction.make(arg, memory);
+                return Conjunction.make(arg, TemporalRules.ORDER_NONE, memory);
             }
+            if (op.equals(Symbols.CONJUNCTION_SEQUENCE)){
+                return Conjunction.make(arg, TemporalRules.ORDER_FORWARD, memory);
+            }
+            /*if(op.equals(Symbols.CONJUNCTION_PARALLEL)){
+                return Conjunction.make(arg, TemporalRules.ORDER_CONCURRENT, memory);
+            }*/
         }
         return null;
     }
@@ -270,7 +306,9 @@ public abstract class CompoundTerm extends Term {
         if (s.length() == 2) {
             return (s.equals(Symbols.NEGATION_OPERATOR)
                     || s.equals(Symbols.DISJUNCTION_OPERATOR)
-                    || s.equals(Symbols.CONJUNCTION_OPERATOR));
+                    || s.equals(Symbols.CONJUNCTION_OPERATOR)
+                    || s.equals(Symbols.CONJUNCTION_SEQUENCE)
+                    || s.equals(Symbols.CONJUNCTION_PARALLEL));
         }
         return false;
     }
@@ -308,6 +346,7 @@ public abstract class CompoundTerm extends Term {
      * @return the oldName of the term
      */
     protected static String makeCompoundName(String op, ArrayList<Term> arg) {
+        //System.out.println("arg: " + arg.toString());
         StringBuilder name = new StringBuilder();
         name.append(Symbols.COMPOUND_TERM_OPENER);
         name.append(op);
@@ -492,6 +531,21 @@ public abstract class CompoundTerm extends Term {
         }
         return false;
     }
+    
+    @Override
+    public Map<Term, Integer> countTerm(Map<Term, Integer> map){
+        
+        if(map == null)
+            map = new LinkedHashMap<Term, Integer>();
+        
+        map.put(this, map.getOrDefault(this, 0) + 1);
+        
+        for(Term term : components)
+            term.countTerm(map);
+        
+        return map;
+        
+    }
 
     /**
      * Check whether the compound contains all components of another term, or
@@ -545,12 +599,16 @@ public abstract class CompoundTerm extends Term {
             success = list.removeAll(((CompoundTerm) t2).getComponents());
         } else {
             success = list.remove(t2);
-        }
+        }       
+        
         if (success) {
             if (list.size() > 1) {
+                
+                
                 return make(t1, list, memory);
             }
             if (list.size() == 1) {
+                
                 if ((t1 instanceof Conjunction) || (t1 instanceof Disjunction)
                         || (t1 instanceof IntersectionExt) || (t1 instanceof IntersectionInt)
                         || (t1 instanceof DifferenceExt) || (t1 instanceof DifferenceInt)) {
@@ -645,24 +703,38 @@ public abstract class CompoundTerm extends Term {
      * @param subs
      */
     public void applySubstitute(HashMap<Term, Term> subs) {
+        // 新建两个词项
         Term t1, t2;
+        
+        //System.out.println("!!!" + this.components.toString());
+        // 遍历整个复合词项
         for (int i = 0; i < size(); i++) {
+            // 位于i的词项
             t1 = componentAt(i);
+            // 假如subs包含以当前词项为key的项
             if (subs.containsKey(t1)) {
+                // 将t1在map中对应的词项赋值给t2
                 t2 = subs.get(t1);
+                // 如果subs中包含以t2为key的项，则把对应项赋值给t2
                 while (subs.containsKey(t2)) {
                     t2 = subs.get(t2);
                 }
+                // 将i位置的词项，替换成t2
                 components.set(i, (Term) t2.clone());
             } else if (t1 instanceof CompoundTerm) {
+                // 如果t1本身就是一个复合词项，则以t1为复合词项进行替换
                 ((CompoundTerm) t1).applySubstitute(subs);
             }
         }
+        
+        //System.out.println(this.components.toString());
+        
         if (this.isCommutative()) {         // re-order
             TreeSet<Term> s = new TreeSet<>(components);
             components = new ArrayList<>(s);
         }
         name = makeName();
+        //System.out.println("name: " + name);
     }
 
     /* ----- link CompoundTerm and its components ----- */
@@ -730,4 +802,6 @@ public abstract class CompoundTerm extends Term {
             }
         }
     }
+    
+    
 }

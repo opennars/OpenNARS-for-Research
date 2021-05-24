@@ -47,7 +47,7 @@ public class Variable extends Term {
      * @return The cloned Variable
      */
     @Override
-    public Object clone() {
+    public Variable clone() {
         return new Variable(name);
     }
 
@@ -134,6 +134,7 @@ public class Variable extends Term {
      * @return Whether the unification is possible
      */
     public static boolean unify(char type, Term t1, Term t2) {
+        System.out.println("123");
         return unify(type, t1, t2, t1, t2);
     }
 
@@ -148,15 +149,20 @@ public class Variable extends Term {
      * @return Whether the unification is possible
      */
     public static boolean unify(char type, Term t1, Term t2, Term compound1, Term compound2) {
+        //System.out.println("456");
         HashMap<Term, Term> map1 = new HashMap<>();
-        HashMap<Term, Term> map2 = new HashMap<>();
+        HashMap<Term, Term> map2 = new HashMap<>();    
+        
         boolean hasSubs = findSubstitute(type, t1, t2, map1, map2); // find substitution
         if (hasSubs) {
 //            renameVar(map1, compound1, "-1");
 //            renameVar(map2, compound2, "-2");
+            //System.out.println("compound1 " + compound1.getName());
             if (!map1.isEmpty()) {
                 ((CompoundTerm) compound1).applySubstitute(map1);
+                //System.out.println("compound1 " + compound1.getName());
                 ((CompoundTerm) compound1).renameVariables();
+
             }
             if (!map2.isEmpty()) {
                 ((CompoundTerm) compound2).applySubstitute(map2);
@@ -177,42 +183,68 @@ public class Variable extends Term {
      * @param map2 The substitution for term2 formed so far
      * @return Whether there is a substitution that unifies the two Terms
      */
-    private static boolean findSubstitute(char type, Term term1, Term term2,
+    public static boolean findSubstitute(char type, Term term1, Term term2,
             HashMap<Term, Term> map1, HashMap<Term, Term> map2) {
+        //System.out.println("789");
         Term t;
+        
+        /*System.out.println("term1: " + term1.getName());
+        System.out.println("Type: " + type);
+        System.out.println("term2: " + term2.getName());*/
+        
         if ((term1 instanceof Variable) && (((Variable) term1).getType() == type)) {
+            //System.out.println("987");
             Variable var1 = (Variable) term1;
+            //System.out.println("term1 type: " + var1.getType());
             t = map1.get(var1);
             if (t != null) {    // already mapped
                 return findSubstitute(type, t, term2, map1, map2);
             } else {            // not mapped yet
+                //System.out.println("term2: " + term2.getName());
                 if ((term2 instanceof Variable) && (((Variable) term2).getType() == type)) {
+                    //System.out.println("term2 is a variable");
                     Variable CommonVar = makeCommonVariable(term1, term2);
+                    //System.out.println("commonvar: " + CommonVar.getName());
+                    //System.out.println("commonvar: " + CommonVar.getType());
                     map1.put(var1, CommonVar);  // unify
                     map2.put(term2, CommonVar);  // unify
+                    //System.out.println("map1: " + map1.toString());
+                    //System.out.println("map2: " + map2.toString());
                 } else {
                     map1.put(var1, term2);  // elimination
+                    //System.out.println("map1: " + map1.toString());
                     if (isCommonVariable(var1)) {
                         map2.put(var1, term2);
+                        //System.out.println("map2: " + map2.toString());
                     }
+                    //System.out.println("Out map2: " + map2.toString());
                 }
                 return true;
             }
         } else if ((term2 instanceof Variable) && (((Variable) term2).getType() == type)) {
+            //System.out.println("654");
+            //System.out.println("term1 is not variable, term2 is variable");
             Variable var2 = (Variable) term2;
+            /*System.out.println("term2: " + term2.getName());
+            System.out.println("map2: " + map2.toString());*/
             t = map2.get(var2);
             if (t != null) {    // already mapped
                 return findSubstitute(type, term1, t, map1, map2);
             } else {            // not mapped yet
                 map2.put(var2, term1);  // elimination
+                //System.out.println("3 map2: " + map2.toString());
                 if (isCommonVariable(var2)) {
                     map1.put(var2, term1);
+                    //System.out.println("map1: " + map1.toString());
                 }
                 return true;
             }
         } else if ((term1 instanceof CompoundTerm) && term1.getClass().equals(term2.getClass())) {
+            
             CompoundTerm cTerm1 = (CompoundTerm) term1;
             CompoundTerm cTerm2 = (CompoundTerm) term2;
+            //System.out.println("cterm1: " + cTerm1.getName());
+            //System.out.println("cterm2: " + cTerm2.getName());
             if (cTerm1.size() != (cTerm2).size()) {
                 return false;
             }
@@ -221,12 +253,16 @@ public class Variable extends Term {
                 return false;
             }
             ArrayList<Term> list = cTerm1.cloneComponents();
+            //System.out.println("Before shuffle: " + list.toString());
             if (cTerm1.isCommutative()) {
                  Collections.shuffle(list, Memory.randomNumber);
             } 
+            //System.out.println("After shuffle: " + list.toString());
             for (int i = 0; i < cTerm1.size(); i++) {   // assuming matching order
                 Term t1 = list.get(i);
                 Term t2 = cTerm2.componentAt(i);
+                //System.out.println("t1: " + t1.getName());
+                //System.out.println("t2: " + t2.getName());
                 if (!findSubstitute(type, t1, t2, map1, map2)) {
                     return false;
                 }

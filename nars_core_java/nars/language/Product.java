@@ -38,7 +38,7 @@ public class Product extends CompoundTerm {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private Product(ArrayList<Term> arg) {
+    public Product(ArrayList<Term> arg) {
         super(arg);
     }
     
@@ -57,7 +57,7 @@ public class Product extends CompoundTerm {
      * Clone a Product
      * @return A new object, to be casted into an ImageExt
      */
-    public Object clone() {
+    public Product clone() {
         return new Product(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
@@ -91,6 +91,7 @@ public class Product extends CompoundTerm {
      * Get the operator of the term.
      * @return the operator of the term
      */
+    @Override
     public String operator() {
         return Symbols.PRODUCT_OPERATOR;
     }

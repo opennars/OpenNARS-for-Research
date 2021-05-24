@@ -24,6 +24,7 @@
 package nars.inference;
 
 import nars.entity.*;
+import nars.main_nogui.Parameters;
 
 /**
  * All truth-value (and desire-value) functions used in inference rules 
@@ -96,7 +97,7 @@ public final class TruthFunctions extends UtilityFunctions {
      * @param v2 Truth value of the second premise
      * @return Truth value of the conclusion
      */
-    static TruthValue deduction(TruthValue v1, TruthValue v2) {
+    public static TruthValue deduction(TruthValue v1, TruthValue v2) {
         float f1 = v1.getFrequency();
         float f2 = v2.getFrequency();
         float c1 = v1.getConfidence();
@@ -166,7 +167,7 @@ public final class TruthFunctions extends UtilityFunctions {
         float c1 = v1.getConfidence();
         float c2 = v2.getConfidence();
         float w = and(f2, c1, c2);
-        float c = w2c(w);
+        float c = w2c(w);  
         return new TruthValue(f1, c);
     }
 
@@ -376,4 +377,25 @@ public final class TruthFunctions extends UtilityFunctions {
         TruthValue v0 = new TruthValue(f1, w2c(c1));
         return analogy(v2, v0);
     }
+    
+    public static TruthValue eternalize(TruthValue truth){
+        
+        float f1 = truth.getFrequency();
+        float c1 = truth.getConfidence();
+        float c = TruthFunctions.w2c(c1);
+        return new TruthValue(f1, c, false, true);
+    }
+    
+    public static final float temporalProjection(long sourceTime, long targetTime, long currentTime){
+        
+        /*System.out.println("sourceTime: " + sourceTime);
+        System.out.println("Target Time: " + targetTime);
+        System.out.println("Current Time: " + currentTime);*/
+        
+        //System.out.println(1.0f - Math.abs(sourceTime - targetTime) / (float)(Math.abs(sourceTime - currentTime) + Math.abs(targetTime - currentTime) + Parameters.PROJECTION_DECAY));
+        
+        return 1.0f - Math.abs(sourceTime - targetTime) / (float)(Math.abs(sourceTime - currentTime) + Math.abs(targetTime - currentTime) + Parameters.PROJECTION_DECAY);
+        
+    }
+    
 }

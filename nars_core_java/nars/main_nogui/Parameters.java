@@ -68,9 +68,28 @@ public class Parameters {
     /** Default durability of input judgment */
     public static final float DEFAULT_JUDGMENT_DURABILITY = (float) 0.8;
     /** Default priority of input question */
-    public static final float DEFAULT_QUESTION_PRIORITY = (float) 0.9;
+    public static final float DEFAULT_QUESTION_PRIORITY = (float) 0.85;
     /** Default durability of input question */
     public static final float DEFAULT_QUESTION_DURABILITY = (float) 0.9;
+    /** Default priority of input event **/
+    public static final float DEFAULT_EVENT_PRIORITY = (float) 0.85;
+    /** Default durability of event**/
+    public static final float DEFAULT_EVENT_DURABILITY = (float) 0.2;
+    
+    
+    /** Default confidence of input goal **/
+    
+    public static float DEFAULT_GOAL_CONFIDENCE = (float) 0.9;
+    
+    public static float DEFAULT_GOAL_PRIORITY = (float) 1;
+    
+    public static float DEFAULT_GOAL_DURABILITY = (float) 0.9;
+    
+    public static float DEFAULT_QUEST_PRIORITY = (float) 0.9;
+    
+    public static float DEFAULT_QUEST_DURABILITY = (float) 0.9;
+    
+    public static float DEFAULT_SUBGOAL_PRIORITY = (float) 1.0;
 
     /* ---------- space management ---------- */
     /** Level granularity in Bag, two digits */
@@ -87,6 +106,11 @@ public class Parameters {
     public static final int TERM_LINK_BAG_SIZE = 100;
     /** Size of TaskBuffer */
     public static final int TASK_BUFFER_SIZE = 10;
+    /** Size of global buffer */
+    public static final int GLOBAL_BUFFER_SIZE = 20;
+    /** Size of internal buffer */
+    public static final int INTERNAL_BUFFER_SIZE = 10;
+   
     
     /* ---------- avoiding repeated reasoning ---------- */
     /** Maximum length of Stamp, a power of 2 */
@@ -97,4 +121,60 @@ public class Parameters {
     public static final int MAXIMUM_BELIEF_LENGTH = 7;
     /** Maximum number of goals kept in a Concept */
     public static final int MAXIMUM_QUESTIONS_LENGTH = 5;
+    
+        /* ----------------------Buffer---------------------*/
+    /**
+     * Duration for internal buffer
+     * Cycles per duration
+     * Past/future tense usage convention
+     * How far away "past" and "future" is from "now" in cycles
+     * The range of now is [-Duration/2, Duration/2]
+     **/
+    public static final int DURATION_FOR_INTERNAL_BUFFER = 2;
+    public static final int DURATION_FOR_GLOBAL_BUFFER = 10;
+    
+    /**
+     * This value multiplied with DURATION gives the time a buffer element can stay in a buffer 
+     */
+    public static final int MAX_BUFFER_DURATION_FACTOR = 2;
+     
+    /** 
+       Cycles per duration.
+       Past/future tense usage convention;
+       How far away "past" and "future" is from "now", in cycles.         
+       The range of "now" is [-DURATION/2, +DURATION/2];      */
+    
+    public static final int DURATION = 5;
+    
+    public static final int DEFAULT_TIME_INTERVAL = 3;
+    
+    public static double PROJECTION_DECAY = 1000;
+    
+    public static float TRUTH_EPSILON = 0.01f;
+    
+    public static int REVISION_MAX_OCCURRENCE_DISTANCE = 10;
+    
+    public static float ANTICIPATION_CONFIDENCE = 0.1f;
+    
+    public static float ANTICIPATION_TOLERANCE = 100.0f;
+    
+    /** Retrospective anticipation, allow to check memory for content in case of anticipation (potential issue with forgetting) */
+    public static boolean RETROSPECTIVE_ANTICIPATIONS = false;
+    
+    public static float DECISION_THRESHOLD = 0.51f;
+    
+    /** Maximum anticipations about its content stored in a concept */
+    public static int ANTICIPATIONS_PER_CONCEPT_MAX = 8;
+    
+    /** Default priority of execution feedback */
+    public static float DEFAULT_FEEDBACK_PRIORITY = (float) 0.9;
+    /** Default durability of execution feedback */
+    public static float DEFAULT_FEEDBACK_DURABILITY = (float) 0.5; //was 0.8 in 1.5.5; 0.5 after
+    
+    public static int ANTICIPATION_LIST_CAPACITY = 5;
+    
+    public static int GOAL_PRECONDITION_CAPACITY = 10;
+    
+    public static int MAXIMUM_GOAL_LENGTH = 5;
+    
 }

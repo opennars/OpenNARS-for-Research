@@ -57,7 +57,7 @@ public class DifferenceInt extends CompoundTerm {
      * Clone an object
      * @return A new object, to be casted into a DifferenceInt
      */
-    public Object clone() {
+    public DifferenceInt clone() {
         return new DifferenceInt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 

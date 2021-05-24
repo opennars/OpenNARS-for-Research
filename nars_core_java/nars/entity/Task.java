@@ -23,12 +23,13 @@
  */
 package nars.entity;
 
+import java.util.ArrayList;
 import nars.language.Term;
 
 /**
  * A task to be processed, consists of a Sentence and a BudgetValue
  */
-public class Task extends Item {
+public class Task extends Item{
 
     /**
      * The sentence of the Task
@@ -46,6 +47,20 @@ public class Task extends Item {
      * For Question and Goal: best solution found so far
      */
     private Sentence bestSolution;
+    
+    private ArrayList<Sentence> previousBestSolution;
+    
+    private boolean processed = false;
+    
+    private boolean putBack = false;
+    
+    private boolean isInput = true;
+    
+    private boolean wasInBuffer;
+    
+    private boolean generatedAnticipation = false;
+    
+    private boolean temporalInduction = false;
 
     /**
      * Constructor for input task
@@ -55,10 +70,46 @@ public class Task extends Item {
      */
     public Task(Sentence s, BudgetValue b) {
         super(s.toKey(), b); // change to toKey()
+        this.wasInBuffer = false;
         sentence = s;
+        sentence.setObservable(observable());
         key = sentence.toKey();
+        previousBestSolution = new ArrayList();
+    }
+    
+    public boolean isPutBack(){
+        return putBack;
+    }
+    
+    public void switchPutBack(){
+        
+        putBack = !putBack;
+        
+    }
+    
+    public boolean getGeneratedAnticipation(){
+        return generatedAnticipation;
+    }
+    
+    public void setGeneratedAnticipation(boolean generatedAnticipation){  
+        this.generatedAnticipation = generatedAnticipation;
+    }
+    
+    public boolean observable(){
+        
+        return isInput |= sentence.getObservable();
+        
     }
 
+    public boolean fulfilled(){
+        
+        if(bestSolution == null)
+            return false;
+        
+        return sentence.getTruth().getExpectation() - bestSolution.getTruth().getExpectation() <= 0;
+        
+    }
+    
     /**
      * Constructor for a derived task
      *
@@ -69,8 +120,10 @@ public class Task extends Item {
      */
     public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief) {
         this(s, b);
+        this.wasInBuffer = false;
         this.parentTask = parentTask;
         this.parentBelief = parentBelief;
+        previousBestSolution = new ArrayList();
     }
 
     /**
@@ -84,7 +137,17 @@ public class Task extends Item {
      */
     public Task(Sentence s, BudgetValue b, Task parentTask, Sentence parentBelief, Sentence solution) {
         this(s, b, parentTask, parentBelief);
+        this.wasInBuffer = false;
         this.bestSolution = solution;
+        previousBestSolution = new ArrayList();
+    }
+    
+    public boolean wasInBuffer(){
+        return wasInBuffer;
+    }
+    
+    public void setWasInBuffer(boolean wasInBuffer){
+        this.wasInBuffer = wasInBuffer;
     }
 
     /**
@@ -120,7 +183,31 @@ public class Task extends Item {
      * @return Whether the Task is derived from another task
      */
     public boolean isInput() {
-        return parentTask == null;
+        
+        if(parentTask != null)
+            isInput = false;
+        
+        return isInput || temporalInduction;
+    }
+    
+    public void addBestSolution(Sentence solution){
+        
+        previousBestSolution.add(solution);
+        
+    }
+    
+    public boolean getTemporalInduction(){
+        return temporalInduction;
+    }
+    
+    public void setTemporalInduction(boolean temporalInduction){
+        
+        this.temporalInduction = temporalInduction;
+        
+    }
+    
+    public void setIsInput(boolean isInput){
+        this.isInput = isInput;
     }
 
     /**
@@ -143,6 +230,18 @@ public class Task extends Item {
         } else {
             that.merge(this);
         }
+    }
+    
+    public boolean getProcessed(){
+        
+        return processed;
+        
+    }
+    
+    public void setProcessed(boolean processed){
+        
+        this.processed = processed;
+        
     }
 
     /**
@@ -171,6 +270,24 @@ public class Task extends Item {
      */
     public Sentence getParentBelief() {
         return parentBelief;
+    }
+    
+    public Stamp getStamp(){
+        
+        return sentence.getStamp();
+        
+    }
+    
+    public boolean isEternal(){
+    
+        return getStamp().getOccurrenceTime() == Stamp.ETERNAL;
+        
+    }
+    
+    public String getName(){
+        
+        return sentence.getContent().getName();
+        
     }
 
     /**
@@ -203,4 +320,6 @@ public class Task extends Item {
         }
         return s.toString();
     }
+    
+    
 }

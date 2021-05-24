@@ -57,7 +57,7 @@ public class IntersectionExt extends CompoundTerm {
      * Clone an object
      * @return A new object, to be casted into a IntersectionExt
      */
-    public Object clone() {
+    public IntersectionExt clone() {
         return new IntersectionExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 

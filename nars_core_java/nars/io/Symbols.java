@@ -31,7 +31,15 @@ public class Symbols {
     /* sentence type and delimitors */
     public static final char JUDGMENT_MARK = '.';
     public static final char QUESTION_MARK = '?';
+    public static final char GOAL_MARK = '!';
+    public static final char QUEST_MARK = '@';
 
+    /* Tense markers */
+    public static final String TENSE_MARK = ":";
+    public static final String TENSE_PAST = ":\\:";
+    public static final String TENSE_PRESENT = ":|:";
+    public static final String TENSE_FUTURE = ":/:";
+    
     /* variable type */
     public static final char VAR_INDEPENDENT = '$';
     public static final char VAR_DEPENDENT = '#';
@@ -68,16 +76,27 @@ public class Symbols {
     /* CompoundStatement operators, length = 2 */
     public static final String NEGATION_OPERATOR = "--";
     public static final String DISJUNCTION_OPERATOR = "||";
+    
     public static final String CONJUNCTION_OPERATOR = "&&";
-
+    public static final String CONJUNCTION_SEQUENCE = "&/";
+    public static final String CONJUNCTION_PARALLEL = "&|";
+    
     /* built-in relations, length = 3 */
     public static final String INHERITANCE_RELATION = "-->";
     public static final String SIMILARITY_RELATION = "<->";
     public static final String INSTANCE_RELATION = "{--";
     public static final String PROPERTY_RELATION = "--]";
     public static final String INSTANCE_PROPERTY_RELATION = "{-]";
-    public static final String IMPLICATION_RELATION = "==>";
+
     public static final String EQUIVALENCE_RELATION = "<=>";
+    public static final String EQUIVALENCE_AFTER = "</>";
+    public static final String EQUIVALENCE_WHEN = "<|>";
+    public static final String EQUIVALENCE_BEFORE = "<\\>";
+    
+    public static final String IMPLICATION_RELATION = "==>";
+    public static final String IMPLICATION_BEFORE = "=\\>";
+    public static final String IMPLICATION_WHEN = "=|>";
+    public static final String IMPLICATION_AFTER = "=/>";
 
     /* experience line prefix */
     public static final String INPUT_LINE = "IN";
@@ -97,4 +116,6 @@ public class Symbols {
     public static final String TO_COMPONENT_2 = ")_ ";
     public static final String TO_COMPOUND_1 = " _@(";
     public static final String TO_COMPOUND_2 = ") ";
+    
+    public static final char INTERVAL_PREFIX = '+';
 }

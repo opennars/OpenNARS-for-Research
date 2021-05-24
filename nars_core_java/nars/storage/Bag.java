@@ -1,25 +1,22 @@
-/* 
- * The MIT License
+/*
+ * Bag.java
  *
- * Copyright 2019 The OpenNARS authors.
+ * Copyright (C) 2008  Pei Wang
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This file is part of Open-NARS.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * Open-NARS is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Open-NARS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Open-NARS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nars.storage;
 
@@ -43,7 +40,7 @@ import nars.main_nogui.Parameters;
  *
  * @param <E> The type of the Item in the Bag
  */
-public abstract class Bag<E extends Item> {
+public abstract class Bag<E extends Item> implements Iterable<E>{
 
     /**
      * priority levels
@@ -248,6 +245,12 @@ public abstract class Bag<E extends Item> {
             }
         }
         E selected = takeOutFirst(currentLevel); // take out the first item in the level
+        int belongingLevel = getLevel(selected);
+        if(currentLevel != belongingLevel){
+            intoBase(selected);
+            return takeOut();
+        }
+        
         currentCounter--;
         nameTable.remove(selected.getKey());
         refresh();
@@ -262,11 +265,25 @@ public abstract class Bag<E extends Item> {
      */
     public E pickOut(String key) {
         E picked = nameTable.get(key);
+        
         if (picked != null) {
             outOfBase(picked);
             nameTable.remove(key);
         }
+        
         return picked;
+    }
+    
+    /**
+     * Remove an item from itemTable, then adjust mass
+     *
+     * @param oldItem The Item to be removed
+     */
+    protected void outOfBase(E oldItem) {
+        int level = getLevel(oldItem);
+        itemTable.get(level).remove(oldItem);
+        mass -= (level + 1);
+        refresh();
     }
 
     /**
@@ -323,24 +340,13 @@ public abstract class Bag<E extends Item> {
      * @param level The current level
      * @return The first Item
      */
-    private E takeOutFirst(int level) {
+    public E takeOutFirst(int level) {
+
         E selected = itemTable.get(level).getFirst();
         itemTable.get(level).removeFirst();
         mass -= (level + 1);
         refresh();
         return selected;
-    }
-
-    /**
-     * Remove an item from itemTable, then adjust mass
-     *
-     * @param oldItem The Item to be removed
-     */
-    protected void outOfBase(E oldItem) {
-        int level = getLevel(oldItem);
-        itemTable.get(level).remove(oldItem);
-        mass -= (level + 1);
-        refresh();
     }
 
     /**
@@ -436,5 +442,22 @@ public abstract class Bag<E extends Item> {
      */
     public void setShowLevel(int showLevel) {
         this.showLevel = showLevel;
+    }
+    
+    public ArrayList<LinkedList<E>> getItemTable() {
+        return itemTable;
+    }
+    
+    public HashMap<String, E> getNameTable(){
+        return nameTable;
+    }
+    
+    public boolean isEmpty(){
+        return nameTable.isEmpty();
+    }
+    
+    @Override
+    public Iterator<E> iterator() {
+        return nameTable.values().iterator();
     }
 }

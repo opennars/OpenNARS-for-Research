@@ -25,7 +25,12 @@ package nars.storage;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import nars.Operator_Mental.Anticipate;
+import nars.Operator_Mental.Deactive;
+import nars.Operator_Mental.Escape;
+import nars.Operator_Mental.Fire;
+import nars.Operator_Mental.Left;
+import nars.Operator_Mental.Right;
 import nars.entity.BudgetValue;
 import nars.entity.Concept;
 import nars.entity.Item;
@@ -37,9 +42,16 @@ import nars.entity.TermLink;
 import nars.entity.TruthValue;
 import nars.inference.BudgetFunctions;
 import nars.io.IInferenceRecorder;
+import nars.io.Symbols;
+import nars.language.Equivalence;
+import nars.language.Implication;
+import nars.language.Operation;
+import nars.language.Operator;
+import nars.language.Tense;
 import nars.language.Term;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.ReasonerBatch;
+import nars.mental.Emotion;
 
 /**
  * The memory of the system.
@@ -59,7 +71,7 @@ public class Memory {
     /**
      * New tasks with novel composed terms, for delayed and selective processing
      */
-    private final NovelTaskBag novelTasks;
+    //private final NovelTaskBag novelTasks;
     /**
      * Inference record text to be written into a log file
      */
@@ -73,7 +85,7 @@ public class Memory {
      * List of new tasks accumulated in one cycle, to be processed in the next
      * cycle
      */
-    private final LinkedList<Task> newTasks;
+    //private final LinkedList<Task> newTasks;
     /**
      * List of Strings or Tasks to be sent to the output channels
      */
@@ -106,6 +118,8 @@ public class Memory {
      * The new Stamp
      */
     public Stamp newStamp;
+    
+    private long originalTime = 0;
     /**
      * The substitution that unify the common term in the Task and the Belief
      * TODO unused
@@ -113,6 +127,11 @@ public class Memory {
     protected HashMap<Term, Term> substitute;
 
     public static Random randomNumber = new Random(1);
+    
+    private Map<String, Operator> operators;
+    
+    //private final long originalTime = 0;
+    private Emotion emotion;
     
     /* ---------- Constructor ---------- */
     /**
@@ -124,15 +143,32 @@ public class Memory {
         this.reasoner = reasoner;
         recorder = new NullInferenceRecorder();
         concepts = new ConceptBag(this);
-        novelTasks = new NovelTaskBag(this);
-        newTasks = new LinkedList<>();
         exportStrings = new ArrayList<>();
+        operators = new LinkedHashMap();
+        initOperators();
+        newStamp = null;
+        emotion = new Emotion();
+    }
+    
+    public void initOperators(){
+        
+        Operator anti = new Anticipate();
+        Operator escape = new Escape();
+        Operator left = new Left();
+        Operator right = new Right();
+        Operator deactive = new Deactive();
+        Operator fire = new Fire();
+        
+        operators.put("^anticipate", anti);
+        operators.put("^escape", escape);
+        operators.put("^left", left);
+        operators.put("^right", right);
+        operators.put("^deactivate", deactive);
+        operators.put("^fire", fire);
     }
 
     public void init() {
         concepts.init();
-        novelTasks.init();
-        newTasks.clear();
         exportStrings.clear();
         reasoner.initTimer();
         randomNumber = new Random(1);
@@ -155,15 +191,22 @@ public class Memory {
     public long getTime() {
         return reasoner.getTime();
     }
+    
+    public Emotion getEmotion(){
+        
+        return emotion;
+        
+    }
 
 //    public MainWindow getMainWindow() {
 //        return reasoner.getMainWindow();
 //    }
     /**
      * Actually means that there are no new Tasks
+     * @return 
      */
     public boolean noResult() {
-        return newTasks.isEmpty();
+        return reasoner.getGlobalBuffer().isEmpty();
     }
 
     /* ---------- conversion utilities ---------- */
@@ -171,11 +214,46 @@ public class Memory {
      * Get an existing Concept for a given name <p> called from Term and
      * ConceptWindow.
      *
+     * 能否在概念包中找到以参数名称为名字的概念，有返回真，无返回假
+     * 
      * @param name the name of a concept
      * @return a Concept or null
      */
     public Concept nameToConcept(String name) {
         return concepts.get(name);
+    }
+    
+    public Stamp getNewStamp(){        
+        
+        if(newStamp == null){  
+            newStamp = new Stamp(getTime());
+            resetOccurrenceTime();
+        }
+        
+        return newStamp;
+    }
+    
+    public Stamp setNewStamp(Stamp first, Stamp second, long time){
+        
+        newStamp = new Stamp(first, second, time);
+        return newStamp;
+        
+    }
+    
+    public void resetOccurrenceTime(){     
+        newStamp.setOccurrenceTime(Stamp.ETERNAL);     
+    }
+    
+    public EventBuffer getOveralExperience(){
+        
+        return reasoner.getGlobalBuffer();
+        
+    }
+    
+    public EventBuffer getInternalExperience(){
+        
+        return reasoner.getInternalBuffer();
+        
     }
 
     /**
@@ -195,7 +273,7 @@ public class Memory {
 
     /**
      * Get an existing Concept for a given Term.
-     *
+     * 得到一个已存在的概念
      * @param term The Term naming a concept
      * @return a Concept or null
      */
@@ -250,28 +328,6 @@ public class Memory {
         concepts.putBack(c);
     }
 
-    /* ---------- new task entries ---------- */
-
-    /* There are several types of new tasks, all added into the
-     newTasks list, to be processed in the next workCycle.
-     Some of them are reported and/or logged. */
-    /**
-     * Input task processing. Invoked by the outside or inside environment.
-     * Outside: StringParser (input); Inside: Operator (feedback). Input tasks
-     * with low priority are ignored, and the others are put into task buffer.
-     *
-     * @param task The input task
-     */
-    public void inputTask(Task task) {
-        if (task.getBudget().aboveThreshold()) {
-            recorder.append("!!! Perceived: " + task + "\n");
-            report(task.getSentence(), true);    // report input
-            newTasks.add(task);       // wait to be processed in the next workCycle
-        } else {
-            recorder.append("!!! Neglected: " + task + "\n");
-        }
-    }
-
     /**
      * Activated task called in MatchingRules.trySolution and
      * Concept.processGoal
@@ -289,10 +345,11 @@ public class Memory {
 //            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
             float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             if (s > minSilent) {  // only report significant derived Tasks
-                report(task.getSentence(), false);
+                //generalInfoReport("4");
+                report(task.getSentence(), false, false);
             }
         }
-        newTasks.add(task);
+        reasoner.getInternalBuffer().putInSequenceList(task, getTime());
     }
 
     /**
@@ -300,16 +357,23 @@ public class Memory {
      *
      * @param task the derived task
      */
-    private void derivedTask(Task task) {
+    public void derivedTask(Task task) {
+        
         if (task.getBudget().aboveThreshold()) {
             recorder.append("!!! Derived: " + task + "\n");
             float budget = task.getBudget().summary();
-//            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
             float minSilent = reasoner.getSilenceValue().get() / 100.0f;
+            
+            //System.out.println(task.getSentence().getContent().getName());
             if (budget > minSilent) {  // only report significant derived Tasks
-                report(task.getSentence(), false);
+                //generalInfoReport("5");
+                report(task.getSentence(), false, false);
             }
-            newTasks.add(task);
+            
+            //generalInfoReport(task.getSentence().toString());
+            
+            reasoner.getInternalBuffer().putInSequenceList(task, getTime());
+            
         } else {
             recorder.append("!!! Ignored: " + task + "\n");
         }
@@ -323,13 +387,23 @@ public class Memory {
      * @param newContent The content of the sentence in task
      * @param newTruth The truth value of the sentence in task
      * @param newBudget The budget value in task
+     * @return 
      */
-    public void doublePremiseTask(Term newContent, TruthValue newTruth, BudgetValue newBudget) {
+    public Task doublePremiseTask(Term newContent, TruthValue newTruth, BudgetValue newBudget) {
+        Stamp deriveStamp = newStamp.clone();
+        resetOccurrenceTime();
+        
+        Task newTask = null;
+        
         if (newContent != null) {
-            Sentence newSentence = new Sentence(newContent, currentTask.getSentence().getPunctuation(), newTruth, newStamp);
-            Task newTask = new Task(newSentence, newBudget, currentTask, currentBelief);
+            Sentence newSentence = new Sentence(newContent, currentTask.getSentence().getPunctuation(), newTruth, deriveStamp);
+            
+            //System.out.println("Sentence: " + newSentence.getContent().getName());
+            newTask = new Task(newSentence, newBudget, currentTask, currentBelief);
             derivedTask(newTask);
         }
+        
+        return newTask;
     }
 
     /**
@@ -342,14 +416,20 @@ public class Memory {
      * @param revisible Whether the sentence is revisible
      */
     public void doublePremiseTask(Term newContent, TruthValue newTruth, BudgetValue newBudget, boolean revisible) {
+        
+        Stamp deriveStamp = newStamp.clone();
+        resetOccurrenceTime();
+        
         if (newContent != null) {
             Sentence taskSentence = currentTask.getSentence();
-            Sentence newSentence = new Sentence(newContent, taskSentence.getPunctuation(), newTruth, newStamp, revisible);
+            Sentence newSentence = new Sentence(newContent, taskSentence.getPunctuation(), newTruth, deriveStamp, revisible);
             Task newTask = new Task(newSentence, newBudget, currentTask, currentBelief);
+            //newTask.setElemOfSequenceBuffer(false);
+            //System.out.println("777");
             derivedTask(newTask);
         }
     }
-
+    
     /**
      * Shared final operations by all single-premise rules, called in
      * StructuralRules
@@ -376,14 +456,22 @@ public class Memory {
         if (parentTask != null && newContent.equals(parentTask.getContent())) { // circular structural inference
             return;
         }
+        
+        //System.out.println("Single: " + newContent.getName());
+        
         Sentence taskSentence = currentTask.getSentence();
         if (taskSentence.isJudgment() || currentBelief == null) {
             newStamp = new Stamp(taskSentence.getStamp(), getTime());
         } else {    // to answer a question with negation in NAL-5 --- move to activated task?
             newStamp = new Stamp(currentBelief.getStamp(), getTime());
         }
-        Sentence newSentence = new Sentence(newContent, punctuation, newTruth, newStamp, taskSentence.getRevisible());
+        
+        Stamp deriveStamp = newStamp.clone();
+        resetOccurrenceTime();
+        
+        Sentence newSentence = new Sentence(newContent, punctuation, newTruth, deriveStamp, taskSentence.getRevisible());
         Task newTask = new Task(newSentence, newBudget, currentTask, null);
+        //System.out.println("888");
         derivedTask(newTask);
     }
 
@@ -395,62 +483,51 @@ public class Memory {
      * @param clock The current time to be displayed
      */
     public void workCycle(long clock) {
-        recorder.append(" --- " + clock + " ---\n");
-        processNewTask();
-        if (noResult()) {       // necessary?
-            processNovelTask();
-        }
-        if (noResult()) {       // necessary?
-            processConcept();
-        }
-        novelTasks.refresh();
+        recorder.append(" --- " + clock + " ---\n");      
+        processBuffer();
+        processConcept();    
+        
+        //reasoner.getGlobalBuffer().refresh();
     }
-
-    /**
-     * Process the newTasks accumulated in the previous workCycle, accept input
-     * ones and those that corresponding to existing concepts, plus one from the
-     * buffer.
-     */
-    private void processNewTask() {
-        Task task;
-        int counter = newTasks.size();  // don't include new tasks produced in the current workCycle
-        while (counter-- > 0) {
-            task = newTasks.removeFirst();
-            if (task.isInput() || (termToConcept(task.getContent()) != null)) { // new input or existing concept
-                immediateProcess(task);
-            } else {
-                Sentence s = task.getSentence();
-                if (s.isJudgment()) {
-                    double d = s.getTruth().getExpectation();
-                    if (d > Parameters.DEFAULT_CREATION_EXPECTATION) {
-                        novelTasks.putIn(task);    // new concept formation
-                    } else {
-                        recorder.append("!!! Neglected: " + task + "\n");
-                    }
-                }
-            }
+    
+    private void processBuffer(){  
+        
+        //reasoner.getGlobalBuffer().print();
+        
+        if(!reasoner.getInternalBuffer().isEmpty()){
+            Task task = reasoner.getInternalBuffer().observe(true, false);
+            //report(task.getSentence(), false, false);
+            if(task != null)
+                reasoner.getGlobalBuffer().preProcessing(task, true);
         }
-    }
-
-    /**
-     * Select a novel task to process.
-     */
-    private void processNovelTask() {
-        Task task = novelTasks.takeOut();       // select a task from novelTasks
-        if (task != null) {
+        
+        //reasoner.getGlobalBuffer().print();
+        Task task = reasoner.getGlobalBuffer().observe(true, true);
+        //generalInfoReport("Take Out: " + task);
+        if(task != null){
+            //System.out.println("Task take out: " + task.getName() + " " + task.getSentence().getTruth().toString());
             immediateProcess(task);
         }
     }
-
+    
+    public ReasonerBatch getReasoner(){
+        return reasoner;
+    }
+    
     /**
      * Select a concept to fire.
      */
     private void processConcept() {
-        currentConcept = concepts.takeOut();
+        currentConcept = concepts.takeOut();  
+        
+        //System.out.println(" * Selected Concept: " + currentConcept.getTerm());
+           
         if (currentConcept != null) {
             currentTerm = currentConcept.getTerm();
             recorder.append(" * Selected Concept: " + currentTerm + "\n");
+            //System.out.println(" * Selected Concept: " + currentTerm + "\n");
             concepts.putBack(currentConcept);   // current Concept remains in the bag all the time
+            //generalInfoReport("Concept selected: " + currentConcept.toStringBrief());
             currentConcept.fire();              // a working workCycle
         }
     }
@@ -462,9 +539,10 @@ public class Memory {
      *
      * @param task the task to be accepted
      */
-    private void immediateProcess(Task task) {
+    public void immediateProcess(Task task) {
         currentTask = task; // one of the two places where this variable is set
         recorder.append("!!! Insert: " + task + "\n");
+        //System.out.println("!!! Insert: " + task + "\n");
         currentTerm = task.getContent();
         currentConcept = getConcept(currentTerm);
         if (currentConcept != null) {
@@ -499,22 +577,27 @@ public class Memory {
      * @param bagObserver
      * @param s the window title
      */
-	public void taskBuffersStartPlay( BagObserver<Task> bagObserver, String s ) {
-        bagObserver.setBag(novelTasks);
-        novelTasks.addBagObserver(bagObserver, s);
+    public void taskBuffersStartPlay( BagObserver<Task> bagObserver, String s ) {
+        //bagObserver.setBag(concepts);
+        //reasoner.getInternalBuffer().addBagObserver(bagObserver, s);
+    }
+    
+    public Concept getConceptFromTheList(Term t){
+        return concepts.get(t.getName());
     }
 
     /**
-     * Display input/output sentence in the output channels. The only place to
-     * add Objects into exportStrings. Currently only Strings are added, though
-     * in the future there can be outgoing Tasks; also if exportStrings is empty
-     * display the current value of timer ( exportStrings is emptied in
-     * {@link ReasonerBatch#doTick()} - TODO fragile mechanism)
+     * Display input/output sentence in the output channels.The only place to
+ add Objects into exportStrings. Currently only Strings are added, though
+ in the future there can be outgoing Tasks; also if exportStrings is empty
+ display the current value of timer ( exportStrings is emptied in
+ {@link ReasonerBatch#doTick()} - TODO fragile mechanism)
      *
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
+     * @param answer
      */
-    public void report(Sentence sentence, boolean input) {
+    public void report(Sentence sentence, boolean input, boolean answer) {
         if (ReasonerBatch.DEBUG) {
             System.out.println("// report( clock " + reasoner.getTime()
                     + ", input " + input
@@ -529,21 +612,105 @@ public class Memory {
                 exportStrings.add(String.valueOf(timer));
             }
         }
+        
+        long interval = 0;
+        if(sentence.getContent() instanceof Implication)
+            interval = ((Implication)(sentence.getContent())).getInterval();
+        else if (sentence.getContent() instanceof Equivalence)
+            interval = ((Equivalence)(sentence.getContent())).getInterval();
+                     
+        boolean execution = sentence.getContent() instanceof Operation;
+        
         String s;
         if (input) {
             s = "  IN: ";
-        } else {
-            s = " OUT: ";
+        }else if(execution){
+        
+            s = "EXE: ";
+            
+        }else {
+            if(answer)
+                s = " ANSWER";
+            else
+                s = " OUT: ";
         }
-        s += sentence.toStringBrief();
+        
+        //System.out.println(sentence.toStringBrief());
+        //System.out.println("occurrence Time: " + sentence.getStamp().getOccurrenceTime());
+        
+        if(!sentence.getStamp().isEternal()){
+            String tense = sentence.getStamp().getTense(getTime(), Parameters.DURATION);
+            if(tense == null){
+                s += sentence.toStringBrief(tense) + " Eternal";
+            }
+            else{ 
+                
+                if(execution && !input)
+                    s += ((Operation)sentence.getContent()).getPredicate().getName();
+                else
+                    s += sentence.toStringBrief(tense);
+                
+                /*switch (tense) {
+                    case Symbols.TENSE_FUTURE:
+                        s += " Will happen at : " + sentence.getOccurrenceTime();
+                        break;
+                    case Symbols.TENSE_PAST:
+                        s+= " Happened at: " + sentence.getOccurrenceTime();
+                        break;
+                    default:
+                        s+= " Happening";
+                        break;
+                }*/
+                
+                
+            }
+        }else{
+            s += sentence.toStringBrief();
+        }
+
+        if(interval > 0)
+            s += " Interval is " + interval;
+        
+        //System.out.println("s: " + s);
+        
         exportStrings.add(s);
     }
-
+    
+    public void generalInfoReport(String s){
+        
+        exportStrings.add(s);
+        
+    }
+    
+    public void executeTask(long time, Operation operation, TruthValue truth){
+        
+        Stamp stamp = new Stamp(Tense.Present, time);
+        Sentence sentence = new Sentence(operation, Symbols.JUDGMENT_MARK, truth, stamp);
+        
+        BudgetValue budgetForNewTask = new BudgetValue(Parameters.DEFAULT_FEEDBACK_PRIORITY, Parameters.DEFAULT_FEEDBACK_DURABILITY,
+        BudgetFunctions.truthToQuality(truth));
+        
+        Task newTask = new Task(sentence, budgetForNewTask);
+        
+        reasoner.getInternalBuffer().putInSequenceList(newTask, getTime());
+    }
+    
+    public Operator getOperator(String op){
+        return operators.get(op);
+    }
+    
+    public Operator addOperator(Operator op){
+        operators.put(op.getName(), op);
+        return op;
+    }
+    
+    public Operator removeOperator(Operator op){
+        return operators.remove(op.getName());
+    }
+    
     @Override
     public String toString() {
         return toStringLongIfNotNull(concepts, "concepts")
-                + toStringLongIfNotNull(novelTasks, "novelTasks")
-                + toStringIfNotNull(newTasks, "newTasks")
                 + toStringLongIfNotNull(currentTask, "currentTask")
                 + toStringLongIfNotNull(currentBeliefLink, "currentBeliefLink")
                 + toStringIfNotNull(currentBelief, "currentBelief");
@@ -610,5 +777,9 @@ public class Memory {
         public boolean isLogging() {
             return false;
         }
+    }
+    
+    public ConceptBag getConcepts(){
+        return concepts;
     }
 }

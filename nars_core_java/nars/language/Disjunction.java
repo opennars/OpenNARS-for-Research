@@ -58,7 +58,7 @@ public class Disjunction extends CompoundTerm {
      * @return A new object
      */
     @Override
-    public Object clone() {
+    public Disjunction clone() {
         return new Disjunction(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 

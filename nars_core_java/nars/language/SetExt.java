@@ -38,7 +38,7 @@ public class SetExt extends CompoundTerm {
      * @param n The name of the term
      * @param arg The component list of the term
      */
-    private SetExt(ArrayList<Term> arg) {
+    public SetExt(ArrayList<Term> arg) {
         super(arg);
     }
 
@@ -57,7 +57,7 @@ public class SetExt extends CompoundTerm {
      * Clone a SetExt
      * @return A new object, to be casted into a SetExt
      */
-    public Object clone() {
+    public SetExt clone() {
         return new SetExt(name, (ArrayList<Term>) cloneList(components), isConstant(), complexity);
     }
 
