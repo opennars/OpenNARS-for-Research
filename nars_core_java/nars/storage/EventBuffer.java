@@ -19,7 +19,6 @@ import nars.inference.TemporalRules;
 import nars.inference.UtilityFunctions;
 import nars.io.Symbols;
 import nars.language.Equivalence;
-import nars.language.Conjunction;
 import nars.language.Implication;
 import nars.language.Negation;
 import nars.language.Term;
@@ -31,12 +30,11 @@ import nars.main_nogui.Parameters;
  */
 public abstract class EventBuffer extends Buffer<Task> {
     
-    // sequenceList用于存放事件
-    private final ArrayList<Task> sequenceList;
-    // private final ArrayList<Task> 
-    // duration，一个任务在buffer中存在的时间，超过就删除
+    // sequenceList is used for store events
+    private final ArrayList<Task> sequenceList; 
+    // How long a task can be store in the buffer
     private final int duration;
-    // 存放一定量的预期列表，用来观察预期时间是否满足
+    // List of expectation
     private final ArrayList<Anticipation> expectationList;
     
     public EventBuffer(Memory memory, int duration, String name) {
@@ -52,8 +50,6 @@ public abstract class EventBuffer extends Buffer<Task> {
     /**
      * capacity of the expectationList, means how many expectation 
      * the system can expect at most
-     * expectationList容量，表示在同一时间，系统可以期待多少事情
-     * 列表由前置任务的优先级排序
      * @return 
     */
     protected abstract int anticipationCapacity();
@@ -334,8 +330,7 @@ public abstract class EventBuffer extends Buffer<Task> {
                     if(findIntertIndexInSequenceList(task) == -1)
                         sequenceList.add(0, task);
                     else
-                        sequenceList.add(findIntertIndexInSequenceList(task), task);
-                             
+                        sequenceList.add(findIntertIndexInSequenceList(task), task);            
                         insert = true;
                     }else{
                         // if the occurence time of the new task less than every task in the list
@@ -350,7 +345,6 @@ public abstract class EventBuffer extends Buffer<Task> {
                 // if the task is insert into the list process anticipation
                 // clear expired anticipation and generate new expectation
                 processAnticipation(task);
-                clearExpiredAnticipation();
                 generateExpectation(task);           
                 
                 return true;
@@ -434,11 +428,11 @@ public abstract class EventBuffer extends Buffer<Task> {
                             
                                     if(c.getDesires().get(0).getSentence().getTruth().getExpectation() > 0.5){                                       
                                         
-                                        this.getMemory().generalInfoReport("NARS is feeling fear. Because NARS desires " 
+                                        /*this.getMemory().generalInfoReport("NARS is feeling fear. Because NARS desires " 
                                                                             + expectEvent.getName() + "\nto happen, with expectation " 
                                                                             + c.getDesires().get(0).getSentence().getTruth().getExpectation() 
                                                                             + ",\n but NARS anticipates " + expectEvent.getName() + "will not happen, with expectation "
-                                                                            + expectEvent.getSentence().getTruth().getExpectation());                                                                             
+                                                                            + expectEvent.getSentence().getTruth().getExpectation());   */                                                                          
                                         
                                         float weight = expectEvent.getPriority();
                                         float fear = Math.abs(expectEvent.getSentence().getTruth().getExpectation() - c.getDesires().get(0).getSentence().getTruth().getExpectation());
@@ -461,11 +455,11 @@ public abstract class EventBuffer extends Buffer<Task> {
                                     
                                     if(c.getDesires().get(0).getSentence().getTruth().getExpectation() <= 0.5){                                      
                                         
-                                        this.getMemory().generalInfoReport("NARS is feeling fear. Because NARS does not desire " 
+                                        /*this.getMemory().generalInfoReport("NARS is feeling fear. Because NARS does not desire " 
                                                                             + expectEvent.getName() + "\n to happen, with expectation " 
                                                                             + c.getDesires().get(0).getSentence().getTruth().getExpectation() 
                                                                             + ",\n but NARS anticipates " + expectEvent.getName() + " will happen, with expectation "
-                                                                            + expectEvent.getSentence().getTruth().getExpectation());                                 
+                                                                            + expectEvent.getSentence().getTruth().getExpectation());        */                         
                                         
                                         
                                         
@@ -716,7 +710,7 @@ public abstract class EventBuffer extends Buffer<Task> {
     protected Task takeOut() {
         // clear the expired items first
         clearExpiredItem();
-        
+        clearExpiredAnticipation();
         // if the item table is not null, return the first one which the one with highest priority      
         if(!this.getItemTable().isEmpty()){
             Task task = this.getItemTable().get(0);

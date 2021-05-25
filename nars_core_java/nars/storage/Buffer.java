@@ -61,18 +61,7 @@ public abstract class Buffer<E extends Item> implements Iterable<E>{
     }
     
     protected abstract int capacity();
-    
-   // protected abstract Task observe(boolean temporalInduction);
-
-    /**
-     * 添加任务进buffer
-     * @param item
-     * @param list
-     * @param capacity
-     * @param time
-     * @param task 需要添加的任务
-     * @return 真如果成功插入，反之，返回假
-     */   
+   
     protected abstract boolean putIn(E item, ArrayList<E> list, int capacity);
     
     protected abstract int findInsertIndex(E item);
