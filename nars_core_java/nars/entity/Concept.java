@@ -860,7 +860,7 @@ public final class Concept extends Item {
                             boolean happening = false;
                             
                             // check if the precondition is happening 
-                            for(int i = memory.getOveralExperience().getSequenceList().size() - 1; i > 0; i--){
+                            for(int i = memory.getOveralExperience().getSequenceList().size() - 1; i >= 0; i--){
                                 
                                 if(((Conjunction)precondition).getComponents().get(0).getName().equals(memory.getOveralExperience().getSequenceList().get(i).getName())){
                                     happening = true;
