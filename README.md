@@ -1,9 +1,8 @@
-OpenNARS Declarative Core
+OpenNARS Core
 -------------------------
-![OpenNARS_Declarative_Core_Logo](https://user-images.githubusercontent.com/8284677/53459976-6ee8bb80-3a33-11e9-8ae4-2325fc587565.png)
-
-Intended for people wanting to implement NAL7/8 in a different way.
-Users, better go to https://github.com/opennars/opennars to enjoy a system that has full NAL1-8 implemented.
+OpenNARS v3.1.x based on OpenNARS v1.5.8 https://github.com/patham9/opennars_declarative_core
+It can be considered a new attempt to implement the new architecture which was originally built on top of v3.0.4: https://github.com/opennars/opennars/releases/tag/v3.1.0
+For more information, read the release messages.
 
 Source Code
 -----------
