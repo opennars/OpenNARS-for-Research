@@ -206,7 +206,7 @@ public final class Concept extends Item {
         // if the new judgment is implication generate anticipation relation in the concept of the 
         // subject and goal relation in the post condition
         generateAnticipations(task.getSentence());
-        generateGoalPreconditions(task.getSentence());
+        this.generateGoalPreconditions(task.getSentence());
     } 
 
     /**
@@ -303,7 +303,7 @@ public final class Concept extends Item {
     }
     
     /**
-     * 处理目标，如果输入是一个目标
+     * For procedural learning, goal processing and 
      * @param task 
      */
     private void processGoal(Task task){
@@ -335,11 +335,10 @@ public final class Concept extends Item {
         }
         
         /*=====================================================================*/
-        // 信念为空
         Sentence belief = null;
         // if the budget of the task is above the threshold 
         if(task.getBudget().aboveThreshold()){
-            // 从select the belief with the highest confidence to offer the new solution
+            // select the belief with the highest confidence to offer the new solution
             belief = evaluation(task.getSentence(), beliefs);
             // go over the question to see if the task can be a good solution for the question
             for(Task iQuest : getQuests())
@@ -368,7 +367,6 @@ public final class Concept extends Item {
                 return;
             }
         }
-        // 目标的时间戳
         Stamp goalStamp = goal.getStamp().clone();
         
         if(!goalStamp.isEternal()){
@@ -513,7 +511,6 @@ public final class Concept extends Item {
     }
     
     /**
-     * genrate goal preconditions
      * @param task 
      */
     public void generateGoalPreconditions(Sentence sentence){
