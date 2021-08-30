@@ -28,8 +28,7 @@ public class Shell {
         reasoner.run();
         reasoner.getSilenceValue().set(100);
         int cnt = 0;
-        while(true)
-        {
+        while(true){
             synchronized(inputString) {
                 if(!"".equals(inputString)) {
                     try {
@@ -37,18 +36,14 @@ public class Shell {
                             int val = Integer.parseInt(inputString.split("\\*volume=")[1]);
                             if(val >= 0 && val <= 100) {
                                 reasoner.getSilenceValue().set(100-val);
-                            }
-                            else
-                            {
+                            } else{
                                 System.out.println("Volume ignored, not in range");
                             }
-                        }
-                        else {
+                        } else {
                             reasoner.textInputLine(inputString);
                         }
                         inputString = "";
-                    }
-                    catch(Exception ex) {
+                    } catch(Exception ex) {
                         inputString = "";
                     }
                 }
@@ -56,28 +51,7 @@ public class Shell {
             if(reasoner.getWalkingSteps() > 0)
                 reasoner.tick();
             cnt++;
-            //if(cnt%10000 == 0) {
-            //    System.out.println(cnt);
-            //}
         }
-    }
-    
-    public static class ShellOutput implements OutputChannel
-    {
-        @Override
-        public void nextOutput(ArrayList<String> arg0) {
-            for(String s : arg0){
-                if(!s.matches("[0-9]+")) {
-                    System.out.println(s);
-                }
-            }
-        }
-
-        @Override
-        public void tickTimer() {
-            
-        }
-        
     }
     
     private static class InputThread extends Thread {
@@ -89,6 +63,7 @@ public class Shell {
             this.reasoner = reasoner;
         }
 
+        @Override
         public void run() {
             while (true) {
                 try {
@@ -108,13 +83,25 @@ public class Shell {
                 } catch (final InterruptedException e) {
                     throw new IllegalStateException("Unexpectadly interrupted while sleeping.", e);
                 }
-                
-               /* try{
-                    reasoner.tick();
-                }catch (Exception e){
-                
-                }*/
             }
         }
+    }
+    
+    public static class ShellOutput implements OutputChannel
+    {
+        @Override
+        public void nextOutput(ArrayList<String> arg0) {
+            for(String s : arg0){
+                if(!s.matches("[0-9]+")) {
+                    System.out.println(s);
+                }
+            }
+        }
+
+        @Override
+        public void tickTimer() {
+            
+        }
+        
     }
 }
