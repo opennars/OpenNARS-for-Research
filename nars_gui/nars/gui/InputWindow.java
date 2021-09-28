@@ -134,8 +134,8 @@ public class InputWindow extends NarsFrame implements ActionListener, InputChann
     }
 
     /**
-     * Accept text input in a tick, which can be multiple lines
-     * TODO some duplicated code with {@link ExperienceReader#nextInput()}
+     * Accept text input in a cycle, which can be multiple lines
+ TODO some duplicated code with {@link ExperienceReader#nextInput()}
      * @return Whether to check this channel again
      */
     public boolean nextInput() {

@@ -145,14 +145,11 @@ public class NAR {
     }
 
     /**
-     * A clock tick. Run one working workCycle or read input. Called from NARS
+     * A system cycle. Run one working workCycle or read input. 
+     * Called from Shell.java and NARS.java
      * only.
      */
-    public void tick() {
-        doTick();
-    }
-
-    public void doTick() {
+    public void cycle() {
         if (DEBUG) {
             if (running || walkingSteps > 0 || !finishedInputs) {
                 System.out.println("// doTick: "

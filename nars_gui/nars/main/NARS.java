@@ -52,7 +52,7 @@ public class NARS implements Runnable {
     /**
      * The reasoner
      */
-    NAR reasoner;
+    Reasoner reasoner;
 
     /**
      * The entry point of the standalone application.
@@ -108,7 +108,6 @@ public class NARS implements Runnable {
             } catch (InterruptedException e) {
             }
             try {
-                // NOTE: try/catch not necessary for input errors , but may be useful for other troubles
                 reasoner.tick();
             } catch (Exception e) {
             }

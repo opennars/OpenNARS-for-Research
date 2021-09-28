@@ -134,7 +134,7 @@ public class NARSBatch {
             log("NARSBatch.run():"
                     + " step " + reasoner.getTime()
                     + " " + reasoner.isFinishedInputs());
-            reasoner.tick();
+            reasoner.cycle();
             log("NARSBatch.run(): after tick"
                     + " step " + reasoner.getTime()
                     + " " + reasoner.isFinishedInputs());

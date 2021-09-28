@@ -61,13 +61,12 @@ public class Reasoner extends NAR {
         mainWindow.setVisible(true);
     }
 
-    @Override
     public void tick() {
         final NAR reasoner = this;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                reasoner.doTick();
+                reasoner.cycle();
             }
         });
     }

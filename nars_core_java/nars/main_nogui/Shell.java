@@ -49,7 +49,7 @@ public class Shell {
                 }
             }
             if(reasoner.getWalkingSteps() > 0)
-                reasoner.tick();
+                reasoner.cycle();
             cnt++;
         }
     }

@@ -478,7 +478,7 @@ public class Memory {
     /* ---------- system working workCycle ---------- */
     /**
      * An atomic working cycle of the system: process new Tasks, then fire a
-     * concept <p> Called from Reasoner.tick only
+     * concept <p> Called from Reasoner.cycle only
      *
      * @param clock The current time to be displayed
      */
