@@ -46,7 +46,7 @@ public class NARSBatch {
     /**
      * The reasoner
      */
-    ReasonerBatch reasoner;
+    NAR reasoner;
     private boolean logging;
     private PrintStream out = System.out;
     private boolean dumpLastState = true;
@@ -121,7 +121,7 @@ public class NARSBatch {
      * Can instantiate multiple reasoners
      */
     public final void init() {
-        reasoner = new ReasonerBatch();
+        reasoner = new NAR();
     }
 
     /**
@@ -155,7 +155,7 @@ public class NARSBatch {
         }
     }
 
-    public ReasonerBatch getReasoner() {
+    public NAR getReasoner() {
         return reasoner;
     }
 

@@ -5,7 +5,7 @@
  */
 package nars.io;
 
-import nars.main_nogui.ReasonerBatch;
+import nars.main_nogui.NAR;
 
 /**
  *
@@ -13,10 +13,10 @@ import nars.main_nogui.ReasonerBatch;
  */
 public class KnowledgeChannel implements InputChannel{
 
-    private final ReasonerBatch reasoner;
+    private final NAR reasoner;
     private final String name;
     
-    public KnowledgeChannel(ReasonerBatch reasoner){
+    public KnowledgeChannel(NAR reasoner){
         this.reasoner = reasoner;
         name = "Knowledge Channel";
     }

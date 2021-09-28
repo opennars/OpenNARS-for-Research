@@ -13,7 +13,7 @@ import nars.storage.InternalExperience;
 import nars.storage.Memory;
 import nars.storage.OveralExperience;
 
-public class ReasonerBatch {
+public class NAR {
 
     /**
      * global DEBUG print switch
@@ -65,7 +65,7 @@ public class ReasonerBatch {
     private final int internal_Duration = Parameters.MAX_BUFFER_DURATION_FACTOR * Parameters.DURATION_FOR_INTERNAL_BUFFER;
     private final int global_Duration = Parameters.MAX_BUFFER_DURATION_FACTOR * Parameters.DURATION_FOR_GLOBAL_BUFFER;
 
-    public ReasonerBatch() {
+    public NAR() {
         memory = new Memory(this);
         //System.out.println(memory.newStamp.getOccurrenceTime());
         inputChannels = new ArrayList();

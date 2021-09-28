@@ -511,6 +511,7 @@ public final class Concept extends Item {
     }
     
     /**
+     * Form hypothesis and generate goal preconditions
      * @param task 
      */
     public void generateGoalPreconditions(Sentence sentence){

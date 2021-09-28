@@ -26,7 +26,7 @@ package nars.main;
 import nars.io.ExperienceReader;
 import nars.main_nogui.CommandLineParameters;
 import nars.main_nogui.NARSBatch;
-import nars.main_nogui.ReasonerBatch;
+import nars.main_nogui.NAR;
 
 /**
  * The main class of the open-nars project.
@@ -52,7 +52,7 @@ public class NARS implements Runnable {
     /**
      * The reasoner
      */
-    ReasonerBatch reasoner;
+    NAR reasoner;
 
     /**
      * The entry point of the standalone application.

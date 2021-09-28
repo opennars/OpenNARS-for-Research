@@ -5,7 +5,7 @@
  */
 package nars.io;
 
-import nars.main_nogui.ReasonerBatch;
+import nars.main_nogui.NAR;
 import nars.storage.Buffer;
 import nars.storage.Memory;
 
@@ -15,9 +15,9 @@ import nars.storage.Memory;
  */
 public class SensorimotorChannel implements InputChannel{
 
-    private ReasonerBatch reasoner;
+    private NAR reasoner;
     private String name;
-    public SensorimotorChannel(ReasonerBatch reasoner){
+    public SensorimotorChannel(NAR reasoner){
         this.reasoner = reasoner;
         name = "Sensorimotor Channel";
     }

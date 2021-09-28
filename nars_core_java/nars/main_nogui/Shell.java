@@ -14,19 +14,19 @@ import nars.io.OutputChannel;
 
 /**
  *
- * @author tc
+ * @author Pei, Xiang, Patrick, Peter
  */
 public class Shell {
     
     static String inputString = "";
     public static void main(String[] args) {
-        ReasonerBatch reasoner = new ReasonerBatch();
+        NAR reasoner = new NAR();
         reasoner.addOutputChannel(new ShellOutput());
         InputThread thr = new InputThread(System.in, reasoner);
         thr.start();
         System.out.println("Welcome to the OpenNARS Shell, type some Narsese input and press enter, use questions to get answers, or increase volume with *volume=n with n=0..100");
         reasoner.run();
-        reasoner.getSilenceValue().set(100);
+        reasoner.getSilenceValue().set(0);
         int cnt = 0;
         while(true){
             synchronized(inputString) {
@@ -56,9 +56,9 @@ public class Shell {
     
     private static class InputThread extends Thread {
         private final BufferedReader bufIn;
-        private final ReasonerBatch reasoner;
+        private final NAR reasoner;
 
-        InputThread(final InputStream in, ReasonerBatch reasoner) {
+        InputThread(final InputStream in, NAR reasoner) {
             this.bufIn = new BufferedReader(new InputStreamReader(in));
             this.reasoner = reasoner;
         }

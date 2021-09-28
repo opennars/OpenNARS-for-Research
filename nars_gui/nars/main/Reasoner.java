@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 
 import nars.gui.InputWindow;
 import nars.gui.MainWindow;
-import nars.main_nogui.ReasonerBatch;
+import nars.main_nogui.NAR;
 
 /**
  * A NARS Reasoner has its memory, I/O channels, and internal clock.
@@ -35,7 +35,7 @@ import nars.main_nogui.ReasonerBatch;
  * Create static main window and input channel, reset memory, and manage system
  * clock.
  */
-public class Reasoner extends ReasonerBatch {
+public class Reasoner extends NAR {
 
     /**
      * The unique main window
@@ -63,7 +63,7 @@ public class Reasoner extends ReasonerBatch {
 
     @Override
     public void tick() {
-        final ReasonerBatch reasoner = this;
+        final NAR reasoner = this;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

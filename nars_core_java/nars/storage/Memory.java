@@ -50,7 +50,7 @@ import nars.language.Operator;
 import nars.language.Tense;
 import nars.language.Term;
 import nars.main_nogui.Parameters;
-import nars.main_nogui.ReasonerBatch;
+import nars.main_nogui.NAR;
 import nars.mental.Emotion;
 
 /**
@@ -61,7 +61,7 @@ public class Memory {
     /**
      * Backward pointer to the reasoner
      */
-    private final ReasonerBatch reasoner;
+    private final NAR reasoner;
 
     /* ---------- Long-term storage for multiple cycles ---------- */
     /**
@@ -139,7 +139,7 @@ public class Memory {
      *
      * @param reasoner
      */
-    public Memory(ReasonerBatch reasoner) {
+    public Memory(NAR reasoner) {
         this.reasoner = reasoner;
         recorder = new NullInferenceRecorder();
         concepts = new ConceptBag(this);
@@ -510,7 +510,7 @@ public class Memory {
         }
     }
     
-    public ReasonerBatch getReasoner(){
+    public NAR getReasoner(){
         return reasoner;
     }
     
@@ -591,14 +591,14 @@ public class Memory {
  add Objects into exportStrings. Currently only Strings are added, though
  in the future there can be outgoing Tasks; also if exportStrings is empty
  display the current value of timer ( exportStrings is emptied in
- {@link ReasonerBatch#doTick()} - TODO fragile mechanism)
+ {@link NAR#doTick()} - TODO fragile mechanism)
      *
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
      * @param answer
      */
     public void report(Sentence sentence, boolean input, boolean answer) {
-        if (ReasonerBatch.DEBUG) {
+        if (NAR.DEBUG) {
             System.out.println("// report( clock " + reasoner.getTime()
                     + ", input " + input
                     + ", timer " + reasoner.getTimer()
