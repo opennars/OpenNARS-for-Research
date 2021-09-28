@@ -19,40 +19,6 @@ import nars.io.OutputChannel;
 public class Shell {
     
     static String inputString = "";
-    public static void main(String[] args) {
-        NAR reasoner = new NAR();
-        reasoner.addOutputChannel(new ShellOutput());
-        InputThread thr = new InputThread(System.in, reasoner);
-        thr.start();
-        System.out.println("Welcome to the OpenNARS Shell, type some Narsese input and press enter, use questions to get answers, or increase volume with *volume=n with n=0..100");
-        reasoner.run();
-        reasoner.getSilenceValue().set(0);
-        int cnt = 0;
-        while(true){
-            synchronized(inputString) {
-                if(!"".equals(inputString)) {
-                    try {
-                        if(inputString.startsWith("*volume=")) { //volume to be consistent with OpenNARS
-                            int val = Integer.parseInt(inputString.split("\\*volume=")[1]);
-                            if(val >= 0 && val <= 100) {
-                                reasoner.getSilenceValue().set(100-val);
-                            } else{
-                                System.out.println("Volume ignored, not in range");
-                            }
-                        } else {
-                            reasoner.textInputLine(inputString);
-                        }
-                        inputString = "";
-                    } catch(Exception ex) {
-                        inputString = "";
-                    }
-                }
-            }
-            if(reasoner.getWalkingSteps() > 0)
-                reasoner.cycle();
-            cnt++;
-        }
-    }
     
     private static class InputThread extends Thread {
         private final BufferedReader bufIn;
@@ -87,21 +53,49 @@ public class Shell {
         }
     }
     
-    public static class ShellOutput implements OutputChannel
-    {
+    public static class ShellOutput implements OutputChannel{
         @Override
         public void nextOutput(ArrayList<String> arg0) {
             for(String s : arg0){
-                if(!s.matches("[0-9]+")) {
-                    System.out.println(s);
-                }
+                if(!s.matches("[0-9]+")) {System.out.println(s);}
             }
         }
-
         @Override
-        public void tickTimer() {
-            
+        public void tickTimer() {}
+    }
+    
+    public static void main(String[] args) {
+        NAR reasoner = new NAR();
+        reasoner.addOutputChannel(new ShellOutput());
+        InputThread thr = new InputThread(System.in, reasoner);
+        thr.start();
+        System.out.println("Welcome to OpenNARS Shell, type Narsese input and press enter, use questions to get answers, or increase volume with *volume=n with n=0..100");
+        reasoner.run();
+        reasoner.getSilenceValue().set(0);
+        int cnt = 0;
+        while(true){
+            synchronized(inputString) {
+                if(!"".equals(inputString)) {
+                    try {
+                        if(inputString.startsWith("*volume=")) { //volume to be consistent with OpenNARS
+                            int val = Integer.parseInt(inputString.split("\\*volume=")[1]);
+                            if(val >= 0 && val <= 100) {
+                                reasoner.getSilenceValue().set(100-val);
+                            } else{
+                                System.out.println("Volume ignored, not in range");
+                            }
+                        } else {
+                            reasoner.textInputLine(inputString);
+                        }
+                        inputString = "";
+                    } catch(Exception ex) {
+                        inputString = "";
+                    }
+                }
+            }
+            if(reasoner.getWalkingSteps() > 0)
+                reasoner.cycle();
+            cnt++;
         }
-        
     }
 }

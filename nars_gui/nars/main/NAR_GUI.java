@@ -30,12 +30,12 @@ import nars.gui.MainWindow;
 import nars.main_nogui.NAR;
 
 /**
- * A NARS Reasoner has its memory, I/O channels, and internal clock.
+ * A NARS NAR_GUI has its memory, I/O channels, and internal clock.
  * <p>
  * Create static main window and input channel, reset memory, and manage system
  * clock.
  */
-public class Reasoner extends NAR {
+public class NAR_GUI extends NAR {
 
     /**
      * The unique main window
@@ -51,7 +51,7 @@ public class Reasoner extends NAR {
      *
      * @param name The name of the reasoner
      */
-    Reasoner(String name) {
+    NAR_GUI(String name) {
         super();
         this.name = name;
         inputWindow = new InputWindow(this, name);

@@ -48,7 +48,7 @@ import nars.io.ExperienceWriter;
 import nars.io.IInferenceRecorder;
 import nars.io.OutputChannel;
 import nars.main.NARS;
-import nars.main.Reasoner;
+import nars.main.NAR_GUI;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.NAR;
 import nars.storage.Memory;
@@ -121,7 +121,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      * @param reasoner
      * @param title
      */
-    public MainWindow(Reasoner reasoner, String title) {
+    public MainWindow(NAR_GUI reasoner, String title) {
         super(title);
         this.reasoner = reasoner;
         memory = reasoner.getMemory();

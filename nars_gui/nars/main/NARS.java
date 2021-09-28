@@ -31,7 +31,7 @@ import nars.main_nogui.NAR;
 /**
  * The main class of the open-nars project.
  * <p>
- * Manage the internal working thread. Communicate with Reasoner only.
+ Manage the internal working thread. Communicate with NAR_GUI only.
  */
 public class NARS implements Runnable {
 
@@ -52,7 +52,7 @@ public class NARS implements Runnable {
     /**
      * The reasoner
      */
-    Reasoner reasoner;
+    NAR_GUI reasoner;
 
     /**
      * The entry point of the standalone application.
@@ -75,7 +75,7 @@ public class NARS implements Runnable {
      * @param args Input file
      */
     public void init(String[] args) {
-        reasoner = new Reasoner("NARS Reasoner");
+        reasoner = new NAR_GUI("NARS Reasoner with GUI support");
         if ((args.length > 0) && CommandLineParameters.isReallyFile(args[0])) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
