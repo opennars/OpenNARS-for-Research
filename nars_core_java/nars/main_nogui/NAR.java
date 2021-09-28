@@ -57,6 +57,9 @@ public class NAR {
      * System clock - number of cycles since last output
      */
     private long timer;
+    /**
+     * Budget Threshold - show output if its budget average above threshold
+     */
     private final AtomicInteger silenceValue = new AtomicInteger(Parameters.SILENT_LEVEL);
     private final InternalExperience internalBuffer;
     private final OveralExperience globalBuffer;
@@ -76,8 +79,8 @@ public class NAR {
     }
 
     /**
-     * Reset the system with an empty memory and reset clock. Called locally and
-     * from {@link MainWindow}.
+     * Reset the system with an empty memory and reset clock. 
+     * Called locally and from {@link MainWindow}.
      */
     public void reset() {
         //CompositionalRules.rand = new Random(1);
@@ -86,7 +89,7 @@ public class NAR {
         clock = 0;
         memory.init();
         Stamp.init();
-//	    timer = 0;
+        //timer = 0;
     }
 
     public Memory getMemory() {
