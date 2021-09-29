@@ -36,9 +36,7 @@ public abstract class Item {
     /** The budget of the Item, consisting of 3 numbers */
     protected BudgetValue budget;
 
-    /**
-     * The default constructor
-     */
+    /** The default constructor */
     protected Item() {}
 
     /**
@@ -192,5 +190,4 @@ public abstract class Item {
     public String toStringLong() {
     	return toString();
     }
-
 }
