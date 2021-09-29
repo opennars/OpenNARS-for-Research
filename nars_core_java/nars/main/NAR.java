@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import nars.entity.Stamp;
 import nars.entity.Task;
-import nars.gui.MainWindow;
 import nars.io.InputChannel;
 import nars.io.OutputChannel;
 import nars.io.StringParser;
@@ -15,53 +14,31 @@ import nars.storage.OveralExperience;
 
 public class NAR {
 
-    /**
-     * global DEBUG print switch
-     */
+    /** global DEBUG print switch */
     public static final boolean DEBUG = false;
-    /**
-     * The name of the reasoner
-     */
+    /** The name of the reasoner */
     protected String name;
-    /**
-     * The memory of the reasoner
-     */
+    /** The memory of the reasoner */
     protected Memory memory;
-    /**
-     * The input channels of the reasoner
-     */
+    /** The input channels of the reasoner */
     protected ArrayList<InputChannel> inputChannels;
-    /**
-     * The output channels of the reasoner
-     */
+    /** The output channels of the reasoner */
     protected ArrayList<OutputChannel> outputChannels;
-    /**
-     * System clock, relatively defined to guarantee the repeatability of
-     * behaviors
-     */
+    /** System clock, relatively defined to guarantee the repeatability of behaviors */
     private long clock;
-    /**
-     * Flag for running continuously
-     */
+    /** Flag for running continuously */
     private boolean running;
-    /**
-     * The remaining number of steps to be carried out (walk mode)
-     */
+    /** The remaining number of steps to be carried out (walk mode) */
     private int walkingSteps;
-    /**
-     * determines the end of {@link NARSBatch} program (set but not accessed in
-     * this class)
-     */
+    /** Determines the end of {@link NARSBatch} program (set but not accessed in this class) */
     private boolean finishedInputs;
-    /**
-     * System clock - number of cycles since last output
-     */
+    /** System clock - number of cycles since last output */
     private long timer;
-    /**
-     * Budget Threshold - show output if its budget average above threshold
-     */
+    /** Budget Threshold - show output if its budget average above threshold */
     private final AtomicInteger silenceValue = new AtomicInteger(Parameters.SILENT_LEVEL);
+    /** Internal Experience Buffer for derivations */
     private final InternalExperience internalBuffer;
+    /** Overall Experience Buffer for input and tasks from internalBuffer */
     private final OveralExperience globalBuffer;
     //private final Experience_From_Narsese narsese_Channel;
     
@@ -77,25 +54,7 @@ public class NAR {
         globalBuffer = new OveralExperience(memory, global_Duration, "Global");
        // narsese_Channel = new Experience_From_Narsese(memory, global_Duration);
     }
-
-    /**
-     * Reset the system with an empty memory and reset clock. 
-     * Called locally and from {@link MainWindow}.
-     */
-    public void reset() {
-        //CompositionalRules.rand = new Random(1);
-        running = false;
-        walkingSteps = 0;
-        clock = 0;
-        memory.init();
-        Stamp.init();
-        //timer = 0;
-    }
-
-    public Memory getMemory() {
-        return memory;
-    }
-
+    
     public void addInputChannel(InputChannel channel) {
         inputChannels.add(channel);
     }
@@ -112,18 +71,18 @@ public class NAR {
         outputChannels.remove(channel);
     }
 
-    /**
-     * Get the current time from the clock Called in {@link nars.entity.Stamp}
-     *
-     * @return The current time
-     */
-    public long getTime() {
-        return clock;
+    /** Reset the system with an empty memory and reset clock. */
+    public void reset() {
+        //CompositionalRules.rand = new Random(1);
+        running = false;
+        walkingSteps = 0;
+        clock = 0;
+        memory.init();
+        Stamp.init();
+        //timer = 0;
     }
 
-    /**
-     * Start the inference process
-     */
+    /** Start the inference process */
     public void run() {
         running = true;
     }
@@ -152,7 +111,7 @@ public class NAR {
     public void cycle() {
         if (DEBUG) {
             if (running || walkingSteps > 0 || !finishedInputs) {
-                System.out.println("// doTick: "
+                System.out.println("// In Cycle: "
                         + "walkingSteps " + walkingSteps
                         + ", clock " + clock
                         + ", getTimer " + getTimer()
@@ -163,8 +122,7 @@ public class NAR {
         if (walkingSteps == 0) {
             boolean reasonerShouldRun = false;
             for (InputChannel channelIn : inputChannels) {
-                reasonerShouldRun = reasonerShouldRun
-                        || channelIn.nextInput();
+                reasonerShouldRun = reasonerShouldRun || channelIn.nextInput();
             }
             finishedInputs = !reasonerShouldRun;
         }
@@ -176,16 +134,69 @@ public class NAR {
             }
             output.clear();	// this will trigger display the current value of timer in Memory.report()
         }
-        
         if (running || walkingSteps > 0) {
             clock++;
             tickTimer();
             
             memory.workCycle(clock);
+
             if (walkingSteps > 0) {
                 walkingSteps--;
             }
         }
+    }
+    
+    /**
+     * To process a line of input text
+     *
+     * @param text
+     */
+    public void textInputLine(String text) {
+        if (text.isEmpty()) {return;}
+        char c = text.charAt(0);
+        if (c == Symbols.RESET_MARK) {
+            reset();
+            memory.getExportStrings().add(text);
+        } else if (c != Symbols.COMMENT_MARK) {
+            // read NARS language or an integer : TODO duplicated code
+            try {
+                int i = Integer.parseInt(text);
+                walk(i);
+            } catch (NumberFormatException e) {
+                Task task = StringParser.parseExperience(new StringBuffer(text), memory, clock);              
+                if (task != null) {
+                    inputNarseseTask(task);
+                }
+            }
+        }
+    }
+
+    /** Adds task to main memory 
+     *  @param task
+     */
+    private void inputNarseseTask(Task task){
+        if(task.getBudget().aboveThreshold()){
+            memory.getRecorder().append("!!! Perceived: " + task + "\n");
+            memory.report(task.getSentence(), true, false);
+            task.getBudget().incPriority((float)0.1);
+            globalBuffer.preProcessing(task, true);
+            //globalBuffer.putInSequenceList(task, memory.getTime());
+        }else{
+            memory.getRecorder().append("!!! Neglected: " + task + "\n");
+        }
+    }
+    
+    public Memory getMemory() {
+        return memory;
+    }
+    
+    /**
+     * Get the current time from the clock Called in {@link nars.entity.Stamp}
+     *
+     * @return The current time
+     */
+    public long getTime() {
+        return clock;
     }
     
     public int getWalkingSteps(){
@@ -199,6 +210,11 @@ public class NAR {
     public OveralExperience getGlobalBuffer(){
         return globalBuffer;
     }
+    
+    /** Report Silence Level */
+    public AtomicInteger getSilenceValue() {
+        return silenceValue;
+    }
 
     /**
      * determines the end of {@link NARSBatch} program
@@ -209,68 +225,8 @@ public class NAR {
     }
 
     /**
-     * To process a line of input text
-     *
-     * @param text
-     */
-    public void textInputLine(String text) {
-        
-        if (text.isEmpty()) {
-            return;
-        }
-        char c = text.charAt(0);
-        if (c == Symbols.RESET_MARK) {
-            reset();
-            memory.getExportStrings().add(text);
-        } else if (c != Symbols.COMMENT_MARK) {
-            // read NARS language or an integer : TODO duplicated code
-            try {
-                int i = Integer.parseInt(text);
-                walk(i);
-            } catch (NumberFormatException e) {
-                
-                Task task = StringParser.parseExperience(new StringBuffer(text), memory, clock);              
-                if (task != null) {
-                    inputNarseseTask(task);
-                }
-            }
-        }
-    }
-
-    private void inputNarseseTask(Task task){
-        
-        if(task.getBudget().aboveThreshold()){
-            
-            memory.getRecorder().append("!!! Perceived: " + task + "\n");
-            memory.report(task.getSentence(), true, false);
-            task.getBudget().incPriority((float)0.1);
-            globalBuffer.preProcessing(task, true);
-            //globalBuffer.putInSequenceList(task, memory.getTime());
-            
-        }else{
-            
-            memory.getRecorder().append("!!! Neglected: " + task + "\n");
-            
-        }
-        
-    }
-    
-    @Override
-    public String toString() {
-        return memory.toString();
-    }
-
-    /**
-     * Report Silence Level
-     */
-    public AtomicInteger getSilenceValue() {
-        return silenceValue;
-    }
-
-    /**
      * To get the timer value and then to
      * reset it by {@link #initTimer()};
-     * plays the same role as {@link nars.gui.MainWindow#updateTimer()} 
      *
      * @return The previous timer value
      */
@@ -280,17 +236,12 @@ public class NAR {
         return i;
     }
 
-    /**
-     * Reset timer;
-     * plays the same role as {@link nars.gui.MainWindow#initTimer()} 
-     */
+    /** Reset timer */
     public void initTimer() {
         setTimer(0);
     }
 
-    /**
-     * Update timer
-     */
+    /** Update timer */
     public void tickTimer() {
         setTimer(getTimer() + 1);
     }
@@ -303,5 +254,10 @@ public class NAR {
     /** set System clock : number of cycles since last output */
     private void setTimer(long timer) {
         this.timer = timer;
+    }
+    
+    @Override
+    public String toString() {
+        return memory.toString();
     }
 }

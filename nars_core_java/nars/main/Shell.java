@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import nars.io.OutputChannel;
 
 /**
- *
  * @author Pei, Xiang, Patrick, Peter
  */
 public class Shell {
@@ -70,8 +69,8 @@ public class Shell {
     public static void main(String[] args) {
         NAR reasoner = new NAR();
         reasoner.addOutputChannel(new ShellOutput());
-        InputThread thr = new InputThread(System.in, reasoner);
-        thr.start();
+        InputThread t = new InputThread(System.in, reasoner);
+        t.start();
         System.out.println("Welcome to OpenNARS v" + Parameters.VERSION  + 
                            " Shell! Type Narsese input and press enter, use questions to get "
                          + "answers or increase volume with *volume=n with n=0..100");
