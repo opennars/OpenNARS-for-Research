@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import nars.entity.BudgetValue;
 import nars.entity.Task;
 import nars.entity.TruthValue;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**

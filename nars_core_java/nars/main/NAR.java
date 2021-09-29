@@ -1,4 +1,4 @@
-package nars.main_nogui;
+package nars.main;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;

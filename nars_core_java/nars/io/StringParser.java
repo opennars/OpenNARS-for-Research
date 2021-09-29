@@ -51,7 +51,7 @@ import static nars.io.Symbols.STATEMENT_OPENER;
 import static nars.io.Symbols.TRUTH_VALUE_MARK;
 import static nars.io.Symbols.VALUE_SEPARATOR;
 import nars.language.*;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**

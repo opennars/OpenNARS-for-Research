@@ -47,9 +47,8 @@ import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
 import nars.io.IInferenceRecorder;
 import nars.io.OutputChannel;
-import nars.main.NAR_GUI;
-import nars.main_nogui.Parameters;
-import nars.main_nogui.NAR;
+import nars.main.Parameters;
+import nars.main.NAR;
 import nars.storage.Memory;
 
 /**

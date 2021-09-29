@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main_nogui;
+package nars.main;
 
 /**
  * The parameters used when the system is invoked from command line

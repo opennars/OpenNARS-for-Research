@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main_nogui;
+package nars.main;
 
 /**
  * Collected system parameters. To be modified before compiling.
@@ -30,7 +30,8 @@ public class Parameters {
     
     /*----------- OpenNARS Info ----------------------------------------------*/
     /** The information about the version and date of the project. */
-    public static final String VERSION_INFO = "OpenNARS\tVersion 3.1.2\tOctober 2021\n";
+    public static final String VERSION = "3.1.2";
+    public static final String VERSION_INFO = "OpenNARS Version " + VERSION + " October 2021\n";
     /** The project web sites. */
     public static final String WEBSITE = " OpenNARS website:  http://code.google.com/p/open-nars/ \n"
                                        + " NARS website:  http://sites.google.com/site/narswang/";

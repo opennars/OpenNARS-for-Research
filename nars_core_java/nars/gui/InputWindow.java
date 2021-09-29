@@ -35,7 +35,7 @@ import javax.swing.JTextArea;
 
 import nars.io.ExperienceReader;
 import nars.io.InputChannel;
-import nars.main_nogui.NAR;
+import nars.main.NAR;
 
 /**
  * Input window, accepting user tasks

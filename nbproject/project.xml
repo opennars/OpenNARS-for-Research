@@ -6,7 +6,6 @@
             <name>open-nars</name>
             <source-roots>
                 <root id="src.dir"/>
-                <root id="nars_gui.dir"/>
             </source-roots>
             <test-roots/>
         </data>

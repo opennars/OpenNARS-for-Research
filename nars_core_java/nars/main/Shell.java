@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nars.main_nogui;
+package nars.main;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,7 +72,9 @@ public class Shell {
         reasoner.addOutputChannel(new ShellOutput());
         InputThread thr = new InputThread(System.in, reasoner);
         thr.start();
-        System.out.println("Welcome to OpenNARS Shell, type Narsese input and press enter, use questions to get answers, or increase volume with *volume=n with n=0..100");
+        System.out.println("Welcome to OpenNARS v" + Parameters.VERSION  + 
+                           " Shell! Type Narsese input and press enter, use questions to get "
+                         + "answers or increase volume with *volume=n with n=0..100");
         reasoner.run();
         reasoner.getSilenceValue().set(0);
         int cnt = 0;

@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import nars.inference.TemporalRules;
 
 import nars.io.Symbols;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**

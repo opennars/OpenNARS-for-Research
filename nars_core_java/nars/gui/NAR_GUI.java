@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main;
+package nars.gui;
 
 import javax.swing.SwingUtilities;
 
 import nars.gui.InputWindow;
 import nars.gui.MainWindow;
-import nars.main_nogui.NAR;
+import nars.main.NAR;
 
 /**
  * A NARS NAR_GUI has its memory, I/O channels, and internal clock.

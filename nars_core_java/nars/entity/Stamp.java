@@ -32,9 +32,9 @@ import static nars.inference.TemporalRules.ORDER_FORWARD;
 import nars.io.Symbols;
 import nars.language.Tense;
 import static nars.language.Tense.*;
-import nars.main_nogui.Debug;
-import nars.main_nogui.Parameters;
-import nars.main_nogui.NAR;
+import nars.main.Debug;
+import nars.main.Parameters;
+import nars.main.NAR;
 
 /**
  * Each Sentence has a time stamp, consisting the following components:

@@ -15,7 +15,7 @@ import nars.io.Symbols;
 import nars.language.Inheritance;
 import nars.language.SetInt;
 import nars.language.Term;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**

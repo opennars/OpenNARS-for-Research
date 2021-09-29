@@ -49,8 +49,8 @@ import nars.language.Operation;
 import nars.language.Operator;
 import nars.language.Tense;
 import nars.language.Term;
-import nars.main_nogui.Parameters;
-import nars.main_nogui.NAR;
+import nars.main.Parameters;
+import nars.main.NAR;
 import nars.mental.Emotion;
 
 /**

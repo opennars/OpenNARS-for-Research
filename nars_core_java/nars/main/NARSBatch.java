@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main_nogui;
+package nars.main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

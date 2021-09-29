@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import nars.entity.*;
 import nars.io.Symbols;
 import nars.language.*;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  * Single-premise inference rules involving compound terms. Input are one

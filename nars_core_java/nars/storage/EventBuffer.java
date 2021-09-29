@@ -22,7 +22,7 @@ import nars.language.Equivalence;
 import nars.language.Implication;
 import nars.language.Negation;
 import nars.language.Term;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  *

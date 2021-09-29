@@ -28,7 +28,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import nars.main_nogui.NAR;
+import nars.main.NAR;
 
 /**
  * To read and write experience as Task streams

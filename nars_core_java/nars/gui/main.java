@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main;
+package nars.gui;
 
+import nars.gui.NAR_GUI;
 import nars.io.ExperienceReader;
-import nars.main_nogui.CommandLineParameters;
-import nars.main_nogui.NARSBatch;
-import nars.main_nogui.NAR;
+import nars.main.CommandLineParameters;
+import nars.main.NARSBatch;
+import nars.main.NAR;
 
 /**
  * The main class of OpenNARS with support of a GUI. 

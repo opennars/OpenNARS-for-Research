@@ -27,7 +27,7 @@ import java.awt.FileDialog;
 import java.io.*;
 import java.util.*;
 
-import nars.main_nogui.NAR;
+import nars.main.NAR;
 
 /**
  * To read and write experience as Task streams
