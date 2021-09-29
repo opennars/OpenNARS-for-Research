@@ -47,14 +47,13 @@ import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
 import nars.io.IInferenceRecorder;
 import nars.io.OutputChannel;
-import nars.main.NARS;
 import nars.main.NAR_GUI;
 import nars.main_nogui.Parameters;
 import nars.main_nogui.NAR;
 import nars.storage.Memory;
 
 /**
- * Main window of NARS GUI
+ * Main window of GUI
  */
 public class MainWindow extends NarsFrame implements ActionListener, OutputChannel {
 
@@ -336,14 +335,11 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
             } else if (label.equals("Report Silence Level")) {
                 silentW.setVisible(true);
             } else if (label.equals("Related Information")) {
-//                MessageDialog web = 
-                		new MessageDialog(this, NARS.WEBSITE);
+                new MessageDialog(this, Parameters.WEBSITE);
             } else if (label.equals("About NARS")) {
-//                MessageDialog info = 
-                		new MessageDialog(this, NARS.INFO);
+                new MessageDialog(this, Parameters.VERSION_INFO);
             } else {
-//                MessageDialog ua = 
-                		new MessageDialog(this, UNAVAILABLE);
+                new MessageDialog(this, UNAVAILABLE);
             }
         }
     }

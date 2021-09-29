@@ -27,6 +27,13 @@ package nars.main_nogui;
  * Collected system parameters. To be modified before compiling.
  */
 public class Parameters {
+    
+    /*----------- OpenNARS Info ----------------------------------------------*/
+    /** The information about the version and date of the project. */
+    public static final String VERSION_INFO = "OpenNARS\tVersion 3.1.2\tOctober 2021\n";
+    /** The project web sites. */
+    public static final String WEBSITE = " OpenNARS website:  http://code.google.com/p/open-nars/ \n"
+                                       + " NARS website:  http://sites.google.com/site/narswang/";
 
     /* ---------- initial values of run-time adjustable parameters ---------- */
     /** Concept decay rate in ConceptBag, in [1, 99]. */

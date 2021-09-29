@@ -20,6 +20,7 @@ public class Shell {
     
     static String inputString = "";
     
+    
     private static class InputThread extends Thread {
         private final BufferedReader bufIn;
         private final NAR reasoner;
@@ -53,6 +54,7 @@ public class Shell {
         }
     }
     
+    
     public static class ShellOutput implements OutputChannel{
         @Override
         public void nextOutput(ArrayList<String> arg0) {
@@ -63,6 +65,7 @@ public class Shell {
         @Override
         public void tickTimer() {}
     }
+    
     
     public static void main(String[] args) {
         NAR reasoner = new NAR();
