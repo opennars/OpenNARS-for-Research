@@ -277,9 +277,9 @@ public abstract class EventBuffer extends Buffer<Task> {
     
     /**
      * Insert an task into the sequence list
-     * @param task 将要被插入的任务
-     * @param time 时间
-     * @return 是否成功插入
+     * @param task Task to be inserted
+     * @param time 
+     * @return 
      */
     public boolean putInSequenceList(Task task, long time){
         

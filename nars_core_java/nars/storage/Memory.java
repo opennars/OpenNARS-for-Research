@@ -42,6 +42,7 @@ import nars.entity.TermLink;
 import nars.entity.TruthValue;
 import nars.inference.BudgetFunctions;
 import nars.io.IInferenceRecorder;
+import nars.io.NullInferenceRecorder;
 import nars.io.Symbols;
 import nars.language.Equivalence;
 import nars.language.Implication;
@@ -54,7 +55,7 @@ import nars.main.NAR;
 import nars.mental.Emotion;
 
 /**
- * The memory of the system.
+ * The main memory of the system.
  */
 public class Memory {
 
@@ -62,8 +63,6 @@ public class Memory {
      * Backward pointer to the reasoner
      */
     private final NAR reasoner;
-
-    /* ---------- Long-term storage for multiple cycles ---------- */
     /**
      * Concept bag. Containing all Concepts of the system
      */
@@ -73,17 +72,14 @@ public class Memory {
      */
     //private final NovelTaskBag novelTasks;
     /**
-     * Inference record text to be written into a log file
+     * Inference record text to be written into a log file, currently not used
      */
     private IInferenceRecorder recorder;
     private final AtomicInteger beliefForgettingRate = new AtomicInteger(Parameters.TERM_LINK_FORGETTING_CYCLE);
     private final AtomicInteger taskForgettingRate = new AtomicInteger(Parameters.TASK_LINK_FORGETTING_CYCLE);
     private final AtomicInteger conceptForgettingRate = new AtomicInteger(Parameters.CONCEPT_FORGETTING_CYCLE);
-
-    /* ---------- Short-term workspace for a single cycle ---------- */
     /**
-     * List of new tasks accumulated in one cycle, to be processed in the next
-     * cycle
+     * List of new tasks accumulated in one cycle, to be processed in the next cycle
      */
     //private final LinkedList<Task> newTasks;
     /**
@@ -133,9 +129,8 @@ public class Memory {
     //private final long originalTime = 0;
     private Emotion emotion;
     
-    /* ---------- Constructor ---------- */
     /**
-     * Create a new memory <p> Called in Reasoner.reset only
+     * Creates a new main memory. Called in NAR only
      *
      * @param reasoner
      */
@@ -175,32 +170,6 @@ public class Memory {
         recorder.append("\n-----RESET-----\n");
     }
 
-    /* ---------- access utilities ---------- */
-    public ArrayList<String> getExportStrings() {
-        return exportStrings;
-    }
-
-    public IInferenceRecorder getRecorder() {
-        return recorder;
-    }
-
-    public void setRecorder(IInferenceRecorder recorder) {
-        this.recorder = recorder;
-    }
-
-    public long getTime() {
-        return reasoner.getTime();
-    }
-    
-    public Emotion getEmotion(){
-        
-        return emotion;
-        
-    }
-
-//    public MainWindow getMainWindow() {
-//        return reasoner.getMainWindow();
-//    }
     /**
      * Actually means that there are no new Tasks
      * @return 
@@ -209,13 +178,10 @@ public class Memory {
         return reasoner.getGlobalBuffer().isEmpty();
     }
 
-    /* ---------- conversion utilities ---------- */
     /**
      * Get an existing Concept for a given name <p> called from Term and
      * ConceptWindow.
      *
-     * 能否在概念包中找到以参数名称为名字的概念，有返回真，无返回假
-     * 
      * @param name the name of a concept
      * @return a Concept or null
      */
@@ -223,57 +189,9 @@ public class Memory {
         return concepts.get(name);
     }
     
-    public Stamp getNewStamp(){        
-        
-        if(newStamp == null){  
-            newStamp = new Stamp(getTime());
-            resetOccurrenceTime();
-        }
-        
-        return newStamp;
-    }
-    
-    public Stamp setNewStamp(Stamp first, Stamp second, long time){
-        
-        newStamp = new Stamp(first, second, time);
-        return newStamp;
-        
-    }
-    
-    public void resetOccurrenceTime(){     
-        newStamp.setOccurrenceTime(Stamp.ETERNAL);     
-    }
-    
-    public EventBuffer getOveralExperience(){
-        
-        return reasoner.getGlobalBuffer();
-        
-    }
-    
-    public EventBuffer getInternalExperience(){
-        
-        return reasoner.getInternalBuffer();
-        
-    }
-
-    /**
-     * Get a Term for a given name of a Concept or Operator <p> called in
-     * StringParser and the make methods of compound terms.
-     *
-     * @param name the name of a concept or operator
-     * @return a Term or null (if no Concept/Operator has this name)
-     */
-    public Term nameToListedTerm(String name) {
-        Concept concept = concepts.get(name);
-        if (concept != null) {
-            return concept.getTerm();
-        }
-        return null;
-    }
-
     /**
      * Get an existing Concept for a given Term.
-     * 得到一个已存在的概念
+     * 
      * @param term The Term naming a concept
      * @return a Concept or null
      */
@@ -302,6 +220,42 @@ public class Memory {
         }
         return concept;
     }
+    
+    public Concept getConceptFromTheList(Term t){
+        return concepts.get(t.getName());
+    }
+    
+    public Stamp getNewStamp(){        
+        if(newStamp == null){  
+            newStamp = new Stamp(getTime());
+            resetOccurrenceTime();
+        }
+        return newStamp;
+    }
+    
+    public Stamp setNewStamp(Stamp first, Stamp second, long time){
+        newStamp = new Stamp(first, second, time);
+        return newStamp;
+    }
+    
+    public void resetOccurrenceTime(){     
+        newStamp.setOccurrenceTime(Stamp.ETERNAL);     
+    }
+    
+    /**
+     * Get a Term for a given name of a Concept or Operator <p> called in
+     * StringParser and the make methods of compound terms.
+     *
+     * @param name the name of a concept or operator
+     * @return a Term or null (if no Concept/Operator has this name)
+     */
+    public Term nameToListedTerm(String name) {
+        Concept concept = concepts.get(name);
+        if (concept != null) {
+            return concept.getTerm();
+        }
+        return null;
+    }
 
     /**
      * Get the current activation level of a concept.
@@ -314,7 +268,6 @@ public class Memory {
         return (c == null) ? 0f : c.getPriority();
     }
 
-    /* ---------- adjustment functions ---------- */
     /**
      * Adjust the activation level of a Concept <p> called in
      * Concept.insertTaskLink only
@@ -486,32 +439,28 @@ public class Memory {
         recorder.append(" --- " + clock + " ---\n");      
         processBuffer();
         processConcept();    
-        
         //reasoner.getGlobalBuffer().refresh();
     }
     
+    /** 
+     * Select task from Internal Buffer and insert to Global Buffer 
+     * Select task from Global Buffer and insert to Main Memory
+     */
     private void processBuffer(){  
-        
         //reasoner.getGlobalBuffer().print();
-        
         if(!reasoner.getInternalBuffer().isEmpty()){
             Task task = reasoner.getInternalBuffer().observe(true, false);
             //report(task.getSentence(), false, false);
             if(task != null)
                 reasoner.getGlobalBuffer().preProcessing(task, true);
         }
-        
         //reasoner.getGlobalBuffer().print();
-        Task task = reasoner.getGlobalBuffer().observe(true, true);
+        Task task = reasoner.getGlobalBuffer().observe(true, true); //Args do not matter
         //generalInfoReport("Take Out: " + task);
         if(task != null){
             //System.out.println("Task take out: " + task.getName() + " " + task.getSentence().getTruth().toString());
             immediateProcess(task);
         }
-    }
-    
-    public NAR getReasoner(){
-        return reasoner;
     }
     
     /**
@@ -532,7 +481,6 @@ public class Memory {
         }
     }
 
-    /* ---------- task processing ---------- */
     /**
      * Immediate processing of a new task, in constant time Local processing, in
      * one concept only
@@ -551,7 +499,6 @@ public class Memory {
         }
     }
 
-    /* ---------- display ---------- */
     /**
      * Start display active concepts on given bagObserver, called from MainWindow.
      *
@@ -565,7 +512,7 @@ public class Memory {
      * @param bagObserver bag Observer that will receive notifications
      * @param title the window title
      */
-	public void conceptsStartPlay( BagObserver<Concept> bagObserver, String title ) {
+    public void conceptsStartPlay( BagObserver<Concept> bagObserver, String title ) {
         bagObserver.setBag(concepts);
         concepts.addBagObserver(bagObserver, title);
     }
@@ -581,17 +528,13 @@ public class Memory {
         //bagObserver.setBag(concepts);
         //reasoner.getInternalBuffer().addBagObserver(bagObserver, s);
     }
-    
-    public Concept getConceptFromTheList(Term t){
-        return concepts.get(t.getName());
-    }
 
     /**
      * Display input/output sentence in the output channels.The only place to
- add Objects into exportStrings. Currently only Strings are added, though
- in the future there can be outgoing Tasks; also if exportStrings is empty
- display the current value of timer ( exportStrings is emptied in
- {@link NAR#doTick()} - TODO fragile mechanism)
+     * add Objects into exportStrings. Currently only Strings are added, though
+     * in the future there can be outgoing Tasks; also if exportStrings is empty
+     * display the current value of timer ( exportStrings is emptied in
+     * {@link NAR#doTick()} - TODO fragile mechanism)
      *
      * @param sentence the sentence to be displayed
      * @param input whether the task is input
@@ -625,19 +568,15 @@ public class Memory {
         if (input) {
             s = "  IN: ";
         }else if(execution){
-        
             s = "EXE: ";
-            
         }else {
             if(answer)
                 s = " ANSWER";
             else
                 s = " OUT: ";
         }
-        
         //System.out.println(sentence.toStringBrief());
         //System.out.println("occurrence Time: " + sentence.getStamp().getOccurrenceTime());
-        
         if(!sentence.getStamp().isEternal()){
             String tense = sentence.getStamp().getTense(getTime(), Parameters.DURATION);
             if(tense == null){
@@ -661,27 +600,26 @@ public class Memory {
                         s+= " Happening";
                         break;
                 }*/
-                
-                
             }
         }else{
             s += sentence.toStringBrief();
         }
-
         if(interval > 0)
             s += " Interval is " + interval;
-        
         //System.out.println("s: " + s);
-        
         exportStrings.add(s);
     }
     
     public void generalInfoReport(String s){
-        
         exportStrings.add(s);
-        
     }
     
+    /**
+     * Task execution called only from Operator.java
+     * @param time
+     * @param operation
+     * @param truth 
+     */
     public void executeTask(long time, Operation operation, TruthValue truth){
         
         Stamp stamp = new Stamp(Tense.Present, time);
@@ -707,6 +645,55 @@ public class Memory {
     public Operator removeOperator(Operator op){
         return operators.remove(op.getName());
     }
+
+    public AtomicInteger getTaskForgettingRate() {
+        return taskForgettingRate;
+    }
+
+    public AtomicInteger getBeliefForgettingRate() {
+        return beliefForgettingRate;
+    }
+
+    public AtomicInteger getConceptForgettingRate() {
+        return conceptForgettingRate;
+    }
+    
+    public ConceptBag getConcepts(){
+        return concepts;
+    }
+    
+    public NAR getReasoner(){
+        return reasoner;
+    }
+    
+    public EventBuffer getOveralExperience(){
+        return reasoner.getGlobalBuffer();
+    }
+    
+    public EventBuffer getInternalExperience(){
+        return reasoner.getInternalBuffer();
+    }
+    
+    public ArrayList<String> getExportStrings() {
+        return exportStrings;
+    }
+
+    public IInferenceRecorder getRecorder() {
+        return recorder;
+    }
+
+    // Only Called from GUI
+    public void setRecorder(IInferenceRecorder recorder) {
+        this.recorder = recorder;
+    }
+
+    public long getTime() {
+        return reasoner.getTime();
+    }
+    
+    public Emotion getEmotion(){
+        return emotion;
+    }
     
     @Override
     public String toString() {
@@ -729,57 +716,5 @@ public class Memory {
     private String toStringIfNotNull(Object item, String title) {
         return item == null ? "" : "\n " + title + ":\n"
                 + item.toString();
-    }
-
-    public AtomicInteger getTaskForgettingRate() {
-        return taskForgettingRate;
-    }
-
-    public AtomicInteger getBeliefForgettingRate() {
-        return beliefForgettingRate;
-    }
-
-    public AtomicInteger getConceptForgettingRate() {
-        return conceptForgettingRate;
-    }
-
-    class NullInferenceRecorder implements IInferenceRecorder {
-
-        @Override
-        public void init() {
-        }
-
-        @Override
-        public void show() {
-        }
-
-        @Override
-        public void play() {
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public void append(String s) {
-        }
-
-        @Override
-        public void openLogFile() {
-        }
-
-        @Override
-        public void closeLogFile() {
-        }
-
-        @Override
-        public boolean isLogging() {
-            return false;
-        }
-    }
-    
-    public ConceptBag getConcepts(){
-        return concepts;
     }
 }
