@@ -46,6 +46,8 @@ import nars.main.Parameters;
 import nars.storage.Bag;
 import nars.storage.BagObserver;
 
+
+
 /**
  * JWindow display the priority distribution of items within a given bag
  */

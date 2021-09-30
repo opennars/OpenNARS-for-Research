@@ -500,36 +500,6 @@ public class Memory {
     }
 
     /**
-     * Start display active concepts on given bagObserver, called from MainWindow.
-     *
-     * we don't want to expose fields concepts and novelTasks, AND we want to
-     * separate GUI and inference, so this method takes as argument a 
-     * {@link BagObserver} and calls {@link ConceptBag#addBagObserver(BagObserver, String)} ;
-     * 
-     * see design for {@link Bag} and {@link nars.gui.BagWindow}
-     * in {@link Bag#addBagObserver(BagObserver, String)}
-     *
-     * @param bagObserver bag Observer that will receive notifications
-     * @param title the window title
-     */
-    public void conceptsStartPlay( BagObserver<Concept> bagObserver, String title ) {
-        bagObserver.setBag(concepts);
-        concepts.addBagObserver(bagObserver, title);
-    }
-
-    /**
-     * Display new tasks, called from MainWindow. see
-     * {@link #conceptsStartPlay(BagObserver, String)}
-     *
-     * @param bagObserver
-     * @param s the window title
-     */
-    public void taskBuffersStartPlay( BagObserver<Task> bagObserver, String s ) {
-        //bagObserver.setBag(concepts);
-        //reasoner.getInternalBuffer().addBagObserver(bagObserver, s);
-    }
-
-    /**
      * Display input/output sentence in the output channels.The only place to
      * add Objects into exportStrings. Currently only Strings are added, though
      * in the future there can be outgoing Tasks; also if exportStrings is empty

@@ -315,9 +315,9 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
                 memory.getExportStrings().add("*****RESET*****");
             } else if (label.equals("Concepts")) {
                 /* see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
-				memory.conceptsStartPlay(new BagWindow<Concept>(), "Active Concepts");
+		StartPlay.conceptsStartPlay(new BagWindow<Concept>(), memory.getConcepts(), "Active Concepts");
             } else if (label.equals("Buffered Tasks")) {
-				memory.taskBuffersStartPlay(new BagWindow<Task>(), "Buffered Tasks");
+		StartPlay.taskBuffersStartPlay(new BagWindow<Task>(), memory.getConcepts(), "Buffered Tasks");
             } else if (label.equals("Concept Content")) {
                 conceptWin.setVisible(true);
             } else if (label.equals("Inference Log")) {
