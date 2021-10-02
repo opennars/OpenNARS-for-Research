@@ -146,7 +146,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
      * @param e The ActionEvent
      */
     @Override
-	public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
         Object s = e.getSource();
         if (s == playButton) {
             concept.play();
@@ -182,7 +182,7 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
             this.detachFromConcept();
         }
         showing = true;
-        this.post(concept.displayContent());
+        this.post(concept.toStringConceptContent());
     }
 
     /**

@@ -42,7 +42,6 @@ import nars.main.NARSBatch;
 import nars.main.Parameters;
 import nars.storage.BagObserver;
 import nars.storage.Memory;
-import nars.storage.NullBagObserver;
 import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
 
@@ -101,10 +100,8 @@ public final class Concept extends Item {
     /**
      * The display window
      */
-    private EntityObserver entityObserver = new NullEntityObserver();
+    private EntityObserver entityObserver;
 
-
-    /* ---------- constructor and initialization ---------- */
     /**
      * Constructor, called in Memory.getConcept only
      *
@@ -130,9 +127,10 @@ public final class Concept extends Item {
         }else{
             termLinkTemplates = null;
         }
+        
+        this.entityObserver = new NullEntityObserver(); // Does nothing as of now
     }
 
-    /* ---------- direct processing of tasks ---------- */
     /**
      * Directly process a new task. Called exactly once on each task. Using
      * local information and finishing in a constant time. Provide feedback in
@@ -155,7 +153,7 @@ public final class Concept extends Item {
         if (task.getBudget().aboveThreshold() && !task.getSentence().isGoal()) {    // still need to be processed
             linkToTask(task);
         }
-        entityObserver.refresh(displayContent());
+        entityObserver.refresh(toStringConceptContent());
     }
 
     /**
@@ -864,6 +862,28 @@ public final class Concept extends Item {
     private String toStringIfNotNull(Object item, String title) {
         return item == null ? "" : "\n " + title + ":" + item.toString();
     }
+    
+    /**
+     * Collect direct isBelief, questions, and goals for display
+     *
+     * @return String representation of direct content
+     */
+    public String toStringConceptContent() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("\n  Beliefs:\n");
+        if (beliefs.size() > 0) {
+            for (Sentence s : beliefs) {
+                buffer.append(s).append("\n");
+            }
+        }
+        buffer.append("\n  Question:\n");
+        if (questions.size() > 0) {
+            for (Task t : questions) {
+                buffer.append(t).append("\n");
+            }
+        }
+        return buffer.toString();
+    }
 
     /**
      * Recalculate the quality of the concept [to be refined to show
@@ -1023,8 +1043,7 @@ public final class Concept extends Item {
 
     /* ---------- display ---------- */
     /**
-     * Start displaying contents and links, called from ConceptWindow,
-     * TermWindow or Memory.processTask only
+     * Start displaying contents and links, called from ConceptWindow or TermWindow
      *
      * same design as for {@link nars.storage.Bag} and
      * {@link nars.gui.BagWindow}; see
@@ -1038,7 +1057,7 @@ public final class Concept extends Item {
     public void startPlay(EntityObserver entityObserver, boolean showLinks) {
         this.entityObserver = entityObserver;
         entityObserver.startPlay(this, showLinks);
-        entityObserver.post(displayContent());
+        entityObserver.post(toStringConceptContent());
         if (showLinks) {
             taskLinks.addBagObserver(entityObserver.createBagObserver(), "Task Links in " + term);
             termLinks.addBagObserver(entityObserver.createBagObserver(), "Term Links in " + term);
@@ -1049,7 +1068,7 @@ public final class Concept extends Item {
      * Resume display, called from ConceptWindow only
      */
     public void play() {
-        entityObserver.post(displayContent());
+        entityObserver.post(toStringConceptContent());
     }
 
     /**
@@ -1057,52 +1076,6 @@ public final class Concept extends Item {
      */
     public void stop() {
         entityObserver.stop();
-    }
-
-    /**
-     * Collect direct isBelief, questions, and goals for display
-     *
-     * @return String representation of direct content
-     */
-    public String displayContent() {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("\n  Beliefs:\n");
-        if (beliefs.size() > 0) {
-            for (Sentence s : beliefs) {
-                buffer.append(s).append("\n");
-            }
-        }
-        buffer.append("\n  Question:\n");
-        if (questions.size() > 0) {
-            for (Task t : questions) {
-                buffer.append(t).append("\n");
-            }
-        }
-        return buffer.toString();
-    }
-    
-    class NullEntityObserver implements EntityObserver {
-
-        @Override
-        public void post(String str) {
-        }
-
-        @Override
-        public BagObserver<TermLink> createBagObserver() {
-            return new NullBagObserver<>();
-        }
-
-        @Override
-        public void startPlay(Concept concept, boolean showLinks) {
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public void refresh(String message) {
-        }
     }
 
     public float acquiredQuality = 0.0f; // Not Used

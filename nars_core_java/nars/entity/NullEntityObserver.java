@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2019 The OpenNARS authors.
+ * Copyright 2021 The OpenNARS authors.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,45 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package nars.entity;
 
 import nars.storage.BagObserver;
+import nars.storage.NullBagObserver;
 
 /**
- * Observer for a {@link Concept} object; similar to Observer design pattern,
- * except that here we have a single observer; NOTE: very similar to interface
- * {@link nars.storage.BagObserver}
+ * Class was moved from Concept.java to be a standalone class for future implementation
+ * 
+ * @author Peter
  */
-public interface EntityObserver {
+public class NullEntityObserver implements EntityObserver {
 
-    /**
-     * Display the content of the concept
-     *
-     * @param str The text to be displayed
-     */
-    public abstract void post(String str);
+    @Override
+    public void post(String str) {
+    }
 
-    /**
-     * create a {@link BagObserver} of the right type (Factory design pattern)
-     */
-    @SuppressWarnings("rawtypes")
-    public abstract BagObserver createBagObserver();
+    @Override
+    public BagObserver<TermLink> createBagObserver() {
+        return new NullBagObserver<>();
+    }
 
-    /**
-     * Set the observed Concept
-     *
-     * @param showLinks unused : TODO : is this forgotten ?
-     */
-    public abstract void startPlay(Concept concept, boolean showLinks);
+    @Override
+    public void startPlay(Concept concept, boolean showLinks) {
+    }
 
-    /**
-     * put in non-showing state
-     */
-    public abstract void stop();
+    @Override
+    public void stop() {
+    }
 
-    /**
-     * Refresh display if in showing state
-     */
-    void refresh(String message);
-
+    @Override
+    public void refresh(String message) {
+        System.out.println(message);
+    }
 }
