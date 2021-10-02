@@ -24,6 +24,7 @@
 package nars.gui;
 
 import nars.entity.Concept;
+import nars.entity.EntityObserver;
 import nars.entity.Task;
 import nars.storage.BagObserver;
 import nars.storage.ConceptBag;
@@ -72,5 +73,42 @@ final class StartPlay {
     public static void taskBuffersStartPlay(BagObserver<Task> bagObserver, ConceptBag concepts, String s ){
         //bagObserver.setBag(concepts);
         //reasoner.getInternalBuffer().addBagObserver(bagObserver, s);
+    }
+    
+    /**
+     * Start displaying contents and links, called from ConceptWindow or TermWindow
+     *
+     * same design as for {@link nars.storage.Bag} and
+     * {@link nars.gui.BagWindow}; see
+     * {@link nars.storage.Bag#addBagObserver(BagObserver, String)}
+     *
+     * @param entityObserver {@link EntityObserver} to set; TODO make it a real
+     * observer pattern (i.e. with a plurality of observers)
+     * @param showLinks Whether to display the task links
+     */
+    @SuppressWarnings("unchecked")
+    public static void startPlayConcept(Concept concept,EntityObserver entityObserver, boolean showLinks) {
+        concept.setEntityObserver(entityObserver);
+        entityObserver.startPlay(concept, showLinks);
+        System.out.println(concept.toStringConceptContent());
+        entityObserver.post(concept.toStringConceptContent());
+        if (showLinks) {
+            concept.getTaskLinkBag().addBagObserver(entityObserver.createBagObserver(), "Task Links in " + concept.getTerm());
+            concept.getTermLinkBag().addBagObserver(entityObserver.createBagObserver(), "Term Links in " + concept.getTerm());
+        }
+    }
+
+    /**
+     * Resume display, called from ConceptWindow only
+     */
+    public static void playConcept(Concept concept) {
+        concept.getEntityObserver().post(concept.toStringConceptContent());
+    }
+
+    /**
+     * Stop display, called from ConceptWindow only
+     */
+    public static void stopConcept(Concept concept) {
+        concept.getEntityObserver().stop();
     }
 }

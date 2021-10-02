@@ -146,23 +146,23 @@ public class ConceptWindow extends NarsFrame implements ActionListener, EntityOb
      * @param e The ActionEvent
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {
         Object s = e.getSource();
         if (s == playButton) {
-            concept.play();
+            StartPlay.playConcept(concept);
         } else if (s == stopButton) {
-            concept.stop();
+            StartPlay.stopConcept(concept);
         } else if (s == playInNewWindowButton) {
-            concept.stop();
+            StartPlay.stopConcept(concept);
             EntityObserver entityObserver = new ConceptWindow(concept);
-            concept.startPlay(entityObserver, false);
+            StartPlay.startPlayConcept(concept, entityObserver, false);
         } else if (s == closeButton) {
             close();
         }
     }
 
     private void close() {
-        concept.stop();
+        StartPlay.stopConcept(concept);
         dispose();
     }
 

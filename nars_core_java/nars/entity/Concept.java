@@ -42,6 +42,7 @@ import nars.main.NARSBatch;
 import nars.main.Parameters;
 import nars.storage.BagObserver;
 import nars.storage.Memory;
+import nars.storage.NullBagObserver;
 import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
 
@@ -101,6 +102,7 @@ public final class Concept extends Item {
      * The display window
      */
     private EntityObserver entityObserver;
+    public float acquiredQuality = 0.0f; // Not Used
 
     /**
      * Constructor, called in Memory.getConcept only
@@ -128,7 +130,7 @@ public final class Concept extends Item {
             termLinkTemplates = null;
         }
         
-        this.entityObserver = new NullEntityObserver(); // Does nothing as of now
+        this.entityObserver = new NullEntityObserver(); // For future use
     }
 
     /**
@@ -864,7 +866,7 @@ public final class Concept extends Item {
     }
     
     /**
-     * Collect direct isBelief, questions, and goals for display
+     * Prints Beliefs and Questions of a concept
      *
      * @return String representation of direct content
      */
@@ -1040,52 +1042,10 @@ public final class Concept extends Item {
         }
         taskLinks.putBack(currentTaskLink);
     }
-
-    /* ---------- display ---------- */
-    /**
-     * Start displaying contents and links, called from ConceptWindow or TermWindow
-     *
-     * same design as for {@link nars.storage.Bag} and
-     * {@link nars.gui.BagWindow}; see
-     * {@link nars.storage.Bag#addBagObserver(BagObserver, String)}
-     *
-     * @param entityObserver {@link EntityObserver} to set; TODO make it a real
-     * observer pattern (i.e. with a plurality of observers)
-     * @param showLinks Whether to display the task links
-     */
-    @SuppressWarnings("unchecked")
-    public void startPlay(EntityObserver entityObserver, boolean showLinks) {
-        this.entityObserver = entityObserver;
-        entityObserver.startPlay(this, showLinks);
-        entityObserver.post(toStringConceptContent());
-        if (showLinks) {
-            taskLinks.addBagObserver(entityObserver.createBagObserver(), "Task Links in " + term);
-            termLinks.addBagObserver(entityObserver.createBagObserver(), "Term Links in " + term);
-        }
-    }
-
-    /**
-     * Resume display, called from ConceptWindow only
-     */
-    public void play() {
-        entityObserver.post(toStringConceptContent());
-    }
-
-    /**
-     * Stop display, called from ConceptWindow only
-     */
-    public void stop() {
-        entityObserver.stop();
-    }
-
-    public float acquiredQuality = 0.0f; // Not Used
     
     public void incAcquiredQuality(){ // Not Used
-        
         acquiredQuality += 0.1f;
-        
         if(acquiredQuality > 1.0f);
             acquiredQuality = 1.0f;
-        
     }
 }
