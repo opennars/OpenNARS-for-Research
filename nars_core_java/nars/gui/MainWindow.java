@@ -47,21 +47,19 @@ import nars.io.ExperienceReader;
 import nars.io.ExperienceWriter;
 import nars.io.IInferenceRecorder;
 import nars.io.OutputChannel;
-import nars.main.NARS;
-import nars.main.Reasoner;
-import nars.main_nogui.Parameters;
-import nars.main_nogui.ReasonerBatch;
+import nars.main.Parameters;
+import nars.main.NAR;
 import nars.storage.Memory;
 
 /**
- * Main window of NARS GUI
+ * Main window of GUI
  */
 public class MainWindow extends NarsFrame implements ActionListener, OutputChannel {
 
     /**
      * Reference to the reasoner
      */
-    private final ReasonerBatch reasoner;
+    private final NAR reasoner;
     /**
      * Reference to the memory
      */
@@ -121,7 +119,7 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
      * @param reasoner
      * @param title
      */
-    public MainWindow(Reasoner reasoner, String title) {
+    public MainWindow(NAR_GUI reasoner, String title) {
         super(title);
         this.reasoner = reasoner;
         memory = reasoner.getMemory();
@@ -317,9 +315,9 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
                 memory.getExportStrings().add("*****RESET*****");
             } else if (label.equals("Concepts")) {
                 /* see design for Bag and {@link BagWindow} in {@link Bag#startPlay(String)} */
-				memory.conceptsStartPlay(new BagWindow<Concept>(), "Active Concepts");
+		StartPlay.conceptsStartPlay(new BagWindow<Concept>(), memory.getConcepts(), "Active Concepts");
             } else if (label.equals("Buffered Tasks")) {
-				memory.taskBuffersStartPlay(new BagWindow<Task>(), "Buffered Tasks");
+		StartPlay.taskBuffersStartPlay(new BagWindow<Task>(), memory.getConcepts(), "Buffered Tasks");
             } else if (label.equals("Concept Content")) {
                 conceptWin.setVisible(true);
             } else if (label.equals("Inference Log")) {
@@ -336,14 +334,11 @@ public class MainWindow extends NarsFrame implements ActionListener, OutputChann
             } else if (label.equals("Report Silence Level")) {
                 silentW.setVisible(true);
             } else if (label.equals("Related Information")) {
-//                MessageDialog web = 
-                		new MessageDialog(this, NARS.WEBSITE);
+                new MessageDialog(this, Parameters.WEBSITE);
             } else if (label.equals("About NARS")) {
-//                MessageDialog info = 
-                		new MessageDialog(this, NARS.INFO);
+                new MessageDialog(this, Parameters.VERSION_INFO);
             } else {
-//                MessageDialog ua = 
-                		new MessageDialog(this, UNAVAILABLE);
+                new MessageDialog(this, UNAVAILABLE);
             }
         }
     }

@@ -5,7 +5,7 @@
  */
 package nars.storage;
 
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  *

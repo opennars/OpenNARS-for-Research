@@ -31,21 +31,13 @@ import nars.language.Term;
  */
 public class Task extends Item{
 
-    /**
-     * The sentence of the Task
-     */
+    /** The sentence of the Task */
     private Sentence sentence;
-    /**
-     * Task from which the Task is derived, or null if input
-     */
+    /** Task from which the Task is derived, or null if input */
     private Task parentTask;
-    /**
-     * Belief from which the Task is derived, or null if derived from a theorem
-     */
+    /** Belief from which the Task is derived, or null if derived from a theorem */
     private Sentence parentBelief;
-    /**
-     * For Question and Goal: best solution found so far
-     */
+    /** For Question and Goal: best solution found so far */
     private Sentence bestSolution;
     
     private ArrayList<Sentence> previousBestSolution;
@@ -75,39 +67,6 @@ public class Task extends Item{
         sentence.setObservable(observable());
         key = sentence.toKey();
         previousBestSolution = new ArrayList();
-    }
-    
-    public boolean isPutBack(){
-        return putBack;
-    }
-    
-    public void switchPutBack(){
-        
-        putBack = !putBack;
-        
-    }
-    
-    public boolean getGeneratedAnticipation(){
-        return generatedAnticipation;
-    }
-    
-    public void setGeneratedAnticipation(boolean generatedAnticipation){  
-        this.generatedAnticipation = generatedAnticipation;
-    }
-    
-    public boolean observable(){
-        
-        return isInput |= sentence.getObservable();
-        
-    }
-
-    public boolean fulfilled(){
-        
-        if(bestSolution == null)
-            return false;
-        
-        return sentence.getTruth().getExpectation() - bestSolution.getTruth().getExpectation() <= 0;
-        
     }
     
     /**
@@ -140,6 +99,32 @@ public class Task extends Item{
         this.wasInBuffer = false;
         this.bestSolution = solution;
         previousBestSolution = new ArrayList();
+    }
+    
+    public boolean isPutBack(){
+        return putBack;
+    }
+    
+    public void switchPutBack(){
+        putBack = !putBack;
+    }
+    
+    public boolean getGeneratedAnticipation(){
+        return generatedAnticipation;
+    }
+    
+    public void setGeneratedAnticipation(boolean generatedAnticipation){  
+        this.generatedAnticipation = generatedAnticipation;
+    }
+    
+    public boolean observable(){
+        return isInput |= sentence.getObservable();
+    }
+
+    public boolean fulfilled(){
+        if(bestSolution == null)
+            return false;
+        return sentence.getTruth().getExpectation() - bestSolution.getTruth().getExpectation() <= 0;
     }
     
     public boolean wasInBuffer(){
@@ -183,17 +168,13 @@ public class Task extends Item{
      * @return Whether the Task is derived from another task
      */
     public boolean isInput() {
-        
         if(parentTask != null)
             isInput = false;
-        
         return isInput || temporalInduction;
     }
     
     public void addBestSolution(Sentence solution){
-        
         previousBestSolution.add(solution);
-        
     }
     
     public boolean getTemporalInduction(){
@@ -201,9 +182,7 @@ public class Task extends Item{
     }
     
     public void setTemporalInduction(boolean temporalInduction){
-        
         this.temporalInduction = temporalInduction;
-        
     }
     
     public void setIsInput(boolean isInput){
@@ -233,15 +212,11 @@ public class Task extends Item{
     }
     
     public boolean getProcessed(){
-        
         return processed;
-        
     }
     
     public void setProcessed(boolean processed){
-        
         this.processed = processed;
-        
     }
 
     /**
@@ -273,21 +248,15 @@ public class Task extends Item{
     }
     
     public Stamp getStamp(){
-        
         return sentence.getStamp();
-        
     }
     
     public boolean isEternal(){
-    
         return getStamp().getOccurrenceTime() == Stamp.ETERNAL;
-        
     }
     
     public String getName(){
-        
         return sentence.getContent().getName();
-        
     }
 
     /**
@@ -320,6 +289,4 @@ public class Task extends Item{
         }
         return s.toString();
     }
-    
-    
 }

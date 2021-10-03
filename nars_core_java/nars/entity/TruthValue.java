@@ -24,7 +24,7 @@
 package nars.entity;
 
 import nars.io.Symbols;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  * Frequency and confidence.

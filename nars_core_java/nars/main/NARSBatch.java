@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main_nogui;
+package nars.main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -46,7 +46,7 @@ public class NARSBatch {
     /**
      * The reasoner
      */
-    ReasonerBatch reasoner;
+    NAR reasoner;
     private boolean logging;
     private PrintStream out = System.out;
     private boolean dumpLastState = true;
@@ -121,7 +121,7 @@ public class NARSBatch {
      * Can instantiate multiple reasoners
      */
     public final void init() {
-        reasoner = new ReasonerBatch();
+        reasoner = new NAR();
     }
 
     /**
@@ -134,7 +134,7 @@ public class NARSBatch {
             log("NARSBatch.run():"
                     + " step " + reasoner.getTime()
                     + " " + reasoner.isFinishedInputs());
-            reasoner.tick();
+            reasoner.cycle();
             log("NARSBatch.run(): after tick"
                     + " step " + reasoner.getTime()
                     + " " + reasoner.isFinishedInputs());
@@ -155,7 +155,7 @@ public class NARSBatch {
         }
     }
 
-    public ReasonerBatch getReasoner() {
+    public NAR getReasoner() {
         return reasoner;
     }
 

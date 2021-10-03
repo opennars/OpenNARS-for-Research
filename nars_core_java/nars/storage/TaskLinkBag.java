@@ -24,7 +24,7 @@
 package nars.storage;
 
 import nars.entity.TaskLink;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  * TaskLinkBag contains links to tasks.

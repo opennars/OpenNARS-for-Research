@@ -16,7 +16,7 @@ import nars.language.Conjunction;
 import nars.language.Operation;
 import nars.language.Tense;
 import nars.language.Term;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  *

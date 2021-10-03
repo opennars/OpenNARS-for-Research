@@ -77,7 +77,7 @@ public class Sentence implements Cloneable {
         this.truth = truth;
         this.stamp = stamp;
         this.revisible = true;
-        observable = false;
+        this.observable = false;
     }
 
     /**
@@ -97,7 +97,7 @@ public class Sentence implements Cloneable {
         this.truth = truth;
         this.stamp = stamp;
         this.revisible = revisible;
-        observable = false;
+        this.observable = false;
     }
 
     public boolean getObservable(){
@@ -118,7 +118,10 @@ public class Sentence implements Cloneable {
     public boolean equals(Object that) {
         if (that instanceof Sentence) {
             Sentence t = (Sentence) that;
-            return content.equals(t.getContent()) && punctuation == t.getPunctuation() && truth.equals(t.getTruth()) && stamp.equals(t.getStamp());
+            return content.equals(t.getContent()) && 
+                   punctuation == t.getPunctuation() && 
+                   truth.equals(t.getTruth()) && 
+                   stamp.equals(t.getStamp());
         }
         return false;
     }
@@ -132,15 +135,11 @@ public class Sentence implements Cloneable {
     }
     
     public boolean getTemporalInduction(){
-        
         return temporalInduction;
-        
     }
     
     public void setTemporalInduction(boolean temporalIndution){
-        
         this.temporalInduction = temporalInduction;
-        
     }
 
     /**
@@ -342,68 +341,56 @@ public class Sentence implements Cloneable {
     }
     
     public boolean isEternal(){
-        
         return stamp.isEternal();
-        
     }
     
     /**
-     * 将一个语句投影到另一个目标时间,如果所要投影的时间为永恒
-     * 那么语句将从事件变为永恒
+     * Project a sentence to another target time, if the time to be projected is eternal
+     * then the sentence will change from event to eternity
      * @param targetTime
      * @param currentTime
      * @param memory
      * @return 
      */
     public Sentence projection(long targetTime, long currentTime, Memory memory){
-        
         TruthValue newTruth = projectionTruth(targetTime, currentTime, memory);
         boolean eternalizing = newTruth.isEternal();
-        
         Stamp newStamp = new Stamp(stamp);
-        
-        if(eternalizing)
+        if(eternalizing){
             newStamp.setOccurrenceTime(Stamp.ETERNAL);
-        else
+        }
+        else{
             newStamp.setOccurrenceTime(targetTime);
-        
+        }
         return new Sentence(content, punctuation, newTruth, newStamp, false);
-        
     }
     
     /**
-     * 投影真值，将一个真值按照给定的目标事件进行投影
+     * Project truth value, project a truth value according to a given target event
      * @param targetTime
      * @param currentTime
      * @param memory
      * @return 
      */
     public TruthValue projectionTruth(long targetTime, long currentTime, Memory memory){
-        
         TruthValue newTruth = null;
-        // 如果当前时间戳不是永恒的
-        if(!stamp.isEternal()){
-            // 先永恒化当前的真值
-            newTruth = TruthFunctions.eternalize(truth);
-            
+        if(!stamp.isEternal()){ //If the current timestamp is not eternal
+            newTruth = TruthFunctions.eternalize(truth); //First eternalize the current truth value
                 if(targetTime != Stamp.ETERNAL){
                     long occurrenceTime = stamp.getOccurrenceTime();
-                    // 按照目标时间算出更新信念的参数
+                    // Calculate the parameters for updating beliefs according to the target time
                     float factor = TruthFunctions.temporalProjection(occurrenceTime, targetTime, currentTime);
-                    // 更新信心
+                    // Update confidence
                     float newConfidence = factor * truth.getConfidence();
-                    // 如果新的信心大于永恒化之后的信心，创建一个以新的信心为信心的真值                   
-                    if(newConfidence > newTruth.getConfidence())
+                    if(newConfidence > newTruth.getConfidence()) // create a true value based on newConfidence           
                         newTruth = new TruthValue(truth.getFrequency(), newConfidence, truth.getAnalytic(), false);
                 }           
         }
-        
-        // 如果newTruth为空，证明当前语句为永恒，则直接返回当前真值，永恒不能非永恒化
-        if(newTruth == null)
+        // If newTruth is null, it proves that the current sentence is eternal, 
+        //then the current truth value is directly returned, and eternity cannot be non-eternal
+        if(newTruth == null){
             newTruth = truth.clone();
-        
+        }
         return newTruth;
-        
     }
-    
 }

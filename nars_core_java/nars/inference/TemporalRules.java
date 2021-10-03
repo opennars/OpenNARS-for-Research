@@ -19,7 +19,7 @@ import nars.language.Operation;
 import nars.language.Similarity;
 import nars.language.Statement;
 import nars.language.Term;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**

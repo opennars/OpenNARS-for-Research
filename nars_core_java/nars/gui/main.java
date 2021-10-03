@@ -21,61 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main;
+package nars.gui;
 
+import nars.gui.NAR_GUI;
 import nars.io.ExperienceReader;
-import nars.main_nogui.CommandLineParameters;
-import nars.main_nogui.NARSBatch;
-import nars.main_nogui.ReasonerBatch;
+import nars.main.CommandLineParameters;
+import nars.main.NARSBatch;
+import nars.main.NAR;
 
 /**
- * The main class of the open-nars project.
- * <p>
- * Manage the internal working thread. Communicate with Reasoner only.
+ * The main class of OpenNARS with support of a GUI. 
+ * Alternatively it may start with shell only by invoking Shell.java. 
+ * Manage the internal working thread. Communicate with NAR_GUI only.
  */
-public class NARS implements Runnable {
-
-    /**
-     * The information about the version and date of the project.
-     */
-    public static final String INFO = "Open-NARS\tVersion 1.5.8\tFebruary 2019 \n";
-    /**
-     * The project web sites.
-     */
-    public static final String WEBSITE
-            = " Open-NARS website:  http://code.google.com/p/open-nars/ \n"
-            + "      NARS website:  http://sites.google.com/site/narswang/";
-    /**
-     * The internal working thread of the system.
-     */
+public class main implements Runnable {
+    
+    /** The internal working thread of the system. */
     Thread narsThread = null;
-    /**
-     * The reasoner
-     */
-    ReasonerBatch reasoner;
+    /** The reasoner */
+    NAR_GUI reasoner;
 
-    /**
-     * The entry point of the standalone application.
-     * <p>
-     * Create an instance of the class
-     *
-     * @param args optional argument used : one input file, possibly followed by
-     * --silence <integer>
-     */
-    public static void main(String args[]) {
-        NARSBatch.setStandAlone(true);
-        NARS nars = new NARS();
-        nars.init(args);
-        nars.start();
-    }
-
-    /**
-     * TODO multiple files
-     *
-     * @param args Input file
-     */
+    /** @param args Input file */
     public void init(String[] args) {
-        reasoner = new Reasoner("NARS Reasoner");
+        reasoner = new NAR_GUI("NARS Reasoner with GUI support");
         if ((args.length > 0) && CommandLineParameters.isReallyFile(args[0])) {
             ExperienceReader experienceReader = new ExperienceReader(reasoner);
             experienceReader.openLoadFile(args[0]);
@@ -94,9 +62,8 @@ public class NARS implements Runnable {
         }
     }
 
-    /* Implementing the Runnable Interface */
     /**
-     * Repeatedly execute NARS working cycle. This method is called when the
+     * Repeatedly execute main working cycle. This method is called when the
      * Runnable's thread is started.
      */
     @Override
@@ -108,10 +75,22 @@ public class NARS implements Runnable {
             } catch (InterruptedException e) {
             }
             try {
-                // NOTE: try/catch not necessary for input errors , but may be useful for other troubles
                 reasoner.tick();
             } catch (Exception e) {
             }
         }
+    }
+    
+    /**
+     * The entry point of the standalone application.
+     * Create an instance of the class
+     * @param args optional argument used : one input file, possibly followed by
+     * --silence <integer>
+     */
+    public static void main(String args[]) {
+        NARSBatch.setStandAlone(true);
+        main nars = new main();
+        nars.init(args);
+        nars.start();
     }
 }

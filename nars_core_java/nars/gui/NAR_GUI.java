@@ -21,21 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nars.main;
+package nars.gui;
 
 import javax.swing.SwingUtilities;
 
 import nars.gui.InputWindow;
 import nars.gui.MainWindow;
-import nars.main_nogui.ReasonerBatch;
+import nars.main.NAR;
 
 /**
- * A NARS Reasoner has its memory, I/O channels, and internal clock.
+ * A NARS NAR_GUI has its memory, I/O channels, and internal clock.
  * <p>
  * Create static main window and input channel, reset memory, and manage system
  * clock.
  */
-public class Reasoner extends ReasonerBatch {
+public class NAR_GUI extends NAR {
 
     /**
      * The unique main window
@@ -51,7 +51,7 @@ public class Reasoner extends ReasonerBatch {
      *
      * @param name The name of the reasoner
      */
-    Reasoner(String name) {
+    NAR_GUI(String name) {
         super();
         this.name = name;
         inputWindow = new InputWindow(this, name);
@@ -61,13 +61,12 @@ public class Reasoner extends ReasonerBatch {
         mainWindow.setVisible(true);
     }
 
-    @Override
     public void tick() {
-        final ReasonerBatch reasoner = this;
+        final NAR reasoner = this;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                reasoner.doTick();
+                reasoner.cycle();
             }
         });
     }

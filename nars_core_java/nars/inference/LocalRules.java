@@ -27,7 +27,7 @@ import nars.storage.Memory;
 import nars.entity.*;
 import nars.language.*;
 import nars.io.Symbols;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  * Directly process a task by a oldBelief, with only two Terms in both. In

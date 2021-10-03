@@ -24,7 +24,7 @@
 package nars.inference;
 
 import nars.entity.*;
-import nars.main_nogui.Parameters;
+import nars.main.Parameters;
 
 /**
  * All truth-value (and desire-value) functions used in inference rules 
