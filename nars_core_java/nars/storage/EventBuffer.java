@@ -178,7 +178,6 @@ public abstract class EventBuffer extends Buffer<Task> {
                 newTask = TemporalRules.temporalInduction(newEvent.getSentence(), t.getSentence(), newEvent, t.getSentence(), sequenceInduction, this.getMemory());
             else
                 newTask = TemporalRules.temporalInduction(t.getSentence(), newEvent.getSentence(), newEvent, t.getSentence(), sequenceInduction, this.getMemory());
-            
             if(newTask != null) 
                 list.add(newTask);
             

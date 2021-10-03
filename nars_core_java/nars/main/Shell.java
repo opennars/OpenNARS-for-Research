@@ -37,6 +37,9 @@ public class Shell {
                     if (line != null) {
                         synchronized(inputString) {
                             inputString = line;
+                            if("".equals(line)) {
+                                inputString = "1";
+                            }
                         }
                     }
 
