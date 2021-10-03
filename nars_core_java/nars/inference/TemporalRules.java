@@ -199,6 +199,7 @@ public class TemporalRules {
                 }
             }else{
                                   
+
                 Statement statement1 = Implication.make(t1, t2, order, Math.abs(timeDiff), memory);     
                 Stamp newStamp = new Stamp(stamp1,stamp2, memory.getTime());
                 newStamp.setOccurrenceTime(Stamp.ETERNAL);
@@ -210,6 +211,7 @@ public class TemporalRules {
         
         if(newTask != null){
             //memory.generalInfoReport("New Implication: " + newTask.getName());
+            System.out.println("Derived: " + newTask.toString());
             memory.immediateProcess(newTask);
         }
         

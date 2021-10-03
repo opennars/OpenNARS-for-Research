@@ -590,17 +590,13 @@ public final class StructuralRules {
         TruthValue truth = sentence.getTruth();
         BudgetValue budget;
         if (sentence.isQuestion() || sentence.isQuest()) {
-            //System.out.println("123");
             budget = BudgetFunctions.compoundBackward(content, memory);
         } else {
-            //System.out.println("234");
             if (sentence.isJudgment() || sentence.isGoal() &&
                 ((!compoundTask && compound instanceof Disjunction) ||
                   (compoundTask && compound instanceof Conjunction))) {
-                //System.out.println("345");
                 truth = TruthFunctions.deduction(truth, RELIANCE);
             } else {
-                //System.out.println("456");
                 TruthValue v1, v2;
                 v1 = TruthFunctions.negation(truth);
                 v2 = TruthFunctions.deduction(v1, RELIANCE);

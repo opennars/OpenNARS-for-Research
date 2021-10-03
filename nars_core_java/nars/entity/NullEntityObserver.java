@@ -53,6 +53,6 @@ public class NullEntityObserver implements EntityObserver {
 
     @Override
     public void refresh(String message) {
-        System.out.println(message);
+        //System.out.println(message);
     }
 }

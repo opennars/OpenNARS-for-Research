@@ -134,7 +134,6 @@ public class Variable extends Term {
      * @return Whether the unification is possible
      */
     public static boolean unify(char type, Term t1, Term t2) {
-        System.out.println("123");
         return unify(type, t1, t2, t1, t2);
     }
 

@@ -541,7 +541,7 @@ public class Memory {
             s = "EXE: ";
         }else {
             if(answer)
-                s = " ANSWER";
+                s = "Answer: ";
             else
                 s = " OUT: ";
         }
