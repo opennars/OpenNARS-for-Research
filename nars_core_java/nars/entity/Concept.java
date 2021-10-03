@@ -40,9 +40,7 @@ import nars.language.Negation;
 import nars.language.Term;
 import nars.main.NARSBatch;
 import nars.main.Parameters;
-import nars.storage.BagObserver;
 import nars.storage.Memory;
-import nars.storage.NullBagObserver;
 import nars.storage.TaskLinkBag;
 import nars.storage.TermLinkBag;
 
@@ -102,7 +100,6 @@ public final class Concept extends Item {
      * The display window
      */
     private EntityObserver entityObserver;
-    public float acquiredQuality = 0.0f; // Not Used
 
     /**
      * Constructor, called in Memory.getConcept only
@@ -1041,11 +1038,5 @@ public final class Concept extends Item {
             }
         }
         taskLinks.putBack(currentTaskLink);
-    }
-    
-    public void incAcquiredQuality(){ // Not Used
-        acquiredQuality += 0.1f;
-        if(acquiredQuality > 1.0f);
-            acquiredQuality = 1.0f;
     }
 }
