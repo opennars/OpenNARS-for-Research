@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nars.Operator_Mental;
+package nars.mental_operator;
 
 import java.util.ArrayList;
 import nars.entity.Task;

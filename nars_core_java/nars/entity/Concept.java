@@ -82,9 +82,7 @@ public final class Concept extends Item {
     
     //private final ArrayList<Task> anticipationList;
     private final ArrayList<Concept> anticipationList;
-    /**
-     * Reference to the memory
-     */
+
     private final ArrayList<Task> quests;
     
     private final ArrayList<Task> desires;
@@ -94,7 +92,11 @@ public final class Concept extends Item {
     private ArrayList<Task> general_executable_preconditions;
     
     public boolean observable = false;
+
     //public List<AnticipationEntry> anticipations = new ArrayList<>();
+    /**
+     *  Reference to memory where this concept is
+     */
     private Memory memory;
     /**
      * The display window
