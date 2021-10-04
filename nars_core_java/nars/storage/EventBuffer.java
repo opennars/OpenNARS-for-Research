@@ -6,7 +6,7 @@
 package nars.storage;
 
 import java.util.ArrayList;
-import nars.Processing.Anticipation;
+import nars.entity.Anticipation;
 import nars.entity.BudgetValue;
 import nars.entity.Concept;
 import nars.entity.Sentence;
@@ -375,7 +375,7 @@ public abstract class EventBuffer extends Buffer<Task> {
         // check if there is a concept to the task exist
         // No new concept is generated here, since no concept, no corresponding 
         // implication for the task
-        Concept concept = this.getMemory().getConceptFromTheList(task.getContent());   
+        Concept concept = this.getMemory().termToConcept(task.getContent());   
         
         // if the concept is not null and the anticipation list is not null,
         // and the task is an event, generate expectation
@@ -469,7 +469,7 @@ public abstract class EventBuffer extends Buffer<Task> {
                                         
                                         Term negation = Negation.make(expectEvent.getContent(), this.getMemory());
                                         
-                                        Concept c1 = this.getMemory().getConceptFromTheList(negation);                                      
+                                        Concept c1 = this.getMemory().termToConcept(negation);                                      
                                         
                                         if(c1 == null)
                                             return;

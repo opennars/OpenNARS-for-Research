@@ -25,12 +25,12 @@ package nars.storage;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import nars.Operator_Mental.Anticipate;
-import nars.Operator_Mental.Deactive;
-import nars.Operator_Mental.Escape;
-import nars.Operator_Mental.Fire;
-import nars.Operator_Mental.Left;
-import nars.Operator_Mental.Right;
+import nars.mental_operator.Anticipate;
+import nars.mental_operator.Deactive;
+import nars.mental_operator.Escape;
+import nars.mental_operator.Fire;
+import nars.mental_operator.Left;
+import nars.mental_operator.Right;
 import nars.entity.BudgetValue;
 import nars.entity.Concept;
 import nars.entity.Item;
@@ -219,10 +219,6 @@ public class Memory {
             }
         }
         return concept;
-    }
-    
-    public Concept getConceptFromTheList(Term t){
-        return concepts.get(t.getName());
     }
     
     public Stamp getNewStamp(){        
@@ -630,6 +626,35 @@ public class Memory {
     
     public ConceptBag getConcepts(){
         return concepts;
+    }
+    
+    /**
+     * Returns priority of currently selected concept
+     * @param c type Concept
+     * @return 
+     */
+    public float getConceptPriority(Concept c){
+        return c.getPriority();
+    }
+
+    /**
+     * Returns Truth Value (aka Desire Value) of highest priority desire task 
+     * from currently selected concept
+     * @param c type Concept
+     * @return 
+     */
+    public TruthValue getConceptDesireTruth(Concept c){
+        return c.getDesire();
+    }
+    
+    /**
+     * Returns Truth Value of highest CONFIDENCE belief sentence 
+     * from currently selected concept
+     * @param c type Concept
+     * @return 
+     */
+    public TruthValue getConceptBeliefTruth(Concept c){
+        return c.getBeliefs().get(0).getTruth();
     }
     
     public NAR getReasoner(){
