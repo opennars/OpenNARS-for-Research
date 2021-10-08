@@ -49,7 +49,7 @@ public class NovelTaskBag extends Bag<Task> {
      * Get the (constant) forget rate in NovelTaskBag
      * @return The forget rate in NovelTaskBag
      */
-    protected int forgetRate() {
+    protected float forgetRate() {
         return Parameters.NEW_TASK_FORGETTING_CYCLE;
     }
 }

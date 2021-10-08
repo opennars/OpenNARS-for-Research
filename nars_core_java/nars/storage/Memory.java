@@ -290,7 +290,7 @@ public class Memory {
         Task task = new Task(sentence, budget, currentTask, sentence, candidateBelief);
         recorder.append("!!! Activated: " + task.toString() + "\n");
         if (sentence.isQuestion()) {
-            float s = task.getBudget().summary();
+            float s = task.getBudget().totalBudget();
 //            float minSilent = reasoner.getMainWindow().silentW.value() / 100.0f;
             float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             if (s > minSilent) {  // only report significant derived Tasks
@@ -310,7 +310,7 @@ public class Memory {
         
         if (task.getBudget().aboveThreshold()) {
             recorder.append("!!! Derived: " + task + "\n");
-            float budget = task.getBudget().summary();
+            float budget = task.getBudget().totalBudget();
             float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             
             //System.out.println(task.getSentence().getContent().getName());

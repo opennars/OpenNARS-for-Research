@@ -138,7 +138,7 @@ public abstract class Bag<E extends Item> implements Iterable<E>{
      *
      * @return The number of times for a decay factor to be fully applied
      */
-    protected abstract int forgetRate();
+    protected abstract float forgetRate();
 
     /**
      * The number of items in the bag
