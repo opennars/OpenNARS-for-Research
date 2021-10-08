@@ -47,10 +47,6 @@ public class TruthValue implements Cloneable { // implements Cloneable {
      * The confidence factor of the truth value
      */
     private ShortFloat confidence;
-    
-    private ShortFloat ignorance;
-    
-    private ShortFloat sharpness;
     /**
      * Whether the truth value is derived from a definition
      */
@@ -71,12 +67,10 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
     
     public TruthValue(float f, float c, boolean b, boolean eternal){
-        
         frequency = new ShortFloat(f);
         confidence = (c < 1) ? new ShortFloat(c) : new ShortFloat(0.9999f);
         isAnalytic = b;
         this.eternal = eternal;
-        
     }
 
     /**
@@ -144,9 +138,7 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
     
     public void setEternal(boolean eternal){
-        
         this.eternal = eternal;
-        
     }
 
     /**
@@ -170,9 +162,7 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
     
     public float getIgnorance(){
-        
         return (float)(1-confidence.getValue());
-        
     }
     
     public float getSharpness(){
@@ -180,10 +170,6 @@ public class TruthValue implements Cloneable { // implements Cloneable {
         //return (float)(2 * Math.pow(Math.abs(getExpectation() - 0.5), 4));
     }
     
-    public float projectedConfidence(){
-        return 0.0f;
-    }
-
     /**
      * Check if the truth value is negative
      *
@@ -198,11 +184,9 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
     
     public TruthValue setConfidence(float c){
-        
         float max_confidence = 1.0f - Parameters.TRUTH_EPSILON;
         this.confidence = new ShortFloat((c < max_confidence ? c : max_confidence));
         return this;
-        
     }
 
     /**
