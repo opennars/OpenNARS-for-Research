@@ -176,9 +176,12 @@ public class TruthValue implements Cloneable { // implements Cloneable {
     }
     
     public float getSharpness(){
-        
-        return (float)(2 * Math.pow(Math.abs(getExpectation() - 0.5), 4));
-        
+        return (float)(2 * Math.abs(getExpectation() - 0.5)); // Change for 3.1.2
+        //return (float)(2 * Math.pow(Math.abs(getExpectation() - 0.5), 4));
+    }
+    
+    public float projectedConfidence(){
+        return 0.0f;
     }
 
     /**

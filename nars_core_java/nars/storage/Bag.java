@@ -217,7 +217,6 @@ public abstract class Bag<E extends Item> implements Iterable<E>{
      * @return Whether the new Item is added into the Bag
      */
     public boolean putBack(E oldItem) {
-        float x =  forgetRate();
         BudgetFunctions.forget(oldItem.getBudget(), forgetRate(), RELATIVE_THRESHOLD);
         return putIn(oldItem);
     }

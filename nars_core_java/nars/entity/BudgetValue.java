@@ -193,9 +193,9 @@ public class BudgetValue implements Cloneable {
 
     /**
      * To summarize a BudgetValue into a single number in [0, 1]
-     * @return The summary value
+     * @return The totalBudget value
      */
-    public float summary() {
+    public float totalBudget() {
         return UtilityFunctions.aveGeo(priority.getValue(), durability.getValue(), quality.getValue());
     }
 
@@ -206,7 +206,7 @@ public class BudgetValue implements Cloneable {
      * @return The decision on whether to process the Item
      */
     public boolean aboveThreshold() {
-        return (summary() >= Parameters.BUDGET_THRESHOLD);
+        return (totalBudget() >= Parameters.BUDGET_THRESHOLD);
     }
 
     /**
