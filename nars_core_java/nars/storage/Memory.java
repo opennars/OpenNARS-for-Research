@@ -307,7 +307,7 @@ public class Memory {
     public void derivedTask(Task task) {
         
         if (task.getBudget().aboveThreshold()) {
-            recorder.append("!!! Derived: " + task + "\n");
+            recorder.append(" OUT: " + task + "\n");
             float budget = task.getBudget().totalBudget();
             float minSilent = reasoner.getSilenceValue().get() / 100.0f;
             

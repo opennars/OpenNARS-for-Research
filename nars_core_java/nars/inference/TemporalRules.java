@@ -211,7 +211,7 @@ public class TemporalRules {
         
         if(newTask != null){
             //memory.generalInfoReport("New Implication: " + newTask.getName());
-            System.out.println("Derived: " + newTask.toString());
+            System.out.println(" OUT: " + newTask.toString());
             memory.immediateProcess(newTask);
         }
         
