@@ -144,6 +144,16 @@ public class Term implements Cloneable, Comparable<Term> {
     public int getComplexity() {
         return 1;
     }
+    
+    /**
+     * Gets simplicity of the term based on the number of atomic components
+     * Single atomic term has max simplicity of 1. Power was chosen as -0.5 and
+     * subject for research
+     * @return 
+     */
+    public double getSimplicity(){
+        return Math.pow(this.getComplexity(), -0.5);
+    }
 
     /**
      * Orders among terms: variable < atomic < compound

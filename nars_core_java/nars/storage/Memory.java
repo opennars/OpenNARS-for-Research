@@ -486,9 +486,9 @@ public class Memory {
         recorder.append("!!! Insert: " + task + "\n");
         //System.out.println("!!! Insert: " + task + "\n");
         currentTerm = task.getContent();
-        currentConcept = getConcept(currentTerm);
+        currentConcept = getConcept(currentTerm);// Creates a new concept
         if (currentConcept != null) {
-            activateConcept(currentConcept, task.getBudget());
+            activateConcept(currentConcept, task.getBudget()); // initializes this concept
             currentConcept.directProcess(task);
         }
     }
