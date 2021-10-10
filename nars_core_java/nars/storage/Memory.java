@@ -115,7 +115,6 @@ public class Memory {
      */
     public Stamp newStamp;
     
-    private long originalTime = 0;
     /**
      * The substitution that unify the common term in the Task and the Belief
      * TODO unused
@@ -126,7 +125,6 @@ public class Memory {
     
     private Map<String, Operator> operators;
     
-    //private final long originalTime = 0;
     private Emotion emotion;
     
     /**
@@ -488,9 +486,9 @@ public class Memory {
         recorder.append("!!! Insert: " + task + "\n");
         //System.out.println("!!! Insert: " + task + "\n");
         currentTerm = task.getContent();
-        currentConcept = getConcept(currentTerm);
+        currentConcept = getConcept(currentTerm);// Creates a new concept
         if (currentConcept != null) {
-            activateConcept(currentConcept, task.getBudget());
+            activateConcept(currentConcept, task.getBudget()); // initializes this concept
             currentConcept.directProcess(task);
         }
     }

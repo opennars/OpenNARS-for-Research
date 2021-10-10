@@ -267,6 +267,24 @@ public class Task extends Item{
     public Task getParentTask() {
         return parentTask;
     }
+    
+    /**
+     * Revise in future since logic is not correct
+     * @return 
+     */
+    public double getAchievingLevel(Concept c){
+        if (this.sentence.isJudgment() || this.sentence.isGoal()){
+            Sentence MatchBelief = c.getBeliefs().get(0); // Not Correct
+            if (MatchBelief != null){
+                return 1 - Math.abs(this.sentence.getTruth().getExpectation() - MatchBelief.getTruth().getExpectation());
+            }
+        }else if(this.sentence.isQuestion() || this.sentence.isQuest()){
+            if (this.sentence != null){   
+                return 1 - Math.abs(this.sentence.getTruth().getExpectation() - bestSolution.getTruth().getExpectation());
+            }
+        }
+        return Math.abs(this.sentence.getTruth().getExpectation()-0.5);
+    }
 
     /**
      * Get a String representation of the Task

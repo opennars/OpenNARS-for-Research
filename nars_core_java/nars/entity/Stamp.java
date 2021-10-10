@@ -268,6 +268,14 @@ public class Stamp implements Cloneable {
         
     }
     
+    /**
+     * Get the creationTime of the truth-value
+     * @return The creation time
+     */
+    public long getCreationTime() {
+        return creationTime;
+    }
+    
     public void setEternal(){
         
         occurrenceTime = ETERNAL;
@@ -365,6 +373,15 @@ public class Stamp implements Cloneable {
     private long[] getBase() {
         return evidentialBase;
     }
+    
+    /**
+     * Get Directness, the shorter the basis the more direct is the derivation
+     * Power value of -0.5 is subject to further research
+     * @return double value
+     */
+    private double getDirectness() {
+        return Math.pow(this.evidentialBase.length, -0.5);
+    }
 
     /**
      * Convert the evidentialBase into a set
@@ -400,14 +417,6 @@ public class Stamp implements Cloneable {
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }
-
-    /**
-     * Get the creationTime of the truth-value
-     * @return The creation time
-     */
-    public long getCreationTime() {
-        return creationTime;
     }
 
     /**

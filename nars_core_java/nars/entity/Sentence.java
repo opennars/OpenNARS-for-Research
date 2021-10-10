@@ -26,6 +26,7 @@ package nars.entity;
 import nars.inference.TruthFunctions;
 import nars.io.Symbols;
 import nars.language.Term;
+import nars.main.Parameters;
 import nars.storage.Memory;
 
 /**
@@ -392,5 +393,14 @@ public class Sentence implements Cloneable {
             newTruth = truth.clone();
         }
         return newTruth;
+    }
+
+    /**
+     * Returns projected confidence from creationTime to currentTime 
+     * @param currentTime
+     * @return 
+     */
+    public double projectedConfidence(long currentTime){
+        return this.truth.getConfidence() * Math.pow((currentTime - this.stamp.getCreationTime()), Parameters.PROJECTION_DECAY);
     }
 }

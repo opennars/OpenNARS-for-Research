@@ -155,8 +155,10 @@ public class Parameters {
     public static final int DURATION = 5;
     
     public static final int DEFAULT_TIME_INTERVAL = 3;
-    
+    /**Used in Sentence.java for Truth Value Projection */
     public static double PROJECTION_DECAY = 1000;
+    /**Used in Sentence.java for Confidence ONLY Projection */
+    public static double CONFIDENCE_PROJECTION_DECAY = -0.02;
     
     public static float TRUTH_EPSILON = 0.01f;
     
