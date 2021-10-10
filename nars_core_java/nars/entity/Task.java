@@ -269,18 +269,22 @@ public class Task extends Item{
     }
     
     /**
-     * Revise in future since logic is not correct
+     * Returns Achieving level of a task. Idea is if a contradicting belief exists
+     * then spend more resources on it, thus the less the achieving level, 
+     * the bigger the contradiction and more resources needs to be spent.
+     * Only called from processBuffer() from Memory.java when a task is pre-processed
+     * @param c
      * @return 
      */
     public double getAchievingLevel(Concept c){
         if (this.sentence.isJudgment() || this.sentence.isGoal()){
-            Sentence MatchBelief = c.getBeliefs().get(0); // Not Correct
+            Sentence MatchBelief = c.getBeliefs().get(0);
             if (MatchBelief != null){
                 return 1 - Math.abs(this.sentence.getTruth().getExpectation() - MatchBelief.getTruth().getExpectation());
             }
         }else if(this.sentence.isQuestion() || this.sentence.isQuest()){
             if (this.sentence != null){   
-                return 1 - Math.abs(this.sentence.getTruth().getExpectation() - bestSolution.getTruth().getExpectation());
+                return 1 - Math.abs(this.sentence.getTruth().getExpectation() - this.bestSolution.getTruth().getExpectation());
             }
         }
         return Math.abs(this.sentence.getTruth().getExpectation()-0.5);
